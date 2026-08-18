@@ -177,23 +177,30 @@ The recipe does not define DOM nodes, Compose modifiers, Android Context objects
 
 ## 6. Resolution model
 
-Resolution must be deterministic and inspectable.
+Resolution is deterministic and inspectable.
 
-A final component style can be influenced by:
+Theme inheritance is optional. None of the six initial themes is required to inherit from another theme; inheritance only applies when a theme source explicitly declares `extends`. Parent objects merge recursively, while arrays and scalar values are replaced by the more specific child definition.
+
+For a concrete component, visual precedence is:
 
 ```text
-base specification
-    -> theme
-    -> palette
-    -> component
-    -> variant/size
-    -> state
+optional theme inheritance
+    -> component base
+    -> component size
+    -> variant base
+    -> variant size
+    -> active states in component-declared priority
+       -> variant-specific override for the same state
     -> capability fallback
 ```
 
-The exact precedence rules must be formally defined before theme implementation expands.
+The ordered `states` list in the component contract is therefore part of visual behavior. `default` must be the first declared state and is represented by the base recipe rather than being applied as an active override. Later active states in the declared list have higher precedence than earlier ones.
 
-Tooling should eventually be able to explain the origin of a resolved value so that theme/debugging problems can be traced without guesswork.
+The order in which pointer, focus or runtime events happen must not affect the final visual result. For example, resolving `hover + disabled` must produce the same result regardless of which state became active first.
+
+Theme identity and palette selection remain independent. Theme recipes reference semantic or primitive tokens; they do not embed palette-specific colors.
+
+Compiler output must retain enough provenance to explain which source token and theme layer produced a resolved value so that theme/debugging problems can be traced without guesswork.
 
 ## 7. Platform adapters
 
