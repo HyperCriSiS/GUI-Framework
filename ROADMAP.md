@@ -23,15 +23,15 @@ The repository is in the foundation phase. The architectural direction is define
 
 ### Core
 
-- [ ] Define platform-neutral design-token schema.
-- [ ] Define semantic color, spacing, radius, typography, border and effect tokens.
-- [ ] Define component-state model: default, hover, focus, pressed, selected, checked, disabled, loading and error where applicable.
-- [ ] Define motion tokens for fast functional transitions and interaction feedback.
-- [ ] Define reduced-motion behavior independent from component state.
-- [ ] Define renderer capability model and quality tiers.
+- [x] Define platform-neutral design-token schema.
+- [x] Define semantic color, spacing, radius, typography, border and effect tokens.
+- [x] Define component-state model: default, hover, focus, pressed, selected, checked, disabled, loading and error where applicable.
+- [x] Define motion tokens for fast functional transitions and interaction feedback.
+- [x] Define reduced-motion behavior independent from component state.
+- [x] Define renderer capability model and quality tiers.
 - [ ] Define theme inheritance and override rules.
 - [ ] Define asset abstraction for SVG and future N-slice/Rive assets.
-- [ ] Define accessibility metadata required by components.
+- [x] Define accessibility metadata required by components.
 
 ### Initial components
 
