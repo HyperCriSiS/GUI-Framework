@@ -244,6 +244,101 @@
           }
         }
       }
+    },
+    "switch": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceElevated}",
+          "radius": "{radius.lg}",
+          "minWidth": "{sizing.switch.track.width.medium}",
+          "minHeight": "{sizing.switch.track.height.medium}",
+          "paddingHorizontal": "{spacing.xxs}",
+          "paddingVertical": "{spacing.xxs}",
+          "border": {
+            "color": "{semantic.color.border}",
+            "width": "{border.width.standard}"
+          }
+        },
+        "thumb": {
+          "fill": "{semantic.color.textSecondary}",
+          "radius": "{radius.lg}",
+          "minWidth": "{sizing.switch.thumb.medium}",
+          "minHeight": "{sizing.switch.thumb.medium}"
+        }
+      },
+      "sizes": {
+        "small": {
+          "root": {
+            "minWidth": "{sizing.switch.track.width.small}",
+            "minHeight": "{sizing.switch.track.height.small}"
+          },
+          "thumb": {
+            "minWidth": "{sizing.switch.thumb.small}",
+            "minHeight": "{sizing.switch.thumb.small}"
+          }
+        },
+        "medium": {
+          "root": {
+            "minWidth": "{sizing.switch.track.width.medium}",
+            "minHeight": "{sizing.switch.track.height.medium}"
+          },
+          "thumb": {
+            "minWidth": "{sizing.switch.thumb.medium}",
+            "minHeight": "{sizing.switch.thumb.medium}"
+          }
+        },
+        "large": {
+          "root": {
+            "minWidth": "{sizing.switch.track.width.large}",
+            "minHeight": "{sizing.switch.track.height.large}"
+          },
+          "thumb": {
+            "minWidth": "{sizing.switch.thumb.large}",
+            "minHeight": "{sizing.switch.thumb.large}"
+          }
+        }
+      },
+      "states": {
+        "hover": {
+          "root": {
+            "border": {
+              "color": "{semantic.color.borderStrong}",
+              "width": "{border.width.standard}"
+            }
+          }
+        },
+        "focus": {
+          "root": {
+            "outline": {
+              "color": "{semantic.color.focus}",
+              "width": "{focus.ring.width}",
+              "offset": "{focus.ring.offset}"
+            }
+          }
+        },
+        "pressed": {
+          "root": {
+            "opacity": "{opacity.pressed}"
+          }
+        },
+        "checked": {
+          "root": {
+            "fill": "{semantic.color.accent}",
+            "border": {
+              "color": "{semantic.color.accent}",
+              "width": "{border.width.standard}"
+            }
+          },
+          "thumb": {
+            "fill": "{semantic.color.onAccent}"
+          }
+        },
+        "disabled": {
+          "root": {
+            "opacity": "{opacity.disabled}"
+          }
+        }
+      }
     }
   }
 }

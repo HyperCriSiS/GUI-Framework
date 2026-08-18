@@ -60,6 +60,10 @@
     {
       "id": "input",
       "source": "components/input.recipe.json"
+    },
+    {
+      "id": "switch",
+      "source": "components/switch.recipe.json"
     }
   ]
 }
