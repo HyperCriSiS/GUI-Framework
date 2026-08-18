@@ -33,5 +33,8 @@ jobs:
       - name: Compile neutral specification
         run: npm run compile:spec
 
+      - name: Test specification compiler
+        run: npm run test:spec
+
       - name: Typecheck prototype contracts
         run: npm run typecheck
