@@ -46,6 +46,9 @@ jobs:
       - name: Test theme inheritance and visual override resolution
         run: npm run test:theme-resolution
 
+      - name: Test typed visual recipe resolution
+        run: npm run test:visual-resolution
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 

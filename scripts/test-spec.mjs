@@ -95,6 +95,17 @@ try {
   assert.equal(darkPalette.tokens["palette.accent500"], undefined, "Raw palette tokens must not be exposed as public adapter tokens");
   assert.equal(containsReference(darkPalette.tokens), false, "Public adapter tokens must be fully resolved");
 
+  assert.deepEqual(
+    Object.keys(darkPalette.themes),
+    ["basic", "cyberpunk", "frosted-glass", "glass", "modern", "spacey"],
+    "Every palette must contain compiled visual slots for the six registered themes",
+  );
+  assert.deepEqual(
+    darkPalette.themes.basic.components,
+    {},
+    "Theme visual IR must stay empty until concrete Basic design values are deliberately defined",
+  );
+
   console.log("Specification compiler determinism, provenance, runtime contracts, composite resolution and palette-independence tests passed.");
 } finally {
   await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);

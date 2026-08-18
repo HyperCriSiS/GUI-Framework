@@ -4,6 +4,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { resolveThemeDefinitions } from "./theme-resolution.mjs";
+import {
+  compileVisualRecipe,
+  mergeCompiledVisualRecipes,
+} from "./visual-resolution.mjs";
 
 const specRoot = resolve("spec");
 const manifestPath = join(specRoot, "manifest.json");
@@ -153,6 +157,32 @@ function compilePublicTokens(tokenUniverse) {
   return output;
 }
 
+function compileThemeVisuals(theme, themeEntriesById, tokenUniverse) {
+  let components = {};
+
+  for (const layerId of theme.inheritance) {
+    const layer = themeEntriesById.get(layerId);
+    if (!layer) throw new Error(`Missing resolved theme layer ${layerId}`);
+
+    for (const [componentId, visual] of Object.entries(layer.definition.components ?? {})) {
+      const compiledLayer = compileVisualRecipe(
+        visual,
+        (path) => resolveToken(path, tokenUniverse),
+        { theme: layer.id, source: layer.source },
+      );
+      components[componentId] = mergeCompiledVisualRecipes(
+        components[componentId] ?? {},
+        compiledLayer,
+      );
+    }
+  }
+
+  return {
+    recommendedPalette: theme.recommendedPalette,
+    components,
+  };
+}
+
 async function compile() {
   const manifest = await readJson(manifestPath);
 
@@ -180,6 +210,7 @@ async function compile() {
     });
   }
   const themes = resolveThemeDefinitions(themeEntries);
+  const themeEntriesById = new Map(themeEntries.map((theme) => [theme.id, theme]));
 
   const palettes = [];
   for (const paletteEntry of manifest.palettes) {
@@ -216,13 +247,21 @@ async function compile() {
       };
     }
 
+    const compiledThemes = Object.fromEntries(
+      themes.map((theme) => [
+        theme.id,
+        compileThemeVisuals(theme, themeEntriesById, tokenUniverse),
+      ]),
+    );
+
     palettes.push({
       id: paletteEntry.id,
       name: paletteEntry.name,
       source: paletteEntry.source,
       developmentReference: paletteEntry.developmentReference === true,
       tokens: compilePublicTokens(tokenUniverse),
-      components: compiledComponents
+      components: compiledComponents,
+      themes: compiledThemes,
     });
   }
 
