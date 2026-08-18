@@ -12,6 +12,12 @@
       "name": "Reference Dark",
       "source": "palettes/reference-dark.tokens.json",
       "developmentReference": true
+    },
+    {
+      "id": "reference-light",
+      "name": "Reference Light",
+      "source": "palettes/reference-light.tokens.json",
+      "developmentReference": true
     }
   ],
   "themes": [

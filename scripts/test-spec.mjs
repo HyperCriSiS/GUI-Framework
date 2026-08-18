@@ -30,17 +30,43 @@ try {
     "The initial theme registry must remain stable"
   );
 
-  const button = ir.palettes[0]?.components?.button;
-  assert.ok(button, "The reference palette must compile the button contract");
-  assert.equal(button.tokenBindings.accent.value.hex, "#4C8DFF");
   assert.deepEqual(
-    button.tokenBindings.accent.trace.map((entry) => entry.token),
+    ir.palettes.map((palette) => palette.id),
+    ["reference-dark", "reference-light"],
+    "Independent development palettes must remain registered"
+  );
+
+  const darkButton = ir.palettes.find((palette) => palette.id === "reference-dark")?.components?.button;
+  const lightButton = ir.palettes.find((palette) => palette.id === "reference-light")?.components?.button;
+  assert.ok(darkButton && lightButton, "Every registered palette must compile the same button contract");
+
+  assert.deepEqual(darkButton.anatomy, lightButton.anatomy, "Palette changes must not fork component anatomy");
+  assert.deepEqual(darkButton.variants, lightButton.variants, "Palette changes must not fork component variants");
+  assert.deepEqual(darkButton.states, lightButton.states, "Palette changes must not fork component states");
+  assert.deepEqual(darkButton.semantics, lightButton.semantics, "Palette changes must not fork component semantics");
+  assert.deepEqual(darkButton.capabilities, lightButton.capabilities, "Palette changes must not fork capability requirements");
+
+  assert.equal(darkButton.tokenBindings.accent.value.hex, "#4C8DFF");
+  assert.equal(lightButton.tokenBindings.accent.value.hex, "#684DE2");
+  assert.notDeepEqual(
+    darkButton.tokenBindings.accent.value,
+    lightButton.tokenBindings.accent.value,
+    "Palette swapping must change resolved semantic color values"
+  );
+
+  assert.deepEqual(
+    darkButton.tokenBindings.accent.trace.map((entry) => entry.token),
     ["semantic.color.accent", "palette.accent500"],
     "Resolved token bindings must preserve provenance"
   );
-  assert.equal(button.semantics.preferNativePrimitive, true);
+  assert.deepEqual(
+    lightButton.tokenBindings.accent.trace.map((entry) => entry.token),
+    ["semantic.color.accent", "palette.accent500"],
+    "Equivalent semantic roles must preserve equivalent provenance shape across palettes"
+  );
+  assert.equal(darkButton.semantics.preferNativePrimitive, true);
 
-  console.log("Specification compiler determinism and reference-resolution tests passed.");
+  console.log("Specification compiler determinism, provenance and palette-independence tests passed.");
 } finally {
   await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);
 }
