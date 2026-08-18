@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  typecheck:
+  validate-and-typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -27,5 +27,8 @@ jobs:
           node-version: "24"
           package-manager-cache: false
 
-      - name: Typecheck core
+      - name: Validate neutral specification
+        run: npm run validate:spec
+
+      - name: Typecheck prototype contracts
         run: npm run typecheck

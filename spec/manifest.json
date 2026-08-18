@@ -1,0 +1,31 @@
+{
+  "specVersion": "0.1.0",
+  "tokenSources": [
+    {
+      "id": "primitives",
+      "source": "tokens/primitives.tokens.json"
+    }
+  ],
+  "palettes": [
+    {
+      "id": "reference-dark",
+      "name": "Reference Dark",
+      "source": "palettes/reference-dark.tokens.json",
+      "developmentReference": true
+    }
+  ],
+  "themes": [
+    { "id": "basic", "name": "Basic" },
+    { "id": "modern", "name": "Modern" },
+    { "id": "glass", "name": "Glass" },
+    { "id": "frosted-glass", "name": "Frosted Glass" },
+    { "id": "spacey", "name": "Spacey" },
+    { "id": "cyberpunk", "name": "Cyberpunk" }
+  ],
+  "components": [
+    {
+      "id": "button",
+      "source": "components/button.recipe.json"
+    }
+  ]
+}

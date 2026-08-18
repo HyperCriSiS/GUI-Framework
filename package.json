@@ -7,6 +7,11 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "typecheck": "npx --yes --package typescript@7.0.2 tsc -p packages/core/tsconfig.json --noEmit"
+    "typecheck": "npx --yes --package typescript@7.0.2 tsc -p packages/core/tsconfig.json --noEmit",
+    "validate:dtcg": "node scripts/validate-dtcg.mjs",
+    "validate:manifest": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/framework-manifest.schema.json -d spec/manifest.json",
+    "validate:components": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/component-recipe.schema.json -d 'spec/components/*.recipe.json'",
+    "validate:spec": "npm run validate:dtcg && npm run validate:manifest && npm run validate:components",
+    "check": "npm run validate:spec && npm run typecheck"
   }
 }
