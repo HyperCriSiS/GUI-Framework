@@ -197,7 +197,7 @@ Tooling should eventually be able to explain the origin of a resolved value so t
 
 ## 7. Platform adapters
 
-Adapters translate the neutral specification to the target environment.
+Adapters translate the compiled neutral intermediate representation (IR) to the target environment. Adapters must not parse DTCG or palette source files directly; this keeps Web, Kotlin/Compose and future targets on the same architectural boundary.
 
 ### Web
 
@@ -224,7 +224,23 @@ Prefer:
 
 The Compose adapter is also an architectural validation target: if the neutral specification only maps cleanly to Web, the specification is insufficiently neutral.
 
-## 8. Visual technologies
+## 8. Dimension and unit translation
+
+Neutral dimensions follow the DTCG dimension model. The `px` unit is an idealized UI/reference pixel rather than a physical device pixel.
+
+Platform adapters translate that semantic unit to the corresponding host unit:
+
+```text
+DTCG px
+    |-- Web -> CSS px
+    |-- Compose -> dp
+```
+
+This mapping must not depend on physical pixel density.
+
+`rem` is context-dependent because it is relative to the platform/default font size. Adapters must only translate it when the target semantics are explicit and equivalent; otherwise the mapping must fail rather than silently approximate.
+
+## 9. Visual technologies
 
 ### SVG
 
@@ -238,7 +254,7 @@ Rive is optional and reserved for cases where its scalable interactive visual/st
 
 Direct Skia integration is deferred. Many target frameworks already provide efficient drawing layers or use Skia internally. A direct Skia module should only be introduced when a concrete effect or renderer limitation justifies the additional maintenance and dependency cost.
 
-## 9. Capability and fallback model
+## 10. Capability and fallback model
 
 Recipes request capabilities rather than inferring operating-system or device generations.
 
@@ -265,7 +281,7 @@ Frosted surface
 
 Fallbacks must preserve layout, semantics and usability.
 
-## 10. States and motion
+## 11. States and motion
 
 States and motion are separate.
 
@@ -291,7 +307,7 @@ Reduced-motion preferences must be respected without removing the visual distinc
 
 Decorative or expensive motion remains optional.
 
-## 11. Accessibility and interaction
+## 12. Accessibility and interaction
 
 The framework specifies semantic requirements but should not reimplement mature host-platform interaction systems unnecessarily.
 
@@ -306,7 +322,7 @@ Adapters are responsible for preserving:
 - accessibility mappings;
 - reduced-motion behavior.
 
-## 12. Performance rules
+## 13. Performance rules
 
 - Prefer host-platform layout and text engines.
 - Prefer lightweight native/Web rendering paths for ordinary controls.
@@ -316,7 +332,7 @@ Adapters are responsible for preserving:
 - Complex lists/tables/trees should rely on platform-efficient virtualization mechanisms.
 - Theme and palette switching must not alter semantic application structure.
 
-## 13. API stability goal
+## 14. API stability goal
 
 Applications should consume semantic components and select a theme/palette without needing to know which renderer or advanced visual provider implements them.
 

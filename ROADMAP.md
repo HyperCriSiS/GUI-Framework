@@ -108,8 +108,9 @@ The Web adapter should use native browser mechanisms rather than implementing a 
 
 The second adapter is an architecture test: it must prove that the specification is not Web-shaped.
 
-- [ ] Generate or consume Kotlin-facing contracts from the neutral specification.
-- [ ] Map recipes/tokens to Compose Android/Desktop primitives.
+- [x] Generate and compile Kotlin-facing contracts from the neutral specification.
+- [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
+- [ ] Map recipes/tokens to Compose Android/Desktop primitives. <!-- sRGB color mapping is implemented and compile-verified; dimensions/motion/recipes remain open -->
 - [ ] Preserve Compose semantics, input, focus and accessibility behavior.
 - [ ] Implement vector/SVG integration appropriate to the target.
 - [ ] Implement functional micro-interactions using platform-efficient mechanisms.
