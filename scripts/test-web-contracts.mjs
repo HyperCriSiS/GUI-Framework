@@ -21,7 +21,7 @@ try {
   const source = await readFile(contractsPath, "utf8");
   assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "input"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "input", "switch"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -43,6 +43,16 @@ try {
   assert.match(source, /"id": "valueChange"/);
   assert.match(source, /"payload": "string"/);
   assert.match(source, /"role": "textbox"/);
+
+  assert.match(source, /export const guiSwitchContract = \{/);
+  assert.match(source, /export type GuiSwitchVariant = \(typeof guiSwitchContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiSwitchSize = \(typeof guiSwitchContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiSwitchState = \(typeof guiSwitchContract\.states\)\[number\];/);
+  assert.match(source, /states: \["default", "hover", "focus", "pressed", "checked", "disabled"\] as const,/);
+  assert.match(source, /"id": "checked"/);
+  assert.match(source, /"id": "checkedChange"/);
+  assert.match(source, /"payload": "boolean"/);
+  assert.match(source, /"role": "switch"/);
 
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not become public Web component contract types");
 

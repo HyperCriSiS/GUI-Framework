@@ -24,6 +24,7 @@ try {
   assert.match(source, /enum class GuiComponentId/);
   assert.match(source, /BUTTON\("button"\)/);
   assert.match(source, /INPUT\("input"\)/);
+  assert.match(source, /SWITCH\("switch"\)/);
 
   assert.match(source, /enum class GuiButtonVariant/);
   assert.match(source, /PRIMARY\("primary"\)/);
@@ -47,6 +48,15 @@ try {
   assert.match(source, /val error: Boolean = false/);
   assert.match(source, /GuiEventContract\("valueChange", "string"\)/);
   assert.match(source, /GuiComponentSemantics\("textbox", true\)/);
+
+  assert.match(source, /enum class GuiSwitchVariant/);
+  assert.match(source, /enum class GuiSwitchSize/);
+  assert.match(source, /enum class GuiSwitchState/);
+  assert.match(source, /CHECKED\("checked"\)/);
+  assert.match(source, /data class GuiSwitchProperties\(/);
+  assert.match(source, /val checked: Boolean/);
+  assert.match(source, /GuiEventContract\("checkedChange", "boolean"\)/);
+  assert.match(source, /GuiComponentSemantics\("switch", true\)/);
 
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not leak into Kotlin component contracts");
   assert.doesNotMatch(source, /HTMLElement|document\.|onClick|Composable|Modifier/, "Neutral Kotlin contracts must not contain Web or Compose implementation APIs");
