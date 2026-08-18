@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GUI Framework theme definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["specVersion", "theme", "components"],
+  "properties": {
+    "specVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "theme": { "$ref": "#/$defs/id" },
+    "extends": { "$ref": "#/$defs/id" },
+    "recommendedPalette": { "$ref": "#/$defs/id" },
+    "components": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/componentVisualRecipe" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]*$"
+    },
+    "tokenReference": {
+      "type": "string",
+      "pattern": "^\\{[^{}.]+(?:\\.[^{}.]+)*\\}$"
+    },
+    "partStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fill": { "$ref": "#/$defs/tokenReference" },
+        "foreground": { "$ref": "#/$defs/tokenReference" },
+        "opacity": { "$ref": "#/$defs/tokenReference" },
+        "radius": { "$ref": "#/$defs/tokenReference" },
+        "paddingHorizontal": { "$ref": "#/$defs/tokenReference" },
+        "paddingVertical": { "$ref": "#/$defs/tokenReference" },
+        "gap": { "$ref": "#/$defs/tokenReference" },
+        "minWidth": { "$ref": "#/$defs/tokenReference" },
+        "minHeight": { "$ref": "#/$defs/tokenReference" },
+        "border": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "width"],
+          "properties": {
+            "color": { "$ref": "#/$defs/tokenReference" },
+            "width": { "$ref": "#/$defs/tokenReference" }
+          }
+        },
+        "shadow": { "$ref": "#/$defs/tokenReference" },
+        "blur": { "$ref": "#/$defs/tokenReference" },
+        "backdropBlur": { "$ref": "#/$defs/tokenReference" },
+        "glow": { "$ref": "#/$defs/tokenReference" },
+        "transition": { "$ref": "#/$defs/tokenReference" }
+      },
+      "minProperties": 1
+    },
+    "partMap": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/partStyle" }
+    },
+    "stateMap": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/partMap" }
+    },
+    "variantVisualRecipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "$ref": "#/$defs/partMap" },
+        "sizes": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/partMap" }
+        },
+        "states": { "$ref": "#/$defs/stateMap" }
+      },
+      "minProperties": 1
+    },
+    "componentVisualRecipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "$ref": "#/$defs/partMap" },
+        "sizes": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/partMap" }
+        },
+        "states": { "$ref": "#/$defs/stateMap" },
+        "variants": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/variantVisualRecipe" }
+        }
+      },
+      "minProperties": 1
+    }
+  }
+}

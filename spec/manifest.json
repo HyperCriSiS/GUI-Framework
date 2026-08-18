@@ -21,12 +21,36 @@
     }
   ],
   "themes": [
-    { "id": "basic", "name": "Basic" },
-    { "id": "modern", "name": "Modern" },
-    { "id": "glass", "name": "Glass" },
-    { "id": "frosted-glass", "name": "Frosted Glass" },
-    { "id": "spacey", "name": "Spacey" },
-    { "id": "cyberpunk", "name": "Cyberpunk" }
+    {
+      "id": "basic",
+      "name": "Basic",
+      "source": "themes/basic.theme.json"
+    },
+    {
+      "id": "modern",
+      "name": "Modern",
+      "source": "themes/modern.theme.json"
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "source": "themes/glass.theme.json"
+    },
+    {
+      "id": "frosted-glass",
+      "name": "Frosted Glass",
+      "source": "themes/frosted-glass.theme.json"
+    },
+    {
+      "id": "spacey",
+      "name": "Spacey",
+      "source": "themes/spacey.theme.json"
+    },
+    {
+      "id": "cyberpunk",
+      "name": "Cyberpunk",
+      "source": "themes/cyberpunk.theme.json"
+    }
   ],
   "components": [
     {

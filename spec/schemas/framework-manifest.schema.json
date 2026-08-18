@@ -3,26 +3,46 @@
   "title": "GUI Framework specification manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["specVersion", "tokenSources", "palettes", "themes", "components"],
+  "required": [
+    "specVersion",
+    "tokenSources",
+    "palettes",
+    "themes",
+    "components"
+  ],
   "properties": {
-    "specVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "specVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
     "tokenSources": {
       "type": "array",
-      "items": { "$ref": "#/$defs/sourceEntry" }
+      "items": {
+        "$ref": "#/$defs/sourceEntry"
+      }
     },
     "palettes": {
       "type": "array",
       "minItems": 1,
       "items": {
         "allOf": [
-          { "$ref": "#/$defs/sourceEntry" },
+          {
+            "$ref": "#/$defs/sourceEntry"
+          },
           {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "developmentReference": { "type": "boolean" }
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "developmentReference": {
+                "type": "boolean"
+              }
             },
-            "required": ["name"]
+            "required": [
+              "name"
+            ]
           }
         ]
       }
@@ -33,16 +53,31 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "name"],
+        "required": [
+          "id",
+          "name",
+          "source"
+        ],
         "properties": {
-          "id": { "$ref": "#/$defs/id" },
-          "name": { "type": "string", "minLength": 1 }
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
     "components": {
       "type": "array",
-      "items": { "$ref": "#/$defs/sourceEntry" }
+      "items": {
+        "$ref": "#/$defs/sourceEntry"
+      }
     }
   },
   "$defs": {
@@ -53,12 +88,25 @@
     "sourceEntry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "source"],
+      "required": [
+        "id",
+        "source"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "source": { "type": "string", "minLength": 1 },
-        "name": { "type": "string", "minLength": 1 },
-        "developmentReference": { "type": "boolean" }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "developmentReference": {
+          "type": "boolean"
+        }
       }
     }
   }
