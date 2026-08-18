@@ -21,6 +21,10 @@ try {
   assert.match(source, /BASIC\("basic"\)/);
   assert.match(source, /FROSTED_GLASS\("frosted-glass"\)/);
   assert.match(source, /CYBERPUNK\("cyberpunk"\)/);
+  assert.match(source, /enum class GuiComponentId/);
+  assert.match(source, /BUTTON\("button"\)/);
+  assert.match(source, /INPUT\("input"\)/);
+
   assert.match(source, /enum class GuiButtonVariant/);
   assert.match(source, /PRIMARY\("primary"\)/);
   assert.match(source, /data class GuiButtonProperties\(/);
@@ -29,6 +33,21 @@ try {
   assert.match(source, /GuiEventContract\("activate", "none"\)/);
   assert.match(source, /GuiContentSlot\("label", "text", true\)/);
   assert.match(source, /GuiComponentSemantics\("button", true\)/);
+
+  assert.match(source, /enum class GuiInputVariant/);
+  assert.match(source, /STANDARD\("standard"\)/);
+  assert.match(source, /enum class GuiInputSize/);
+  assert.match(source, /enum class GuiInputState/);
+  assert.match(source, /ERROR\("error"\)/);
+  assert.match(source, /data class GuiInputProperties\(/);
+  assert.match(source, /val value: String/);
+  assert.match(source, /val placeholder: String = ""/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /val readOnly: Boolean = false/);
+  assert.match(source, /val error: Boolean = false/);
+  assert.match(source, /GuiEventContract\("valueChange", "string"\)/);
+  assert.match(source, /GuiComponentSemantics\("textbox", true\)/);
+
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not leak into Kotlin component contracts");
   assert.doesNotMatch(source, /HTMLElement|document\.|onClick|Composable|Modifier/, "Neutral Kotlin contracts must not contain Web or Compose implementation APIs");
 

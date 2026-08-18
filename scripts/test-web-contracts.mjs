@@ -21,13 +21,29 @@ try {
   const source = await readFile(contractsPath, "utf8");
   assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "input"\] as const;/);
+
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "disabled", "loading"\] as const,/);
   assert.match(source, /"id": "activate"/);
   assert.match(source, /"id": "disabled"/);
   assert.match(source, /"kind": "text"/);
+
+  assert.match(source, /export const guiInputContract = \{/);
+  assert.match(source, /export type GuiInputVariant = \(typeof guiInputContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiInputSize = \(typeof guiInputContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiInputState = \(typeof guiInputContract\.states\)\[number\];/);
+  assert.match(source, /variants: \["standard"\] as const,/);
+  assert.match(source, /states: \["default", "hover", "focus", "disabled", "error"\] as const,/);
+  assert.match(source, /"id": "value"/);
+  assert.match(source, /"id": "placeholder"/);
+  assert.match(source, /"id": "readOnly"/);
+  assert.match(source, /"id": "error"/);
+  assert.match(source, /"id": "valueChange"/);
+  assert.match(source, /"payload": "string"/);
+  assert.match(source, /"role": "textbox"/);
+
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not become public Web component contract types");
 
   console.log("Web TypeScript contract generation tests passed.");
