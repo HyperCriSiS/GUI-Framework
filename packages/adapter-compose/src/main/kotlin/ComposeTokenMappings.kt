@@ -3,7 +3,10 @@
 package gui.framework.compose.internal
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import gui.framework.generated.internal.GuiColorValue
+import gui.framework.generated.internal.GuiDimensionValue
 
 /**
  * Maps a resolved neutral sRGB color token to the host Compose color primitive.
@@ -28,4 +31,25 @@ internal fun GuiColorValue.toComposeColor(): Color {
         blue = components[2].toFloat(),
         alpha = 1f,
     )
+}
+
+/**
+ * Maps a DTCG `px` dimension to Compose density-independent pixels.
+ *
+ * DTCG defines `px` as an idealized UI/reference pixel and identifies Android
+ * `dp` as the equivalent unit. It is therefore mapped directly and must not be
+ * multiplied by the physical display density.
+ *
+ * `rem` is intentionally rejected because its meaning is font-size-relative and
+ * requires a separate context-aware mapping rather than an approximation to Dp.
+ */
+internal fun GuiDimensionValue.toComposeDp(): Dp {
+    require(unit == "px") {
+        "Unsupported neutral dimension unit for Compose Dp mapping: $unit"
+    }
+    require(value.isFinite()) {
+        "Neutral dimension value must be finite"
+    }
+
+    return value.toFloat().dp
 }
