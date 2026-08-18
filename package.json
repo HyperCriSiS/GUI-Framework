@@ -12,8 +12,10 @@
     "validate:manifest": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/framework-manifest.schema.json -d spec/manifest.json",
     "validate:components": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/component-recipe.schema.json -d 'spec/components/*.recipe.json'",
     "validate:spec": "npm run validate:dtcg && npm run validate:manifest && npm run validate:components",
-    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run typecheck",
     "compile:spec": "node packages/compiler/src/index.mjs --output build/spec-ir.json",
-    "test:spec": "node scripts/test-spec.mjs"
+    "build:web-tokens": "node packages/adapter-web/src/generate-css.mjs build/spec-ir.json build/web/tokens.css",
+    "test:spec": "node scripts/test-spec.mjs",
+    "test:web-adapter": "node scripts/test-web-adapter.mjs",
+    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run build:web-tokens && npm run test:web-adapter && npm run typecheck"
   }
 }

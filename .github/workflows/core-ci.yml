@@ -36,5 +36,11 @@ jobs:
       - name: Test specification compiler
         run: npm run test:spec
 
+      - name: Generate Web token output
+        run: npm run build:web-tokens
+
+      - name: Test Web adapter token generation
+        run: npm run test:web-adapter
+
       - name: Typecheck prototype contracts
         run: npm run typecheck
