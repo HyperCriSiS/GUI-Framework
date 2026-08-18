@@ -1,0 +1,30 @@
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+build/
+dist/
+out/
+target/
+
+# JavaScript / TypeScript
+node_modules/
+*.tsbuildinfo
+
+# Kotlin / Gradle
+.gradle/
+local.properties
+
+# Logs
+*.log
+
+# Local/private project notes
+internal/
+.private/
+*.local.md
