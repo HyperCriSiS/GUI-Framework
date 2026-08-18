@@ -16,10 +16,13 @@
     "compile:spec": "node packages/compiler/src/index.mjs --output build/spec-ir.json",
     "build:web-tokens": "node packages/adapter-web/src/generate-css.mjs build/spec-ir.json build/web/tokens.css",
     "build:web-contracts": "node packages/adapter-web/src/generate-contracts.mjs build/spec-ir.json build/web/contracts.ts",
+    "build:kotlin-contracts": "node packages/adapter-compose/src/generate-contracts.mjs build/spec-ir.json build/compose/GuiContracts.kt",
     "test:spec": "node scripts/test-spec.mjs",
     "test:web-adapter": "node scripts/test-web-adapter.mjs",
     "test:web-contracts": "node scripts/test-web-contracts.mjs",
+    "test:kotlin-contracts": "node scripts/test-compose-contracts.mjs",
     "typecheck:web-contracts": "npx --yes --package typescript@7.0.2 tsc --noEmit --strict --target ES2022 --module ESNext build/web/contracts.ts",
-    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run build:web-tokens && npm run test:web-adapter && npm run build:web-contracts && npm run test:web-contracts && npm run typecheck:web-contracts && npm run typecheck"
+    "compile:kotlin-contracts": "mvn -q -f packages/adapter-compose/pom.xml compile",
+    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run build:web-tokens && npm run test:web-adapter && npm run build:web-contracts && npm run test:web-contracts && npm run typecheck:web-contracts && npm run build:kotlin-contracts && npm run test:kotlin-contracts && npm run compile:kotlin-contracts && npm run typecheck"
   }
 }

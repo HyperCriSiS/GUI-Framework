@@ -15,7 +15,7 @@ permissions:
 jobs:
   validate-and-typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
 
     steps:
       - name: Checkout
@@ -26,6 +26,13 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -50,6 +57,15 @@ jobs:
 
       - name: Typecheck generated Web TypeScript contracts
         run: npm run typecheck:web-contracts
+
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Test Kotlin contract generation
+        run: npm run test:kotlin-contracts
+
+      - name: Compile generated Kotlin contracts
+        run: npm run compile:kotlin-contracts
 
       - name: Typecheck prototype contracts
         run: npm run typecheck
