@@ -64,7 +64,13 @@ jobs:
       - name: Test Kotlin contract generation
         run: npm run test:kotlin-contracts
 
-      - name: Compile generated Kotlin contracts
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Test Kotlin token generation
+        run: npm run test:kotlin-tokens
+
+      - name: Compile generated Kotlin output
         run: npm run compile:kotlin-contracts
 
       - name: Typecheck prototype contracts
