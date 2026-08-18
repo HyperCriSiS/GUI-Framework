@@ -40,6 +40,11 @@
             <artifactId>ui-desktop</artifactId>
             <version>${compose.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.compose.foundation</groupId>
+            <artifactId>foundation-desktop</artifactId>
+            <version>${compose.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -48,6 +53,13 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-compose-compiler-plugin-embeddable</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>compile-compose-adapter-foundation</id>
@@ -57,6 +69,9 @@
                         </goals>
                         <configuration>
                             <jvmTarget>17</jvmTarget>
+                            <compilerPlugins>
+                                <plugin>compose</plugin>
+                            </compilerPlugins>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/../../build/compose</sourceDir>
                                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>

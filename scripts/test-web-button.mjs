@@ -56,6 +56,7 @@ try {
   assert.match(css, /background-color: #4C8DFF;/);
   assert.match(css, /background-color: #684DE2;/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic button must not enable animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   let activations = 0;

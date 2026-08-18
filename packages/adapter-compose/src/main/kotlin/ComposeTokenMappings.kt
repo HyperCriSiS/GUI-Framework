@@ -4,20 +4,18 @@ package gui.framework.compose.internal
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import gui.framework.generated.internal.GuiColorValue
 import gui.framework.generated.internal.GuiDimensionValue
 import gui.framework.generated.internal.GuiDurationValue
+import gui.framework.generated.internal.GuiNumberValue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Maps a resolved neutral sRGB color token to the host Compose color primitive.
- *
- * Other color spaces are deliberately rejected until their conversion semantics
- * are defined by the neutral specification/toolchain.
- */
+/** Maps a resolved neutral sRGB color token to the host Compose color primitive. */
 internal fun GuiColorValue.toComposeColor(): Color {
     require(colorSpace == "srgb") {
         "Unsupported neutral color space for Compose mapping: $colorSpace"
@@ -39,13 +37,7 @@ internal fun GuiColorValue.toComposeColor(): Color {
 
 /**
  * Maps a DTCG `px` dimension to Compose density-independent pixels.
- *
- * DTCG defines `px` as an idealized UI/reference pixel and identifies Android
- * `dp` as the equivalent unit. It is therefore mapped directly and must not be
- * multiplied by the physical display density.
- *
- * `rem` is intentionally rejected because its meaning is font-size-relative and
- * requires a separate context-aware mapping rather than an approximation to Dp.
+ * `rem` is intentionally rejected because it requires context-aware mapping.
  */
 internal fun GuiDimensionValue.toComposeDp(): Dp {
     require(unit == "px") {
@@ -54,17 +46,32 @@ internal fun GuiDimensionValue.toComposeDp(): Dp {
     require(value.isFinite()) {
         "Neutral dimension value must be finite"
     }
-
     return value.toFloat().dp
 }
 
 /**
- * Maps a resolved neutral duration token to Kotlin's platform-neutral Duration.
- *
- * DTCG duration values use `ms` or `s`. Keeping the value as Duration avoids
- * leaking animation-engine-specific integer millisecond assumptions into the
- * generated contract or the Compose adapter.
+ * Maps a neutral typography dimension to Compose scale-independent pixels.
+ * The property context, not the DTCG dimension type alone, determines that a
+ * font-size token must respect the host user's font scale.
  */
+internal fun GuiDimensionValue.toComposeSp(): TextUnit {
+    require(unit == "px") {
+        "Unsupported neutral font-size unit for Compose mapping: $unit"
+    }
+    require(value.isFinite() && value >= 0.0) {
+        "Neutral font-size value must be finite and non-negative"
+    }
+    return value.toFloat().sp
+}
+
+internal fun GuiNumberValue.toComposeUnitlessFloat(): Float {
+    require(value.isFinite()) {
+        "Neutral number value must be finite"
+    }
+    return value.toFloat()
+}
+
+/** Maps a resolved neutral duration token to Kotlin's platform-neutral Duration. */
 internal fun GuiDurationValue.toKotlinDuration(): Duration {
     require(value.isFinite()) {
         "Neutral duration value must be finite"

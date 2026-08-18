@@ -8,8 +8,7 @@
           "radius": "{radius.control}",
           "paddingHorizontal": "{spacing.lg}",
           "paddingVertical": "{spacing.sm}",
-          "gap": "{spacing.sm}",
-          "transition": "{motion.interaction.fast}"
+          "gap": "{spacing.sm}"
         },
         "label": {
           "fontSize": "{typography.size.medium}",
