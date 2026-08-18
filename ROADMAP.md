@@ -49,6 +49,9 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 
 - [x] Define the initial language-neutral component recipe contract and schema.
 - [x] Define component anatomy/parts.
+- [x] Define language-neutral content slots for text, graphics and child content.
+- [x] Define language-neutral runtime properties and mappings from properties to declared component states.
+- [x] Define language-neutral component events and payload contracts without platform-specific event names.
 - [x] Define variants and sizes.
 - [x] Define the shared state vocabulary and allow component-specific subsets.
 - [x] Define functional transition/motion token references for component recipes.
@@ -70,6 +73,7 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [ ] Resolve capability fallback chains deterministically.
 - [x] Generate an inspectable intermediate representation with resolved values and provenance traces.
 - [x] Add diagnostics for missing semantic palette roles, duplicate token paths, circular references, type mismatches and unresolved token references.
+- [x] Validate cross-field runtime contracts such as content-to-anatomy mapping, property default types and property-to-state mappings.
 - [ ] Add diagnostics for invalid theme/state overrides once override resolution exists.
 - [x] Add initial tests for deterministic output, provenance and specification-registry compatibility.
 
