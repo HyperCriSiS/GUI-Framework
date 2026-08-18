@@ -89,9 +89,14 @@ function styleDeclarations(style, label) {
   return output;
 }
 
-function partSelector(rootSelector, partId) {
+function kebabPart(partId) {
+  return partId.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+function partSelector(rootSelector, componentId, partId) {
   if (partId === "root") return rootSelector;
-  return `${rootSelector} .gui-button__${partId.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
+  if (componentId === "input" && partId === "placeholder") return `${rootSelector}::placeholder`;
+  return `${rootSelector} .gui-${componentId}__${kebabPart(partId)}`;
 }
 
 function stateSelector(rootSelector, state) {
@@ -102,46 +107,48 @@ function stateSelector(rootSelector, state) {
     case "pressed": return `${rootSelector}:active:not(:disabled)`;
     case "disabled": return `${rootSelector}:disabled`;
     case "loading": return `${rootSelector}[data-gui-loading="true"]`;
+    case "error": return `${rootSelector}[aria-invalid="true"]`;
     default: return `${rootSelector}[data-gui-state~="${state}"]`;
   }
 }
 
-function emitPartMap(lines, selector, partMap, label) {
+function emitPartMap(lines, selector, componentId, partMap, label) {
   for (const [partId, style] of Object.entries(partMap ?? {})) {
     const declarations = styleDeclarations(style, `${label}.${partId}`);
     if (declarations.length === 0) continue;
-    lines.push(`${partSelector(selector, partId)} {`);
+    lines.push(`${partSelector(selector, componentId, partId)} {`);
     lines.push(...declarations.map((declaration) => `  ${declaration};`));
     lines.push("}", "");
   }
 }
 
-function emitVisual(lines, prefix, component, visual, label) {
-  const root = `${prefix} .gui-button`;
-  emitPartMap(lines, root, visual.base, `${label}.base`);
+function emitVisual(lines, prefix, componentId, component, visual, label) {
+  const root = `${prefix} .gui-${componentId}`;
+  emitPartMap(lines, root, componentId, visual.base, `${label}.base`);
 
   for (const size of component.sizes ?? []) {
-    emitPartMap(lines, `${root}[data-gui-size="${size}"]`, visual.sizes?.[size], `${label}.sizes.${size}`);
+    emitPartMap(lines, `${root}[data-gui-size="${size}"]`, componentId, visual.sizes?.[size], `${label}.sizes.${size}`);
   }
 
   for (const variant of component.variants ?? []) {
     const scoped = visual.variants?.[variant];
     if (!scoped) continue;
     const variantRoot = `${root}[data-gui-variant="${variant}"]`;
-    emitPartMap(lines, variantRoot, scoped.base, `${label}.variants.${variant}.base`);
+    emitPartMap(lines, variantRoot, componentId, scoped.base, `${label}.variants.${variant}.base`);
     for (const size of component.sizes ?? []) {
-      emitPartMap(lines, `${variantRoot}[data-gui-size="${size}"]`, scoped.sizes?.[size], `${label}.variants.${variant}.sizes.${size}`);
+      emitPartMap(lines, `${variantRoot}[data-gui-size="${size}"]`, componentId, scoped.sizes?.[size], `${label}.variants.${variant}.sizes.${size}`);
     }
   }
 
   for (const state of component.states ?? []) {
     if (state === "default") continue;
-    emitPartMap(lines, stateSelector(root, state), visual.states?.[state], `${label}.states.${state}`);
+    emitPartMap(lines, stateSelector(root, state), componentId, visual.states?.[state], `${label}.states.${state}`);
     for (const variant of component.variants ?? []) {
       const variantRoot = `${root}[data-gui-variant="${variant}"]`;
       emitPartMap(
         lines,
         stateSelector(variantRoot, state),
+        componentId,
         visual.variants?.[variant]?.states?.[state],
         `${label}.variants.${variant}.states.${state}`,
       );
@@ -149,11 +156,8 @@ function emitVisual(lines, prefix, component, visual, label) {
   }
 }
 
-function generate(ir) {
-  const lines = [
-    "/* Generated from the language-neutral GUI Framework specification. */",
-    "/* Do not edit directly. */",
-    "",
+function emitFoundation(lines) {
+  lines.push(
     ".gui-button {",
     "  appearance: none;",
     "  box-sizing: border-box;",
@@ -174,21 +178,50 @@ function generate(ir) {
     ".gui-button:disabled { cursor: default; }",
     ".gui-button:focus { outline: none; }",
     "",
+    ".gui-input {",
+    "  appearance: none;",
+    "  box-sizing: border-box;",
+    "  display: inline-block;",
+    "  border-style: solid;",
+    "  border-width: 0;",
+    "  background: transparent;",
+    "  color: inherit;",
+    "  font-family: inherit;",
+    "  vertical-align: middle;",
+    "  outline: none;",
+    "}",
+    "",
+    ".gui-input::placeholder { opacity: 1; }",
+    ".gui-input:disabled { cursor: default; }",
+    "",
+  );
+}
+
+function generate(ir) {
+  const lines = [
+    "/* Generated from the language-neutral GUI Framework specification. */",
+    "/* Do not edit directly. */",
+    "",
   ];
+  emitFoundation(lines);
 
   for (const palette of ir.palettes ?? []) {
+    const componentIds = Object.keys(palette.components ?? {}).sort();
     for (const theme of ir.themes ?? []) {
-      const visual = palette.themes?.[theme.id]?.components?.button;
-      const component = palette.components?.button;
-      if (!visual || !component) continue;
-      const prefix = `[data-gui-palette="${palette.id}"][data-gui-theme="${theme.id}"]`;
-      emitVisual(lines, prefix, component, visual, `${palette.id}.${theme.id}.button`);
+      const themeComponents = palette.themes?.[theme.id]?.components ?? {};
+      for (const componentId of componentIds) {
+        const visual = themeComponents[componentId];
+        const component = palette.components?.[componentId];
+        if (!visual || !component) continue;
+        const prefix = `[data-gui-palette="${palette.id}"][data-gui-theme="${theme.id}"]`;
+        emitVisual(lines, prefix, componentId, component, visual, `${palette.id}.${theme.id}.${componentId}`);
+      }
     }
   }
 
   lines.push(
     "@media (prefers-reduced-motion: reduce) {",
-    "  .gui-button {",
+    "  .gui-button, .gui-input {",
     "    transition-duration: 0ms !important;",
     "    transition-delay: 0ms !important;",
     "  }",
