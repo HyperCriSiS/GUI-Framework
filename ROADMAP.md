@@ -41,7 +41,7 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Define a palette contract independent from theme geometry and effects.
 - [x] Require each palette to provide the semantic color roles needed by the component system.
 - [x] Allow every theme to be combined with multiple palettes.
-- [ ] Allow themes to ship a recommended/default palette without making it mandatory.
+- [x] Allow themes to ship a recommended/default palette without making it mandatory.
 - [ ] Define palette variants such as light/dark only where useful; do not hard-code a two-mode assumption into the core model.
 - [ ] Define contrast/legibility validation requirements for theme/palette combinations.
 
@@ -55,11 +55,11 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Define variants and sizes.
 - [x] Define the shared state vocabulary and allow component-specific subsets.
 - [x] Define functional transition/motion token references for component recipes.
-- [ ] Define visual recipes for surfaces, borders, shadows, glow, blur, vectors and other effects.
+- [x] Define the neutral visual-recipe contract for surfaces, borders, shadows, glow, blur and related effects. <!-- concrete theme values intentionally remain open -->
 - [ ] Define asset references for SVG and future N-slice/Rive assets.
 - [x] Define capability requirements and ordered quality fallback levels.
 - [x] Define initial accessibility/semantic metadata that renderers must preserve.
-- [ ] Define recipe inheritance/override resolution.
+- [x] Define deterministic recipe inheritance/override resolution.
 - [x] Define an initial trace/provenance model that explains where resolved component token bindings came from.
 - [x] Version the neutral specification independently from individual renderer packages.
 
@@ -69,12 +69,12 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Parse and validate the DTCG token sources used by the project.
 - [x] Parse and validate component recipes against the GUI-specific JSON Schema.
 - [x] Resolve token aliases and palette mappings deterministically.
-- [ ] Resolve theme overrides and state overrides deterministically once their specification is defined.
+- [x] Resolve theme inheritance plus variant/size/state overrides deterministically.
 - [ ] Resolve capability fallback chains deterministically.
 - [x] Generate an inspectable intermediate representation with resolved values and provenance traces.
 - [x] Add diagnostics for missing semantic palette roles, duplicate token paths, circular references, type mismatches and unresolved token references.
 - [x] Validate cross-field runtime contracts such as content-to-anatomy mapping, property default types and property-to-state mappings.
-- [ ] Add diagnostics for invalid theme/state overrides once override resolution exists.
+- [x] Add diagnostics for invalid theme references, component parts, variants, sizes, states and inheritance cycles.
 - [x] Add initial tests for deterministic output, provenance and specification-registry compatibility.
 
 ## Phase 3 — Web reference adapter
@@ -110,7 +110,7 @@ The second adapter is an architecture test: it must prove that the specification
 
 - [x] Generate and compile Kotlin-facing contracts from the neutral specification.
 - [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
-- [ ] Map recipes/tokens to Compose Android/Desktop primitives. <!-- sRGB color mapping is implemented and compile-verified; dimensions/motion/recipes remain open -->
+- [ ] Map recipes/tokens to Compose Android/Desktop primitives. <!-- sRGB Color, DTCG px -> dp and duration -> Kotlin Duration are compile-verified; visual recipes remain open -->
 - [ ] Preserve Compose semantics, input, focus and accessibility behavior.
 - [ ] Implement vector/SVG integration appropriate to the target.
 - [ ] Implement functional micro-interactions using platform-efficient mechanisms.
