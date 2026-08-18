@@ -23,8 +23,8 @@ try {
   assert.match(source, /"reference-light" to mapOf/);
   assert.match(source, /"basic" to mapOf/);
   assert.match(source, /"button" to GuiVisualRecipe/);
-  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.2980392156862745, 0\.5529411764705883, 1\.0\), "#4C8DFF"\)/);
-  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.40784313725490196, 0\.30196078431372547, 0\.8862745098039215\), "#684DE2"\)/);
+  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.298, 0\.5529, 1\.0\), "#4C8DFF"\)/);
+  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.4078, 0\.302, 0\.8863\), "#684DE2"\)/);
   assert.match(source, /GuiDimensionValue\(36\.0, "px"\)/);
   assert.match(source, /GuiDimensionValue\(14\.0, "px"\)/);
   assert.match(source, /GuiVisualOutline/);
