@@ -20,6 +20,11 @@
       "state": "checked"
     },
     {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": true
+    },
+    {
       "id": "disabled",
       "type": "boolean",
       "required": false,

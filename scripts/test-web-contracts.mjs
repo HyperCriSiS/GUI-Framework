@@ -50,6 +50,7 @@ try {
   assert.match(source, /export type GuiSwitchState = \(typeof guiSwitchContract\.states\)\[number\];/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "checked", "disabled"\] as const,/);
   assert.match(source, /"id": "checked"/);
+  assert.match(source, /"id": "accessibilityLabel"/);
   assert.match(source, /"id": "checkedChange"/);
   assert.match(source, /"payload": "boolean"/);
   assert.match(source, /"role": "switch"/);

@@ -105,6 +105,7 @@ function stateSelector(rootSelector, state) {
     case "hover": return `${rootSelector}:hover:not(:disabled)`;
     case "focus": return `${rootSelector}:focus-visible`;
     case "pressed": return `${rootSelector}:active:not(:disabled)`;
+    case "checked": return `${rootSelector}[aria-checked="true"]`;
     case "disabled": return `${rootSelector}:disabled`;
     case "loading": return `${rootSelector}[data-gui-loading="true"]`;
     case "error": return `${rootSelector}[aria-invalid="true"]`;
@@ -194,6 +195,31 @@ function emitFoundation(lines) {
     ".gui-input::placeholder { opacity: 1; }",
     ".gui-input:disabled { cursor: default; }",
     "",
+    ".gui-switch {",
+    "  appearance: none;",
+    "  box-sizing: border-box;",
+    "  display: inline-flex;",
+    "  align-items: center;",
+    "  justify-content: flex-start;",
+    "  border-style: solid;",
+    "  border-width: 0;",
+    "  background: transparent;",
+    "  color: inherit;",
+    "  font: inherit;",
+    "  cursor: pointer;",
+    "  user-select: none;",
+    "  vertical-align: middle;",
+    "  outline: none;",
+    "}",
+    "",
+    ".gui-switch[aria-checked=\"true\"] { justify-content: flex-end; }",
+    ".gui-switch:disabled { cursor: default; }",
+    ".gui-switch__thumb {",
+    "  display: block;",
+    "  flex: 0 0 auto;",
+    "  pointer-events: none;",
+    "}",
+    "",
   );
 }
 
@@ -221,7 +247,7 @@ function generate(ir) {
 
   lines.push(
     "@media (prefers-reduced-motion: reduce) {",
-    "  .gui-button, .gui-input {",
+    "  .gui-button, .gui-input, .gui-switch {",
     "    transition-duration: 0ms !important;",
     "    transition-delay: 0ms !important;",
     "  }",

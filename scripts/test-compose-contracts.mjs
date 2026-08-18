@@ -55,6 +55,7 @@ try {
   assert.match(source, /CHECKED\("checked"\)/);
   assert.match(source, /data class GuiSwitchProperties\(/);
   assert.match(source, /val checked: Boolean/);
+  assert.match(source, /val accessibilityLabel: String/);
   assert.match(source, /GuiEventContract\("checkedChange", "boolean"\)/);
   assert.match(source, /GuiComponentSemantics\("switch", true\)/);
 

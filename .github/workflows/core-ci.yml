@@ -67,6 +67,9 @@ jobs:
       - name: Test native Web Basic Input
         run: npm run test:web-input
 
+      - name: Test native Web Basic Switch
+        run: npm run test:web-switch
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
