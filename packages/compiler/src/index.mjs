@@ -3,6 +3,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
+import { resolveThemeDefinitions } from "./theme-resolution.mjs";
 
 const specRoot = resolve("spec");
 const manifestPath = join(specRoot, "manifest.json");
@@ -168,6 +169,18 @@ async function compile() {
     components.push({ id: componentEntry.id, source: componentEntry.source, recipe });
   }
 
+  const themeEntries = [];
+  for (const themeEntry of manifest.themes) {
+    const definition = await readJson(join(specRoot, themeEntry.source));
+    themeEntries.push({
+      id: themeEntry.id,
+      name: themeEntry.name,
+      source: themeEntry.source,
+      definition
+    });
+  }
+  const themes = resolveThemeDefinitions(themeEntries);
+
   const palettes = [];
   for (const paletteEntry of manifest.palettes) {
     const paletteTokens = collectTokens(await readJson(join(specRoot, paletteEntry.source)), paletteEntry.source);
@@ -215,7 +228,7 @@ async function compile() {
 
   return stableObject({
     specVersion: manifest.specVersion,
-    themes: manifest.themes,
+    themes,
     palettes
   });
 }

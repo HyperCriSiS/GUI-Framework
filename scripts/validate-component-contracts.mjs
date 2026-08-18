@@ -34,6 +34,12 @@ for (const entry of (await readdir("spec/components")).filter((name) => name.end
   const anatomy = new Map(recipe.anatomy.map((part) => [part.id, part]));
   const states = new Set(recipe.states);
 
+  if (recipe.states[0] !== "default") {
+    errors.push(
+      `${file}: default must be the first state because state order defines deterministic override priority`,
+    );
+  }
+
   for (const slot of recipe.content) {
     const part = anatomy.get(slot.id);
     if (!part) {

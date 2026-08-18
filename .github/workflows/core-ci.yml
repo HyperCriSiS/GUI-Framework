@@ -43,6 +43,9 @@ jobs:
       - name: Test specification compiler
         run: npm run test:spec
 
+      - name: Test theme inheritance and visual override resolution
+        run: npm run test:theme-resolution
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
