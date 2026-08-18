@@ -8,6 +8,8 @@ The project is in the foundation phase. After comparing the initial architecture
 
 The existing TypeScript contracts on `feat/core-foundation` are treated as an early prototype and input to the specification work, not as the permanent cross-platform source of truth.
 
+The first concrete vertical slice is now implemented and CI-verified: the Basic theme defines a native Web Button whose geometry, typography, palette-dependent colors, variants, sizes and interaction states are compiled from the language-neutral specification. Other themes intentionally remain visually unspecified until the second reference adapter validates the same contract.
+
 ## Phase 0 — Foundation and scope
 
 - [x] Define the initial cross-platform objective.
@@ -32,7 +34,7 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Define primitive tokens for raw reusable values.
 - [x] Define semantic tokens for UI roles such as background, surface, text, accent, success, warning and danger.
 - [ ] Define component-level tokens only where shared semantic tokens are insufficient.
-- [ ] Define spacing, sizing, radius, typography, border, elevation, effect and motion tokens. <!-- spacing, radius and motion started; remaining categories open -->
+- [ ] Define spacing, sizing, radius, typography, border, elevation, effect and motion tokens. <!-- spacing, sizing, radius, typography, border, focus and motion started; elevation/effect categories remain open -->
 - [x] Define token aliases/references without embedding platform-specific syntax.
 - [x] Add automated validation for the DTCG subset used by the project. <!-- DTCG 2025.10 does not currently publish an official JSON Schema -->
 
@@ -55,7 +57,7 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Define variants and sizes.
 - [x] Define the shared state vocabulary and allow component-specific subsets.
 - [x] Define functional transition/motion token references for component recipes.
-- [x] Define the neutral visual-recipe contract for surfaces, borders, shadows, glow, blur and related effects. <!-- concrete theme values intentionally remain open -->
+- [x] Define the neutral visual-recipe contract for surfaces, borders, shadows, glow, blur and related effects. <!-- concrete theme values intentionally remain mostly open -->
 - [ ] Define asset references for SVG and future N-slice/Rive assets.
 - [x] Define capability requirements and ordered quality fallback levels.
 - [x] Define initial accessibility/semantic metadata that renderers must preserve.
@@ -70,7 +72,7 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 - [x] Parse and validate component recipes against the GUI-specific JSON Schema.
 - [x] Resolve token aliases and palette mappings deterministically.
 - [x] Resolve theme inheritance plus variant/size/state overrides deterministically.
-- [ ] Resolve capability fallback chains deterministically.
+- [x] Resolve capability fallback chains deterministically. <!-- CI-verified in Core CI #28 -->
 - [x] Generate an inspectable intermediate representation with resolved values and provenance traces.
 - [x] Add diagnostics for missing semantic palette roles, duplicate token paths, circular references, type mismatches and unresolved token references.
 - [x] Validate cross-field runtime contracts such as content-to-anatomy mapping, property default types and property-to-state mappings.
@@ -82,20 +84,20 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 The Web adapter should use native browser mechanisms rather than implementing a custom browser rendering runtime.
 
 - [x] Generate or consume Web-facing TypeScript contracts from the neutral specification.
-- [ ] Implement HTML/CSS mapping.
+- [x] Implement initial HTML/CSS mapping. <!-- first native Button vertical slice -->
 - [x] Implement CSS custom-property/token output.
 - [ ] Implement SVG asset integration.
-- [ ] Preserve native HTML semantics where possible.
-- [ ] Implement keyboard/focus behavior using platform primitives.
-- [ ] Implement accessibility mappings.
-- [ ] Implement functional micro-interactions for hover, press, focus, toggle and open/close states.
-- [ ] Implement reduced-motion handling.
+- [x] Preserve native HTML semantics where possible. <!-- native Button uses the platform button primitive -->
+- [x] Implement keyboard/focus behavior using platform primitives. <!-- verified for Button; broader component coverage remains part of later reference components -->
+- [ ] Implement accessibility mappings. <!-- initial Button mappings include native disabled semantics and aria-busy; broader mapping remains open -->
+- [ ] Implement functional micro-interactions for hover, press, focus, toggle and open/close states. <!-- hover/press/focus are implemented for Button; toggle/open-close remain open -->
+- [x] Implement reduced-motion handling. <!-- generated Button CSS honors prefers-reduced-motion -->
 - [ ] Implement capability detection and deterministic visual fallbacks.
 - [ ] Verify browser-extension popup, sidebar and options-page use cases.
 
 ### Initial reference components
 
-- [ ] Button
+- [x] Button <!-- Basic theme; primary/secondary/ghost/danger, small/medium/large, focus/hover/pressed/disabled/loading; CI-verified in Core CI #30 -->
 - [ ] Input
 - [ ] Switch
 - [ ] Panel/Card
@@ -110,7 +112,7 @@ The second adapter is an architecture test: it must prove that the specification
 
 - [x] Generate and compile Kotlin-facing contracts from the neutral specification.
 - [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
-- [ ] Map recipes/tokens to Compose Android/Desktop primitives. <!-- sRGB Color, DTCG px -> dp and duration -> Kotlin Duration are compile-verified; visual recipes remain open -->
+- [ ] Map recipes/tokens to Compose Android/Desktop primitives. <!-- sRGB Color, DTCG px -> dp and duration -> Kotlin Duration are compile-verified; component visual recipes remain open -->
 - [ ] Preserve Compose semantics, input, focus and accessibility behavior.
 - [ ] Implement vector/SVG integration appropriate to the target.
 - [ ] Implement functional micro-interactions using platform-efficient mechanisms.
@@ -127,7 +129,7 @@ The initial theme names are fixed, but their detailed visual language remains in
 
 Themes:
 
-- [ ] Basic
+- [ ] Basic <!-- first Button recipe exists; full theme/reference-component coverage remains open -->
 - [ ] Modern
 - [ ] Glass
 - [ ] Frosted Glass
@@ -152,7 +154,7 @@ Palette work:
 - [x] Define at least one non-final reference palette for early implementation.
 - [x] Prove palette swapping without modifying component recipes.
 - [ ] Prove the same palette can be reused across multiple themes where visually appropriate.
-- [ ] Prove a theme can use multiple substantially different palettes without forking the theme.
+- [x] Prove a theme can use multiple substantially different palettes without forking the theme. <!-- Basic Button resolves from one shared recipe against both reference palettes -->
 
 ## Phase 6 — Extended component set
 
