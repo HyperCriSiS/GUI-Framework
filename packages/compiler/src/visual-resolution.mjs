@@ -15,6 +15,9 @@ const visualPropertyTypes = Object.freeze({
   backdropBlur: "dimension",
   glow: "dimension",
   transition: "transition",
+  fontSize: "dimension",
+  fontWeight: "number",
+  lineHeight: "number",
 });
 
 function isPlainObject(value) {
@@ -76,6 +79,15 @@ function compilePartStyle(style, resolveToken, origin) {
       output.border = {
         color: compileReference(value.color, "color", resolveToken, origin),
         width: compileReference(value.width, "dimension", resolveToken, origin),
+      };
+      continue;
+    }
+
+    if (property === "outline") {
+      output.outline = {
+        color: compileReference(value.color, "color", resolveToken, origin),
+        width: compileReference(value.width, "dimension", resolveToken, origin),
+        offset: compileReference(value.offset, "dimension", resolveToken, origin),
       };
       continue;
     }

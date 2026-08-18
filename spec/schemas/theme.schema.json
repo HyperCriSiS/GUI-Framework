@@ -37,6 +37,9 @@
         "gap": { "$ref": "#/$defs/tokenReference" },
         "minWidth": { "$ref": "#/$defs/tokenReference" },
         "minHeight": { "$ref": "#/$defs/tokenReference" },
+        "fontSize": { "$ref": "#/$defs/tokenReference" },
+        "fontWeight": { "$ref": "#/$defs/tokenReference" },
+        "lineHeight": { "$ref": "#/$defs/tokenReference" },
         "border": {
           "type": "object",
           "additionalProperties": false,
@@ -44,6 +47,16 @@
           "properties": {
             "color": { "$ref": "#/$defs/tokenReference" },
             "width": { "$ref": "#/$defs/tokenReference" }
+          }
+        },
+        "outline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "width", "offset"],
+          "properties": {
+            "color": { "$ref": "#/$defs/tokenReference" },
+            "width": { "$ref": "#/$defs/tokenReference" },
+            "offset": { "$ref": "#/$defs/tokenReference" }
           }
         },
         "shadow": { "$ref": "#/$defs/tokenReference" },

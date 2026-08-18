@@ -41,6 +41,45 @@
   "opacity": {
     "$type": "number",
     "disabled": { "$value": 0.5 },
-    "subtle": { "$value": 0.72 }
+    "subtle": { "$value": 0.72 },
+    "hover": { "$value": 0.92 },
+    "pressed": { "$value": 0.82 }
+  },
+  "sizing": {
+    "$type": "dimension",
+    "control": {
+      "small": { "$value": { "value": 30, "unit": "px" } },
+      "medium": { "$value": { "value": 36, "unit": "px" } },
+      "large": { "$value": { "value": 44, "unit": "px" } }
+    }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "standard": { "$value": { "value": 1, "unit": "px" } }
+    }
+  },
+  "focus": {
+    "ring": {
+      "$type": "dimension",
+      "width": { "$value": { "value": 2, "unit": "px" } },
+      "offset": { "$value": { "value": 2, "unit": "px" } }
+    }
+  },
+  "typography": {
+    "size": {
+      "$type": "dimension",
+      "small": { "$value": { "value": 13, "unit": "px" } },
+      "medium": { "$value": { "value": 14, "unit": "px" } },
+      "large": { "$value": { "value": 15, "unit": "px" } }
+    },
+    "weight": {
+      "$type": "number",
+      "medium": { "$value": 500 }
+    },
+    "lineHeight": {
+      "$type": "number",
+      "control": { "$value": 1.2 }
+    }
   }
 }
