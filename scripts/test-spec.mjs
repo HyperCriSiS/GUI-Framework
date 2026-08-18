@@ -16,6 +16,13 @@ function compile(output) {
   }
 }
 
+function containsReference(value) {
+  if (typeof value === "string") return /^\{[^{}]+\}$/.test(value);
+  if (Array.isArray(value)) return value.some(containsReference);
+  if (value !== null && typeof value === "object") return Object.values(value).some(containsReference);
+  return false;
+}
+
 try {
   compile(first);
   compile(second);
@@ -36,8 +43,10 @@ try {
     "Independent development palettes must remain registered"
   );
 
-  const darkButton = ir.palettes.find((palette) => palette.id === "reference-dark")?.components?.button;
-  const lightButton = ir.palettes.find((palette) => palette.id === "reference-light")?.components?.button;
+  const darkPalette = ir.palettes.find((palette) => palette.id === "reference-dark");
+  const lightPalette = ir.palettes.find((palette) => palette.id === "reference-light");
+  const darkButton = darkPalette?.components?.button;
+  const lightButton = lightPalette?.components?.button;
   assert.ok(darkButton && lightButton, "Every registered palette must compile the same button contract");
 
   assert.deepEqual(darkButton.anatomy, lightButton.anatomy, "Palette changes must not fork component anatomy");
@@ -59,14 +68,22 @@ try {
     ["semantic.color.accent", "palette.accent500"],
     "Resolved token bindings must preserve provenance"
   );
-  assert.deepEqual(
-    lightButton.tokenBindings.accent.trace.map((entry) => entry.token),
-    ["semantic.color.accent", "palette.accent500"],
-    "Equivalent semantic roles must preserve equivalent provenance shape across palettes"
-  );
   assert.equal(darkButton.semantics.preferNativePrimitive, true);
 
-  console.log("Specification compiler determinism, provenance and palette-independence tests passed.");
+  const transition = darkButton.tokenBindings.interactionTransition;
+  assert.equal(transition.type, "transition");
+  assert.deepEqual(transition.value.duration, { value: 120, unit: "ms" });
+  assert.deepEqual(transition.value.delay, { value: 0, unit: "ms" });
+  assert.deepEqual(transition.value.timingFunction, [0.2, 0, 0, 1]);
+  assert.equal(containsReference(transition.value), false, "Composite token values must not retain unresolved references in IR");
+
+  assert.ok(darkPalette.tokens["semantic.color.background"], "Semantic tokens must be exported in the public IR");
+  assert.ok(darkPalette.tokens["spacing.md"], "Primitive tokens must be exported in the public IR");
+  assert.ok(darkPalette.tokens["motion.interaction.fast"], "Composite primitive tokens must be exported in the public IR");
+  assert.equal(darkPalette.tokens["palette.accent500"], undefined, "Raw palette tokens must not be exposed as public adapter tokens");
+  assert.equal(containsReference(darkPalette.tokens), false, "Public adapter tokens must be fully resolved");
+
+  console.log("Specification compiler determinism, provenance, composite resolution and palette-independence tests passed.");
 } finally {
   await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);
 }

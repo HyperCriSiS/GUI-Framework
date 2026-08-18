@@ -57,6 +57,48 @@ function mergeTokenMaps(...maps) {
   return merged;
 }
 
+function appendTrace(trace, additions) {
+  const seen = new Set(trace.map((entry) => `${entry.token}\u0000${entry.source}`));
+  for (const entry of additions) {
+    const key = `${entry.token}\u0000${entry.source}`;
+    if (!seen.has(key)) {
+      trace.push(entry);
+      seen.add(key);
+    }
+  }
+}
+
+function resolveNestedValue(value, tokens, stack) {
+  if (isTokenReference(value)) {
+    const resolved = resolveToken(referencePath(value), tokens, stack);
+    return { value: resolved.value, trace: resolved.trace };
+  }
+
+  if (Array.isArray(value)) {
+    const output = [];
+    const trace = [];
+    for (const item of value) {
+      const resolved = resolveNestedValue(item, tokens, stack);
+      output.push(resolved.value);
+      appendTrace(trace, resolved.trace);
+    }
+    return { value: output, trace };
+  }
+
+  if (isObject(value)) {
+    const output = {};
+    const trace = [];
+    for (const [key, item] of Object.entries(value)) {
+      const resolved = resolveNestedValue(item, tokens, stack);
+      output[key] = resolved.value;
+      appendTrace(trace, resolved.trace);
+    }
+    return { value: output, trace };
+  }
+
+  return { value, trace: [] };
+}
+
 function resolveToken(path, tokens, stack = []) {
   if (stack.includes(path)) {
     throw new Error(`Circular token reference: ${[...stack, path].join(" -> ")}`);
@@ -65,24 +107,28 @@ function resolveToken(path, tokens, stack = []) {
   const token = tokens.get(path);
   if (!token) throw new Error(`Unresolved token reference: ${path}`);
 
-  if (!isTokenReference(token.value)) {
+  if (isTokenReference(token.value)) {
+    const targetPath = referencePath(token.value);
+    const resolved = resolveToken(targetPath, tokens, [...stack, path]);
+    if (resolved.type !== token.type) {
+      throw new Error(`Token ${path} declares ${token.type} but resolves to ${resolved.type}`);
+    }
+
     return {
       type: token.type,
-      value: token.value,
-      trace: [{ token: path, source: token.source }]
+      value: resolved.value,
+      trace: [{ token: path, source: token.source }, ...resolved.trace]
     };
   }
 
-  const targetPath = referencePath(token.value);
-  const resolved = resolveToken(targetPath, tokens, [...stack, path]);
-  if (resolved.type !== token.type) {
-    throw new Error(`Token ${path} declares ${token.type} but resolves to ${resolved.type}`);
-  }
+  const nested = resolveNestedValue(token.value, tokens, [...stack, path]);
+  const trace = [{ token: path, source: token.source }];
+  appendTrace(trace, nested.trace);
 
   return {
     type: token.type,
-    value: resolved.value,
-    trace: [{ token: path, source: token.source }, ...resolved.trace]
+    value: nested.value,
+    trace
   };
 }
 
@@ -90,6 +136,20 @@ function stableObject(value) {
   if (Array.isArray(value)) return value.map(stableObject);
   if (!isObject(value)) return value;
   return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stableObject(value[key])]));
+}
+
+function compilePublicTokens(tokenUniverse) {
+  const output = {};
+  for (const path of [...tokenUniverse.keys()].sort()) {
+    if (path.startsWith("palette.")) continue;
+    const resolved = resolveToken(path, tokenUniverse);
+    output[path] = {
+      type: resolved.type,
+      value: resolved.value,
+      trace: resolved.trace
+    };
+  }
+  return output;
 }
 
 async function compile() {
@@ -118,6 +178,9 @@ async function compile() {
       const bindings = {};
       for (const [binding, reference] of Object.entries(component.recipe.tokenBindings)) {
         const tokenPath = referencePath(reference);
+        if (tokenPath.startsWith("palette.")) {
+          throw new Error(`${component.source}: component binding ${binding} must use semantic or primitive tokens, not raw palette token ${tokenPath}`);
+        }
         const resolved = resolveToken(tokenPath, tokenUniverse);
         bindings[binding] = {
           reference,
@@ -142,6 +205,7 @@ async function compile() {
       name: paletteEntry.name,
       source: paletteEntry.source,
       developmentReference: paletteEntry.developmentReference === true,
+      tokens: compilePublicTokens(tokenUniverse),
       components: compiledComponents
     });
   }
