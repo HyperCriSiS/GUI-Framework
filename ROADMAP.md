@@ -77,9 +77,9 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 
 The Web adapter should use native browser mechanisms rather than implementing a custom browser rendering runtime.
 
-- [ ] Generate or consume Web-facing TypeScript contracts from the neutral specification.
+- [x] Generate or consume Web-facing TypeScript contracts from the neutral specification.
 - [ ] Implement HTML/CSS mapping.
-- [ ] Implement CSS custom-property/token output.
+- [x] Implement CSS custom-property/token output.
 - [ ] Implement SVG asset integration.
 - [ ] Preserve native HTML semantics where possible.
 - [ ] Implement keyboard/focus behavior using platform primitives.
