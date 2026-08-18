@@ -42,5 +42,14 @@ jobs:
       - name: Test Web adapter token generation
         run: npm run test:web-adapter
 
+      - name: Generate Web TypeScript contracts
+        run: npm run build:web-contracts
+
+      - name: Test Web TypeScript contract generation
+        run: npm run test:web-contracts
+
+      - name: Typecheck generated Web TypeScript contracts
+        run: npm run typecheck:web-contracts
+
       - name: Typecheck prototype contracts
         run: npm run typecheck

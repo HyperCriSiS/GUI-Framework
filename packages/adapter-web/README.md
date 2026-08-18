@@ -9,6 +9,8 @@ Current scope:
 - emit platform-neutral primitive tokens as `:root` CSS custom properties;
 - emit semantic color roles per explicitly selected palette using `data-gui-palette`;
 - convert supported neutral token types to CSS syntax;
+- generate TypeScript theme/component metadata and union types from the neutral component registry;
+- keep development palette IDs out of public component contract types;
 - fail explicitly for token types that do not yet have a Web mapping.
 
 No final theme styling is implemented here yet.
