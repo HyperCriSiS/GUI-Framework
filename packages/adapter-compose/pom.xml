@@ -10,6 +10,7 @@
 
     <properties>
         <kotlin.version>2.4.10</kotlin.version>
+        <compose.version>1.11.1</compose.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -18,6 +19,11 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.compose.ui</groupId>
+            <artifactId>ui-desktop</artifactId>
+            <version>${compose.version}</version>
         </dependency>
     </dependencies>
 
@@ -29,7 +35,7 @@
                 <version>${kotlin.version}</version>
                 <executions>
                     <execution>
-                        <id>compile-generated-contracts</id>
+                        <id>compile-compose-adapter-foundation</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
@@ -38,6 +44,7 @@
                             <jvmTarget>17</jvmTarget>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/../../build/compose</sourceDir>
+                                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
