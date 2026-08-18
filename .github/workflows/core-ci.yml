@@ -46,6 +46,9 @@ jobs:
       - name: Test theme inheritance and visual override resolution
         run: npm run test:theme-resolution
 
+      - name: Test capability fallback resolution
+        run: npm run test:capability-resolution
+
       - name: Test typed visual recipe resolution
         run: npm run test:visual-resolution
 

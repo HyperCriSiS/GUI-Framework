@@ -78,6 +78,38 @@
       },
       "minProperties": 1
     },
+    "fallbackVisualRecipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "$ref": "#/$defs/partMap" },
+        "sizes": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/partMap" }
+        },
+        "states": { "$ref": "#/$defs/stateMap" },
+        "variants": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/variantVisualRecipe" }
+        }
+      },
+      "minProperties": 1
+    },
+    "fallbackEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires", "recipe"],
+      "properties": {
+        "requires": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "recipe": { "$ref": "#/$defs/fallbackVisualRecipe" }
+      }
+    },
     "componentVisualRecipe": {
       "type": "object",
       "additionalProperties": false,
@@ -93,6 +125,11 @@
           "type": "object",
           "propertyNames": { "$ref": "#/$defs/id" },
           "additionalProperties": { "$ref": "#/$defs/variantVisualRecipe" }
+        },
+        "fallbacks": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/id" },
+          "additionalProperties": { "$ref": "#/$defs/fallbackEntry" }
         }
       },
       "minProperties": 1

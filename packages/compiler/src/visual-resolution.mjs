@@ -132,16 +132,26 @@ function compileScopedVisualRecipe(visual, resolveToken, origin, allowVariants) 
   return output;
 }
 
-/**
- * Converts a neutral theme visual recipe from token references into adapter-ready
- * typed values while retaining both token provenance and the theme source that
- * supplied each visual field.
- */
 export function compileVisualRecipe(visual, resolveToken, origin) {
   if (!origin?.theme || !origin?.source) {
     throw new Error("Visual recipe compilation requires theme and source provenance");
   }
-  return compileScopedVisualRecipe(visual, resolveToken, origin, true);
+
+  const output = compileScopedVisualRecipe(visual, resolveToken, origin, true);
+
+  if (visual.fallbacks) {
+    output.fallbacks = Object.fromEntries(
+      Object.entries(visual.fallbacks).map(([fallbackId, fallback]) => [
+        fallbackId,
+        {
+          requires: [...fallback.requires],
+          recipe: compileScopedVisualRecipe(fallback.recipe, resolveToken, origin, true),
+        },
+      ]),
+    );
+  }
+
+  return output;
 }
 
 function isCompiledVisualValue(value) {
@@ -153,11 +163,6 @@ function isCompiledVisualValue(value) {
   );
 }
 
-/**
- * Merges separately compiled inheritance layers. Compiled token values are
- * atomic: a child token reference replaces the complete parent value/provenance
- * object, while surrounding part/style objects continue to merge recursively.
- */
 export function mergeCompiledVisualRecipes(base, override) {
   if (isCompiledVisualValue(override)) return clone(override);
   if (!isPlainObject(base) || !isPlainObject(override)) return clone(override);

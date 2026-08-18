@@ -22,6 +22,7 @@
     "build:kotlin-tokens": "node packages/adapter-compose/src/generate-tokens.mjs build/spec-ir.json build/compose/GuiTokens.kt",
     "test:spec": "node scripts/test-spec.mjs",
     "test:theme-resolution": "node scripts/test-theme-resolution.mjs",
+    "test:capability-resolution": "node scripts/test-capability-resolution.mjs",
     "test:visual-resolution": "node scripts/test-visual-resolution.mjs",
     "test:web-adapter": "node scripts/test-web-adapter.mjs",
     "test:web-contracts": "node scripts/test-web-contracts.mjs",
@@ -29,6 +30,6 @@
     "test:kotlin-tokens": "node scripts/test-compose-tokens.mjs",
     "typecheck:web-contracts": "npx --yes --package typescript@7.0.2 tsc --noEmit --strict --target ES2022 --module ESNext build/web/contracts.ts",
     "compile:kotlin-contracts": "mvn -q -f packages/adapter-compose/pom.xml compile",
-    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run test:theme-resolution && npm run test:visual-resolution && npm run build:web-tokens && npm run test:web-adapter && npm run build:web-contracts && npm run test:web-contracts && npm run typecheck:web-contracts && npm run build:kotlin-contracts && npm run test:kotlin-contracts && npm run build:kotlin-tokens && npm run test:kotlin-tokens && npm run compile:kotlin-contracts && npm run typecheck"
+    "check": "npm run validate:spec && npm run compile:spec && npm run test:spec && npm run test:theme-resolution && npm run test:capability-resolution && npm run test:visual-resolution && npm run build:web-tokens && npm run test:web-adapter && npm run build:web-contracts && npm run test:web-contracts && npm run typecheck:web-contracts && npm run build:kotlin-contracts && npm run test:kotlin-contracts && npm run build:kotlin-tokens && npm run test:kotlin-tokens && npm run compile:kotlin-contracts && npm run typecheck"
   }
 }

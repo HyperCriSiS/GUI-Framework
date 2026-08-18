@@ -59,12 +59,19 @@ for (const entry of manifest.themes) {
       continue;
     }
 
-    const parts = new Set(recipe.anatomy.map((part) => part.id));
-    const variants = new Set(recipe.variants);
-    const sizes = new Set(recipe.sizes);
-    const states = new Set(recipe.states);
+    const contract = {
+      parts: new Set(recipe.anatomy.map((part) => part.id)),
+      variants: new Set(recipe.variants),
+      sizes: new Set(recipe.sizes),
+      states: new Set(recipe.states),
+      fallbackOrder: new Set(recipe.capabilities?.fallbackOrder ?? []),
+      capabilities: new Set([
+        ...(recipe.capabilities?.required ?? []),
+        ...(recipe.capabilities?.optional ?? []),
+      ]),
+    };
 
-    validateVisualRecipe(file, componentId, visual, { parts, variants, sizes, states }, false);
+    validateVisualRecipe(file, componentId, visual, contract, true);
   }
 }
 
@@ -98,7 +105,7 @@ function validatePartMap(file, componentId, label, partMap, parts) {
   }
 }
 
-function validateVisualRecipe(file, componentId, visual, contract, variantScoped) {
+function validateRecipeBody(file, componentId, visual, contract) {
   validatePartMap(file, componentId, "base", visual.base, contract.parts);
 
   for (const [sizeId, partMap] of Object.entries(visual.sizes ?? {})) {
@@ -115,13 +122,35 @@ function validateVisualRecipe(file, componentId, visual, contract, variantScoped
     validatePartMap(file, componentId, `states.${stateId}`, partMap, contract.parts);
   }
 
-  if (!variantScoped) {
-    for (const [variantId, variant] of Object.entries(visual.variants ?? {})) {
-      if (!contract.variants.has(variantId)) {
-        errors.push(`${file}: ${componentId} uses undeclared variant ${variantId}`);
-      }
-      validateVisualRecipe(file, componentId, variant, contract, true);
+  for (const [variantId, variant] of Object.entries(visual.variants ?? {})) {
+    if (!contract.variants.has(variantId)) {
+      errors.push(`${file}: ${componentId} uses undeclared variant ${variantId}`);
     }
+    validateRecipeBody(file, componentId, variant, contract);
+  }
+}
+
+function validateVisualRecipe(file, componentId, visual, contract, allowFallbacks) {
+  validateRecipeBody(file, componentId, visual, contract);
+
+  if (!allowFallbacks) return;
+
+  for (const [fallbackId, fallback] of Object.entries(visual.fallbacks ?? {})) {
+    if (!contract.fallbackOrder.has(fallbackId)) {
+      errors.push(
+        `${file}: ${componentId} fallback ${fallbackId} is not declared in component capability fallbackOrder`,
+      );
+    }
+
+    for (const capability of fallback.requires ?? []) {
+      if (!contract.capabilities.has(capability)) {
+        errors.push(
+          `${file}: ${componentId} fallback ${fallbackId} requires undeclared capability ${capability}`,
+        );
+      }
+    }
+
+    validateVisualRecipe(file, componentId, fallback.recipe, contract, false);
   }
 }
 
@@ -131,4 +160,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("Theme sources and visual recipe references are internally consistent.");
+console.log("Theme sources, capability fallbacks and visual recipe references are internally consistent.");

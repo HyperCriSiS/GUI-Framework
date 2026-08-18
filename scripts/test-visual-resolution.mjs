@@ -96,6 +96,16 @@ const parent = compileVisualRecipe(
         root: { opacity: "{opacity.disabled}" },
       },
     },
+    fallbacks: {
+      standard: {
+        requires: ["advancedBlendModes"],
+        recipe: {
+          base: {
+            root: { glow: "{radius.control}" },
+          },
+        },
+      },
+    },
   },
   resolveToken,
   { theme: "parent", source: "themes/parent.theme.json" },
@@ -115,6 +125,8 @@ assert.equal(parent.base.root.transition.type, "transition");
 assert.equal(parent.states.disabled.root.opacity.type, "number");
 assert.equal(parent.base.root.border.color.type, "color");
 assert.equal(parent.base.root.border.width.type, "dimension");
+assert.deepEqual(parent.fallbacks.standard.requires, ["advancedBlendModes"]);
+assert.equal(parent.fallbacks.standard.recipe.base.root.glow.type, "dimension");
 
 const child = compileVisualRecipe(
   {
@@ -159,4 +171,4 @@ assert.throws(
   /requires color but resolves to dimension/,
 );
 
-console.log("Theme visual references compile to typed values with token and theme provenance.");
+console.log("Theme visual and fallback references compile to typed values with provenance.");

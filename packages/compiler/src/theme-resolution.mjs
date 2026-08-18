@@ -10,12 +10,6 @@ function clone(value) {
   return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, clone(item)]));
 }
 
-/**
- * Deterministic merge used by theme inheritance and visual recipe resolution.
- * Objects merge recursively; arrays and scalar values are replaced by the more
- * specific layer. Replacing arrays avoids accidental accumulation of ordered
- * visual effects such as shadow stacks.
- */
 export function deepMerge(base, override) {
   if (!isPlainObject(base) || !isPlainObject(override)) return clone(override);
 
@@ -29,11 +23,6 @@ export function deepMerge(base, override) {
   return output;
 }
 
-/**
- * Resolves optional theme inheritance without assigning any inheritance
- * relationship to the six built-in themes. Relationships only exist when a
- * theme source explicitly declares `extends`.
- */
 export function resolveThemeDefinitions(entries) {
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   if (byId.size !== entries.length) throw new Error("Duplicate theme ids are not allowed");
@@ -89,17 +78,6 @@ export function resolveThemeDefinitions(entries) {
   return entries.map((entry) => resolveOne(entry.id));
 }
 
-/**
- * Resolves one component visual recipe for a concrete variant, size and set of
- * active states. State precedence comes exclusively from `statePriority`, which
- * is the component contract's ordered `states` list. Call order and object key
- * order therefore cannot change the result.
- *
- * Precedence, from least to most specific:
- * base -> size -> variant -> variant+size -> states in contract order, where a
- * variant-specific state is applied after the component-wide state of the same
- * name.
- */
 export function resolveComponentVisualRecipe(
   visual,
   { variant, size, activeStates = [], statePriority = [] } = {},
@@ -127,4 +105,102 @@ export function resolveComponentVisualRecipe(
   }
 
   return output;
+}
+
+/**
+ * Selects the first declared compatible fallback level. The order comes from
+ * the component contract, never from object key order or device heuristics.
+ */
+export function selectCapabilityFallback(
+  visual,
+  capabilityContract = {},
+  availableCapabilities = [],
+) {
+  const available = new Set(availableCapabilities);
+  const missingRequired = (capabilityContract.required ?? []).filter(
+    (capability) => !available.has(capability),
+  );
+
+  if (missingRequired.length > 0) {
+    return {
+      supported: false,
+      missingRequired,
+      selectedFallback: null,
+    };
+  }
+
+  for (const fallbackId of capabilityContract.fallbackOrder ?? []) {
+    const fallback = visual?.fallbacks?.[fallbackId];
+    if (!fallback) continue;
+
+    const compatible = (fallback.requires ?? []).every((capability) =>
+      available.has(capability),
+    );
+    if (compatible) {
+      return {
+        supported: true,
+        missingRequired: [],
+        selectedFallback: fallbackId,
+      };
+    }
+  }
+
+  return {
+    supported: true,
+    missingRequired: [],
+    selectedFallback: null,
+  };
+}
+
+/**
+ * Resolves ordinary variant/size/state styling first, then applies the selected
+ * capability fallback as the most specific visual layer. If no fallback tier is
+ * compatible, the universal base recipe remains usable.
+ */
+export function resolveComponentVisualForCapabilities(
+  visual,
+  capabilityContract,
+  {
+    variant,
+    size,
+    activeStates = [],
+    statePriority = [],
+    availableCapabilities = [],
+  } = {},
+) {
+  const selection = selectCapabilityFallback(
+    visual,
+    capabilityContract,
+    availableCapabilities,
+  );
+
+  if (!selection.supported) {
+    return {
+      ...selection,
+      visual: null,
+    };
+  }
+
+  let output = resolveComponentVisualRecipe(visual, {
+    variant,
+    size,
+    activeStates,
+    statePriority,
+  });
+
+  if (selection.selectedFallback) {
+    const fallback = visual.fallbacks[selection.selectedFallback];
+    const fallbackVisual = resolveComponentVisualRecipe(fallback.recipe, {
+      variant,
+      size,
+      activeStates,
+      statePriority,
+    });
+    output = deepMerge(output, fallbackVisual);
+  }
+
+  return {
+    ...selection,
+    visual: output,
+  };
 }
