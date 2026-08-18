@@ -23,12 +23,14 @@ try {
   assert.match(source, /"reference-light" to mapOf/);
   assert.match(source, /"basic" to mapOf/);
   assert.match(source, /"button" to GuiVisualRecipe/);
+  assert.match(source, /"input" to GuiVisualRecipe/);
+  assert.match(source, /"placeholder" to GuiVisualPartStyle/);
   assert.match(source, /GuiColorValue\("srgb", listOf\(0\.298, 0\.5529, 1\.0\), "#4C8DFF"\)/);
   assert.match(source, /GuiColorValue\("srgb", listOf\(0\.4078, 0\.302, 0\.8863\), "#684DE2"\)/);
   assert.match(source, /GuiDimensionValue\(36\.0, "px"\)/);
   assert.match(source, /GuiDimensionValue\(14\.0, "px"\)/);
   assert.match(source, /GuiVisualOutline/);
-  assert.doesNotMatch(source, /motion\.interaction\.fast/, "Active animation tokens must not be emitted for the v1 Basic button");
+  assert.doesNotMatch(source, /motion\.interaction\.fast/, "Active animation tokens must not be emitted for v1 Basic controls");
 
   console.log("Compose visual generation tests passed.");
 } finally {
