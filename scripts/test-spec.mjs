@@ -50,10 +50,22 @@ try {
   assert.ok(darkButton && lightButton, "Every registered palette must compile the same button contract");
 
   assert.deepEqual(darkButton.anatomy, lightButton.anatomy, "Palette changes must not fork component anatomy");
+  assert.deepEqual(darkButton.content, lightButton.content, "Palette changes must not fork component content contracts");
+  assert.deepEqual(darkButton.properties, lightButton.properties, "Palette changes must not fork component property contracts");
+  assert.deepEqual(darkButton.events, lightButton.events, "Palette changes must not fork component event contracts");
   assert.deepEqual(darkButton.variants, lightButton.variants, "Palette changes must not fork component variants");
   assert.deepEqual(darkButton.states, lightButton.states, "Palette changes must not fork component states");
   assert.deepEqual(darkButton.semantics, lightButton.semantics, "Palette changes must not fork component semantics");
   assert.deepEqual(darkButton.capabilities, lightButton.capabilities, "Palette changes must not fork capability requirements");
+
+  assert.deepEqual(darkButton.content, [
+    { id: "label", kind: "text", required: true },
+    { id: "leadingIcon", kind: "graphic", required: false },
+    { id: "trailingIcon", kind: "graphic", required: false }
+  ]);
+  assert.deepEqual(darkButton.events, [{ id: "activate", payload: "none" }]);
+  assert.equal(darkButton.properties.find((property) => property.id === "disabled")?.state, "disabled");
+  assert.equal(darkButton.properties.find((property) => property.id === "loading")?.state, "loading");
 
   assert.equal(darkButton.tokenBindings.accent.value.hex, "#4C8DFF");
   assert.equal(lightButton.tokenBindings.accent.value.hex, "#684DE2");
@@ -83,7 +95,7 @@ try {
   assert.equal(darkPalette.tokens["palette.accent500"], undefined, "Raw palette tokens must not be exposed as public adapter tokens");
   assert.equal(containsReference(darkPalette.tokens), false, "Public adapter tokens must be fully resolved");
 
-  console.log("Specification compiler determinism, provenance, composite resolution and palette-independence tests passed.");
+  console.log("Specification compiler determinism, provenance, runtime contracts, composite resolution and palette-independence tests passed.");
 } finally {
   await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);
 }

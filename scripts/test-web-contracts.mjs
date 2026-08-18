@@ -25,6 +25,9 @@ try {
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "disabled", "loading"\] as const,/);
+  assert.match(source, /"id": "activate"/);
+  assert.match(source, /"id": "disabled"/);
+  assert.match(source, /"kind": "text"/);
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not become public Web component contract types");
 
   console.log("Web TypeScript contract generation tests passed.");

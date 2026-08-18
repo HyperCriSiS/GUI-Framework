@@ -191,6 +191,9 @@ async function compile() {
       }
       compiledComponents[component.id] = {
         anatomy: component.recipe.anatomy,
+        content: component.recipe.content,
+        properties: component.recipe.properties,
+        events: component.recipe.events,
         variants: component.recipe.variants,
         sizes: component.recipe.sizes,
         states: component.recipe.states,

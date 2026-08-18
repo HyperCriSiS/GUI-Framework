@@ -7,6 +7,18 @@
     { "id": "leadingIcon", "required": false },
     { "id": "trailingIcon", "required": false }
   ],
+  "content": [
+    { "id": "label", "kind": "text", "required": true },
+    { "id": "leadingIcon", "kind": "graphic", "required": false },
+    { "id": "trailingIcon", "kind": "graphic", "required": false }
+  ],
+  "properties": [
+    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" },
+    { "id": "loading", "type": "boolean", "required": false, "default": false, "state": "loading" }
+  ],
+  "events": [
+    { "id": "activate", "payload": "none" }
+  ],
   "variants": ["primary", "secondary", "ghost", "danger"],
   "sizes": ["small", "medium", "large"],
   "states": ["default", "hover", "focus", "pressed", "disabled", "loading"],

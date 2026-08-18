@@ -20,6 +20,10 @@ function readonlyTuple(values) {
   return `[${values.map(literal).join(", ")}] as const`;
 }
 
+function readonlyJson(value, indent = "") {
+  return `${JSON.stringify(value, null, 2).replace(/\n/g, `\n${indent}`)} as const`;
+}
+
 function generate(ir) {
   if (!Array.isArray(ir.themes) || ir.themes.length === 0) {
     throw new Error("Compiled IR contains no themes");
@@ -55,12 +59,15 @@ function generate(ir) {
     const contract = referenceComponents[id];
     const name = pascalCase(id);
     lines.push(`export const gui${name}Contract = {`);
-    lines.push(`  anatomy: ${JSON.stringify(contract.anatomy, null, 2).replace(/\n/g, "\n  ")} as const,`);
+    lines.push(`  anatomy: ${readonlyJson(contract.anatomy, "  ")},`);
+    lines.push(`  content: ${readonlyJson(contract.content, "  ")},`);
+    lines.push(`  properties: ${readonlyJson(contract.properties, "  ")},`);
+    lines.push(`  events: ${readonlyJson(contract.events, "  ")},`);
     lines.push(`  variants: ${readonlyTuple(contract.variants)},`);
     lines.push(`  sizes: ${readonlyTuple(contract.sizes)},`);
     lines.push(`  states: ${readonlyTuple(contract.states)},`);
-    lines.push(`  semantics: ${JSON.stringify(contract.semantics, null, 2).replace(/\n/g, "\n  ")} as const,`);
-    lines.push(`  capabilities: ${JSON.stringify(contract.capabilities, null, 2).replace(/\n/g, "\n  ")} as const`);
+    lines.push(`  semantics: ${readonlyJson(contract.semantics, "  ")},`);
+    lines.push(`  capabilities: ${readonlyJson(contract.capabilities, "  ")}`);
     lines.push("} as const;", "");
     lines.push(`export type Gui${name}Variant = (typeof gui${name}Contract.variants)[number];`);
     lines.push(`export type Gui${name}Size = (typeof gui${name}Contract.sizes)[number];`);

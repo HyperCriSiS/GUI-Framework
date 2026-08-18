@@ -3,7 +3,7 @@
   "title": "GUI Framework component recipe",
   "type": "object",
   "additionalProperties": false,
-  "required": ["specVersion", "component", "anatomy", "variants", "sizes", "states", "semantics", "tokenBindings", "capabilities"],
+  "required": ["specVersion", "component", "anatomy", "content", "properties", "events", "variants", "sizes", "states", "semantics", "tokenBindings", "capabilities"],
   "properties": {
     "specVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
     "component": { "$ref": "#/$defs/id" },
@@ -17,6 +17,48 @@
         "properties": {
           "id": { "$ref": "#/$defs/id" },
           "required": { "type": "boolean" }
+        }
+      }
+    },
+    "content": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "required"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "kind": { "enum": ["text", "graphic", "children"] },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "required"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "type": { "enum": ["boolean", "string", "number"] },
+          "required": { "type": "boolean" },
+          "default": {},
+          "state": {
+            "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "disabled", "loading", "error", "success", "expanded"]
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "payload"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "payload": { "enum": ["none", "boolean", "string", "number"] }
         }
       }
     },
