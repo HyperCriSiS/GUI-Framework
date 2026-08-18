@@ -56,6 +56,10 @@
     {
       "id": "button",
       "source": "components/button.recipe.json"
+    },
+    {
+      "id": "input",
+      "source": "components/input.recipe.json"
     }
   ]
 }
