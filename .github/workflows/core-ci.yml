@@ -58,6 +58,12 @@ jobs:
       - name: Test Web adapter token generation
         run: npm run test:web-adapter
 
+      - name: Generate Web component output
+        run: npm run build:web-components
+
+      - name: Test native Web Basic Button
+        run: npm run test:web-button
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
@@ -79,7 +85,13 @@ jobs:
       - name: Test Kotlin token generation
         run: npm run test:kotlin-tokens
 
-      - name: Compile generated Kotlin output
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Test Kotlin visual generation
+        run: npm run test:kotlin-visuals
+
+      - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 
       - name: Typecheck prototype contracts
