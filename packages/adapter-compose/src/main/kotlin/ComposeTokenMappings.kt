@@ -7,6 +7,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import gui.framework.generated.internal.GuiColorValue
 import gui.framework.generated.internal.GuiDimensionValue
+import gui.framework.generated.internal.GuiDurationValue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Maps a resolved neutral sRGB color token to the host Compose color primitive.
@@ -52,4 +56,26 @@ internal fun GuiDimensionValue.toComposeDp(): Dp {
     }
 
     return value.toFloat().dp
+}
+
+/**
+ * Maps a resolved neutral duration token to Kotlin's platform-neutral Duration.
+ *
+ * DTCG duration values use `ms` or `s`. Keeping the value as Duration avoids
+ * leaking animation-engine-specific integer millisecond assumptions into the
+ * generated contract or the Compose adapter.
+ */
+internal fun GuiDurationValue.toKotlinDuration(): Duration {
+    require(value.isFinite()) {
+        "Neutral duration value must be finite"
+    }
+    require(value >= 0.0) {
+        "Neutral duration value must not be negative"
+    }
+
+    return when (unit) {
+        "ms" -> value.milliseconds
+        "s" -> value.seconds
+        else -> error("Unsupported neutral duration unit for Kotlin mapping: $unit")
+    }
 }
