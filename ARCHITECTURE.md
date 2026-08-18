@@ -35,7 +35,7 @@ The core defines platform-neutral contracts for:
 - quality/fallback levels;
 - asset references;
 - accessibility metadata;
-- future animation hooks.
+- motion tokens and functional interaction-transition contracts.
 
 The core must not require Rive, Skia, Compose, a browser DOM, or another platform renderer.
 
@@ -146,9 +146,9 @@ A theme may define:
 
 Theme implementations must not duplicate application logic or accessibility behavior.
 
-## 7. Component states
+## 7. Component states and motion
 
-The core state model must be independent from animation.
+The core state model is independent from motion, but functional micro-interactions are part of baseline component behavior.
 
 Components may expose relevant states such as:
 
@@ -164,7 +164,9 @@ loading
 error
 ```
 
-State transitions are initially immediate. A future animation extension may interpolate between these same states without changing the component API.
+Renderers should provide short, performant transitions for interaction feedback such as hover, press, focus, toggle, selection and open/close states. Motion parameters are supplied through shared motion tokens rather than hard-coded per component.
+
+Reduced-motion preferences must be respected without removing the visual distinction between states. Decorative or expensive animation remains optional and must not be required for component semantics or usability.
 
 ## 8. Performance rules
 
@@ -188,7 +190,7 @@ Every renderer is responsible for preserving:
 - keyboard operation where applicable;
 - high-contrast/legibility requirements;
 - disabled and error states;
-- reduced-motion behavior once animations are introduced.
+- reduced-motion behavior while preserving necessary state feedback.
 
 ## 10. API stability goal
 

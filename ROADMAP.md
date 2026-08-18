@@ -13,7 +13,7 @@ The repository is in the foundation phase. The architectural direction is define
 - [x] Separate semantic components from visual renderers.
 - [x] Define SVG, Rive and Skia as optional visual/rendering layers rather than mandatory application runtimes.
 - [x] Require capability-based fallbacks for advanced effects.
-- [x] Keep animation outside the initial feature scope while preserving future extension points.
+- [x] Define functional micro-interactions as part of baseline component behavior while keeping decorative motion optional.
 - [ ] Finalize the repository license and add the canonical `LICENSE` file.
 - [ ] Define supported platform/version matrix.
 - [ ] Define package/module naming conventions.
@@ -26,6 +26,8 @@ The repository is in the foundation phase. The architectural direction is define
 - [ ] Define platform-neutral design-token schema.
 - [ ] Define semantic color, spacing, radius, typography, border and effect tokens.
 - [ ] Define component-state model: default, hover, focus, pressed, selected, checked, disabled, loading and error where applicable.
+- [ ] Define motion tokens for fast functional transitions and interaction feedback.
+- [ ] Define reduced-motion behavior independent from component state.
 - [ ] Define renderer capability model and quality tiers.
 - [ ] Define theme inheritance and override rules.
 - [ ] Define asset abstraction for SVG and future N-slice/Rive assets.
@@ -44,6 +46,7 @@ The repository is in the foundation phase. The architectural direction is define
 - [ ] Implement HTML/CSS renderer.
 - [ ] Implement SVG asset integration.
 - [ ] Implement keyboard and focus behavior.
+- [ ] Implement baseline functional micro-interactions for hover, press, focus, toggle and open/close states.
 - [ ] Implement accessibility mappings.
 - [ ] Implement capability detection and visual fallbacks.
 - [ ] Add a real reference application using the framework components.
@@ -125,16 +128,16 @@ For every theme:
 - [ ] Responsive compact/dense modes.
 - [ ] Browser-extension popup/sidebar/options patterns.
 
-## Phase 7 — Animation extension
+## Phase 7 — Advanced motion and optional visual animation
 
-Animation remains optional and must not be required for correct operation.
+Baseline functional micro-interactions are part of the core component behavior from Phase 1. This later phase covers richer motion that is not required for basic usability.
 
-- [ ] Define animation capability interface.
-- [ ] Define reduced-motion behavior.
-- [ ] Define transition tokens.
+- [ ] Define advanced motion capability interface.
+- [ ] Extend transition tokens for richer motion patterns.
 - [ ] Add optional Rive state-machine integration.
-- [ ] Add renderer-native transition adapters where appropriate.
-- [ ] Confirm that all components remain fully functional with animation disabled.
+- [ ] Add renderer-native advanced transition adapters where appropriate.
+- [ ] Confirm that all components remain fully understandable and operable with reduced motion.
+- [ ] Keep decorative motion optional and isolated from component semantics.
 
 ## Continuous requirements
 
