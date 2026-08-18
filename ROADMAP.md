@@ -14,7 +14,7 @@ The repository is in the foundation phase. The architectural direction is define
 - [x] Define SVG, Rive and Skia as optional visual/rendering layers rather than mandatory application runtimes.
 - [x] Require capability-based fallbacks for advanced effects.
 - [x] Define functional micro-interactions as part of baseline component behavior while keeping decorative motion optional.
-- [ ] Finalize the repository license and add the canonical `LICENSE` file.
+- [x] Finalize the repository license and add the canonical `LICENSE` file (AGPL-3.0-or-later).
 - [ ] Define supported platform/version matrix.
 - [ ] Define package/module naming conventions.
 - [ ] Define compatibility and semantic-versioning policy.
