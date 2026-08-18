@@ -28,48 +28,50 @@ The existing TypeScript contracts on `feat/core-foundation` are treated as an ea
 
 ### Design tokens
 
-- [ ] Adopt a DTCG-compatible token source format.
-- [ ] Define primitive tokens for raw reusable values.
-- [ ] Define semantic tokens for UI roles such as background, surface, text, accent, success, warning and danger.
+- [x] Adopt a DTCG-compatible token source format.
+- [x] Define primitive tokens for raw reusable values.
+- [x] Define semantic tokens for UI roles such as background, surface, text, accent, success, warning and danger.
 - [ ] Define component-level tokens only where shared semantic tokens are insufficient.
-- [ ] Define spacing, sizing, radius, typography, border, elevation, effect and motion tokens.
-- [ ] Define token aliases/references without embedding platform-specific syntax.
-- [ ] Add schema validation for token sources.
+- [ ] Define spacing, sizing, radius, typography, border, elevation, effect and motion tokens. <!-- spacing, radius and motion started; remaining categories open -->
+- [x] Define token aliases/references without embedding platform-specific syntax.
+- [x] Add automated validation for the DTCG subset used by the project. <!-- DTCG 2025.10 does not currently publish an official JSON Schema -->
 
 ### Palette model
 
-- [ ] Define a palette contract independent from theme geometry and effects.
-- [ ] Require each palette to provide the semantic color roles needed by the component system.
-- [ ] Allow every theme to be combined with multiple palettes.
+- [x] Define a palette contract independent from theme geometry and effects.
+- [x] Require each palette to provide the semantic color roles needed by the component system.
+- [x] Allow every theme to be combined with multiple palettes.
 - [ ] Allow themes to ship a recommended/default palette without making it mandatory.
 - [ ] Define palette variants such as light/dark only where useful; do not hard-code a two-mode assumption into the core model.
 - [ ] Define contrast/legibility validation requirements for theme/palette combinations.
 
 ### Component recipe specification
 
-- [ ] Define a language-neutral component recipe format.
-- [ ] Define component anatomy/parts.
-- [ ] Define variants and sizes.
-- [ ] Define states: default, hover, focus, pressed, selected, checked, disabled, loading, error and other component-specific states.
-- [ ] Define functional transition/motion references between states.
+- [x] Define the initial language-neutral component recipe contract and schema.
+- [x] Define component anatomy/parts.
+- [x] Define variants and sizes.
+- [x] Define the shared state vocabulary and allow component-specific subsets.
+- [x] Define functional transition/motion token references for component recipes.
 - [ ] Define visual recipes for surfaces, borders, shadows, glow, blur, vectors and other effects.
 - [ ] Define asset references for SVG and future N-slice/Rive assets.
-- [ ] Define capability requirements and ordered fallback recipes.
-- [ ] Define accessibility/semantic metadata that renderers must preserve.
+- [x] Define capability requirements and ordered quality fallback levels.
+- [x] Define initial accessibility/semantic metadata that renderers must preserve.
 - [ ] Define recipe inheritance/override resolution.
-- [ ] Define a trace/debug model that can explain where a resolved token or recipe value came from.
-- [ ] Version the specification independently from individual renderer packages.
+- [x] Define an initial trace/provenance model that explains where resolved component token bindings came from.
+- [x] Version the neutral specification independently from individual renderer packages.
 
 ## Phase 2 — Compiler and validation toolchain
 
-- [ ] Select the implementation language for the specification compiler/tooling.
-- [ ] Parse and validate design-token sources.
-- [ ] Parse and validate component recipes.
-- [ ] Resolve token aliases, theme overrides, palette mappings and state overrides deterministically.
+- [x] Select Node.js ESM JavaScript for the initial specification compiler/tooling while keeping the source specification language-neutral.
+- [x] Parse and validate the DTCG token sources used by the project.
+- [x] Parse and validate component recipes against the GUI-specific JSON Schema.
+- [x] Resolve token aliases and palette mappings deterministically.
+- [ ] Resolve theme overrides and state overrides deterministically once their specification is defined.
 - [ ] Resolve capability fallback chains deterministically.
-- [ ] Generate inspectable intermediate representation for debugging and tests.
-- [ ] Add diagnostics for missing semantic roles, invalid overrides and unresolved references.
-- [ ] Add tests for deterministic output and specification compatibility.
+- [x] Generate an inspectable intermediate representation with resolved values and provenance traces.
+- [x] Add diagnostics for missing semantic palette roles, duplicate token paths, circular references, type mismatches and unresolved token references.
+- [ ] Add diagnostics for invalid theme/state overrides once override resolution exists.
+- [x] Add initial tests for deterministic output, provenance and specification-registry compatibility.
 
 ## Phase 3 — Web reference adapter
 
@@ -137,13 +139,13 @@ For every theme:
 - [ ] Verify all reference components.
 - [ ] Verify dense and compact layouts.
 - [ ] Verify performance.
-- [ ] Verify multiple independent color palettes.
+- [x] Verify multiple independent development color palettes against the same component contract.
 - [ ] Verify legibility/contrast for supported palette combinations.
 
 Palette work:
 
-- [ ] Define at least one reference palette for early implementation.
-- [ ] Prove palette swapping without modifying component recipes.
+- [x] Define at least one non-final reference palette for early implementation.
+- [x] Prove palette swapping without modifying component recipes.
 - [ ] Prove the same palette can be reused across multiple themes where visually appropriate.
 - [ ] Prove a theme can use multiple substantially different palettes without forking the theme.
 
