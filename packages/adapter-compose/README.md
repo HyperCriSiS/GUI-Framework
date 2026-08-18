@@ -4,6 +4,8 @@ This internal package is the second platform adapter and an architecture validat
 
 The adapter consumes compiled IR only. The first stage intentionally generates plain Kotlin contracts without importing Compose. This verifies that component identity, variants, states, content slots, runtime properties, events and semantic metadata can cross the language boundary without making Web or Compose the canonical model.
 
+Palette-dependent resolved token values are deliberately excluded when checking whether component contracts are identical across palettes. Anatomy, content, runtime properties, events, variants, sizes, states, semantics and capability requirements must remain palette-independent.
+
 Current scope:
 
 - generate Kotlin theme and component identifiers from the neutral registry;

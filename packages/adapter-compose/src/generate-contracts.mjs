@@ -57,17 +57,45 @@ function emitEnum(lines, name, values) {
   lines.push("}", "");
 }
 
+function paletteIndependentContract(component) {
+  return {
+    anatomy: component.anatomy,
+    content: component.content,
+    properties: component.properties,
+    events: component.events,
+    variants: component.variants,
+    sizes: component.sizes,
+    states: component.states,
+    semantics: component.semantics,
+    capabilities: component.capabilities
+  };
+}
+
 function verifyRegistry(ir) {
   if (!Array.isArray(ir.themes) || ir.themes.length === 0) throw new Error("Compiled IR contains no themes");
   if (!Array.isArray(ir.palettes) || ir.palettes.length === 0) throw new Error("Compiled IR contains no palettes/components");
+
   const ids = Object.keys(ir.palettes[0].components ?? {}).sort();
   if (ids.length === 0) throw new Error("Compiled IR contains no components");
-  const reference = JSON.stringify(ir.palettes[0].components);
+
+  const referenceContracts = Object.fromEntries(
+    ids.map((id) => [id, paletteIndependentContract(ir.palettes[0].components[id])])
+  );
+
   for (const palette of ir.palettes.slice(1)) {
-    if (JSON.stringify(palette.components) !== reference) {
-      throw new Error(`Component contracts differ for palette ${palette.id}; Kotlin contracts must remain palette-independent`);
+    const paletteIds = Object.keys(palette.components ?? {}).sort();
+    if (JSON.stringify(paletteIds) !== JSON.stringify(ids)) {
+      throw new Error(`Component registry differs for palette ${palette.id}`);
+    }
+
+    for (const id of ids) {
+      const current = paletteIndependentContract(palette.components[id]);
+      if (JSON.stringify(current) !== JSON.stringify(referenceContracts[id])) {
+        throw new Error(`Palette-independent contract for component ${id} differs for palette ${palette.id}`);
+      }
     }
   }
+
   return ids;
 }
 
