@@ -100,11 +100,38 @@ try {
     ["basic", "cyberpunk", "frosted-glass", "glass", "modern", "spacey"],
     "Every palette must contain compiled visual slots for the six registered themes",
   );
-  assert.deepEqual(
-    darkPalette.themes.basic.components,
-    {},
-    "Theme visual IR must stay empty until concrete Basic design values are deliberately defined",
+
+  const darkBasicButton = darkPalette.themes.basic.components.button;
+  const lightBasicButton = lightPalette.themes.basic.components.button;
+  assert.ok(darkBasicButton && lightBasicButton, "Basic must compile a concrete button visual recipe for every palette");
+  assert.equal(
+    darkBasicButton.variants.primary.base.root.fill.value.hex,
+    "#4C8DFF",
+    "The Basic primary button must resolve through the dark palette",
   );
+  assert.equal(
+    lightBasicButton.variants.primary.base.root.fill.value.hex,
+    "#684DE2",
+    "The same Basic primary button must resolve through the light palette without forking the theme recipe",
+  );
+  assert.notDeepEqual(
+    darkBasicButton.variants.primary.base.root.fill.value,
+    lightBasicButton.variants.primary.base.root.fill.value,
+    "Palette changes must alter resolved Basic visuals while preserving one shared theme definition",
+  );
+  assert.equal(
+    darkBasicButton.base.root.radius.reference,
+    "{radius.control}",
+    "Compiled Basic visuals must retain source-token provenance",
+  );
+
+  for (const themeId of ["cyberpunk", "frosted-glass", "glass", "modern", "spacey"]) {
+    assert.deepEqual(
+      darkPalette.themes[themeId].components,
+      {},
+      `${themeId} visual IR must remain intentionally empty until that theme is deliberately designed`,
+    );
+  }
 
   console.log("Specification compiler determinism, provenance, runtime contracts, composite resolution and palette-independence tests passed.");
 } finally {
