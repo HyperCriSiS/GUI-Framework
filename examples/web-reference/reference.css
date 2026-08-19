@@ -13,6 +13,12 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #111827;
+  color: #f8fafc;
+}
+
+#gui-reference-root {
+  min-height: 100vh;
   background: var(--gui-semantic-color-surface, #111827);
   color: var(--gui-semantic-color-text-primary, #f8fafc);
 }

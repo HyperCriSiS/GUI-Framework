@@ -112,6 +112,11 @@ assert.match(html, /\.\.\/\.\.\/build\/web\/tokens\.css/);
 assert.match(html, /\.\.\/\.\.\/build\/web\/components\.css/);
 assert.match(html, /type="module" src="\.\/app\.mjs"/);
 assert.doesNotMatch(css, /\.gui-(?:button|input|switch|panel|dialog)(?:\b|__)/, "Reference layout CSS must not duplicate framework component styling");
+assert.match(
+  css,
+  /#gui-reference-root\s*\{[^}]*background:\s*var\(--gui-semantic-color-surface,[^}]*color:\s*var\(--gui-semantic-color-text-primary,/s,
+  "The themed application root must own the reference surface and primary text colors",
+);
 
 app.destroy();
 assert.equal(root.children.length, 0);
