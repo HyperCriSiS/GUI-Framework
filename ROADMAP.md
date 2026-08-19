@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The first four reference components are now implemented and CI-verified for both Web and Compose: Button, Input, Switch and Panel/Card. Their contracts, theme visuals and platform mappings originate from the same neutral specification. Dialog is the final component required for the initial reference-component set.
+The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The next integration milestone is a real Web reference application that exercises the five components together.
 
 ## Phase 0 — Foundation and scope
 
@@ -83,9 +83,9 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Implement native HTML/CSS mapping.
 - [x] Implement CSS custom-property/token output.
 - [ ] Implement SVG asset integration.
-- [x] Preserve native HTML semantics where possible. <!-- verified across Button, Input, Switch and Panel/Card -->
+- [x] Preserve native HTML semantics where possible. <!-- verified across Button, Input, Switch, Panel/Card and Dialog -->
 - [x] Implement keyboard/focus behavior with platform primitives for current interactive controls.
-- [ ] Complete accessibility mappings. <!-- Button, Input, Switch and optional Panel/Card labeling are mapped; Dialog and broader coverage remain -->
+- [ ] Complete accessibility mappings. <!-- all five initial reference components map their current neutral semantics; broader coverage and integration validation remain -->
 - [ ] Complete functional micro-interactions. <!-- current interactive controls have state feedback; Dialog open/close remains -->
 - [x] Implement reduced-motion handling for generated interactive-control CSS.
 - [ ] Implement capability detection and deterministic visual fallbacks.
@@ -97,7 +97,7 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Input
 - [x] Switch
 - [x] Panel/Card
-- [ ] Dialog
+- [x] Dialog
 
 - [ ] Build a real Web reference application using these components.
 - [ ] Establish visual-regression and interaction baselines.
@@ -108,22 +108,22 @@ The second adapter is an architecture test: it must prove that the specification
 
 - [x] Generate and compile Kotlin-facing contracts from the neutral specification.
 - [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
-- [x] Map current recipes/tokens to Compose Android/Desktop primitives. <!-- includes sRGB Color, DTCG px -> dp, duration -> Kotlin Duration and Basic Button/Input/Switch/Panel visuals -->
-- [ ] Complete Compose semantics, input, focus and accessibility behavior. <!-- current four components mapped; Dialog and broader validation remain -->
+- [x] Map current recipes/tokens to Compose Android/Desktop primitives. <!-- includes sRGB Color, DTCG px -> dp, duration -> Kotlin Duration and Basic Button/Input/Switch/Panel/Dialog visuals -->
+- [ ] Complete Compose semantics, input, focus and accessibility behavior. <!-- all five initial reference components are mapped; broader integration validation remains -->
 - [ ] Implement vector/SVG integration appropriate to the target.
 - [ ] Complete functional micro-interactions using platform-efficient mechanisms.
 - [ ] Implement capability/fallback mapping for target devices.
 - [ ] Validate scaling and older/lower-end device behavior.
 - [ ] Build Android reference application.
 - [ ] Build desktop reference application.
-- [ ] Complete Web/Compose behavior and visual-intent comparison. <!-- initial comparison exists for Button/Input/Switch/Panel -->
+- [ ] Complete Web/Compose behavior and visual-intent comparison. <!-- initial component-level comparison exists for Button/Input/Switch/Panel/Dialog; application-level comparison remains -->
 - [ ] Rework the specification if the second adapter exposes platform-specific assumptions.
 
 ## Phase 5 — Theme and palette implementation
 
 Themes:
 
-- [ ] Basic <!-- Button/Input/Switch/Panel implemented for Web and Compose; Dialog/full coverage remain -->
+- [ ] Basic <!-- all five initial reference components are implemented for Web and Compose; full theme verification remains -->
 - [ ] Modern
 - [ ] Glass
 - [ ] Frosted Glass
