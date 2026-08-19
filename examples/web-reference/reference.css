@@ -174,7 +174,7 @@ body {
     align-items: flex-start;
   }
 
-  .gui-reference__actions > .gui-button {
+  .gui-reference__actions > * {
     flex: 1 1 140px;
   }
 }
