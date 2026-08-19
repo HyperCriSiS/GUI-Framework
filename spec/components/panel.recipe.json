@@ -5,6 +5,10 @@
     {
       "id": "root",
       "required": true
+    },
+    {
+      "id": "children",
+      "required": true
     }
   ],
   "content": [
@@ -41,7 +45,6 @@
   "tokenBindings": {
     "surface": "{semantic.color.surface}",
     "surfaceElevated": "{semantic.color.surfaceElevated}",
-    "text": "{semantic.color.textPrimary}",
     "border": "{semantic.color.border}",
     "borderStrong": "{semantic.color.borderStrong}"
   },

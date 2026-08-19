@@ -355,7 +355,6 @@
       "base": {
         "root": {
           "fill": "{semantic.color.surfaceElevated}",
-          "foreground": "{semantic.color.textPrimary}",
           "radius": "{radius.lg}",
           "paddingHorizontal": "{spacing.lg}",
           "paddingVertical": "{spacing.lg}",
