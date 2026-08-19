@@ -97,6 +97,9 @@ jobs:
       - name: Test Kotlin visual generation
         run: npm run test:kotlin-visuals
 
+      - name: Test native Compose Basic Switch
+        run: npm run test:kotlin-switch
+
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 

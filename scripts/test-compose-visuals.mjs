@@ -24,6 +24,8 @@ try {
   assert.match(source, /"basic" to mapOf/);
   assert.match(source, /"button" to GuiVisualRecipe/);
   assert.match(source, /"input" to GuiVisualRecipe/);
+  assert.match(source, /"switch" to GuiVisualRecipe/);
+  assert.match(source, /"thumb" to GuiVisualPartStyle/);
   assert.match(source, /"placeholder" to GuiVisualPartStyle/);
   assert.match(source, /GuiColorValue\("srgb", listOf\(0\.1451, 0\.3882, 0\.9216\), "#2563EB"\)/);
   assert.match(source, /GuiColorValue\("srgb", listOf\(0\.4078, 0\.302, 0\.8863\), "#684DE2"\)/);
