@@ -1,8 +1,6 @@
 name: Core CI
 
 on:
-  workflow_dispatch:
-
   push:
     branches:
       - main
@@ -126,66 +124,12 @@ jobs:
       - name: Typecheck prototype contracts
         run: npm run typecheck
 
-  web-browser-baseline:
-    if: github.event_name != 'workflow_dispatch'
-    needs: validate-and-typecheck
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          package-manager-cache: false
-
-      - name: Install browser-test dependency
-        run: npm install --ignore-scripts --no-audit --no-fund
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Web token output
-        run: npm run build:web-tokens
-
-      - name: Generate Web component output
-        run: npm run build:web-components
-
-      - name: Install pinned Chromium runtime
-        run: npx playwright install --with-deps chromium
-
-      - name: Verify interactions and record visual baseline candidates
-        run: npm run test:web-browser:record
-
-      - name: Upload visual baseline candidates
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-browser-baseline-candidates
-          path: tests/browser/__snapshots__/
-          if-no-files-found: error
-          retention-days: 7
-
-  record-web-baselines:
-    if: github.event_name == 'workflow_dispatch'
+  web-browser-regression:
     needs: validate-and-typecheck
     runs-on: ubuntu-24.04
     timeout-minutes: 12
-    permissions:
-      contents: write
 
     steps:
-      - name: Refuse direct main baseline recording
-        shell: bash
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "Record baselines on a development branch and merge them through normal review."
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -196,7 +140,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install pinned browser-test dependency
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -210,43 +154,14 @@ jobs:
       - name: Install pinned Chromium runtime
         run: npx playwright install --with-deps chromium
 
-      - name: Record visual baselines
-        run: npm run test:web-browser:record
+      - name: Verify browser interactions and visual regressions
+        run: npm run test:web-browser
 
-      - name: Validate recorded PNG files
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import struct
-
-          root = Path("tests/browser/__snapshots__/web-reference.spec.mjs")
-          expected = {
-              "reference-dark-desktop.png": 1280,
-              "reference-dialog-desktop.png": 1280,
-              "reference-light-mobile.png": 390,
-          }
-
-          for name, expected_width in expected.items():
-              path = root / name
-              data = path.read_bytes()
-              if data[:8] != b"\x89PNG\r\n\x1a\n":
-                  raise SystemExit(f"{path} is not a PNG")
-              width, height = struct.unpack(">II", data[16:24])
-              if width != expected_width or height <= 0:
-                  raise SystemExit(f"Unexpected dimensions for {path}: {width}x{height}")
-              print(f"{path}: {width}x{height}, {len(data)} bytes")
-          PY
-
-      - name: Commit reproducible browser baseline
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json tests/browser/__snapshots__/
-          if git diff --cached --quiet; then
-            echo "No baseline changes to commit."
-            exit 0
-          fi
-          git commit -m "test(web): record CI visual baselines [skip ci]"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-browser-regression-failure
+          path: test-results/playwright/
+          if-no-files-found: ignore
+          retention-days: 7
