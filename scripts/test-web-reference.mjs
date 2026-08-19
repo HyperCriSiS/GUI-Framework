@@ -70,7 +70,10 @@ const app = mountReferenceApp(fakeDocument, root);
 
 assert.equal(root.dataset.guiTheme, "basic");
 assert.equal(root.dataset.guiPalette, "reference-dark");
-assert.ok(root.children.length >= 3, "The reference application must mount real content and its dialog");
+assert.equal(root.className, "gui-reference-host");
+assert.equal(root.children.length, 2, "The theme host must contain the layout surface and dialog");
+assert.equal(root.children[0], app.surface);
+assert.equal(app.surface.className, "gui-reference");
 assert.deepEqual(app.getState(), {
   name: "Ada Lovelace",
   notifications: true,

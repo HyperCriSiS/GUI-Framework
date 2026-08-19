@@ -44,10 +44,11 @@ export function mountReferenceApp(document, root, options = {}) {
   if (typeof state.notifications !== "boolean") throw new TypeError("Reference app notifications must be a boolean");
 
   root.replaceChildren();
-  root.className = "gui-reference";
+  root.className = "gui-reference-host";
   root.dataset.guiTheme = "basic";
   root.dataset.guiPalette = state.palette;
 
+  const surface = createElement(document, "div", "gui-reference");
   const header = createElement(document, "header", "gui-reference__header");
   header.append(
     createElement(document, "p", "gui-reference__eyebrow", "Basic theme · Web adapter"),
@@ -186,7 +187,8 @@ export function mountReferenceApp(document, root, options = {}) {
   primaryStack.append(settingsPanel.element);
   secondaryStack.append(summaryPanel.element, detailPanel.element);
   grid.append(primaryStack, secondaryStack);
-  root.append(header, grid);
+  surface.append(header, grid);
+  root.append(surface);
 
   const dialogContent = createElement(document, "div", "gui-reference__dialog-content");
   const dialogTitle = createElement(document, "h2", "", "Review settings");
@@ -238,6 +240,7 @@ export function mountReferenceApp(document, root, options = {}) {
 
   return {
     root,
+    surface,
     components,
     getState() {
       return { ...state };
