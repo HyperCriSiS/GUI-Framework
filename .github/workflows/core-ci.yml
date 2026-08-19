@@ -70,6 +70,9 @@ jobs:
       - name: Test native Web Basic Switch
         run: npm run test:web-switch
 
+      - name: Test native Web Basic Panel
+        run: npm run test:web-panel
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
