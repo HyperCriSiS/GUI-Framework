@@ -52,6 +52,9 @@ jobs:
       - name: Test typed visual recipe resolution
         run: npm run test:visual-resolution
 
+      - name: Test accessibility requirements
+        run: npm run test:accessibility
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
@@ -75,6 +78,9 @@ jobs:
 
       - name: Test native Web Basic Dialog
         run: npm run test:web-dialog
+
+      - name: Test functional Web reference application
+        run: npm run test:web-reference
 
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
