@@ -1,0 +1,75 @@
+{
+  "specVersion": "0.1.0",
+  "component": "dialog",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "children",
+      "required": true
+    }
+  ],
+  "content": [
+    {
+      "id": "children",
+      "kind": "children",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "open",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "dismissible",
+      "type": "boolean",
+      "required": false,
+      "default": true
+    }
+  ],
+  "events": [
+    {
+      "id": "dismissRequest",
+      "payload": "none"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default"
+  ],
+  "semantics": {
+    "role": "dialog",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "border": "{semantic.color.border}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}
