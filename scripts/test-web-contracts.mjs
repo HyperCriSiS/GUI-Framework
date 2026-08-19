@@ -23,7 +23,7 @@ try {
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
   assert.match(source, /export const guiThemeIds = \["basic"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "input", "switch"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "input", "panel", "switch"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -56,6 +56,15 @@ try {
   assert.match(source, /"id": "checkedChange"/);
   assert.match(source, /"payload": "boolean"/);
   assert.match(source, /"role": "switch"/);
+
+  assert.match(source, /export const guiPanelContract = \{/);
+  assert.match(source, /export type GuiPanelVariant = \(typeof guiPanelContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiPanelSize = \(typeof guiPanelContract\.sizes\)\[number\];/);
+  assert.match(source, /states: \["default"\] as const,/);
+  assert.match(source, /"id": "accessibilityLabel"/);
+  assert.match(source, /"id": "children"/);
+  assert.match(source, /"kind": "children"/);
+  assert.match(source, /"role": "container"/);
 
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not become public Web component contract types");
 
