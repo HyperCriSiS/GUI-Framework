@@ -384,6 +384,40 @@
           }
         }
       }
+    },
+    "dialog": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceElevated}",
+          "radius": "{radius.lg}",
+          "paddingHorizontal": "{spacing.lg}",
+          "paddingVertical": "{spacing.lg}",
+          "border": {
+            "color": "{semantic.color.border}",
+            "width": "{border.width.standard}"
+          }
+        }
+      },
+      "sizes": {
+        "small": {
+          "root": {
+            "paddingHorizontal": "{spacing.md}",
+            "paddingVertical": "{spacing.md}"
+          }
+        },
+        "medium": {
+          "root": {
+            "paddingHorizontal": "{spacing.lg}",
+            "paddingVertical": "{spacing.lg}"
+          }
+        },
+        "large": {
+          "root": {
+            "paddingHorizontal": "{spacing.xl}",
+            "paddingVertical": "{spacing.xl}"
+          }
+        }
+      }
     }
   }
 }

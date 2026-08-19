@@ -23,7 +23,7 @@ try {
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
   assert.match(source, /export const guiThemeIds = \["basic"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "input", "panel", "switch"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "dialog", "input", "panel", "switch"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -31,6 +31,20 @@ try {
   assert.match(source, /"id": "activate"/);
   assert.match(source, /"id": "disabled"/);
   assert.match(source, /"kind": "text"/);
+
+  assert.match(source, /export const guiDialogContract = \{/);
+  assert.match(source, /export type GuiDialogVariant = \(typeof guiDialogContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiDialogSize = \(typeof guiDialogContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiDialogState = \(typeof guiDialogContract\.states\)\[number\];/);
+  assert.match(source, /states: \["default"\] as const,/);
+  assert.match(source, /"id": "open"/);
+  assert.match(source, /"id": "accessibilityLabel"/);
+  assert.match(source, /"id": "dismissible"/);
+  assert.match(source, /"id": "dismissRequest"/);
+  assert.match(source, /"payload": "none"/);
+  assert.match(source, /"id": "children"/);
+  assert.match(source, /"kind": "children"/);
+  assert.match(source, /"role": "dialog"/);
 
   assert.match(source, /export const guiInputContract = \{/);
   assert.match(source, /export type GuiInputVariant = \(typeof guiInputContract\.variants\)\[number\];/);

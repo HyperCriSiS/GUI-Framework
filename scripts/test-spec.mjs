@@ -43,6 +43,12 @@ try {
     "Independent development palettes must remain registered"
   );
 
+  assert.deepEqual(
+    ir.components.map((component) => component.id),
+    ["button", "dialog", "input", "panel", "switch"],
+    "The reference component registry must remain stable"
+  );
+
   const darkPalette = ir.palettes.find((palette) => palette.id === "reference-dark");
   const lightPalette = ir.palettes.find((palette) => palette.id === "reference-light");
   const darkButton = darkPalette?.components?.button;
@@ -103,6 +109,14 @@ try {
 
   const darkBasicButton = darkPalette.themes.basic.components.button;
   const lightBasicButton = lightPalette.themes.basic.components.button;
+  const darkBasicDialog = darkPalette.themes.basic.components.dialog;
+  const lightBasicDialog = lightPalette.themes.basic.components.dialog;
+  assert.ok(darkBasicDialog && lightBasicDialog, "Basic must compile a concrete dialog visual recipe for every palette");
+  assert.notDeepEqual(
+    darkBasicDialog.base.root.fill.value,
+    lightBasicDialog.base.root.fill.value,
+    "Palette changes must alter resolved Basic dialog surfaces without forking the theme recipe",
+  );
   assert.ok(darkBasicButton && lightBasicButton, "Basic must compile a concrete button visual recipe for every palette");
   assert.equal(
     darkBasicButton.variants.primary.base.root.fill.value.hex,

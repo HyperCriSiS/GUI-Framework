@@ -68,6 +68,10 @@
     {
       "id": "panel",
       "source": "components/panel.recipe.json"
+    },
+    {
+      "id": "dialog",
+      "source": "components/dialog.recipe.json"
     }
   ]
 }

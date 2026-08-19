@@ -30,6 +30,7 @@ try {
   );
   assert.match(source, /enum class GuiComponentId/);
   assert.match(source, /BUTTON\("button"\)/);
+  assert.match(source, /DIALOG\("dialog"\)/);
   assert.match(source, /INPUT\("input"\)/);
   assert.match(source, /PANEL\("panel"\)/);
   assert.match(source, /SWITCH\("switch"\)/);
@@ -42,6 +43,17 @@ try {
   assert.match(source, /GuiEventContract\("activate", "none"\)/);
   assert.match(source, /GuiContentSlot\("label", "text", true\)/);
   assert.match(source, /GuiComponentSemantics\("button", true\)/);
+
+  assert.match(source, /enum class GuiDialogVariant/);
+  assert.match(source, /enum class GuiDialogSize/);
+  assert.match(source, /enum class GuiDialogState/);
+  assert.match(source, /data class GuiDialogProperties\(/);
+  assert.match(source, /val open: Boolean/);
+  assert.match(source, /val accessibilityLabel: String/);
+  assert.match(source, /val dismissible: Boolean = true/);
+  assert.match(source, /GuiEventContract\("dismissRequest", "none"\)/);
+  assert.match(source, /GuiContentSlot\("children", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("dialog", true\)/);
 
   assert.match(source, /enum class GuiInputVariant/);
   assert.match(source, /STANDARD\("standard"\)/);
