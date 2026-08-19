@@ -25,7 +25,7 @@ try {
 
   assert.match(css, /\[data-gui-palette="reference-dark"\] \{/);
   assert.match(css, /\[data-gui-palette="reference-light"\] \{/);
-  assert.match(css, /--gui-semantic-color-accent: #4C8DFF;/);
+  assert.match(css, /--gui-semantic-color-accent: #2563EB;/);
   assert.match(css, /--gui-semantic-color-accent: #684DE2;/);
 
   assert.doesNotMatch(css, /palette-accent500/, "Raw palette token names must not leak into Web output");

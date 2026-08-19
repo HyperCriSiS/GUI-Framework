@@ -10,11 +10,13 @@
     "neutral900": { "$value": { "colorSpace": "srgb", "components": [0.102, 0.1216, 0.1569], "hex": "#1A1F28" } },
     "white": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" } },
     "accent500": { "$value": { "colorSpace": "srgb", "components": [0.4078, 0.302, 0.8863], "hex": "#684DE2" } },
-    "accent400": { "$value": { "colorSpace": "srgb", "components": [0.5059, 0.4118, 0.9412], "hex": "#8169F0" } },
+    "accent400": { "$value": { "colorSpace": "srgb", "components": [0.4549, 0.3412, 0.9098], "hex": "#7457E8" } },
     "accent600": { "$value": { "colorSpace": "srgb", "components": [0.3255, 0.2235, 0.7569], "hex": "#5339C1" } },
     "success500": { "$value": { "colorSpace": "srgb", "components": [0.1176, 0.6196, 0.3961], "hex": "#1E9E65" } },
     "warning500": { "$value": { "colorSpace": "srgb", "components": [0.7608, 0.4941, 0.0941], "hex": "#C27E18" } },
-    "danger500": { "$value": { "colorSpace": "srgb", "components": [0.7725, 0.2078, 0.2863], "hex": "#C53549" } }
+    "danger400": { "$value": { "colorSpace": "srgb", "components": [0.8039, 0.251, 0.3216], "hex": "#CD4052" } },
+    "danger500": { "$value": { "colorSpace": "srgb", "components": [0.7725, 0.2078, 0.2863], "hex": "#C53549" } },
+    "danger600": { "$value": { "colorSpace": "srgb", "components": [0.6824, 0.149, 0.2314], "hex": "#AE263B" } }
   },
   "semantic": {
     "color": {
@@ -29,12 +31,14 @@
       "accentHover": { "$value": "{palette.accent400}" },
       "accentPressed": { "$value": "{palette.accent600}" },
       "onAccent": { "$value": "{palette.white}" },
-      "border": { "$value": "{palette.neutral300}" },
-      "borderStrong": { "$value": "{palette.neutral500}" },
+      "border": { "$value": "{palette.neutral500}" },
+      "borderStrong": { "$value": "{palette.neutral700}" },
       "focus": { "$value": "{palette.accent400}" },
       "success": { "$value": "{palette.success500}" },
       "warning": { "$value": "{palette.warning500}" },
-      "danger": { "$value": "{palette.danger500}" }
+      "danger": { "$value": "{palette.danger500}" },
+      "dangerHover": { "$value": "{palette.danger400}" },
+      "dangerPressed": { "$value": "{palette.danger600}" }
     }
   }
 }

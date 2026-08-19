@@ -25,7 +25,7 @@ try {
   assert.match(source, /"button" to GuiVisualRecipe/);
   assert.match(source, /"input" to GuiVisualRecipe/);
   assert.match(source, /"placeholder" to GuiVisualPartStyle/);
-  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.298, 0\.5529, 1\.0\), "#4C8DFF"\)/);
+  assert.match(source, /GuiColorValue\("srgb", listOf\(0\.1451, 0\.3882, 0\.9216\), "#2563EB"\)/);
   assert.match(source, /GuiColorValue\("srgb", listOf\(0\.4078, 0\.302, 0\.8863\), "#684DE2"\)/);
   assert.match(source, /GuiDimensionValue\(36\.0, "px"\)/);
   assert.match(source, /GuiDimensionValue\(14\.0, "px"\)/);

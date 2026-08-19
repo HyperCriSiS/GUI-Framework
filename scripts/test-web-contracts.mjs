@@ -19,7 +19,9 @@ try {
   run(process.execPath, ["packages/adapter-web/src/generate-contracts.mjs", irPath, contractsPath], "Web contract generator");
 
   const source = await readFile(contractsPath, "utf8");
-  assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
+  assert.match(source, /export const guiRegisteredThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
+  assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
+  assert.match(source, /export const guiThemeIds = \["basic"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
   assert.match(source, /export const guiComponentIds = \["button", "input", "switch"\] as const;/);
 

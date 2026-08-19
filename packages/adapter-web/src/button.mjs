@@ -7,16 +7,24 @@ function assertChoice(value, choices, label) {
   if (!choices.has(value)) throw new Error(`Unknown GUI button ${label}: ${value}`);
 }
 
+function optionalBoolean(props, key) {
+  if (!Object.prototype.hasOwnProperty.call(props, key)) return false;
+  if (typeof props[key] !== "boolean") throw new TypeError(`GUI button ${key} must be a boolean`);
+  return props[key];
+}
+
 function normalizeProps(props = {}) {
   const normalized = {
-    label: props.label ?? "",
+    label: props.label,
     variant: props.variant ?? "primary",
     size: props.size ?? "medium",
-    disabled: props.disabled === true,
-    loading: props.loading === true,
+    disabled: optionalBoolean(props, "disabled"),
+    loading: optionalBoolean(props, "loading"),
     onActivate: props.onActivate ?? null,
   };
-  if (typeof normalized.label !== "string") throw new TypeError("GUI button label must be a string");
+  if (typeof normalized.label !== "string" || normalized.label.trim() === "") {
+    throw new TypeError("GUI button label must be a non-empty string");
+  }
   if (normalized.onActivate !== null && typeof normalized.onActivate !== "function") {
     throw new TypeError("GUI button onActivate must be a function or null");
   }
@@ -55,9 +63,9 @@ export function createGuiButton(document, initialProps = {}) {
     else element.removeAttribute("aria-busy");
   }
 
-  function activate(event) {
+  function activate() {
     if (props.disabled || props.loading) return;
-    props.onActivate?.(event);
+    props.onActivate?.();
   }
 
   element.addEventListener("click", activate);

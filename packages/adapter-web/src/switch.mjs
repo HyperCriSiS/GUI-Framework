@@ -7,15 +7,24 @@ function assertChoice(value, choices, label) {
   if (!choices.has(value)) throw new Error(`Unknown GUI switch ${label}: ${value}`);
 }
 
+function optionalBoolean(props, key) {
+  if (!Object.prototype.hasOwnProperty.call(props, key)) return false;
+  if (typeof props[key] !== "boolean") throw new TypeError(`GUI switch ${key} must be a boolean`);
+  return props[key];
+}
+
 function normalizeProps(props = {}) {
   const normalized = {
-    checked: props.checked === true,
+    checked: props.checked,
     accessibilityLabel: props.accessibilityLabel,
     variant: props.variant ?? "standard",
     size: props.size ?? "medium",
-    disabled: props.disabled === true,
+    disabled: optionalBoolean(props, "disabled"),
     onCheckedChange: props.onCheckedChange ?? null,
   };
+  if (typeof normalized.checked !== "boolean") {
+    throw new TypeError("GUI switch checked must be a boolean");
+  }
   if (typeof normalized.accessibilityLabel !== "string" || normalized.accessibilityLabel.trim() === "") {
     throw new TypeError("GUI switch accessibilityLabel must be a non-empty string");
   }
@@ -58,9 +67,9 @@ export function createGuiSwitch(document, initialProps = {}) {
     element.setAttribute("aria-label", props.accessibilityLabel);
   }
 
-  function checkedChange(event) {
+  function checkedChange() {
     if (props.disabled) return;
-    props.onCheckedChange?.(!props.checked, event);
+    props.onCheckedChange?.(!props.checked);
   }
 
   element.addEventListener("click", checkedChange);

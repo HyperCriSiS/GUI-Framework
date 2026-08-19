@@ -3,6 +3,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
+import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
 
 function pascalCase(value) {
   return value
@@ -100,6 +101,8 @@ function verifyRegistry(ir) {
 }
 
 function generate(ir) {
+  const { registeredThemeIds, availableThemeIds } = analyzeThemeAvailability(ir);
+  if (availableThemeIds.length === 0) throw new Error("Compiled IR contains no fully visualized themes");
   const componentIds = verifyRegistry(ir);
   const components = ir.palettes[0].components;
   const lines = [
@@ -111,7 +114,8 @@ function generate(ir) {
     ""
   ];
 
-  emitEnum(lines, "GuiThemeId", ir.themes.map((theme) => theme.id));
+  emitEnum(lines, "GuiRegisteredThemeId", registeredThemeIds);
+  emitEnum(lines, "GuiThemeId", availableThemeIds);
   emitEnum(lines, "GuiComponentId", componentIds);
 
   lines.push("data class GuiContentSlot(", "    val id: String,", "    val kind: String,", "    val required: Boolean", ")", "");

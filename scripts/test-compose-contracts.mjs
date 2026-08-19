@@ -17,10 +17,17 @@ try {
   run(["packages/adapter-compose/src/generate-contracts.mjs", irPath, kotlinPath], "Kotlin contract generator");
 
   const source = await readFile(kotlinPath, "utf8");
-  assert.match(source, /enum class GuiThemeId\(val wireValue: String\)/);
-  assert.match(source, /BASIC\("basic"\)/);
+  assert.match(source, /enum class GuiRegisteredThemeId\(val wireValue: String\)/);
+  assert.match(source, /MODERN\("modern"\)/);
   assert.match(source, /FROSTED_GLASS\("frosted-glass"\)/);
   assert.match(source, /CYBERPUNK\("cyberpunk"\)/);
+  assert.match(source, /enum class GuiThemeId\(val wireValue: String\)/);
+  assert.match(source, /BASIC\("basic"\)/);
+  assert.doesNotMatch(
+    source.slice(source.indexOf("enum class GuiThemeId"), source.indexOf("enum class GuiComponentId")),
+    /MODERN|FROSTED_GLASS|CYBERPUNK/,
+    "Only fully visualized themes may be exposed as selectable Compose theme IDs",
+  );
   assert.match(source, /enum class GuiComponentId/);
   assert.match(source, /BUTTON\("button"\)/);
   assert.match(source, /INPUT\("input"\)/);

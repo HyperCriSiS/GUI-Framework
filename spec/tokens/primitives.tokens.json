@@ -56,20 +56,20 @@
     "switch": {
       "track": {
         "width": {
-          "small": { "$value": { "value": 30, "unit": "px" } },
-          "medium": { "$value": { "value": 36, "unit": "px" } },
-          "large": { "$value": { "value": 44, "unit": "px" } }
+          "small": { "$value": { "value": 36, "unit": "px" } },
+          "medium": { "$value": { "value": 44, "unit": "px" } },
+          "large": { "$value": { "value": 52, "unit": "px" } }
         },
         "height": {
-          "small": { "$value": { "value": 18, "unit": "px" } },
-          "medium": { "$value": { "value": 20, "unit": "px" } },
-          "large": { "$value": { "value": 24, "unit": "px" } }
+          "small": { "$value": { "value": 24, "unit": "px" } },
+          "medium": { "$value": { "value": 28, "unit": "px" } },
+          "large": { "$value": { "value": 32, "unit": "px" } }
         }
       },
       "thumb": {
-        "small": { "$value": { "value": 14, "unit": "px" } },
-        "medium": { "$value": { "value": 16, "unit": "px" } },
-        "large": { "$value": { "value": 20, "unit": "px" } }
+        "small": { "$value": { "value": 18, "unit": "px" } },
+        "medium": { "$value": { "value": 22, "unit": "px" } },
+        "large": { "$value": { "value": 26, "unit": "px" } }
       }
     }
   },

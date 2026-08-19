@@ -45,26 +45,30 @@ try {
   const css = await readFile(cssPath, "utf8");
   assert.match(css, /\.gui-button \{/);
   assert.match(css, /data-gui-theme="basic"/);
-  assert.match(css, /data-gui-palette="reference-dark"/);
-  assert.match(css, /data-gui-palette="reference-light"/);
-  assert.match(css, /data-gui-variant="primary"/);
-  assert.match(css, /data-gui-size="large"/);
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /outline-width: 2px;/);
-  assert.match(css, /min-height: 36px;/);
-  assert.match(css, /font-size: 14px;/);
-  assert.match(css, /background-color: #4C8DFF;/);
-  assert.match(css, /background-color: #684DE2;/);
+  assert.doesNotMatch(css, /data-gui-theme="(?:modern|glass|frosted-glass|spacey|cyberpunk)"/);
+  assert.match(css, /:where\(\[data-gui-variant="primary"\]\)/);
+  assert.match(css, /:where\(\[data-gui-size="large"\]\)/);
+  assert.match(css, /:where\(:focus-visible\)/);
+  assert.match(css, /outline-width: var\(--gui-focus-ring-width\);/);
+  assert.match(css, /min-height: var\(--gui-sizing-control-medium\);/);
+  assert.match(css, /font-size: var\(--gui-typography-size-medium\);/);
+  assert.match(css, /background-color: var\(--gui-semantic-color-accent\);/);
+  assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Component CSS must use cascading token variables rather than duplicate palette values");
+  assert.doesNotMatch(css, /#4C8DFF|#684DE2/, "Resolved palette colors must stay in token CSS so the nearest palette scope wins");
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic button must not enable animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   let activations = 0;
+  const activationArgumentCounts = [];
   const button = createGuiButton(fakeDocument, {
     label: "Save",
     variant: "secondary",
     size: "large",
-    onActivate: () => { activations += 1; },
+    onActivate() {
+      activations += 1;
+      activationArgumentCounts.push(arguments.length);
+    },
   });
 
   assert.equal(button.element.tagName, "BUTTON");
@@ -75,6 +79,7 @@ try {
   assert.equal(button.element.disabled, false);
   button.element.click();
   assert.equal(activations, 1);
+  assert.deepEqual(activationArgumentCounts, [0], "Button activation must not leak a DOM event");
 
   button.update({ loading: true, label: "Saving" });
   assert.equal(button.element.disabled, true, "Loading must use native disabled semantics");
@@ -90,9 +95,37 @@ try {
   button.element.click();
   assert.equal(activations, 1, "Disabled buttons must not activate");
 
+  assert.throws(
+    () => button.update({ label: 42 }),
+    { name: "TypeError", message: "GUI button label must be a non-empty string" },
+  );
+  assert.throws(
+    () => button.update({ disabled: "true" }),
+    { name: "TypeError", message: "GUI button disabled must be a boolean" },
+  );
+  assert.throws(
+    () => button.update({ loading: null }),
+    { name: "TypeError", message: "GUI button loading must be a boolean" },
+  );
+
   button.destroy();
   assert.equal(button.element.listeners.has("click"), false);
-  assert.throws(() => createGuiButton(fakeDocument, { variant: "invalid" }), /Unknown GUI button variant/);
+  assert.throws(
+    () => createGuiButton(fakeDocument),
+    { name: "TypeError", message: "GUI button label must be a non-empty string" },
+  );
+  assert.throws(
+    () => createGuiButton(fakeDocument, { label: "   " }),
+    { name: "TypeError", message: "GUI button label must be a non-empty string" },
+  );
+  assert.throws(
+    () => createGuiButton(fakeDocument, { label: "Save", disabled: undefined }),
+    { name: "TypeError", message: "GUI button disabled must be a boolean" },
+  );
+  assert.throws(
+    () => createGuiButton(fakeDocument, { label: "Save", variant: "invalid" }),
+    /Unknown GUI button variant/,
+  );
 
   console.log("Web Basic button vertical-slice tests passed.");
 } finally {

@@ -67,7 +67,7 @@ try {
   assert.equal(darkButton.properties.find((property) => property.id === "disabled")?.state, "disabled");
   assert.equal(darkButton.properties.find((property) => property.id === "loading")?.state, "loading");
 
-  assert.equal(darkButton.tokenBindings.accent.value.hex, "#4C8DFF");
+  assert.equal(darkButton.tokenBindings.accent.value.hex, "#2563EB");
   assert.equal(lightButton.tokenBindings.accent.value.hex, "#684DE2");
   assert.notDeepEqual(
     darkButton.tokenBindings.accent.value,
@@ -106,7 +106,7 @@ try {
   assert.ok(darkBasicButton && lightBasicButton, "Basic must compile a concrete button visual recipe for every palette");
   assert.equal(
     darkBasicButton.variants.primary.base.root.fill.value.hex,
-    "#4C8DFF",
+    "#2563EB",
     "The Basic primary button must resolve through the dark palette",
   );
   assert.equal(

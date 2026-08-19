@@ -23,7 +23,7 @@ try {
   assert.match(source, /GuiTransitionValue\(duration = GuiDurationValue\(120\.0, "ms"\), delay = GuiDurationValue\(0\.0, "ms"\), timingFunction = GuiCubicBezierValue\(0\.2, 0\.0, 0\.0, 1\.0\)\)/);
   assert.match(source, /"reference-dark" to mapOf\(/);
   assert.match(source, /"reference-light" to mapOf\(/);
-  assert.match(source, /"semantic\.color\.accent" to GuiColorValue\("srgb", listOf\(0\.298, 0\.5529, 1\.0\), "#4C8DFF"\)/);
+  assert.match(source, /"semantic\.color\.accent" to GuiColorValue\("srgb", listOf\(0\.1451, 0\.3882, 0\.9216\), "#2563EB"\)/);
   assert.match(source, /"semantic\.color\.accent" to GuiColorValue\("srgb", listOf\(0\.4078, 0\.302, 0\.8863\), "#684DE2"\)/);
   assert.doesNotMatch(source, /palette\.accent500/, "Raw palette token names must not leak into Kotlin adapter output");
   assert.doesNotMatch(source, /\{[A-Za-z0-9_.-]+\}/, "Unresolved neutral references must not leak into Kotlin adapter output");

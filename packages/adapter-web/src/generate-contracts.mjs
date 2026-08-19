@@ -3,6 +3,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
+import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
 
 function pascalCase(value) {
   return value
@@ -25,29 +26,18 @@ function readonlyJson(value, indent = "") {
 }
 
 function generate(ir) {
-  if (!Array.isArray(ir.themes) || ir.themes.length === 0) {
-    throw new Error("Compiled IR contains no themes");
-  }
-  if (!Array.isArray(ir.palettes) || ir.palettes.length === 0) {
-    throw new Error("Compiled IR contains no palettes/components");
-  }
-
+  const { registeredThemeIds, availableThemeIds, componentIds } = analyzeThemeAvailability(ir);
+  if (availableThemeIds.length === 0) throw new Error("Compiled IR contains no fully visualized themes");
   const referenceComponents = ir.palettes[0].components ?? {};
-  const componentIds = Object.keys(referenceComponents).sort();
-  if (componentIds.length === 0) throw new Error("Compiled IR contains no components");
-
-  for (const palette of ir.palettes.slice(1)) {
-    const ids = Object.keys(palette.components ?? {}).sort();
-    if (JSON.stringify(ids) !== JSON.stringify(componentIds)) {
-      throw new Error(`Component registry differs for palette ${palette.id}`);
-    }
-  }
 
   const lines = [
     "// Generated from the language-neutral GUI Framework specification.",
     "// Do not edit directly.",
     "",
-    `export const guiThemeIds = ${readonlyTuple(ir.themes.map((theme) => theme.id))};`,
+    `export const guiRegisteredThemeIds = ${readonlyTuple(registeredThemeIds)};`,
+    "export type GuiRegisteredThemeId = (typeof guiRegisteredThemeIds)[number];",
+    "",
+    `export const guiThemeIds = ${readonlyTuple(availableThemeIds)};`,
     "export type GuiThemeId = (typeof guiThemeIds)[number];",
     "",
     `export const guiComponentIds = ${readonlyTuple(componentIds)};`,

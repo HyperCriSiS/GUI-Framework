@@ -3,34 +3,29 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
+import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
 
-function scalarWithUnit(value, label) {
-  if (!value || typeof value !== "object" || typeof value.value !== "number" || typeof value.unit !== "string") {
-    throw new Error(`${label}: expected a numeric value with unit`);
-  }
-  return `${value.value}${value.unit}`;
+function cssName(path) {
+  return `--gui-${path.replace(/[^A-Za-z0-9_-]+/g, "-").replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`;
 }
 
-function colorValue(value, label) {
-  if (!value || typeof value !== "object") throw new Error(`${label}: expected color object`);
-  if (typeof value.hex === "string") return value.hex;
-  if (value.colorSpace === "srgb" && Array.isArray(value.components) && value.components.length === 3) {
-    const channels = value.components.map((component) => Math.round(component * 255));
-    const alpha = typeof value.alpha === "number" ? ` / ${value.alpha}` : "";
-    return `rgb(${channels.join(" ")}${alpha})`;
+function tokenPath(reference, label) {
+  if (typeof reference !== "string" || !/^\{[^{}.]+(?:\.[^{}.]+)*\}$/.test(reference)) {
+    throw new Error(`${label}: expected a compiled token reference`);
   }
-  throw new Error(`${label}: Web adapter does not support this color representation`);
+  return reference.slice(1, -1);
 }
 
 function compiledValue(value, label) {
-  if (!value || typeof value !== "object" || typeof value.type !== "string") {
+  if (!value || typeof value !== "object" || typeof value.type !== "string" || typeof value.reference !== "string") {
     throw new Error(`${label}: expected compiled visual value`);
   }
   switch (value.type) {
-    case "color": return colorValue(value.value, label);
+    case "color":
     case "dimension":
-    case "duration": return scalarWithUnit(value.value, label);
-    case "number": return String(value.value);
+    case "duration":
+    case "number":
+      return `var(${cssName(tokenPath(value.reference, label))})`;
     default: throw new Error(`${label}: unsupported visual token type ${value.type}`);
   }
 }
@@ -39,14 +34,8 @@ function transitionDeclarations(value, label) {
   if (!value || value.type !== "transition" || !value.value) {
     throw new Error(`${label}: expected compiled transition`);
   }
-  const duration = scalarWithUnit(value.value.duration, `${label}.duration`);
-  const delay = scalarWithUnit(value.value.delay, `${label}.delay`);
-  const timing = value.value.timingFunction;
-  if (!Array.isArray(timing) || timing.length !== 4) throw new Error(`${label}: invalid timingFunction`);
   return [
-    `transition-duration: ${duration}`,
-    `transition-timing-function: cubic-bezier(${timing.join(", ")})`,
-    `transition-delay: ${delay}`,
+    `transition: var(${cssName(tokenPath(value.reference, label))})`,
     "transition-property: background-color, border-color, color, opacity, box-shadow, outline-color",
   ];
 }
@@ -102,14 +91,14 @@ function partSelector(rootSelector, componentId, partId) {
 function stateSelector(rootSelector, state) {
   switch (state) {
     case "default": return rootSelector;
-    case "hover": return `${rootSelector}:hover:not(:disabled)`;
-    case "focus": return `${rootSelector}:focus-visible`;
-    case "pressed": return `${rootSelector}:active:not(:disabled)`;
-    case "checked": return `${rootSelector}[aria-checked="true"]`;
-    case "disabled": return `${rootSelector}:disabled`;
-    case "loading": return `${rootSelector}[data-gui-loading="true"]`;
-    case "error": return `${rootSelector}[aria-invalid="true"]`;
-    default: return `${rootSelector}[data-gui-state~="${state}"]`;
+    case "hover": return `${rootSelector}:where(:hover:not(:disabled))`;
+    case "focus": return `${rootSelector}:where(:focus-visible)`;
+    case "pressed": return `${rootSelector}:where(:active:not(:disabled))`;
+    case "checked": return `${rootSelector}:where([aria-checked="true"])`;
+    case "disabled": return `${rootSelector}:where(:disabled)`;
+    case "loading": return `${rootSelector}:where([data-gui-loading="true"])`;
+    case "error": return `${rootSelector}:where([aria-invalid="true"])`;
+    default: return `${rootSelector}:where([data-gui-state~="${state}"])`;
   }
 }
 
@@ -128,16 +117,16 @@ function emitVisual(lines, prefix, componentId, component, visual, label) {
   emitPartMap(lines, root, componentId, visual.base, `${label}.base`);
 
   for (const size of component.sizes ?? []) {
-    emitPartMap(lines, `${root}[data-gui-size="${size}"]`, componentId, visual.sizes?.[size], `${label}.sizes.${size}`);
+    emitPartMap(lines, `${root}:where([data-gui-size="${size}"])`, componentId, visual.sizes?.[size], `${label}.sizes.${size}`);
   }
 
   for (const variant of component.variants ?? []) {
     const scoped = visual.variants?.[variant];
     if (!scoped) continue;
-    const variantRoot = `${root}[data-gui-variant="${variant}"]`;
+    const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
     emitPartMap(lines, variantRoot, componentId, scoped.base, `${label}.variants.${variant}.base`);
     for (const size of component.sizes ?? []) {
-      emitPartMap(lines, `${variantRoot}[data-gui-size="${size}"]`, componentId, scoped.sizes?.[size], `${label}.variants.${variant}.sizes.${size}`);
+      emitPartMap(lines, `${variantRoot}:where([data-gui-size="${size}"])`, componentId, scoped.sizes?.[size], `${label}.variants.${variant}.sizes.${size}`);
     }
   }
 
@@ -145,7 +134,7 @@ function emitVisual(lines, prefix, componentId, component, visual, label) {
     if (state === "default") continue;
     emitPartMap(lines, stateSelector(root, state), componentId, visual.states?.[state], `${label}.states.${state}`);
     for (const variant of component.variants ?? []) {
-      const variantRoot = `${root}[data-gui-variant="${variant}"]`;
+      const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
       emitPartMap(
         lines,
         stateSelector(variantRoot, state),
@@ -157,9 +146,50 @@ function emitVisual(lines, prefix, componentId, component, visual, label) {
   }
 }
 
-function emitFoundation(lines) {
+function referenceShape(value) {
+  if (Array.isArray(value)) return value.map(referenceShape);
+  if (!value || typeof value !== "object") return value;
+  if (typeof value.reference === "string" && typeof value.type === "string") {
+    return { reference: value.reference, type: value.type };
+  }
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => key !== "trace" && key !== "themeTrace" && key !== "value")
+      .map(([key, child]) => [key, referenceShape(child)]),
+  );
+}
+
+function assertPaletteIndependentVisuals(ir) {
+  if (!Array.isArray(ir.palettes) || ir.palettes.length === 0) {
+    throw new Error("Compiled IR contains no palettes");
+  }
+
+  const reference = ir.palettes[0];
+  const referenceComponents = Object.keys(reference.components ?? {}).sort();
+  for (const palette of ir.palettes.slice(1)) {
+    const componentIds = Object.keys(palette.components ?? {}).sort();
+    if (JSON.stringify(componentIds) !== JSON.stringify(referenceComponents)) {
+      throw new Error(`Component registry differs for palette ${palette.id}`);
+    }
+
+    for (const theme of ir.themes ?? []) {
+      const expected = referenceShape(reference.themes?.[theme.id]?.components ?? {});
+      const actual = referenceShape(palette.themes?.[theme.id]?.components ?? {});
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        throw new Error(
+          `Theme visual token references differ for palette ${palette.id} and theme ${theme.id}`,
+        );
+      }
+    }
+  }
+
+  return { reference, componentIds: referenceComponents };
+}
+
+function emitFoundation(lines, themeIds) {
+  const scope = `:where(${themeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")})`;
   lines.push(
-    ".gui-button {",
+    `${scope} .gui-button {`,
     "  appearance: none;",
     "  box-sizing: border-box;",
     "  display: inline-flex;",
@@ -176,10 +206,10 @@ function emitFoundation(lines) {
     "  vertical-align: middle;",
     "}",
     "",
-    ".gui-button:disabled { cursor: default; }",
-    ".gui-button:focus { outline: none; }",
+    `${scope} .gui-button:disabled { cursor: default; }`,
+    `${scope} .gui-button:focus { outline: none; }`,
     "",
-    ".gui-input {",
+    `${scope} .gui-input {`,
     "  appearance: none;",
     "  box-sizing: border-box;",
     "  display: inline-block;",
@@ -192,10 +222,10 @@ function emitFoundation(lines) {
     "  outline: none;",
     "}",
     "",
-    ".gui-input::placeholder { opacity: 1; }",
-    ".gui-input:disabled { cursor: default; }",
+    `${scope} .gui-input::placeholder { opacity: 1; }`,
+    `${scope} .gui-input:disabled { cursor: default; }`,
     "",
-    ".gui-switch {",
+    `${scope} .gui-switch {`,
     "  appearance: none;",
     "  box-sizing: border-box;",
     "  display: inline-flex;",
@@ -212,9 +242,9 @@ function emitFoundation(lines) {
     "  outline: none;",
     "}",
     "",
-    ".gui-switch[aria-checked=\"true\"] { justify-content: flex-end; }",
-    ".gui-switch:disabled { cursor: default; }",
-    ".gui-switch__thumb {",
+    `${scope} .gui-switch[aria-checked="true"] { justify-content: flex-end; }`,
+    `${scope} .gui-switch:disabled { cursor: default; }`,
+    `${scope} .gui-switch__thumb {`,
     "  display: block;",
     "  flex: 0 0 auto;",
     "  pointer-events: none;",
@@ -224,30 +254,32 @@ function emitFoundation(lines) {
 }
 
 function generate(ir) {
+  const { availableThemeIds } = analyzeThemeAvailability(ir);
+  if (availableThemeIds.length === 0) throw new Error("Compiled IR contains no fully visualized themes");
+  const { reference, componentIds } = assertPaletteIndependentVisuals(ir);
   const lines = [
     "/* Generated from the language-neutral GUI Framework specification. */",
     "/* Do not edit directly. */",
     "",
   ];
-  emitFoundation(lines);
+  emitFoundation(lines, availableThemeIds);
 
-  for (const palette of ir.palettes ?? []) {
-    const componentIds = Object.keys(palette.components ?? {}).sort();
-    for (const theme of ir.themes ?? []) {
-      const themeComponents = palette.themes?.[theme.id]?.components ?? {};
-      for (const componentId of componentIds) {
-        const visual = themeComponents[componentId];
-        const component = palette.components?.[componentId];
-        if (!visual || !component) continue;
-        const prefix = `[data-gui-palette="${palette.id}"][data-gui-theme="${theme.id}"]`;
-        emitVisual(lines, prefix, componentId, component, visual, `${palette.id}.${theme.id}.${componentId}`);
-      }
+  for (const theme of (ir.themes ?? []).filter(({ id }) => availableThemeIds.includes(id))) {
+    const themeComponents = reference.themes?.[theme.id]?.components ?? {};
+    for (const componentId of componentIds) {
+      const visual = themeComponents[componentId];
+      const component = reference.components?.[componentId];
+      if (!visual || !component) continue;
+      const prefix = `[data-gui-theme="${theme.id}"]`;
+      emitVisual(lines, prefix, componentId, component, visual, `${theme.id}.${componentId}`);
     }
   }
 
   lines.push(
     "@media (prefers-reduced-motion: reduce) {",
-    "  .gui-button, .gui-input, .gui-switch {",
+    `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`,
+    `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`,
+    `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`,
     "    transition-duration: 0ms !important;",
     "    transition-delay: 0ms !important;",
     "  }",

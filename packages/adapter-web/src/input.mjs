@@ -7,15 +7,21 @@ function assertChoice(value, choices, label) {
   if (!choices.has(value)) throw new Error(`Unknown GUI input ${label}: ${value}`);
 }
 
+function optionalBoolean(props, key) {
+  if (!Object.prototype.hasOwnProperty.call(props, key)) return false;
+  if (typeof props[key] !== "boolean") throw new TypeError(`GUI input ${key} must be a boolean`);
+  return props[key];
+}
+
 function normalizeProps(props = {}) {
   const normalized = {
-    value: props.value ?? "",
+    value: props.value,
     placeholder: props.placeholder ?? "",
     variant: props.variant ?? "standard",
     size: props.size ?? "medium",
-    disabled: props.disabled === true,
-    readOnly: props.readOnly === true,
-    error: props.error === true,
+    disabled: optionalBoolean(props, "disabled"),
+    readOnly: optionalBoolean(props, "readOnly"),
+    error: optionalBoolean(props, "error"),
     onValueChange: props.onValueChange ?? null,
   };
   if (typeof normalized.value !== "string") throw new TypeError("GUI input value must be a string");
@@ -59,7 +65,7 @@ export function createGuiInput(document, initialProps = {}) {
 
   function valueChange(event) {
     if (props.disabled || props.readOnly) return;
-    props.onValueChange?.(event.currentTarget.value, event);
+    props.onValueChange?.(event.currentTarget.value);
   }
 
   element.addEventListener("input", valueChange);

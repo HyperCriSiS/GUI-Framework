@@ -182,7 +182,9 @@ const requiredPaletteRoles = [
   "focus",
   "success",
   "warning",
-  "danger"
+  "danger",
+  "dangerHover",
+  "dangerPressed"
 ];
 
 for (const entry of (await readdir("spec/palettes")).filter((name) => name.endsWith(".tokens.json")).sort()) {

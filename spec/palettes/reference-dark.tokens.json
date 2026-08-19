@@ -10,12 +10,14 @@
     "neutral300": { "$value": { "colorSpace": "srgb", "components": [0.6824, 0.7137, 0.7608], "hex": "#AEB6C2" } },
     "neutral050": { "$value": { "colorSpace": "srgb", "components": [0.9569, 0.9647, 0.9725], "hex": "#F4F6F8" } },
     "white": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" } },
-    "accent500": { "$value": { "colorSpace": "srgb", "components": [0.298, 0.5529, 1], "hex": "#4C8DFF" } },
-    "accent400": { "$value": { "colorSpace": "srgb", "components": [0.4118, 0.6314, 1], "hex": "#69A1FF" } },
-    "accent600": { "$value": { "colorSpace": "srgb", "components": [0.2157, 0.4706, 0.902], "hex": "#3778E6" } },
+    "accent500": { "$value": { "colorSpace": "srgb", "components": [0.1451, 0.3882, 0.9216], "hex": "#2563EB" } },
+    "accent400": { "$value": { "colorSpace": "srgb", "components": [0.1686, 0.4275, 0.9216], "hex": "#2B6DEB" } },
+    "accent600": { "$value": { "colorSpace": "srgb", "components": [0.1137, 0.3059, 0.8471], "hex": "#1D4ED8" } },
     "success500": { "$value": { "colorSpace": "srgb", "components": [0.2588, 0.7882, 0.5412], "hex": "#42C98A" } },
     "warning500": { "$value": { "colorSpace": "srgb", "components": [0.898, 0.7255, 0.298], "hex": "#E5B94C" } },
-    "danger500": { "$value": { "colorSpace": "srgb", "components": [0.8824, 0.3569, 0.3922], "hex": "#E15B64" } }
+    "danger400": { "$value": { "colorSpace": "srgb", "components": [0.7922, 0.2745, 0.3294], "hex": "#CA4654" } },
+    "danger500": { "$value": { "colorSpace": "srgb", "components": [0.7608, 0.2549, 0.3098], "hex": "#C2414F" } },
+    "danger600": { "$value": { "colorSpace": "srgb", "components": [0.6627, 0.1804, 0.251], "hex": "#A92E40" } }
   },
   "semantic": {
     "color": {
@@ -30,12 +32,14 @@
       "accentHover": { "$value": "{palette.accent400}" },
       "accentPressed": { "$value": "{palette.accent600}" },
       "onAccent": { "$value": "{palette.white}" },
-      "border": { "$value": "{palette.neutral700}" },
-      "borderStrong": { "$value": "{palette.neutral600}" },
+      "border": { "$value": "{palette.neutral500}" },
+      "borderStrong": { "$value": "{palette.neutral300}" },
       "focus": { "$value": "{palette.accent400}" },
       "success": { "$value": "{palette.success500}" },
       "warning": { "$value": "{palette.warning500}" },
-      "danger": { "$value": "{palette.danger500}" }
+      "danger": { "$value": "{palette.danger500}" },
+      "dangerHover": { "$value": "{palette.danger400}" },
+      "dangerPressed": { "$value": "{palette.danger600}" }
     }
   }
 }

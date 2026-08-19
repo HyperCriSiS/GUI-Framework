@@ -49,23 +49,29 @@ try {
   assert.match(css, /\.gui-input \{/);
   assert.match(css, /\.gui-input::placeholder/);
   assert.match(css, /data-gui-theme="basic"/);
-  assert.match(css, /data-gui-palette="reference-dark"/);
-  assert.match(css, /data-gui-palette="reference-light"/);
-  assert.match(css, /\.gui-input:focus-visible/);
-  assert.match(css, /\.gui-input\[aria-invalid="true"\]/);
-  assert.match(css, /min-height: 36px;/);
-  assert.match(css, /font-size: 14px;/);
-  assert.match(css, /color: #AEB6C2;/);
-  assert.match(css, /border-color: #E15B64;/);
+  assert.match(css, /\.gui-input:where\(:focus-visible\)/);
+  assert.match(css, /\.gui-input:where\(\[aria-invalid="true"\]\)/);
+  assert.match(css, /min-height: var\(--gui-sizing-control-medium\);/);
+  assert.match(css, /font-size: var\(--gui-typography-size-medium\);/);
+  assert.match(css, /color: var\(--gui-semantic-color-text-secondary\);/);
+  assert.match(css, /border-color: var\(--gui-semantic-color-danger\);/);
+  const hoverSelector = ".gui-input:where(:hover:not(:disabled))";
+  const errorSelector = '.gui-input:where([aria-invalid="true"])';
+  assert.ok(css.indexOf(errorSelector) > css.indexOf(hoverSelector), "The declared error state must win over hover at equal specificity");
+  assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Component CSS must use cascading token variables rather than duplicate palette values");
   assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic input must not enable animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   const changes = [];
+  const changeArgumentCounts = [];
   const input = createGuiInput(fakeDocument, {
     value: "alpha",
     placeholder: "Search",
     size: "large",
-    onValueChange: (value) => changes.push(value),
+    onValueChange(value) {
+      changes.push(value);
+      changeArgumentCounts.push(arguments.length);
+    },
   });
 
   assert.equal(input.element.tagName, "INPUT");
@@ -79,6 +85,8 @@ try {
 
   input.element.input("beta");
   assert.deepEqual(changes, ["beta"]);
+  assert.deepEqual(changeArgumentCounts, [1], "Input changes must expose only the string payload");
+  assert.equal(typeof changes[0], "string");
 
   input.update({ value: "beta", error: true });
   assert.equal(input.element.value, "beta");
@@ -96,9 +104,41 @@ try {
   input.element.input("disabled");
   assert.deepEqual(changes, ["beta"], "Disabled inputs must not emit framework value changes");
 
+  assert.throws(
+    () => input.update({ value: undefined }),
+    { name: "TypeError", message: "GUI input value must be a string" },
+  );
+  assert.throws(
+    () => input.update({ disabled: "false" }),
+    { name: "TypeError", message: "GUI input disabled must be a boolean" },
+  );
+  assert.throws(
+    () => input.update({ readOnly: 0 }),
+    { name: "TypeError", message: "GUI input readOnly must be a boolean" },
+  );
+  assert.throws(
+    () => input.update({ error: null }),
+    { name: "TypeError", message: "GUI input error must be a boolean" },
+  );
+
   input.destroy();
   assert.equal(input.element.listeners.has("input"), false);
-  assert.throws(() => createGuiInput(fakeDocument, { size: "invalid" }), /Unknown GUI input size/);
+  assert.throws(
+    () => createGuiInput(fakeDocument),
+    { name: "TypeError", message: "GUI input value must be a string" },
+  );
+  assert.throws(
+    () => createGuiInput(fakeDocument, { value: 1 }),
+    { name: "TypeError", message: "GUI input value must be a string" },
+  );
+  assert.throws(
+    () => createGuiInput(fakeDocument, { value: "", error: undefined }),
+    { name: "TypeError", message: "GUI input error must be a boolean" },
+  );
+  assert.throws(
+    () => createGuiInput(fakeDocument, { value: "", size: "invalid" }),
+    /Unknown GUI input size/,
+  );
 
   console.log("Web Basic input vertical-slice tests passed.");
 } finally {

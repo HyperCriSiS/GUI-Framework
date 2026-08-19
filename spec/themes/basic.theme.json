@@ -152,12 +152,20 @@
           "states": {
             "hover": {
               "root": {
-                "opacity": "{opacity.hover}"
+                "fill": "{semantic.color.dangerHover}",
+                "border": {
+                  "color": "{semantic.color.dangerHover}",
+                  "width": "{border.width.standard}"
+                }
               }
             },
             "pressed": {
               "root": {
-                "opacity": "{opacity.pressed}"
+                "fill": "{semantic.color.dangerPressed}",
+                "border": {
+                  "color": "{semantic.color.dangerPressed}",
+                  "width": "{border.width.standard}"
+                }
               }
             }
           }
@@ -318,7 +326,10 @@
         },
         "pressed": {
           "root": {
-            "opacity": "{opacity.pressed}"
+            "border": {
+              "color": "{semantic.color.borderStrong}",
+              "width": "{border.width.standard}"
+            }
           }
         },
         "checked": {

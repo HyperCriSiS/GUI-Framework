@@ -45,24 +45,29 @@ try {
   assert.match(css, /\.gui-switch \{/);
   assert.match(css, /\.gui-switch__thumb/);
   assert.match(css, /data-gui-theme="basic"/);
-  assert.match(css, /data-gui-palette="reference-dark"/);
-  assert.match(css, /data-gui-palette="reference-light"/);
-  assert.match(css, /\.gui-switch:focus-visible/);
-  assert.match(css, /\.gui-switch\[aria-checked="true"\]/);
-  assert.match(css, /min-width: 36px;/);
-  assert.match(css, /min-height: 20px;/);
-  assert.match(css, /min-width: 16px;/);
-  assert.match(css, /background-color: #4C8DFF;/);
-  assert.match(css, /background-color: #684DE2;/);
+  assert.match(css, /\.gui-switch:where\(:focus-visible\)/);
+  assert.match(css, /\.gui-switch:where\(\[aria-checked="true"\]\)/);
+  assert.match(css, /min-width: var\(--gui-sizing-switch-track-width-medium\);/);
+  assert.match(css, /min-height: var\(--gui-sizing-switch-track-height-medium\);/);
+  assert.match(css, /min-width: var\(--gui-sizing-switch-thumb-medium\);/);
+  assert.match(css, /background-color: var\(--gui-semantic-color-accent\);/);
+  const hoverSelector = ".gui-switch:where(:hover:not(:disabled))";
+  const checkedSelector = '.gui-switch:where([aria-checked="true"])';
+  assert.ok(css.indexOf(checkedSelector) > css.indexOf(hoverSelector), "The declared checked state must win over hover at equal specificity");
+  assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Component CSS must use cascading token variables rather than duplicate palette values");
   assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic switch must not enable animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   const changes = [];
+  const changeArgumentCounts = [];
   const guiSwitch = createGuiSwitch(fakeDocument, {
     checked: false,
     accessibilityLabel: "Enable synchronization",
     size: "large",
-    onCheckedChange: (checked) => changes.push(checked),
+    onCheckedChange(checked) {
+      changes.push(checked);
+      changeArgumentCounts.push(arguments.length);
+    },
   });
 
   assert.equal(guiSwitch.element.tagName, "BUTTON");
@@ -78,6 +83,8 @@ try {
 
   guiSwitch.element.click();
   assert.deepEqual(changes, [true]);
+  assert.deepEqual(changeArgumentCounts, [1], "Switch changes must expose only the boolean payload");
+  assert.equal(typeof changes[0], "boolean");
   assert.equal(guiSwitch.element.getAttribute("aria-checked"), "false", "Switch value remains controlled until update");
 
   guiSwitch.update({ checked: true, accessibilityLabel: "Disable synchronization" });
@@ -86,14 +93,36 @@ try {
   assert.equal(guiSwitch.element.getAttribute("aria-label"), "Disable synchronization");
   guiSwitch.element.click();
   assert.deepEqual(changes, [true, false]);
+  assert.deepEqual(changeArgumentCounts, [1, 1]);
 
   guiSwitch.update({ disabled: true });
   assert.equal(guiSwitch.element.disabled, true);
   guiSwitch.element.click();
   assert.deepEqual(changes, [true, false], "Disabled switches must not emit checked changes");
 
+  assert.throws(
+    () => guiSwitch.update({ checked: "false" }),
+    { name: "TypeError", message: "GUI switch checked must be a boolean" },
+  );
+  assert.throws(
+    () => guiSwitch.update({ disabled: 0 }),
+    { name: "TypeError", message: "GUI switch disabled must be a boolean" },
+  );
+
   guiSwitch.destroy();
   assert.equal(guiSwitch.element.listeners.has("click"), false);
+  assert.throws(
+    () => createGuiSwitch(fakeDocument, { accessibilityLabel: "Switch" }),
+    { name: "TypeError", message: "GUI switch checked must be a boolean" },
+  );
+  assert.throws(
+    () => createGuiSwitch(fakeDocument, { checked: null, accessibilityLabel: "Switch" }),
+    { name: "TypeError", message: "GUI switch checked must be a boolean" },
+  );
+  assert.throws(
+    () => createGuiSwitch(fakeDocument, { checked: false, accessibilityLabel: "Switch", disabled: undefined }),
+    { name: "TypeError", message: "GUI switch disabled must be a boolean" },
+  );
   assert.throws(() => createGuiSwitch(fakeDocument, { checked: false }), /accessibilityLabel must be a non-empty string/);
   assert.throws(() => createGuiSwitch(fakeDocument, { checked: false, accessibilityLabel: "Switch", size: "invalid" }), /Unknown GUI switch size/);
 
