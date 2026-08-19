@@ -123,3 +123,45 @@ jobs:
 
       - name: Typecheck prototype contracts
         run: npm run typecheck
+
+  web-browser-baseline:
+    needs: validate-and-typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install browser-test dependency
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Generate Web token output
+        run: npm run build:web-tokens
+
+      - name: Generate Web component output
+        run: npm run build:web-components
+
+      - name: Install pinned Chromium runtime
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify interactions and record visual baseline candidates
+        run: npm run test:web-browser:record
+
+      - name: Upload visual baseline candidates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-browser-baseline-candidates
+          path: tests/browser/__snapshots__/
+          if-no-files-found: error
+          retention-days: 7
