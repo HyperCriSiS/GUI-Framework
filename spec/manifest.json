@@ -64,6 +64,10 @@
     {
       "id": "switch",
       "source": "components/switch.recipe.json"
+    },
+    {
+      "id": "panel",
+      "source": "components/panel.recipe.json"
     }
   ]
 }
