@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The next integration milestone is a real Web reference application that exercises the five components together.
+The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application now exercises the five components together under the same Basic theme and palette system. The next integration milestone is to establish browser-based interaction and visual-regression baselines.
 
 ## Phase 0 — Foundation and scope
 
@@ -99,7 +99,7 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Panel/Card
 - [x] Dialog
 
-- [ ] Build a real Web reference application using these components.
+- [x] Build a real Web reference application using these components.
 - [ ] Establish visual-regression and interaction baselines.
 
 ## Phase 4 — Compose adapter and architecture validation
