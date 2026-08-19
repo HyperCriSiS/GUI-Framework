@@ -23,6 +23,7 @@ try {
   assert.match(source, /"reference-light" to mapOf/);
   assert.match(source, /"basic" to mapOf/);
   assert.match(source, /"button" to GuiVisualRecipe/);
+  assert.match(source, /"dialog" to GuiVisualRecipe/);
   assert.match(source, /"input" to GuiVisualRecipe/);
   assert.match(source, /"panel" to GuiVisualRecipe/);
   assert.match(source, /"switch" to GuiVisualRecipe/);

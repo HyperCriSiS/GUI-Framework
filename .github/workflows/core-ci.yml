@@ -109,6 +109,9 @@ jobs:
       - name: Test native Compose Basic Panel
         run: npm run test:kotlin-panel
 
+      - name: Test native Compose Basic Dialog
+        run: npm run test:kotlin-dialog
+
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 
