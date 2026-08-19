@@ -43,11 +43,14 @@ try {
     "Independent development palettes must remain registered"
   );
 
-  assert.deepEqual(
-    ir.components.map((component) => component.id),
-    ["button", "dialog", "input", "panel", "switch"],
-    "The reference component registry must remain stable"
-  );
+  const expectedComponentIds = ["button", "dialog", "input", "panel", "switch"];
+  for (const palette of ir.palettes) {
+    assert.deepEqual(
+      Object.keys(palette.components),
+      expectedComponentIds,
+      `Palette ${palette.id} must compile the complete reference component registry`
+    );
+  }
 
   const darkPalette = ir.palettes.find((palette) => palette.id === "reference-dark");
   const lightPalette = ir.palettes.find((palette) => palette.id === "reference-light");
