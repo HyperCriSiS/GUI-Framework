@@ -73,6 +73,9 @@ jobs:
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
+      - name: Test native Web Basic Dialog
+        run: npm run test:web-dialog
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
