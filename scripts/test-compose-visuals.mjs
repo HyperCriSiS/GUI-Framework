@@ -24,6 +24,7 @@ try {
   assert.match(source, /"basic" to mapOf/);
   assert.match(source, /"button" to GuiVisualRecipe/);
   assert.match(source, /"input" to GuiVisualRecipe/);
+  assert.match(source, /"panel" to GuiVisualRecipe/);
   assert.match(source, /"switch" to GuiVisualRecipe/);
   assert.match(source, /"thumb" to GuiVisualPartStyle/);
   assert.match(source, /"placeholder" to GuiVisualPartStyle/);

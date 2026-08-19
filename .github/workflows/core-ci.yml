@@ -103,6 +103,9 @@ jobs:
       - name: Test native Compose Basic Switch
         run: npm run test:kotlin-switch
 
+      - name: Test native Compose Basic Panel
+        run: npm run test:kotlin-panel
+
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 
