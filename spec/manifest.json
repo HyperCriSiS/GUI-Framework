@@ -4,10 +4,6 @@
     {
       "id": "primitives",
       "source": "tokens/primitives.tokens.json"
-    },
-    {
-      "id": "components",
-      "source": "tokens/components.tokens.json"
     }
   ],
   "palettes": [
@@ -54,6 +50,25 @@
       "id": "cyberpunk",
       "name": "Cyberpunk",
       "source": "themes/cyberpunk.theme.json"
+    }
+  ],
+  "assets": [
+    {
+      "id": "reference-check",
+      "kind": "svg",
+      "source": "assets/reference-check.svg",
+      "portableProfile": "path",
+      "intrinsicSize": {
+        "width": 24,
+        "height": 24
+      },
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "colorMode": "currentColor"
     }
   ],
   "components": [

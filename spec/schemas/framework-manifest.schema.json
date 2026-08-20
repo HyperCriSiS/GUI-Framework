@@ -8,6 +8,7 @@
     "tokenSources",
     "palettes",
     "themes",
+    "assets",
     "components"
   ],
   "properties": {
@@ -78,6 +79,12 @@
       "items": {
         "$ref": "#/$defs/sourceEntry"
       }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assetEntry"
+      }
     }
   },
   "$defs": {
@@ -108,6 +115,108 @@
           "type": "boolean"
         }
       }
+    },
+    "assetEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "svg",
+            "n-slice",
+            "rive"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "portableProfile": {
+          "enum": [
+            "path"
+          ]
+        },
+        "intrinsicSize": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "viewBox": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "colorMode": {
+          "enum": [
+            "original",
+            "currentColor"
+          ]
+        },
+        "fallback": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "svg"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "portableProfile",
+              "intrinsicSize",
+              "viewBox",
+              "colorMode"
+            ]
+          }
+        }
+      ]
     }
   }
 }
