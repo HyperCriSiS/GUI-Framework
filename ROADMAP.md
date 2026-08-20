@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application exercises the five components together under the same Basic theme and palette system, with Playwright interaction tests and read-only visual-regression baselines in CI. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are now defined. The next integration milestone is portable asset/SVG integration and broader adapter compatibility coverage.
+The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application exercises the five components together under the same Basic theme and palette system, with Playwright interaction tests and read-only visual-regression baselines in CI. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are now defined. Portable SVG assets now have a neutral registry and strict shared profile, with Web output and native Compose ImageVector generation covered by validation/tests. The next foundation milestone is palette variants/contrast validation and broader adapter compatibility coverage.
 
 ## Phase 0 — Foundation and scope
 
@@ -31,8 +31,8 @@ The complete initial reference-component set is now implemented and CI-verified 
 - [x] Adopt a DTCG-compatible token source format.
 - [x] Define primitive tokens for raw reusable values.
 - [x] Define semantic tokens for UI roles.
-- [ ] Define component-level tokens only where shared semantic tokens are insufficient.
-- [ ] Complete spacing, sizing, radius, typography, border, elevation, effect and motion token categories. <!-- spacing, sizing, radius, typography, border, focus and motion started; elevation/effect remain open -->
+- [x] Define component-level tokens only where shared semantic tokens are insufficient.
+- [x] Complete spacing, sizing, radius, typography, border, elevation, effect and motion token categories.
 - [x] Define token aliases/references without platform-specific syntax.
 - [x] Add automated validation for the DTCG subset used by the project.
 
@@ -54,7 +54,7 @@ The complete initial reference-component set is now implemented and CI-verified 
 - [x] Define variants, sizes and shared state vocabulary.
 - [x] Define functional transition/motion token references.
 - [x] Define neutral visual recipes for surfaces, borders and optional effects.
-- [ ] Define asset references for SVG and future N-slice/Rive assets.
+- [x] Define asset references for SVG and future N-slice/Rive assets.
 - [x] Define capability requirements and ordered quality fallback levels.
 - [x] Define accessibility/semantic metadata renderers must preserve.
 - [x] Define deterministic recipe inheritance/override resolution.
@@ -82,7 +82,7 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Generate Web-facing TypeScript contracts from the neutral specification.
 - [x] Implement native HTML/CSS mapping.
 - [x] Implement CSS custom-property/token output.
-- [ ] Implement SVG asset integration.
+- [x] Implement SVG asset integration.
 - [x] Preserve native HTML semantics where possible. <!-- verified across Button, Input, Switch, Panel/Card and Dialog -->
 - [x] Implement keyboard/focus behavior with platform primitives for current interactive controls.
 - [ ] Complete accessibility mappings. <!-- all five initial reference components map their current neutral semantics; broader coverage and integration validation remain -->
@@ -110,7 +110,7 @@ The second adapter is an architecture test: it must prove that the specification
 - [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
 - [x] Map current recipes/tokens to Compose Android/Desktop primitives. <!-- includes sRGB Color, DTCG px -> dp, duration -> Kotlin Duration and Basic Button/Input/Switch/Panel/Dialog visuals -->
 - [ ] Complete Compose semantics, input, focus and accessibility behavior. <!-- all five initial reference components are mapped; broader integration validation remains -->
-- [ ] Implement vector/SVG integration appropriate to the target.
+- [x] Implement vector/SVG integration appropriate to the target.
 - [ ] Complete functional micro-interactions using platform-efficient mechanisms.
 - [ ] Implement capability/fallback mapping for target devices.
 - [ ] Validate scaling and older/lower-end device behavior.

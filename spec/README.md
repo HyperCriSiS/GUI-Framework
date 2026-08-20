@@ -7,10 +7,12 @@ This directory contains the language-neutral source of truth for the GUI Framewo
 - `tokens/` contains DTCG 2025.10-compatible non-color primitives such as spacing and motion.
 - `palettes/` contains color sources and the semantic color roles required by components.
 - `components/` contains language-neutral component contracts/recipes.
+- `assets/` contains portable visual assets registered by stable IDs.
 - `schemas/` contains JSON Schemas for GUI-Framework-specific documents.
-- `manifest.json` declares the specification version and the currently registered sources.
+- `manifest.json` declares the specification version and the currently registered token, palette, theme, asset and component sources.
+- `ASSETS.md` defines the portable asset contract and the deterministic SVG subset used by reference adapters.
 
-The six initial theme identities are registered in the manifest but intentionally do not define their detailed visual language yet. Theme geometry/effects and palette color choices remain separate concerns.
+The six initial theme identities are registered in the manifest. Basic currently carries the reference implementation used to prove the architecture; the remaining theme identities are still intentionally open for their detailed visual language. Theme geometry/effects and palette color choices remain separate concerns.
 
 ## Theme versus palette
 
