@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import { resolveComponentVisualRecipe } from "../packages/compiler/src/theme-resolution.mjs";
 
 const irPath = "build/spec-ir-accessibility-test.json";
+const contrastPolicyPath = "spec/accessibility/contrast-policy.json";
 const MIN_TEXT_CONTRAST = 4.5;
 const MIN_NON_TEXT_CONTRAST = 3;
 const MIN_TARGET_SIZE_PX = 24;
@@ -25,7 +26,7 @@ function colorComponents(token, label) {
   assert.equal(token?.type, "color", `${label} must be a compiled color`);
   assert.equal(token.value?.colorSpace, "srgb", `${label} must use sRGB`);
   assert.deepEqual(token.value?.components?.length, 3, `${label} must have three channels`);
-  assert.equal(token.value?.alpha ?? 1, 1, `${label} must be opaque in the Basic theme`);
+  assert.equal(token.value?.alpha ?? 1, 1, `${label} must be opaque for contrast evaluation`);
   return token.value.components;
 }
 
@@ -67,6 +68,17 @@ function token(palette, path) {
   const value = palette.tokens[path];
   assert.ok(value, `${palette.id} is missing public token ${path}`);
   return value;
+}
+
+function verifySemanticContrastPolicy(palette, policy) {
+  for (const check of policy.checks) {
+    assertContrast(
+      token(palette, check.foreground),
+      token(palette, check.background),
+      check.minimum,
+      `${palette.id} semantic contrast ${check.id}`,
+    );
+  }
 }
 
 function verifyButtons(palette, background) {
@@ -152,14 +164,20 @@ function verifySwitch(palette, background) {
 
 try {
   compile();
-  const ir = JSON.parse(await readFile(irPath, "utf8"));
+  const [irSource, policySource] = await Promise.all([
+    readFile(irPath, "utf8"),
+    readFile(contrastPolicyPath, "utf8"),
+  ]);
+  const ir = JSON.parse(irSource);
+  const policy = JSON.parse(policySource);
   for (const palette of ir.palettes) {
+    verifySemanticContrastPolicy(palette, policy);
     const background = token(palette, "semantic.color.background");
     verifyButtons(palette, background);
     verifyInput(palette, background);
     verifySwitch(palette, background);
   }
-  console.log("Basic theme WCAG 2.2 AA contrast and minimum target-size checks passed.");
+  console.log(`Semantic palette contrast policy and Basic WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
   await rm(irPath, { force: true });
 }
