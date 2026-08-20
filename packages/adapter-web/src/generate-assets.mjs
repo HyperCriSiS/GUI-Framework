@@ -54,10 +54,10 @@ lines.push("  }");
 lines.push("  if (options.className) element.setAttribute(\"class\", options.className);");
 lines.push("  element.setAttribute(\"focusable\", \"false\");");
 lines.push("  if (options.title) {");
-lines.push("    element.setAttribute(\"role\", \"img\");
+lines.push("    element.setAttribute(\"role\", \"img\");");
 lines.push("    element.setAttribute(\"aria-label\", options.title);");
 lines.push("  } else {");
-lines.push("    element.setAttribute(\"aria-hidden\", \"true\");
+lines.push("    element.setAttribute(\"aria-hidden\", \"true\");");
 lines.push("  }");
 lines.push("  return element as SVGSVGElement;", "}", "");
 
