@@ -132,21 +132,23 @@ function stableObject(value) {
 }
 
 function compileThemeVisuals(theme, themeEntriesById, tokenUniverse) {
-  const baseTheme = theme.extends ? themeEntriesById.get(theme.extends) : null;
-  const componentIds = new Set([
-    ...Object.keys(baseTheme?.definition?.components ?? {}),
-    ...Object.keys(theme.components ?? {}),
-  ]);
+  const resolveVisualToken = (path) => resolveToken(path, tokenUniverse);
   const components = {};
 
-  for (const componentId of componentIds) {
-    const parentVisual = baseTheme?.definition?.components?.[componentId]
-      ? compileVisualRecipe(baseTheme.definition.components[componentId], tokenUniverse)
-      : null;
-    const ownVisual = theme.components?.[componentId]
-      ? compileVisualRecipe(theme.components[componentId], tokenUniverse)
-      : null;
-    components[componentId] = mergeCompiledVisualRecipes(parentVisual, ownVisual);
+  for (const inheritedThemeId of theme.inheritance) {
+    const entry = themeEntriesById.get(inheritedThemeId);
+    if (!entry) throw new Error(`Resolved theme ${theme.id} references unknown inheritance entry ${inheritedThemeId}`);
+
+    for (const [componentId, visual] of Object.entries(entry.definition.components ?? {})) {
+      const compiled = compileVisualRecipe(
+        visual,
+        resolveVisualToken,
+        { theme: entry.id, source: entry.source },
+      );
+      components[componentId] = components[componentId]
+        ? mergeCompiledVisualRecipes(components[componentId], compiled)
+        : compiled;
+    }
   }
 
   return {
