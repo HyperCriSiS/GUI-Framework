@@ -47,9 +47,9 @@ try {
   assert.match(css, /data-gui-theme="basic"/);
   assert.match(css, /\.gui-switch:where\(:focus-visible\)/);
   assert.match(css, /\.gui-switch:where\(\[aria-checked="true"\]\)/);
-  assert.match(css, /min-width: var\(--gui-sizing-switch-track-width-medium\);/);
-  assert.match(css, /min-height: var\(--gui-sizing-switch-track-height-medium\);/);
-  assert.match(css, /min-width: var\(--gui-sizing-switch-thumb-medium\);/);
+  assert.match(css, /min-width: var\(--gui-component-switch-track-width-medium\);/);
+  assert.match(css, /min-height: var\(--gui-component-switch-track-height-medium\);/);
+  assert.match(css, /min-width: var\(--gui-component-switch-thumb-size-medium\);/);
   assert.match(css, /background-color: var\(--gui-semantic-color-accent\);/);
   const hoverSelector = ".gui-switch:where(:hover:not(:disabled))";
   const checkedSelector = '.gui-switch:where([aria-checked="true"])';

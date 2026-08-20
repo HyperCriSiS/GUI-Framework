@@ -4,6 +4,10 @@
     {
       "id": "primitives",
       "source": "tokens/primitives.tokens.json"
+    },
+    {
+      "id": "components",
+      "source": "tokens/components.tokens.json"
     }
   ],
   "palettes": [
