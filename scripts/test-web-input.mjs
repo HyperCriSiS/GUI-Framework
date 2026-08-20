@@ -67,6 +67,7 @@ try {
   const input = createGuiInput(fakeDocument, {
     value: "alpha",
     placeholder: "Search",
+    accessibilityLabel: "Search records",
     size: "large",
     onValueChange(value) {
       changes.push(value);
@@ -80,6 +81,7 @@ try {
   assert.equal(input.element.dataset.guiSize, "large");
   assert.equal(input.element.value, "alpha");
   assert.equal(input.element.placeholder, "Search");
+  assert.equal(input.element.getAttribute("aria-label"), "Search records");
   assert.equal(input.element.disabled, false);
   assert.equal(input.element.readOnly, false);
 
@@ -88,10 +90,14 @@ try {
   assert.deepEqual(changeArgumentCounts, [1], "Input changes must expose only the string payload");
   assert.equal(typeof changes[0], "string");
 
-  input.update({ value: "beta", error: true });
+  input.update({ value: "beta", error: true, accessibilityLabel: "Updated search label" });
   assert.equal(input.element.value, "beta");
   assert.equal(input.element.dataset.guiError, "true");
   assert.equal(input.element.getAttribute("aria-invalid"), "true");
+  assert.equal(input.element.getAttribute("aria-label"), "Updated search label");
+
+  input.update({ accessibilityLabel: "" });
+  assert.equal(input.element.getAttribute("aria-label"), null, "Empty labels must defer to host-associated labels");
 
   input.update({ readOnly: true });
   assert.equal(input.element.readOnly, true);
@@ -107,6 +113,10 @@ try {
   assert.throws(
     () => input.update({ value: undefined }),
     { name: "TypeError", message: "GUI input value must be a string" },
+  );
+  assert.throws(
+    () => input.update({ accessibilityLabel: null }),
+    { name: "TypeError", message: "GUI input accessibilityLabel must be a string" },
   );
   assert.throws(
     () => input.update({ disabled: "false" }),

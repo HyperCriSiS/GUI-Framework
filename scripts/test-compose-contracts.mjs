@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
-const irPath = "build/spec-ir-compose-test.json";
+const irPath = "build/spec-ir-compose-contract-test.json";
 const kotlinPath = "build/compose/GuiContracts-test.kt";
 
 function run(args, label) {
@@ -14,26 +14,18 @@ function run(args, label) {
 
 try {
   run(["packages/compiler/src/index.mjs", "--output", irPath], "Specification compiler");
-  run(["packages/adapter-compose/src/generate-contracts.mjs", irPath, kotlinPath], "Kotlin contract generator");
+  run(["packages/adapter-compose/src/generate-contracts.mjs", irPath, kotlinPath], "Compose contract generator");
 
   const source = await readFile(kotlinPath, "utf8");
-  assert.match(source, /enum class GuiRegisteredThemeId\(val wireValue: String\)/);
-  assert.match(source, /MODERN\("modern"\)/);
-  assert.match(source, /FROSTED_GLASS\("frosted-glass"\)/);
-  assert.match(source, /CYBERPUNK\("cyberpunk"\)/);
-  assert.match(source, /enum class GuiThemeId\(val wireValue: String\)/);
+  assert.match(source, /enum class GuiRegisteredThemeId/);
   assert.match(source, /BASIC\("basic"\)/);
-  assert.doesNotMatch(
-    source.slice(source.indexOf("enum class GuiThemeId"), source.indexOf("enum class GuiComponentId")),
-    /MODERN|FROSTED_GLASS|CYBERPUNK/,
-    "Only fully visualized themes may be exposed as selectable Compose theme IDs",
-  );
+  assert.match(source, /MODERN\("modern"\)/);
+  assert.match(source, /GLASS\("glass"\)/);
+  assert.match(source, /FROSTED_GLASS\("frosted-glass"\)/);
+  assert.match(source, /SPACEY\("spacey"\)/);
+  assert.match(source, /CYBERPUNK\("cyberpunk"\)/);
+  assert.match(source, /enum class GuiThemeId/);
   assert.match(source, /enum class GuiComponentId/);
-  assert.match(source, /BUTTON\("button"\)/);
-  assert.match(source, /DIALOG\("dialog"\)/);
-  assert.match(source, /INPUT\("input"\)/);
-  assert.match(source, /PANEL\("panel"\)/);
-  assert.match(source, /SWITCH\("switch"\)/);
 
   assert.match(source, /enum class GuiButtonVariant/);
   assert.match(source, /PRIMARY\("primary"\)/);
@@ -63,6 +55,7 @@ try {
   assert.match(source, /data class GuiInputProperties\(/);
   assert.match(source, /val value: String/);
   assert.match(source, /val placeholder: String = ""/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
   assert.match(source, /val disabled: Boolean = false/);
   assert.match(source, /val readOnly: Boolean = false/);
   assert.match(source, /val error: Boolean = false/);

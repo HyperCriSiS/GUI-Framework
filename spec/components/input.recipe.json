@@ -25,6 +25,12 @@
       "default": ""
     },
     {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
       "id": "disabled",
       "type": "boolean",
       "required": false,

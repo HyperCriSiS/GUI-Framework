@@ -17,6 +17,7 @@ function normalizeProps(props = {}) {
   const normalized = {
     value: props.value,
     placeholder: props.placeholder ?? "",
+    accessibilityLabel: props.accessibilityLabel ?? "",
     variant: props.variant ?? "standard",
     size: props.size ?? "medium",
     disabled: optionalBoolean(props, "disabled"),
@@ -26,6 +27,7 @@ function normalizeProps(props = {}) {
   };
   if (typeof normalized.value !== "string") throw new TypeError("GUI input value must be a string");
   if (typeof normalized.placeholder !== "string") throw new TypeError("GUI input placeholder must be a string");
+  if (typeof normalized.accessibilityLabel !== "string") throw new TypeError("GUI input accessibilityLabel must be a string");
   if (normalized.onValueChange !== null && typeof normalized.onValueChange !== "function") {
     throw new TypeError("GUI input onValueChange must be a function or null");
   }
@@ -59,6 +61,8 @@ export function createGuiInput(document, initialProps = {}) {
     element.disabled = props.disabled;
     element.readOnly = props.readOnly;
 
+    if (props.accessibilityLabel.trim() !== "") element.setAttribute("aria-label", props.accessibilityLabel);
+    else element.removeAttribute("aria-label");
     if (props.error) element.setAttribute("aria-invalid", "true");
     else element.removeAttribute("aria-invalid");
   }
