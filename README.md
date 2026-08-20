@@ -23,12 +23,12 @@ Primary roles:
 - **Skia:** optional advanced rendering and shader effects where supported and worthwhile.
 - **Capability fallbacks:** themes must remain usable when advanced effects are unavailable or intentionally disabled.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model and [ROADMAP.md](ROADMAP.md) for implementation status and milestones.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [COMPATIBILITY.md](COMPATIBILITY.md) for the support/versioning policy, and [ROADMAP.md](ROADMAP.md) for implementation status and milestones.
 
 ## Status
 
-Early architecture and foundation phase. Public APIs are not stable yet.
+Foundation phase. The initial Web and Compose reference-component set is implemented, and the Web reference application has interaction and visual-regression coverage. Public APIs remain experimental before 1.0; compatibility rules are documented in [COMPATIBILITY.md](COMPATIBILITY.md).
 
 ## License
 
-A restrictive licensing policy is planned. The exact license text must be finalized before public distribution of production code. See [LICENSE_POLICY.md](LICENSE_POLICY.md).
+The project is licensed under **AGPL-3.0-or-later**. See [LICENSE](LICENSE) and [LICENSE_POLICY.md](LICENSE_POLICY.md).

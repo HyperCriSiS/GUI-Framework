@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application now exercises the five components together under the same Basic theme and palette system. The next integration milestone is to establish browser-based interaction and visual-regression baselines.
+The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application exercises the five components together under the same Basic theme and palette system, with Playwright interaction tests and read-only visual-regression baselines in CI. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are now defined. The next integration milestone is portable asset/SVG integration and broader adapter compatibility coverage.
 
 ## Phase 0 — Foundation and scope
 
@@ -20,9 +20,9 @@ The complete initial reference-component set is now implemented and CI-verified 
 - [x] Finalize the repository license as AGPL-3.0-or-later.
 - [x] Fix the initial theme set to Basic, Modern, Glass, Frosted Glass, Spacey and Cyberpunk.
 - [x] Separate theme identity from color palette selection.
-- [ ] Define supported platform/version matrix.
-- [ ] Define public package/module naming conventions.
-- [ ] Define compatibility and semantic-versioning policy.
+- [x] Define supported platform/version matrix.
+- [x] Define public package/module naming conventions.
+- [x] Define compatibility and semantic-versioning policy.
 
 ## Phase 1 — Language-neutral specification
 
@@ -100,7 +100,7 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Dialog
 
 - [x] Build a real Web reference application using these components.
-- [ ] Establish visual-regression and interaction baselines.
+- [x] Establish visual-regression and interaction baselines.
 
 ## Phase 4 — Compose adapter and architecture validation
 
