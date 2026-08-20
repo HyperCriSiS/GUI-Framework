@@ -112,16 +112,15 @@ function emitPartMap(lines, selector, componentId, partMap, label) {
   }
 }
 
-function emitVisual(lines, prefix, componentId, component, visual, label) {
-  const root = `${prefix} .gui-${componentId}`;
-  emitPartMap(lines, root, componentId, visual.base, `${label}.base`);
+function emitScopedVisual(lines, root, componentId, component, visual, label) {
+  emitPartMap(lines, root, componentId, visual?.base, `${label}.base`);
 
   for (const size of component.sizes ?? []) {
-    emitPartMap(lines, `${root}:where([data-gui-size="${size}"])`, componentId, visual.sizes?.[size], `${label}.sizes.${size}`);
+    emitPartMap(lines, `${root}:where([data-gui-size="${size}"])`, componentId, visual?.sizes?.[size], `${label}.sizes.${size}`);
   }
 
   for (const variant of component.variants ?? []) {
-    const scoped = visual.variants?.[variant];
+    const scoped = visual?.variants?.[variant];
     if (!scoped) continue;
     const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
     emitPartMap(lines, variantRoot, componentId, scoped.base, `${label}.variants.${variant}.base`);
@@ -132,17 +131,34 @@ function emitVisual(lines, prefix, componentId, component, visual, label) {
 
   for (const state of component.states ?? []) {
     if (state === "default") continue;
-    emitPartMap(lines, stateSelector(root, state), componentId, visual.states?.[state], `${label}.states.${state}`);
+    emitPartMap(lines, stateSelector(root, state), componentId, visual?.states?.[state], `${label}.states.${state}`);
     for (const variant of component.variants ?? []) {
       const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
       emitPartMap(
         lines,
         stateSelector(variantRoot, state),
         componentId,
-        visual.variants?.[variant]?.states?.[state],
+        visual?.variants?.[variant]?.states?.[state],
         `${label}.variants.${variant}.states.${state}`,
       );
     }
+  }
+}
+
+function emitVisual(lines, prefix, componentId, component, visual, label) {
+  const root = `${prefix} .gui-${componentId}`;
+  emitScopedVisual(lines, root, componentId, component, visual, label);
+
+  for (const [fallbackId, fallback] of Object.entries(visual?.fallbacks ?? {})) {
+    const fallbackRoot = `${root}:where([data-gui-fallback="${fallbackId}"])`;
+    emitScopedVisual(
+      lines,
+      fallbackRoot,
+      componentId,
+      component,
+      fallback.recipe,
+      `${label}.fallbacks.${fallbackId}.recipe`,
+    );
   }
 }
 
