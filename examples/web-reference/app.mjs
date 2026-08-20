@@ -7,6 +7,7 @@ import { createGuiPanel } from "../../packages/adapter-web/src/panel.mjs";
 import { createGuiDialog } from "../../packages/adapter-web/src/dialog.mjs";
 
 const palettes = new Set(["reference-dark", "reference-light"]);
+const hostContexts = new Set(["page", "extension-popup", "extension-sidebar", "extension-options"]);
 
 function createElement(document, tagName, className = "", text = "") {
   const element = document.createElement(tagName);
@@ -33,6 +34,8 @@ export function mountReferenceApp(document, root, options = {}) {
 
   const initialPalette = options.palette ?? "reference-dark";
   if (!palettes.has(initialPalette)) throw new Error(`Unknown reference palette: ${initialPalette}`);
+  const hostContext = options.hostContext ?? "page";
+  if (!hostContexts.has(hostContext)) throw new Error(`Unknown Web reference host context: ${hostContext}`);
 
   const state = {
     name: options.name ?? "Ada Lovelace",
@@ -47,6 +50,7 @@ export function mountReferenceApp(document, root, options = {}) {
   root.className = "gui-reference-host";
   root.dataset.guiTheme = "basic";
   root.dataset.guiPalette = state.palette;
+  root.dataset.guiHostContext = hostContext;
 
   const surface = createElement(document, "div", "gui-reference");
   const header = createElement(document, "header", "gui-reference__header");
@@ -241,6 +245,7 @@ export function mountReferenceApp(document, root, options = {}) {
   return {
     root,
     surface,
+    hostContext,
     components,
     getState() {
       return { ...state };
@@ -250,6 +255,7 @@ export function mountReferenceApp(document, root, options = {}) {
       root.replaceChildren();
       delete root.dataset.guiTheme;
       delete root.dataset.guiPalette;
+      delete root.dataset.guiHostContext;
       root.className = "";
     },
   };
@@ -257,5 +263,8 @@ export function mountReferenceApp(document, root, options = {}) {
 
 if (typeof document !== "undefined") {
   const root = document.querySelector?.("#gui-reference-root");
-  if (root) mountReferenceApp(document, root);
+  if (root) {
+    const query = new URLSearchParams(globalThis.location?.search ?? "");
+    mountReferenceApp(document, root, { hostContext: query.get("context") ?? "page" });
+  }
 }

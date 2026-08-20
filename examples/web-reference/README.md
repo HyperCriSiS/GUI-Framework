@@ -16,4 +16,14 @@ Then serve the repository root with any static HTTP server and open:
 /examples/web-reference/
 ```
 
-The surface exercises controlled Input and Switch state, palette switching, native Button behavior, composed Panel/Card layout and controlled native Dialog dismissal.
+The surface exercises controlled Input and Switch state, palette switching, native Button behavior, composed Panel/Card layout and controlled native Dialog dismissal/focus restoration.
+
+Browser-extension layout contexts use the same application and framework components rather than a separate extension-only component layer:
+
+```text
+/examples/web-reference/?context=extension-popup
+/examples/web-reference/?context=extension-sidebar
+/examples/web-reference/?context=extension-options
+```
+
+Playwright verifies representative popup, sidebar and options-page viewport sizes for keyboard traversal, horizontal overflow and modal-dialog fit/focus behavior. These contexts intentionally validate host-layout constraints without putting browser-extension assumptions into the neutral component specification.

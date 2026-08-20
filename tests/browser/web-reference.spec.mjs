@@ -4,12 +4,22 @@ import { expect, test } from "@playwright/test";
 
 const referencePath = "/examples/web-reference/";
 
-async function openReference(page) {
-  await page.goto(referencePath);
+async function openReference(page, context = "page") {
+  const suffix = context === "page" ? "" : `?context=${encodeURIComponent(context)}`;
+  await page.goto(`${referencePath}${suffix}`);
   const root = page.locator("#gui-reference-root");
   await expect(root).toHaveAttribute("data-gui-theme", "basic");
   await expect(root).toHaveAttribute("data-gui-palette", "reference-dark");
+  await expect(root).toHaveAttribute("data-gui-host-context", context);
   return root;
+}
+
+async function expectNoHorizontalOverflow(page) {
+  const metrics = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    viewportWidth: document.documentElement.clientWidth,
+  }));
+  expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth);
 }
 
 test("controlled native interactions remain synchronized", async ({ page }) => {
@@ -42,6 +52,38 @@ test("controlled native interactions remain synchronized", async ({ page }) => {
   await expect(reviewButton).toBeFocused();
   await expect(page.getByText("Review closed.")).toBeVisible();
 });
+
+for (const host of [
+  { context: "extension-popup", width: 360, height: 600 },
+  { context: "extension-sidebar", width: 420, height: 800 },
+  { context: "extension-options", width: 1100, height: 760 },
+]) {
+  test(`${host.context} remains keyboard-usable without horizontal overflow`, async ({ page }) => {
+    await page.setViewportSize({ width: host.width, height: host.height });
+    await openReference(page, host.context);
+    await expectNoHorizontalOverflow(page);
+
+    const input = page.getByLabel("Display name");
+    const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
+    const saveButton = page.getByRole("button", { name: "Save settings" });
+    await input.focus();
+    await page.keyboard.press("Tab");
+    await expect(notificationSwitch).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(saveButton).toBeFocused();
+
+    const reviewButton = page.getByRole("button", { name: "Review changes" });
+    await reviewButton.click();
+    const dialog = page.getByRole("dialog", { name: "Review settings" });
+    await expect(dialog).toBeVisible();
+    const bounds = await dialog.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(host.width);
+    await page.keyboard.press("Escape");
+    await expect(reviewButton).toBeFocused();
+  });
+}
 
 test("Basic reference dark desktop visual baseline", async ({ page }) => {
   await openReference(page);

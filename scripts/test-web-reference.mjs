@@ -70,6 +70,8 @@ const app = mountReferenceApp(fakeDocument, root);
 
 assert.equal(root.dataset.guiTheme, "basic");
 assert.equal(root.dataset.guiPalette, "reference-dark");
+assert.equal(root.dataset.guiHostContext, "page");
+assert.equal(app.hostContext, "page");
 assert.equal(root.className, "gui-reference-host");
 assert.equal(root.children.length, 2, "The theme host must contain the layout surface and dialog");
 assert.equal(root.children[0], app.surface);
@@ -107,6 +109,13 @@ app.components.closeDialogButton.element.click();
 assert.equal(app.getState().dialogOpen, false);
 assert.equal(app.components.dialog.element.open, false);
 
+const extensionRoot = new FakeElement("main");
+const extensionApp = mountReferenceApp(fakeDocument, extensionRoot, { hostContext: "extension-popup" });
+assert.equal(extensionRoot.dataset.guiHostContext, "extension-popup");
+assert.equal(extensionApp.hostContext, "extension-popup");
+extensionApp.destroy();
+assert.equal(extensionRoot.dataset.guiHostContext, undefined);
+
 const [html, css] = await Promise.all([
   readFile("examples/web-reference/index.html", "utf8"),
   readFile("examples/web-reference/reference.css", "utf8"),
@@ -120,15 +129,20 @@ assert.match(
   /#gui-reference-root\s*\{[^}]*background:\s*var\(--gui-semantic-color-surface,[^}]*color:\s*var\(--gui-semantic-color-text-primary,/s,
   "The themed application root must own the reference surface and primary text colors",
 );
+assert.match(css, /data-gui-host-context="extension-popup"/);
+assert.match(css, /data-gui-host-context="extension-sidebar"/);
+assert.match(css, /data-gui-host-context="extension-options"/);
 
 app.destroy();
 assert.equal(root.children.length, 0);
 assert.equal(root.dataset.guiTheme, undefined);
 assert.equal(root.dataset.guiPalette, undefined);
+assert.equal(root.dataset.guiHostContext, undefined);
 assert.equal(root.className, "");
 
 assert.throws(() => mountReferenceApp(null, root), /Document-like object/);
 assert.throws(() => mountReferenceApp(fakeDocument, null), /Element-like root/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { palette: "unknown" }), /Unknown reference palette/);
+assert.throws(() => mountReferenceApp(fakeDocument, root, { hostContext: "unknown" }), /Unknown Web reference host context/);
 
 console.log("Functional Web reference application integration tests passed.");

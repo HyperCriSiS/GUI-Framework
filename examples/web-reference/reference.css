@@ -166,6 +166,35 @@ body {
   margin-block-start: 8px;
 }
 
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference {
+  width: 100%;
+  padding: 16px;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__header,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference__header {
+  margin-block-end: 16px;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference h1,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference h1 {
+  font-size: 1.75rem;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__grid,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference__grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__actions > * {
+  flex: 1 1 100%;
+}
+
+.gui-reference-host[data-gui-host-context="extension-options"] .gui-reference {
+  width: min(100% - 40px, 960px);
+}
+
 @media (max-width: 720px) {
   .gui-reference {
     width: min(100% - 20px, 1040px);
@@ -182,5 +211,11 @@ body {
 
   .gui-reference__actions > * {
     flex: 1 1 140px;
+  }
+
+  .gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference,
+  .gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference {
+    width: 100%;
+    padding: 12px;
   }
 }
