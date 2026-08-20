@@ -58,6 +58,12 @@ jobs:
       - name: Generate Web token output
         run: npm run build:web-tokens
 
+      - name: Generate Web assets
+        run: npm run build:web-assets
+
+      - name: Test Web asset generation
+        run: npm run test:web-assets
+
       - name: Test Web adapter token generation
         run: npm run test:web-adapter
 
@@ -108,6 +114,12 @@ jobs:
 
       - name: Test Kotlin visual generation
         run: npm run test:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Test Kotlin asset generation
+        run: npm run test:kotlin-assets
 
       - name: Test native Compose Basic Switch
         run: npm run test:kotlin-switch
