@@ -19,13 +19,17 @@
       "id": "reference-dark",
       "name": "Reference Dark",
       "source": "palettes/reference-dark.tokens.json",
-      "developmentReference": true
+      "developmentReference": true,
+      "familyId": "reference",
+      "variantId": "dark"
     },
     {
       "id": "reference-light",
       "name": "Reference Light",
       "source": "palettes/reference-light.tokens.json",
-      "developmentReference": true
+      "developmentReference": true,
+      "familyId": "reference",
+      "variantId": "light"
     }
   ],
   "themes": [
@@ -70,7 +74,12 @@
         "width": 24,
         "height": 24
       },
-      "viewBox": [0, 0, 24, 24],
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
       "colorMode": "currentColor"
     }
   ],

@@ -54,6 +54,11 @@ try {
 
   const darkPalette = ir.palettes.find((palette) => palette.id === "reference-dark");
   const lightPalette = ir.palettes.find((palette) => palette.id === "reference-light");
+  assert.equal(darkPalette?.familyId, "reference");
+  assert.equal(lightPalette?.familyId, "reference");
+  assert.equal(darkPalette?.variantId, "dark");
+  assert.equal(lightPalette?.variantId, "light");
+  assert.notEqual(darkPalette?.variantId, lightPalette?.variantId, "Palette variants in one family must remain distinguishable");
   const darkButton = darkPalette?.components?.button;
   const lightButton = lightPalette?.components?.button;
   assert.ok(darkButton && lightButton, "Every registered palette must compile the same button contract");

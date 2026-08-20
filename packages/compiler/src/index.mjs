@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { resolveThemeDefinitions } from "./theme-resolution.mjs";
+import { validatePaletteRegistry } from "./palette-model.mjs";
 import {
   compileVisualRecipe,
   mergeCompiledVisualRecipes,
@@ -34,91 +35,62 @@ function collectTokens(node, source, path = [], inheritedType, output = new Map(
 
   for (const [name, child] of Object.entries(node)) {
     if (name.startsWith("$")) continue;
-    if (!isObject(child)) throw new Error(`${source}: ${[...path, name].join(".")} must be an object`);
     const tokenPath = [...path, name];
+    if (!isObject(child)) throw new Error(`${source}: ${tokenPath.join(".")} must be an object`);
 
-    if (Object.prototype.hasOwnProperty.call(child, "$value")) {
+    if (Object.hasOwn(child, "$value")) {
+      const type = child.$type ?? groupType;
+      if (!type) throw new Error(`${source}: ${tokenPath.join(".")} has no token type`);
       const key = tokenPath.join(".");
-      if (output.has(key)) throw new Error(`Duplicate token path ${key} while loading ${source}`);
-      const type = typeof child.$type === "string" ? child.$type : groupType;
-      if (!type) throw new Error(`${source}: token ${key} has no type`);
-      output.set(key, { path: key, type, value: child.$value, source });
-    } else {
-      collectTokens(child, source, tokenPath, groupType, output);
+      if (output.has(key)) throw new Error(`${source}: duplicate token ${key}`);
+      output.set(key, { source, path: key, type, raw: child.$value });
+      continue;
     }
+
+    collectTokens(child, source, tokenPath, child.$type ?? groupType, output);
   }
 
   return output;
 }
 
 function mergeTokenMaps(...maps) {
-  const merged = new Map();
+  const output = new Map();
   for (const map of maps) {
-    for (const [key, token] of map) {
-      if (merged.has(key)) throw new Error(`Duplicate token path across loaded sources: ${key}`);
-      merged.set(key, token);
+    for (const [key, value] of map) {
+      if (output.has(key)) throw new Error(`Token ${key} is defined by both ${output.get(key).source} and ${value.source}`);
+      output.set(key, value);
     }
   }
-  return merged;
+  return output;
 }
 
-function appendTrace(trace, additions) {
-  const seen = new Set(trace.map((entry) => `${entry.token}\u0000${entry.source}`));
-  for (const entry of additions) {
-    const key = `${entry.token}\u0000${entry.source}`;
-    if (!seen.has(key)) {
-      trace.push(entry);
-      seen.add(key);
-    }
-  }
-}
-
-function resolveNestedValue(value, tokens, stack) {
+function resolveCompositeValue(value, tokens, stack, trace) {
   if (isTokenReference(value)) {
     const resolved = resolveToken(referencePath(value), tokens, stack);
-    return { value: resolved.value, trace: resolved.trace };
+    trace.push(...resolved.trace);
+    return resolved.value;
   }
-
-  if (Array.isArray(value)) {
-    const output = [];
-    const trace = [];
-    for (const item of value) {
-      const resolved = resolveNestedValue(item, tokens, stack);
-      output.push(resolved.value);
-      appendTrace(trace, resolved.trace);
-    }
-    return { value: output, trace };
-  }
-
+  if (Array.isArray(value)) return value.map((entry) => resolveCompositeValue(entry, tokens, stack, trace));
   if (isObject(value)) {
-    const output = {};
-    const trace = [];
-    for (const [key, item] of Object.entries(value)) {
-      const resolved = resolveNestedValue(item, tokens, stack);
-      output[key] = resolved.value;
-      appendTrace(trace, resolved.trace);
-    }
-    return { value: output, trace };
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, resolveCompositeValue(entry, tokens, stack, trace)])
+    );
   }
-
-  return { value, trace: [] };
+  return value;
 }
 
 function resolveToken(path, tokens, stack = []) {
-  if (stack.includes(path)) {
-    throw new Error(`Circular token reference: ${[...stack, path].join(" -> ")}`);
-  }
-
   const token = tokens.get(path);
-  if (!token) throw new Error(`Unresolved token reference: ${path}`);
+  if (!token) throw new Error(`Unresolved token reference ${path}`);
+  if (stack.includes(path)) throw new Error(`Circular token reference: ${[...stack, path].join(" -> ")}`);
 
-  if (isTokenReference(token.value)) {
-    const targetPath = referencePath(token.value);
-    const resolved = resolveToken(targetPath, tokens, [...stack, path]);
+  const nextStack = [...stack, path];
+  if (isTokenReference(token.raw)) {
+    const target = referencePath(token.raw);
+    const resolved = resolveToken(target, tokens, nextStack);
     if (resolved.type !== token.type) {
-      throw new Error(`Token ${path} declares ${token.type} but resolves to ${resolved.type}`);
+      throw new Error(`Type mismatch: ${path} (${token.type}) references ${target} (${resolved.type})`);
     }
-
     return {
       type: token.type,
       value: resolved.value,
@@ -126,29 +98,21 @@ function resolveToken(path, tokens, stack = []) {
     };
   }
 
-  const nested = resolveNestedValue(token.value, tokens, [...stack, path]);
-  const trace = [{ token: path, source: token.source }];
-  appendTrace(trace, nested.trace);
-
+  const compositeTrace = [];
+  const value = resolveCompositeValue(token.raw, tokens, nextStack, compositeTrace);
   return {
     type: token.type,
-    value: nested.value,
-    trace
+    value,
+    trace: [{ token: path, source: token.source }, ...compositeTrace]
   };
 }
 
-function stableObject(value) {
-  if (Array.isArray(value)) return value.map(stableObject);
-  if (!isObject(value)) return value;
-  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stableObject(value[key])]));
-}
-
-function compilePublicTokens(tokenUniverse) {
+function compilePublicTokens(tokens) {
   const output = {};
-  for (const path of [...tokenUniverse.keys()].sort()) {
-    if (path.startsWith("palette.")) continue;
-    const resolved = resolveToken(path, tokenUniverse);
-    output[path] = {
+  for (const key of [...tokens.keys()].sort()) {
+    if (key.startsWith("palette.")) continue;
+    const resolved = resolveToken(key, tokens);
+    output[key] = {
       type: resolved.type,
       value: resolved.value,
       trace: resolved.trace
@@ -157,28 +121,38 @@ function compilePublicTokens(tokenUniverse) {
   return output;
 }
 
+function stableObject(value) {
+  if (Array.isArray(value)) return value.map(stableObject);
+  if (!isObject(value)) return value;
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, stableObject(value[key])])
+  );
+}
+
 function compileThemeVisuals(theme, themeEntriesById, tokenUniverse) {
-  let components = {};
+  const baseTheme = theme.extends ? themeEntriesById.get(theme.extends) : null;
+  const componentIds = new Set([
+    ...Object.keys(baseTheme?.definition?.components ?? {}),
+    ...Object.keys(theme.components ?? {}),
+  ]);
+  const components = {};
 
-  for (const layerId of theme.inheritance) {
-    const layer = themeEntriesById.get(layerId);
-    if (!layer) throw new Error(`Missing resolved theme layer ${layerId}`);
-
-    for (const [componentId, visual] of Object.entries(layer.definition.components ?? {})) {
-      const compiledLayer = compileVisualRecipe(
-        visual,
-        (path) => resolveToken(path, tokenUniverse),
-        { theme: layer.id, source: layer.source },
-      );
-      components[componentId] = mergeCompiledVisualRecipes(
-        components[componentId] ?? {},
-        compiledLayer,
-      );
-    }
+  for (const componentId of componentIds) {
+    const parentVisual = baseTheme?.definition?.components?.[componentId]
+      ? compileVisualRecipe(baseTheme.definition.components[componentId], tokenUniverse)
+      : null;
+    const ownVisual = theme.components?.[componentId]
+      ? compileVisualRecipe(theme.components[componentId], tokenUniverse)
+      : null;
+    components[componentId] = mergeCompiledVisualRecipes(parentVisual, ownVisual);
   }
 
   return {
-    recommendedPalette: theme.recommendedPalette,
+    id: theme.id,
+    extends: theme.extends ?? null,
+    recommendedPalette: theme.recommendedPalette ?? null,
     components,
   };
 }
@@ -211,6 +185,8 @@ async function compile() {
   }
   const themes = resolveThemeDefinitions(themeEntries);
   const themeEntriesById = new Map(themeEntries.map((theme) => [theme.id, theme]));
+
+  validatePaletteRegistry(manifest.palettes);
 
   const palettes = [];
   for (const paletteEntry of manifest.palettes) {
@@ -257,6 +233,8 @@ async function compile() {
     palettes.push({
       id: paletteEntry.id,
       name: paletteEntry.name,
+      familyId: paletteEntry.familyId,
+      variantId: paletteEntry.variantId,
       source: paletteEntry.source,
       developmentReference: paletteEntry.developmentReference === true,
       tokens: compilePublicTokens(tokenUniverse),
@@ -273,16 +251,8 @@ async function compile() {
 }
 
 const outputArgIndex = process.argv.indexOf("--output");
-const outputPath = outputArgIndex >= 0 ? process.argv[outputArgIndex + 1] : undefined;
-if (outputArgIndex >= 0 && !outputPath) throw new Error("--output requires a path");
-
-const result = await compile();
-const serialized = `${JSON.stringify(result, null, 2)}\n`;
-
-if (outputPath) {
-  await mkdir(dirname(resolve(outputPath)), { recursive: true });
-  await writeFile(resolve(outputPath), serialized, "utf8");
-  console.log(`Compiled neutral specification to ${outputPath}`);
-} else {
-  process.stdout.write(serialized);
-}
+const outputPath = resolve(outputArgIndex >= 0 ? process.argv[outputArgIndex + 1] : "build/spec-ir.json");
+const ir = await compile();
+await mkdir(dirname(outputPath), { recursive: true });
+await writeFile(outputPath, `${JSON.stringify(ir, null, 2)}\n`, "utf8");
+console.log(`Compiled GUI Framework specification ${ir.specVersion} to ${outputPath}`);
