@@ -80,6 +80,18 @@ try {
   assert.match(source, /"kind": "children"/);
   assert.match(source, /"role": "container"/);
 
+  assert.match(source, /export const guiCapabilityProfiles = \{/);
+  assert.match(source, /"basic": \{/);
+  assert.match(source, /"button": \{/);
+  assert.match(source, /"optional": \[/);
+  assert.match(source, /"advancedBlendModes"/);
+  assert.match(source, /"shaderEffects"/);
+  assert.match(source, /"fallbackOrder": \[/);
+  assert.match(source, /"standard"/);
+  assert.match(source, /"minimal"/);
+  assert.match(source, /"fallbacks": \{\}/);
+  assert.match(source, /export type GuiCapabilityProfiles = typeof guiCapabilityProfiles;/);
+
   assert.doesNotMatch(source, /reference-dark|reference-light/, "Development palette IDs must not become public Web component contract types");
 
   console.log("Web TypeScript contract generation tests passed.");

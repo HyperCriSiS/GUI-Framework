@@ -25,6 +25,20 @@ function readonlyJson(value, indent = "") {
   return `${JSON.stringify(value, null, 2).replace(/\n/g, `\n${indent}`)} as const`;
 }
 
+function capabilityProfile(component, visual) {
+  return {
+    required: [...(component.capabilities?.required ?? [])],
+    optional: [...(component.capabilities?.optional ?? [])],
+    fallbackOrder: [...(component.capabilities?.fallbackOrder ?? [])],
+    fallbacks: Object.fromEntries(
+      Object.entries(visual?.fallbacks ?? {}).map(([id, fallback]) => [
+        id,
+        { requires: [...(fallback.requires ?? [])] },
+      ]),
+    ),
+  };
+}
+
 function generate(ir) {
   const { registeredThemeIds, availableThemeIds, componentIds } = analyzeThemeAvailability(ir);
   if (availableThemeIds.length === 0) throw new Error("Compiled IR contains no fully visualized themes");
@@ -64,6 +78,38 @@ function generate(ir) {
     lines.push(`export type Gui${name}State = (typeof gui${name}Contract.states)[number];`);
     lines.push("");
   }
+
+  const capabilityProfiles = {};
+  const referencePalette = ir.palettes[0];
+  for (const themeId of availableThemeIds) {
+    capabilityProfiles[themeId] = {};
+    for (const componentId of componentIds) {
+      capabilityProfiles[themeId][componentId] = capabilityProfile(
+        referenceComponents[componentId],
+        referencePalette.themes?.[themeId]?.components?.[componentId],
+      );
+    }
+  }
+
+  for (const palette of ir.palettes.slice(1)) {
+    for (const themeId of availableThemeIds) {
+      for (const componentId of componentIds) {
+        const expected = capabilityProfiles[themeId][componentId];
+        const actual = capabilityProfile(
+          palette.components?.[componentId],
+          palette.themes?.[themeId]?.components?.[componentId],
+        );
+        if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+          throw new Error(
+            `Capability profile differs for palette ${palette.id}, theme ${themeId}, component ${componentId}`,
+          );
+        }
+      }
+    }
+  }
+
+  lines.push(`export const guiCapabilityProfiles = ${readonlyJson(capabilityProfiles)};`, "");
+  lines.push("export type GuiCapabilityProfiles = typeof guiCapabilityProfiles;", "");
 
   return `${lines.join("\n")}\n`;
 }
