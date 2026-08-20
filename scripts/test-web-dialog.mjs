@@ -14,14 +14,17 @@ function run(args, label) {
 }
 
 class FakeElement {
-  constructor(tagName) {
+  constructor(tagName, document) {
     this.tagName = tagName.toUpperCase();
+    this.ownerDocument = document;
     this.dataset = {};
     this.attributes = new Map();
     this.listeners = new Map();
     this.children = [];
     this.className = "";
     this.style = {};
+    this.isConnected = true;
+    this.focusCalls = 0;
   }
   append(child) { this.children.push(child); }
   setAttribute(name, value) { this.attributes.set(name, String(value)); }
@@ -31,11 +34,15 @@ class FakeElement {
   removeEventListener(type, listener) {
     if (this.listeners.get(type) === listener) this.listeners.delete(type);
   }
+  focus() {
+    this.focusCalls += 1;
+    this.ownerDocument.activeElement = this;
+  }
 }
 
 class FakeDialogElement extends FakeElement {
-  constructor() {
-    super("dialog");
+  constructor(document) {
+    super("dialog", document);
     this.open = false;
     this.showModalCalls = 0;
     this.closeCalls = 0;
@@ -44,11 +51,13 @@ class FakeDialogElement extends FakeElement {
     if (this.open) throw new Error("Dialog is already open");
     this.open = true;
     this.showModalCalls += 1;
+    this.ownerDocument.activeElement = this;
   }
   close() {
     if (!this.open) return;
     this.open = false;
     this.closeCalls += 1;
+    if (this.ownerDocument.activeElement === this) this.ownerDocument.activeElement = null;
   }
   cancel() {
     let prevented = false;
@@ -63,11 +72,18 @@ class FakeDialogElement extends FakeElement {
   }
 }
 
-const fakeDocument = {
+class FakeDocument {
+  constructor() {
+    this.activeElement = null;
+  }
   createElement(tagName) {
-    return tagName.toLowerCase() === "dialog" ? new FakeDialogElement() : new FakeElement(tagName);
-  },
-};
+    return tagName.toLowerCase() === "dialog"
+      ? new FakeDialogElement(this)
+      : new FakeElement(tagName, this);
+  }
+}
+
+const fakeDocument = new FakeDocument();
 
 try {
   run(["packages/compiler/src/index.mjs", "--output", irPath], "Specification compiler");
@@ -88,6 +104,10 @@ try {
   assert.doesNotMatch(css, /transition: var\(/, "The v1 Basic dialog must not add custom open or close animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into dialog CSS");
 
+  const opener = fakeDocument.createElement("button");
+  opener.focus();
+  assert.equal(opener.focusCalls, 1);
+
   let dismissRequests = 0;
   const dialog = createGuiDialog(fakeDocument, {
     open: false,
@@ -103,6 +123,7 @@ try {
   assert.equal(dialog.element.dataset.guiSize, "large");
   assert.equal(dialog.element.dataset.guiDismissible, "true");
   assert.equal(dialog.element.getAttribute("aria-label"), "Delete account");
+  assert.equal(dialog.element.getAttribute("aria-modal"), "true");
   assert.equal(dialog.element.open, false);
   assert.equal(dialog.element.style.boxSizing, "border-box");
   assert.equal(dialog.element.style.borderStyle, "solid");
@@ -113,6 +134,7 @@ try {
   dialog.update({ open: true });
   assert.equal(dialog.element.open, true);
   assert.equal(dialog.element.showModalCalls, 1);
+  assert.equal(fakeDocument.activeElement, dialog.element, "Opening must enter native modal focus handling");
   assert.equal(dialog.element.children[0], child, "Dialog updates must preserve caller-owned children");
 
   const prevented = dialog.element.cancel();
@@ -131,6 +153,20 @@ try {
   assert.equal(dialog.element.closeCalls, 1);
   assert.equal(dialog.element.getAttribute("aria-label"), "Account deletion confirmation");
   assert.equal(dialog.element.children[0], child);
+  assert.equal(opener.focusCalls, 2, "Controlled close must restore focus to the pre-open element");
+  assert.equal(fakeDocument.activeElement, opener);
+
+  opener.focus();
+  const focusCallsBeforeDisconnectedClose = opener.focusCalls;
+  dialog.update({ open: true, dismissible: true });
+  opener.isConnected = false;
+  dialog.update({ open: false });
+  assert.equal(
+    opener.focusCalls,
+    focusCallsBeforeDisconnectedClose,
+    "Focus restoration must ignore a target that left the document",
+  );
+  opener.isConnected = true;
 
   assert.throws(() => createGuiDialog(fakeDocument, { accessibilityLabel: "Dialog" }), /open must be a boolean/);
   assert.throws(() => createGuiDialog(fakeDocument, { open: false }), /accessibilityLabel must be a non-empty string/);
@@ -140,10 +176,17 @@ try {
   assert.throws(() => dialog.update({ onDismissRequest: "invalid" }), /onDismissRequest must be a function or null/);
   assert.throws(() => createGuiDialog(null, { open: false, accessibilityLabel: "Dialog" }), /requires a DOM Document-like object/);
 
+  opener.focus();
+  const focusCallsBeforeDestroy = opener.focusCalls;
   dialog.update({ open: true, dismissible: true });
   dialog.destroy();
   assert.equal(dialog.element.listeners.has("cancel"), false);
   assert.equal(dialog.element.open, false, "Destroy must remove an open dialog from the native modal state");
+  assert.equal(
+    opener.focusCalls,
+    focusCallsBeforeDestroy,
+    "Destroy must not impose focus ownership on application teardown",
+  );
   assert.equal(dialog.element.children[0], child, "Destroy must not take ownership of caller-provided child nodes");
 
   console.log("Web Basic dialog vertical-slice tests passed.");

@@ -65,10 +65,39 @@ export function createGuiDialog(document, initialProps = {}) {
   element.style.color = "inherit";
 
   let props = normalizeProps(initialProps);
+  let restoreFocusTarget = null;
 
-  function syncOpenState() {
-    if (props.open && !element.open) element.showModal();
-    else if (!props.open && element.open) element.close();
+  function captureRestoreFocusTarget() {
+    const activeElement = document.activeElement;
+    restoreFocusTarget =
+      activeElement &&
+      activeElement !== element &&
+      typeof activeElement.focus === "function"
+        ? activeElement
+        : null;
+  }
+
+  function restoreFocus() {
+    const target = restoreFocusTarget;
+    restoreFocusTarget = null;
+    if (!target || target.isConnected === false || typeof target.focus !== "function") return;
+
+    try {
+      target.focus({ preventScroll: true });
+    } catch {
+      target.focus();
+    }
+  }
+
+  function syncOpenState({ restore = true } = {}) {
+    if (props.open && !element.open) {
+      captureRestoreFocusTarget();
+      element.showModal();
+    } else if (!props.open && element.open) {
+      element.close();
+      if (restore) restoreFocus();
+      else restoreFocusTarget = null;
+    }
   }
 
   function render() {
@@ -77,6 +106,7 @@ export function createGuiDialog(document, initialProps = {}) {
     element.dataset.guiSize = props.size;
     element.dataset.guiDismissible = props.dismissible ? "true" : "false";
     element.setAttribute("aria-label", props.accessibilityLabel);
+    element.setAttribute("aria-modal", "true");
     syncOpenState();
   }
 
@@ -97,7 +127,12 @@ export function createGuiDialog(document, initialProps = {}) {
     },
     destroy() {
       element.removeEventListener("cancel", requestDismiss);
-      if (element.open) element.close();
+      if (element.open) {
+        props = { ...props, open: false };
+        syncOpenState({ restore: false });
+      } else {
+        restoreFocusTarget = null;
+      }
     },
   };
 }

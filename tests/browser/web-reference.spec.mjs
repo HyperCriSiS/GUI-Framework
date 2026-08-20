@@ -30,13 +30,16 @@ test("controlled native interactions remain synchronized", async ({ page }) => {
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
   await expect(page.getByRole("button", { name: "Use dark palette" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Review changes" }).click();
+  const reviewButton = page.getByRole("button", { name: "Review changes" });
+  await reviewButton.click();
   const dialog = page.getByRole("dialog", { name: "Review settings" });
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveJSProperty("open", true);
+  await expect(dialog).toHaveAttribute("aria-modal", "true");
 
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
+  await expect(reviewButton).toBeFocused();
   await expect(page.getByText("Review closed.")).toBeVisible();
 });
 
