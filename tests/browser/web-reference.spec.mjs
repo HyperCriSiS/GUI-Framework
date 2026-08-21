@@ -4,13 +4,17 @@ import { expect, test } from "@playwright/test";
 
 const referencePath = "/examples/web-reference/";
 
-async function openReference(page, context = "page") {
-  const suffix = context === "page" ? "" : `?context=${encodeURIComponent(context)}`;
+async function openReference(page, context = "page", density = "standard") {
+  const query = new URLSearchParams();
+  if (context !== "page") query.set("context", context);
+  if (density !== "standard") query.set("density", density);
+  const suffix = query.size === 0 ? "" : `?${query.toString()}`;
   await page.goto(`${referencePath}${suffix}`);
   const root = page.locator("#gui-reference-root");
   await expect(root).toHaveAttribute("data-gui-theme", "basic");
   await expect(root).toHaveAttribute("data-gui-palette", "reference-dark");
   await expect(root).toHaveAttribute("data-gui-host-context", context);
+  await expect(root).toHaveAttribute("data-gui-density", density);
   return root;
 }
 
@@ -84,6 +88,53 @@ for (const host of [
     await expect(reviewButton).toBeFocused();
   });
 }
+
+test("Basic compact density remains usable at the minimum reference width", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await openReference(page, "page", "compact");
+  await expectNoHorizontalOverflow(page);
+
+  for (const locator of [
+    page.getByLabel("Display name"),
+    page.getByRole("switch", { name: "Activity notifications" }),
+    page.getByRole("button", { name: "Save settings" }),
+    page.getByRole("button", { name: "Use light palette" }),
+    page.getByRole("button", { name: "Review changes" }),
+  ]) {
+    await expect(locator).toHaveAttribute("data-gui-size", "small");
+    const bounds = await locator.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.height).toBeGreaterThanOrEqual(24);
+  }
+
+  for (const panel of await page.locator(".gui-panel").all()) {
+    await expect(panel).toHaveAttribute("data-gui-size", "small");
+  }
+
+  const input = page.getByLabel("Display name");
+  const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
+  const saveButton = page.getByRole("button", { name: "Save settings" });
+  await input.focus();
+  await page.keyboard.press("Tab");
+  await expect(notificationSwitch).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(saveButton).toBeFocused();
+
+  const reviewButton = page.getByRole("button", { name: "Review changes" });
+  await reviewButton.click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute("data-gui-size", "small");
+  await expect(page.getByRole("button", { name: "Close" })).toHaveAttribute("data-gui-size", "small");
+
+  const dialogBounds = await dialog.boundingBox();
+  expect(dialogBounds).not.toBeNull();
+  expect(dialogBounds.x).toBeGreaterThanOrEqual(0);
+  expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(320);
+  await expectNoHorizontalOverflow(page);
+  await page.keyboard.press("Escape");
+  await expect(reviewButton).toBeFocused();
+});
 
 test("Basic reference dark desktop visual baseline", async ({ page }) => {
   await openReference(page);

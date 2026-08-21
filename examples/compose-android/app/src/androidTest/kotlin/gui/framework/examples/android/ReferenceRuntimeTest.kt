@@ -20,10 +20,24 @@ class ReferenceRuntimeTest {
 
     @Test
     fun referenceControlsRemainUsableAtHostScale() {
+        exerciseReferenceControls("Scaled reference")
+    }
+
+    @Test
+    fun compactReferenceControlsRemainUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.setReferenceDensity(ReferenceDensity.Compact)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Compact reference")
+    }
+
+    private fun exerciseReferenceControls(replacement: String) {
         composeRule
             .onNodeWithContentDescription("Reference name")
             .assertIsDisplayed()
-            .performTextReplacement("Scaled reference")
+            .performTextReplacement(replacement)
 
         val referenceSwitch = composeRule.onNodeWithContentDescription("Reference switch")
         referenceSwitch.assertIsDisplayed().performClick()

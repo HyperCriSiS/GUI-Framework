@@ -22,7 +22,17 @@ import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTheme
+import gui.framework.generated.internal.GuiButtonSize
+import gui.framework.generated.internal.GuiDialogSize
+import gui.framework.generated.internal.GuiInputSize
+import gui.framework.generated.internal.GuiPanelSize
+import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiThemeId
+
+enum class ReferenceDensity {
+    Standard,
+    Compact,
+}
 
 fun main() = application {
     Window(
@@ -39,10 +49,16 @@ fun main() = application {
 }
 
 @Composable
-private fun DesktopReferenceApp() {
+private fun DesktopReferenceApp(density: ReferenceDensity = ReferenceDensity.Standard) {
     var name by remember { mutableStateOf("Compose") }
     var enabled by remember { mutableStateOf(true) }
     var dialogOpen by remember { mutableStateOf(false) }
+
+    val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
+    val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
+    val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
+    val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
+    val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
 
     Column(
         modifier = Modifier
@@ -54,6 +70,7 @@ private fun DesktopReferenceApp() {
 
         GuiPanel(
             accessibilityLabel = "Reference controls",
+            size = panelSize,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 GuiInput(
@@ -61,16 +78,19 @@ private fun DesktopReferenceApp() {
                     onValueChange = { name = it },
                     placeholder = "Name",
                     accessibilityLabel = "Reference name",
+                    size = inputSize,
                 )
                 GuiSwitch(
                     checked = enabled,
                     onCheckedChange = { enabled = it },
                     accessibilityLabel = "Reference switch",
+                    size = switchSize,
                 )
                 GuiButton(
                     label = "Open dialog",
                     onActivate = { dialogOpen = true },
                     disabled = !enabled,
+                    size = buttonSize,
                 )
             }
         }
@@ -80,12 +100,14 @@ private fun DesktopReferenceApp() {
         open = dialogOpen,
         accessibilityLabel = "Reference dialog",
         onDismissRequest = { dialogOpen = false },
+        size = dialogSize,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BasicText("Hello, $name")
             GuiButton(
                 label = "Close",
                 onActivate = { dialogOpen = false },
+                size = buttonSize,
             )
         }
     }

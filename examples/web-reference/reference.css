@@ -166,6 +166,54 @@ body {
   margin-block-start: 8px;
 }
 
+.gui-reference-host[data-gui-density="compact"] .gui-reference {
+  width: min(100% - 16px, 760px);
+  padding-block: 16px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__header {
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference h1 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference h2 {
+  margin-block-end: 10px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__grid,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__stack {
+  gap: 10px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__field {
+  gap: 4px;
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__setting {
+  gap: 8px;
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__actions,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__summary,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__dialog-actions {
+  gap: 6px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__status {
+  margin-block-start: 8px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__dialog-content {
+  gap: 8px;
+  min-width: min(360px, calc(100vw - 40px));
+  max-width: 440px;
+}
+
 .gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference,
 .gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference {
   width: 100%;

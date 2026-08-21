@@ -8,6 +8,7 @@ import { createGuiDialog } from "../../packages/adapter-web/src/dialog.mjs";
 
 const palettes = new Set(["reference-dark", "reference-light"]);
 const hostContexts = new Set(["page", "extension-popup", "extension-sidebar", "extension-options"]);
+const densities = new Set(["standard", "compact"]);
 
 function createElement(document, tagName, className = "", text = "") {
   const element = document.createElement(tagName);
@@ -36,6 +37,9 @@ export function mountReferenceApp(document, root, options = {}) {
   if (!palettes.has(initialPalette)) throw new Error(`Unknown reference palette: ${initialPalette}`);
   const hostContext = options.hostContext ?? "page";
   if (!hostContexts.has(hostContext)) throw new Error(`Unknown Web reference host context: ${hostContext}`);
+  const density = options.density ?? "standard";
+  if (!densities.has(density)) throw new Error(`Unknown Web reference density: ${density}`);
+  const compact = density === "compact";
 
   const state = {
     name: options.name ?? "Ada Lovelace",
@@ -51,6 +55,7 @@ export function mountReferenceApp(document, root, options = {}) {
   root.dataset.guiTheme = "basic";
   root.dataset.guiPalette = state.palette;
   root.dataset.guiHostContext = hostContext;
+  root.dataset.guiDensity = density;
 
   const surface = createElement(document, "div", "gui-reference");
   const header = createElement(document, "header", "gui-reference__header");
@@ -69,13 +74,13 @@ export function mountReferenceApp(document, root, options = {}) {
   const primaryStack = createElement(document, "div", "gui-reference__stack");
   const secondaryStack = createElement(document, "div", "gui-reference__stack");
 
-  const settingsPanel = createGuiPanel(document, { accessibilityLabel: "Profile settings", size: "large" });
+  const settingsPanel = createGuiPanel(document, { accessibilityLabel: "Profile settings", size: compact ? "small" : "large" });
   const settingsTitle = createElement(document, "h2", "", "Profile settings");
   const nameField = createElement(document, "div", "gui-reference__field");
   const nameLabel = createElement(document, "label", "gui-reference__label", "Display name");
   nameLabel.htmlFor = "gui-reference-name";
 
-  const summaryPanel = createGuiPanel(document, { accessibilityLabel: "Current state", size: "medium" });
+  const summaryPanel = createGuiPanel(document, { accessibilityLabel: "Current state", size: compact ? "small" : "medium" });
   const summaryTitle = createElement(document, "h2", "", "Current state");
   const summaryList = createElement(document, "dl", "gui-reference__summary");
   const nameValue = createElement(document, "dd");
@@ -109,7 +114,7 @@ export function mountReferenceApp(document, root, options = {}) {
   nameInput = createGuiInput(document, {
     value: state.name,
     placeholder: "Enter a display name",
-    size: "large",
+    size: compact ? "small" : "large",
     onValueChange(nextValue) {
       state.name = nextValue;
       nameInput.update({ value: nextValue });
@@ -131,7 +136,7 @@ export function mountReferenceApp(document, root, options = {}) {
   notificationSwitch = createGuiSwitch(document, {
     checked: state.notifications,
     accessibilityLabel: "Activity notifications",
-    size: "medium",
+    size: compact ? "small" : "medium",
     onCheckedChange(nextChecked) {
       state.notifications = nextChecked;
       notificationSwitch.update({ checked: nextChecked });
@@ -146,6 +151,7 @@ export function mountReferenceApp(document, root, options = {}) {
   const saveButton = createGuiButton(document, {
     label: "Save settings",
     variant: "primary",
+    size: compact ? "small" : "medium",
     onActivate() {
       status.textContent = state.name.trim() === "" ? "Saved with an empty display name." : `Saved settings for ${state.name}.`;
     },
@@ -155,6 +161,7 @@ export function mountReferenceApp(document, root, options = {}) {
   paletteButton = createGuiButton(document, {
     label: state.palette === "reference-dark" ? "Use light palette" : "Use dark palette",
     variant: "secondary",
+    size: compact ? "small" : "medium",
     onActivate() {
       state.palette = state.palette === "reference-dark" ? "reference-light" : "reference-dark";
       paletteButton.update({ label: state.palette === "reference-dark" ? "Use light palette" : "Use dark palette" });
@@ -167,6 +174,7 @@ export function mountReferenceApp(document, root, options = {}) {
   const openDialogButton = createGuiButton(document, {
     label: "Review changes",
     variant: "ghost",
+    size: compact ? "small" : "medium",
     onActivate() {
       state.dialogOpen = true;
       dialog.update({ open: true });
@@ -177,7 +185,7 @@ export function mountReferenceApp(document, root, options = {}) {
   settingsPanel.element.append(settingsTitle, nameField, notificationSetting, actions, status);
   summaryPanel.element.append(summaryTitle, summaryList);
 
-  const detailPanel = createGuiPanel(document, { accessibilityLabel: "Integration scope", size: "medium" });
+  const detailPanel = createGuiPanel(document, { accessibilityLabel: "Integration scope", size: compact ? "small" : "medium" });
   detailPanel.element.append(
     createElement(document, "h2", "", "Integration scope"),
     createElement(
@@ -213,6 +221,7 @@ export function mountReferenceApp(document, root, options = {}) {
   const closeDialogButton = createGuiButton(document, {
     label: "Close",
     variant: "primary",
+    size: compact ? "small" : "medium",
     onActivate: closeDialog,
   });
   dialogActions.append(closeDialogButton.element);
@@ -221,7 +230,7 @@ export function mountReferenceApp(document, root, options = {}) {
   dialog = createGuiDialog(document, {
     open: state.dialogOpen,
     accessibilityLabel: "Review settings",
-    size: "medium",
+    size: compact ? "small" : "medium",
     onDismissRequest: closeDialog,
   });
   dialog.element.append(dialogContent);
@@ -246,6 +255,7 @@ export function mountReferenceApp(document, root, options = {}) {
     root,
     surface,
     hostContext,
+    density,
     components,
     getState() {
       return { ...state };
@@ -256,6 +266,7 @@ export function mountReferenceApp(document, root, options = {}) {
       delete root.dataset.guiTheme;
       delete root.dataset.guiPalette;
       delete root.dataset.guiHostContext;
+      delete root.dataset.guiDensity;
       root.className = "";
     },
   };
@@ -265,6 +276,9 @@ if (typeof document !== "undefined") {
   const root = document.querySelector?.("#gui-reference-root");
   if (root) {
     const query = new URLSearchParams(globalThis.location?.search ?? "");
-    mountReferenceApp(document, root, { hostContext: query.get("context") ?? "page" });
+    mountReferenceApp(document, root, {
+      hostContext: query.get("context") ?? "page",
+      density: query.get("density") ?? "standard",
+    });
   }
 }

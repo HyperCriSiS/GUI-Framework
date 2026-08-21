@@ -18,6 +18,12 @@ Then serve the repository root with any static HTTP server and open:
 
 The surface exercises controlled Input and Switch state, palette switching, native Button behavior, composed Panel/Card layout and controlled native Dialog dismissal/focus restoration.
 
+The same reference surface can exercise the compact density profile. Compact does not introduce a second component system; it composes the existing `small` component sizes with tighter host-layout spacing:
+
+```text
+/examples/web-reference/?density=compact
+```
+
 Browser-extension layout contexts use the same application and framework components rather than a separate extension-only component layer:
 
 ```text

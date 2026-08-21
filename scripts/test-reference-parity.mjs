@@ -15,6 +15,10 @@ assert.equal(scenario.version, 1);
 assert.equal(scenario.theme, "basic");
 assert.equal(scenario.palette, "reference-dark");
 assert.deepEqual(scenario.components, ["button", "input", "switch", "panel", "dialog"]);
+assert.deepEqual(scenario.densityProfiles, {
+  standard: { usesComponentDefaults: true },
+  compact: { componentSize: "small", minimumViewportWidth: 320 },
+});
 assert.deepEqual(scenario.flows.map(({ id }) => id), [
   "edit-primary-input",
   "toggle-switch",
@@ -30,6 +34,12 @@ for (const component of scenario.components) {
 
 assert.match(web, /root\.dataset\.guiTheme = "basic"/);
 assert.match(web, /options\.palette \?\? "reference-dark"/);
+assert.match(web, /options\.density \?\? "standard"/);
+assert.match(web, /const compact = density === "compact"/);
+assert.ok(
+  (web.match(/size: compact \? "small" :/g) ?? []).length >= 8,
+  "Web compact reference must route its reference components through the existing small size",
+);
 for (const factory of ["createGuiButton", "createGuiInput", "createGuiSwitch", "createGuiPanel", "createGuiDialog"]) {
   assert.match(web, new RegExp(`\\b${factory}\\(`), `Web reference must exercise ${factory}`);
 }
@@ -42,6 +52,14 @@ assert.match(web, /label: "Close"[\s\S]*onActivate: closeDialog/);
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /theme = GuiThemeId\.BASIC/);
   assert.match(source, /paletteId = "reference-dark"/);
+  assert.match(source, /ReferenceDensity\.Compact/);
+  for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
+    assert.match(
+      source,
+      new RegExp(`${sizeType}\\.SMALL`),
+      `${name} compact reference must map ${sizeType} to its existing SMALL size`,
+    );
+  }
   for (const component of ["GuiButton", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }

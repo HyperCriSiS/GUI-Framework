@@ -71,7 +71,9 @@ const app = mountReferenceApp(fakeDocument, root);
 assert.equal(root.dataset.guiTheme, "basic");
 assert.equal(root.dataset.guiPalette, "reference-dark");
 assert.equal(root.dataset.guiHostContext, "page");
+assert.equal(root.dataset.guiDensity, "standard");
 assert.equal(app.hostContext, "page");
+assert.equal(app.density, "standard");
 assert.equal(root.className, "gui-reference-host");
 assert.equal(root.children.length, 2, "The theme host must contain the layout surface and dialog");
 assert.equal(root.children[0], app.surface);
@@ -109,6 +111,31 @@ app.components.closeDialogButton.element.click();
 assert.equal(app.getState().dialogOpen, false);
 assert.equal(app.components.dialog.element.open, false);
 
+const compactRoot = new FakeElement("main");
+const compactApp = mountReferenceApp(fakeDocument, compactRoot, { density: "compact" });
+assert.equal(compactRoot.dataset.guiDensity, "compact");
+assert.equal(compactApp.density, "compact");
+for (const componentId of [
+  "nameInput",
+  "notificationSwitch",
+  "saveButton",
+  "paletteButton",
+  "openDialogButton",
+  "settingsPanel",
+  "summaryPanel",
+  "detailPanel",
+  "dialog",
+  "closeDialogButton",
+]) {
+  assert.equal(
+    compactApp.components[componentId].element.dataset.guiSize,
+    "small",
+    `Compact reference ${componentId} must use the existing small component size`,
+  );
+}
+compactApp.destroy();
+assert.equal(compactRoot.dataset.guiDensity, undefined);
+
 const extensionRoot = new FakeElement("main");
 const extensionApp = mountReferenceApp(fakeDocument, extensionRoot, { hostContext: "extension-popup" });
 assert.equal(extensionRoot.dataset.guiHostContext, "extension-popup");
@@ -132,17 +159,20 @@ assert.match(
 assert.match(css, /data-gui-host-context="extension-popup"/);
 assert.match(css, /data-gui-host-context="extension-sidebar"/);
 assert.match(css, /data-gui-host-context="extension-options"/);
+assert.match(css, /data-gui-density="compact"/);
 
 app.destroy();
 assert.equal(root.children.length, 0);
 assert.equal(root.dataset.guiTheme, undefined);
 assert.equal(root.dataset.guiPalette, undefined);
 assert.equal(root.dataset.guiHostContext, undefined);
+assert.equal(root.dataset.guiDensity, undefined);
 assert.equal(root.className, "");
 
 assert.throws(() => mountReferenceApp(null, root), /Document-like object/);
 assert.throws(() => mountReferenceApp(fakeDocument, null), /Element-like root/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { palette: "unknown" }), /Unknown reference palette/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { hostContext: "unknown" }), /Unknown Web reference host context/);
+assert.throws(() => mountReferenceApp(fakeDocument, root, { density: "unknown" }), /Unknown Web reference density/);
 
 console.log("Functional Web reference application integration tests passed.");
