@@ -43,6 +43,9 @@ jobs:
       - name: Test specification compiler
         run: npm run test:spec
 
+      - name: Guard renderer-neutral specification boundaries
+        run: npm run test:neutral-boundaries
+
       - name: Test theme inheritance and visual override resolution
         run: npm run test:theme-resolution
 
