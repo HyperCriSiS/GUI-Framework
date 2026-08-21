@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented and CI-verified for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. A functional Web reference application exercises the five components together under the same Basic theme and palette system, with Playwright interaction tests and read-only visual-regression baselines in CI. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are now defined. Portable SVG assets now have a neutral registry and strict shared profile, with Web output and native Compose ImageVector generation covered by validation/tests. Palette families/variants and semantic contrast policy are now explicit and CI-gated without hard-coding a light/dark-only model. The next foundation milestone is broader adapter accessibility/capability coverage and reference-application validation.
+The complete initial reference-component set is now implemented for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The Web reference adapter is complete for this initial set: native semantics/accessibility mappings, keyboard/focus behavior, functional interaction feedback, deterministic capability fallbacks, portable SVG assets, popup/sidebar/options host-context validation, Playwright interactions and read-only visual-regression baselines are covered. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model. The next foundation milestone is completing the corresponding Compose behavior/capability coverage and building Android/Desktop reference applications.
 
 ## Phase 0 — Foundation and scope
 
@@ -85,11 +85,11 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Implement SVG asset integration.
 - [x] Preserve native HTML semantics where possible. <!-- verified across Button, Input, Switch, Panel/Card and Dialog -->
 - [x] Implement keyboard/focus behavior with platform primitives for current interactive controls.
-- [ ] Complete accessibility mappings. <!-- all five initial reference components map their current neutral semantics; broader coverage and integration validation remain -->
-- [ ] Complete functional micro-interactions. <!-- current interactive controls have state feedback; Dialog open/close remains -->
+- [x] Complete accessibility mappings for the initial reference-component set. <!-- native labels/roles/state semantics are mapped and exercised by component/reference-app tests -->
+- [x] Complete functional micro-interactions for the initial reference-component set. <!-- native control feedback plus controlled Dialog open/dismiss/focus restoration are implemented -->
 - [x] Implement reduced-motion handling for generated interactive-control CSS.
-- [ ] Implement capability detection and deterministic visual fallbacks.
-- [ ] Verify browser-extension popup, sidebar and options-page use cases.
+- [x] Implement capability detection and deterministic visual fallbacks.
+- [x] Verify browser-extension popup, sidebar and options-page use cases. <!-- representative viewport, keyboard, overflow and dialog-fit/focus behavior covered in Playwright -->
 
 ### Initial reference components
 
