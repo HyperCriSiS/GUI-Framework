@@ -26,7 +26,7 @@ class ReferenceRuntimeTest {
     @Test
     fun compactReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceDensity(ReferenceDensity.Compact)
+            composeRule.activity.applyReferenceDensity(ReferenceDensity.Compact)
         }
         composeRule.waitForIdle()
 

@@ -36,7 +36,7 @@ enum class ReferenceDensity {
 class MainActivity : ComponentActivity() {
     private var referenceDensity by mutableStateOf(ReferenceDensity.Standard)
 
-    fun setReferenceDensity(density: ReferenceDensity) {
+    fun applyReferenceDensity(density: ReferenceDensity) {
         referenceDensity = density
     }
 

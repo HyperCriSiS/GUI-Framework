@@ -48,7 +48,7 @@ assert.match(source, /GuiTheme\(/);
 assert.match(source, /GuiThemeId\.BASIC/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
-assert.match(source, /setReferenceDensity\(density: ReferenceDensity\)/);
+assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
 for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
   assert.match(
     source,
@@ -66,7 +66,7 @@ assert.doesNotMatch(source, /androidx\.compose\.material/);
 assert.match(runtimeTest, /createAndroidComposeRule<MainActivity>\(\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Scaled reference"\)/);
 assert.match(runtimeTest, /compactReferenceControlsRemainUsableAtHostScale/);
-assert.match(runtimeTest, /setReferenceDensity\(ReferenceDensity\.Compact\)/);
+assert.match(runtimeTest, /applyReferenceDensity\(ReferenceDensity\.Compact\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
 assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
