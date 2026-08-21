@@ -17,7 +17,9 @@ function normalizeProps(props = {}) {
   const normalized = {
     value: props.value,
     placeholder: props.placeholder ?? "",
-    accessibilityLabel: props.accessibilityLabel ?? "",
+    accessibilityLabel: Object.prototype.hasOwnProperty.call(props, "accessibilityLabel")
+      ? props.accessibilityLabel
+      : "",
     variant: props.variant ?? "standard",
     size: props.size ?? "medium",
     disabled: optionalBoolean(props, "disabled"),
