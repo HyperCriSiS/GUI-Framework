@@ -64,6 +64,9 @@ jobs:
       - name: Test Basic theme performance budget
         run: npm run test:basic-performance
 
+      - name: Test Modern theme foundation contract
+        run: npm run test:modern-theme
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
