@@ -147,7 +147,37 @@ try {
     "Compiled Basic visuals must retain source-token provenance",
   );
 
-  for (const themeId of ["cyberpunk", "frosted-glass", "glass", "modern", "spacey"]) {
+  const darkModernButton = darkPalette.themes.modern.components.button;
+  const lightModernButton = lightPalette.themes.modern.components.button;
+  const darkModernPanel = darkPalette.themes.modern.components.panel;
+  const darkModernSwitch = darkPalette.themes.modern.components.switch;
+  assert.ok(darkModernButton && lightModernButton && darkModernPanel && darkModernSwitch, "Modern must compile the inherited reference-component visuals for every palette");
+  assert.equal(darkModernButton.base.root.radius.reference, "{radius.lg}");
+  assert.equal(darkModernPanel.base.root.radius.reference, "{radius.xl}");
+  assert.equal(darkModernSwitch.base.root.radius.reference, "{radius.pill}");
+  assert.equal(darkModernSwitch.base.thumb.radius.reference, "{radius.pill}");
+  assert.deepEqual(
+    darkModernButton.variants,
+    darkBasicButton.variants,
+    "Modern must retain Basic button variant behavior while changing geometry",
+  );
+  assert.deepEqual(
+    darkModernButton.variants.primary.base.root.fill.value,
+    darkBasicButton.variants.primary.base.root.fill.value,
+    "One palette must be reusable across Basic and Modern without palette-specific theme forks",
+  );
+  assert.deepEqual(
+    darkModernButton.base.root.radius.value,
+    lightModernButton.base.root.radius.value,
+    "Modern geometry must remain stable when the palette changes",
+  );
+  assert.notDeepEqual(
+    darkModernButton.variants.primary.base.root.fill.value,
+    lightModernButton.variants.primary.base.root.fill.value,
+    "Modern must inherit semantic palette changes without forking its geometry recipe",
+  );
+
+  for (const themeId of ["cyberpunk", "frosted-glass", "glass", "spacey"]) {
     assert.deepEqual(
       darkPalette.themes[themeId].components,
       {},
