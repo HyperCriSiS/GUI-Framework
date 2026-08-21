@@ -77,9 +77,11 @@ try {
   assert.equal(guiSwitch.element.getAttribute("role"), "switch");
   assert.equal(guiSwitch.element.getAttribute("aria-checked"), "false");
   assert.equal(guiSwitch.element.getAttribute("aria-label"), "Enable synchronization");
+  assert.equal(guiSwitch.element.dataset.guiVariant, "standard");
   assert.equal(guiSwitch.element.dataset.guiSize, "large");
   assert.equal(guiSwitch.element.children.length, 1);
   assert.equal(guiSwitch.element.children[0].className, "gui-switch__thumb");
+  assert.equal(guiSwitch.element.children[0].getAttribute("aria-hidden"), "true");
 
   guiSwitch.element.click();
   assert.deepEqual(changes, [true]);
@@ -89,6 +91,7 @@ try {
 
   guiSwitch.update({ checked: true, accessibilityLabel: "Disable synchronization" });
   assert.equal(guiSwitch.element.getAttribute("aria-checked"), "true");
+  assert.equal(guiSwitch.element.dataset.guiChecked, "true");
   assert.equal(guiSwitch.element.getAttribute("aria-label"), "Disable synchronization");
   guiSwitch.element.click();
   assert.deepEqual(changes, [true, false]);
