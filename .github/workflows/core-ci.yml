@@ -242,6 +242,10 @@ jobs:
           npm run build:kotlin-visuals
           npm run build:kotlin-assets
 
+      - name: Compile Android reference instrumentation tests
+        working-directory: examples/compose-android
+        run: gradle :app:compileDebugAndroidTestKotlin --no-daemon
+
       - name: Assemble Android reference APK
         run: npm run build:kotlin-android-reference
 
