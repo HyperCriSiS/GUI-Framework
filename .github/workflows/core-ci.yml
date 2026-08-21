@@ -121,6 +121,12 @@ jobs:
       - name: Test Kotlin asset generation
         run: npm run test:kotlin-assets
 
+      - name: Test native Compose Basic Button
+        run: npm run test:kotlin-button
+
+      - name: Test native Compose Basic Input
+        run: npm run test:kotlin-input
+
       - name: Test native Compose Basic Switch
         run: npm run test:kotlin-switch
 
@@ -129,6 +135,9 @@ jobs:
 
       - name: Test native Compose Basic Dialog
         run: npm run test:kotlin-dialog
+
+      - name: Test Compose Desktop reference application
+        run: npm run test:kotlin-desktop-reference
 
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
