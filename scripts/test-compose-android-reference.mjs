@@ -3,12 +3,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [rootBuild, appBuild, settings, manifest, source] = await Promise.all([
+const [rootBuild, appBuild, settings, manifest, source, runtimeTest] = await Promise.all([
   readFile("examples/compose-android/build.gradle.kts", "utf8"),
   readFile("examples/compose-android/app/build.gradle.kts", "utf8"),
   readFile("examples/compose-android/settings.gradle.kts", "utf8"),
   readFile("examples/compose-android/app/src/main/AndroidManifest.xml", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
+  readFile("examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt", "utf8"),
 ]);
 
 assert.match(rootBuild, /id\("com\.android\.application"\) version "9\.3\.0"/);
@@ -23,6 +24,7 @@ assert.match(settings, /include\(":app"\)/);
 assert.match(appBuild, /compileSdk = 37/);
 assert.match(appBuild, /minSdk = 23/);
 assert.match(appBuild, /targetSdk = 37/);
+assert.match(appBuild, /testInstrumentationRunner = "androidx\.test\.runner\.AndroidJUnitRunner"/);
 assert.match(appBuild, /compose = true/);
 assert.match(appBuild, /JavaVersion\.VERSION_17/);
 assert.match(appBuild, /sourceSets\.named\("main"\)/);
@@ -30,6 +32,10 @@ assert.match(appBuild, /kotlin\.directories \+= "\.\.\/\.\.\/\.\.\/packages\/ada
 assert.match(appBuild, /kotlin\.directories \+= "\.\.\/\.\.\/\.\.\/build\/compose"/);
 assert.match(appBuild, /androidx\.compose:compose-bom:2026\.06\.01/);
 assert.match(appBuild, /androidx\.activity:activity-compose:1\.13\.0/);
+assert.match(appBuild, /androidx\.compose\.ui:ui-test-junit4/);
+assert.match(appBuild, /androidx\.test\.ext:junit:1\.3\.0/);
+assert.match(appBuild, /androidx\.test:runner:1\.7\.0/);
+assert.match(appBuild, /androidx\.compose\.ui:ui-test-manifest/);
 assert.doesNotMatch(appBuild, /androidx\.compose\.material/);
 
 assert.match(manifest, /android:name="\.MainActivity"/);
@@ -48,4 +54,13 @@ assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
-console.log("Compose Android reference application source/build contract tests passed.");
+assert.match(runtimeTest, /createAndroidComposeRule<MainActivity>\(\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
+assert.match(runtimeTest, /performTextReplacement\("Scaled reference"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
+assert.match(runtimeTest, /performClick\(\)/);
+assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
+assert.match(runtimeTest, /assertDoesNotExist\(\)/);
+
+console.log("Compose Android reference application source/build/runtime contract tests passed.");
