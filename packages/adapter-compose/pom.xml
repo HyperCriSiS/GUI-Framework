@@ -75,6 +75,7 @@
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/../../build/compose</sourceDir>
                                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                                <sourceDir>${project.basedir}/../../examples/compose-desktop/src/main/kotlin</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
