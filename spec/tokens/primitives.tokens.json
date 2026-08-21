@@ -58,6 +58,18 @@
         "unit": "px"
       }
     },
+    "xl": {
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      }
+    },
+    "pill": {
+      "$value": {
+        "value": 999,
+        "unit": "px"
+      }
+    },
     "control": {
       "$value": "{radius.md}"
     }
