@@ -2,8 +2,53 @@
 
 package gui.framework.compose.internal
 
+import gui.framework.generated.internal.GuiComponentCapabilities
 import gui.framework.generated.internal.GuiVisualPartStyle
 import gui.framework.generated.internal.GuiVisualRecipe
+
+
+internal data class GuiCapabilitySelection(
+    val fallbackId: String?,
+    val missingRequired: Set<String>,
+) {
+    val supported: Boolean get() = missingRequired.isEmpty()
+}
+
+internal fun selectGuiCapabilityFallback(
+    capabilities: GuiComponentCapabilities,
+    recipe: GuiVisualRecipe,
+    availableCapabilities: Set<String>,
+): GuiCapabilitySelection {
+    val missingRequired = capabilities.required
+        .filterNot(availableCapabilities::contains)
+        .toSortedSet()
+    if (missingRequired.isNotEmpty()) {
+        return GuiCapabilitySelection(fallbackId = null, missingRequired = missingRequired)
+    }
+
+    for (fallbackId in capabilities.fallbackOrder) {
+        val fallback = recipe.fallbacks[fallbackId] ?: continue
+        if (fallback.requires.all(availableCapabilities::contains)) {
+            return GuiCapabilitySelection(fallbackId = fallbackId, missingRequired = emptySet())
+        }
+    }
+
+    return GuiCapabilitySelection(fallbackId = null, missingRequired = emptySet())
+}
+
+internal fun resolveGuiCapabilityRecipe(
+    capabilities: GuiComponentCapabilities,
+    recipe: GuiVisualRecipe,
+    availableCapabilities: Set<String>,
+    componentId: String,
+): GuiVisualRecipe {
+    val selection = selectGuiCapabilityFallback(capabilities, recipe, availableCapabilities)
+    require(selection.supported) {
+        "GUI component $componentId requires unavailable capabilities: " +
+            selection.missingRequired.joinToString()
+    }
+    return selection.fallbackId?.let(recipe.fallbacks::get)?.recipe ?: recipe
+}
 
 internal fun GuiVisualPartStyle.overlay(override: GuiVisualPartStyle): GuiVisualPartStyle = copy(
     fill = override.fill ?: fill,

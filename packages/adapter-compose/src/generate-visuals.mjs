@@ -110,15 +110,36 @@ function scopedExpr(scoped, label) {
     `)`;
 }
 
-function recipeExpr(recipe, label) {
-  if (recipe?.fallbacks && Object.keys(recipe.fallbacks).length > 0) {
-    throw new Error(`${label}: Compose capability visual fallback mapping is not implemented yet`);
+function stringSetExpr(values, label) {
+  if (!Array.isArray(values)) throw new Error(`${label}: expected capability list`);
+  const unique = [...new Set(values)];
+  if (unique.some((value) => typeof value !== "string" || value.length === 0)) {
+    throw new Error(`${label}: capability ids must be non-empty strings`);
   }
+  if (unique.length !== values.length) throw new Error(`${label}: duplicate capability id`);
+  return unique.length === 0 ? "emptySet()" : `setOf(${unique.map(kotlinString).join(", ")})`;
+}
+
+function fallbackExpr(fallback, label) {
+  if (!fallback || typeof fallback !== "object" || !fallback.recipe || typeof fallback.recipe !== "object") {
+    throw new Error(`${label}: expected fallback recipe`);
+  }
+  if (fallback.recipe.fallbacks && Object.keys(fallback.recipe.fallbacks).length > 0) {
+    throw new Error(`${label}: nested capability fallbacks are not supported`);
+  }
+  return `GuiVisualFallback(` +
+    `requires = ${stringSetExpr(fallback.requires ?? [], `${label}.requires`)}, ` +
+    `recipe = ${recipeExpr(fallback.recipe, `${label}.recipe`, false)}` +
+    `)`;
+}
+
+function recipeExpr(recipe, label, includeFallbacks = true) {
   return `GuiVisualRecipe(` +
     `base = ${partMapExpr(recipe?.base, `${label}.base`)}, ` +
     `sizes = ${mapExpr(recipe?.sizes, partMapExpr, `${label}.sizes`)}, ` +
     `states = ${mapExpr(recipe?.states, partMapExpr, `${label}.states`)}, ` +
-    `variants = ${mapExpr(recipe?.variants, scopedExpr, `${label}.variants`)}` +
+    `variants = ${mapExpr(recipe?.variants, scopedExpr, `${label}.variants`)}, ` +
+    `fallbacks = ${includeFallbacks ? mapExpr(recipe?.fallbacks, fallbackExpr, `${label}.fallbacks`) : "emptyMap()"}` +
     `)`;
 }
 
@@ -156,11 +177,17 @@ function generate(ir) {
     "    val states: Map<String, Map<String, GuiVisualPartStyle>> = emptyMap(),",
     ")",
     "",
+    "data class GuiVisualFallback(",
+    "    val requires: Set<String> = emptySet(),",
+    "    val recipe: GuiVisualRecipe,",
+    ")",
+    "",
     "data class GuiVisualRecipe(",
     "    val base: Map<String, GuiVisualPartStyle> = emptyMap(),",
     "    val sizes: Map<String, Map<String, GuiVisualPartStyle>> = emptyMap(),",
     "    val states: Map<String, Map<String, GuiVisualPartStyle>> = emptyMap(),",
     "    val variants: Map<String, GuiVisualScopedRecipe> = emptyMap(),",
+    "    val fallbacks: Map<String, GuiVisualFallback> = emptyMap(),",
     ")",
     "",
     "object GuiVisualRegistry {",

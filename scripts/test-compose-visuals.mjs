@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import assert from "node:assert/strict";
-import { readFile, rm } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
 const irPath = "build/spec-ir-compose-visual-test.json";
 const kotlinPath = "build/compose/GuiVisuals-test.kt";
+const fallbackIrPath = "build/spec-ir-compose-fallback-test.json";
+const fallbackKotlinPath = "build/compose/GuiVisuals-fallback-test.kt";
 
 function run(args, label) {
   const result = spawnSync(process.execPath, args, { encoding: "utf8" });
@@ -18,6 +20,8 @@ try {
 
   const source = await readFile(kotlinPath, "utf8");
   assert.match(source, /data class GuiVisualPartStyle/);
+  assert.match(source, /data class GuiVisualFallback/);
+  assert.match(source, /val fallbacks: Map<String, GuiVisualFallback> = emptyMap\(\)/);
   assert.match(source, /object GuiVisualRegistry/);
   assert.match(source, /"reference-dark" to mapOf/);
   assert.match(source, /"reference-light" to mapOf/);
@@ -36,7 +40,32 @@ try {
   assert.match(source, /GuiVisualOutline/);
   assert.doesNotMatch(source, /motion\.interaction\.fast/, "Active animation tokens must not be emitted for v1 Basic controls");
 
-  console.log("Compose visual generation tests passed.");
+  const fallbackIr = JSON.parse(await readFile(irPath, "utf8"));
+  for (const palette of fallbackIr.palettes) {
+    const button = palette.themes?.basic?.components?.button;
+    assert.ok(button, `Synthetic fallback test requires Basic button visual for ${palette.id}`);
+    button.fallbacks = {
+      minimal: {
+        requires: [],
+        recipe: { base: {}, sizes: {}, states: {}, variants: {} },
+      },
+    };
+  }
+  await writeFile(fallbackIrPath, `${JSON.stringify(fallbackIr, null, 2)}\n`, "utf8");
+  run(["packages/adapter-compose/src/generate-visuals.mjs", fallbackIrPath, fallbackKotlinPath], "Compose fallback visual generator");
+  const fallbackSource = await readFile(fallbackKotlinPath, "utf8");
+  assert.match(
+    fallbackSource,
+    /"minimal" to GuiVisualFallback\(requires = emptySet\(\), recipe = GuiVisualRecipe\(/,
+    "Compose output must preserve deterministic capability fallback recipes",
+  );
+
+  console.log("Compose visual and capability fallback generation tests passed.");
 } finally {
-  await Promise.all([rm(irPath, { force: true }), rm(kotlinPath, { force: true })]);
+  await Promise.all([
+    rm(irPath, { force: true }),
+    rm(kotlinPath, { force: true }),
+    rm(fallbackIrPath, { force: true }),
+    rm(fallbackKotlinPath, { force: true }),
+  ]);
 }

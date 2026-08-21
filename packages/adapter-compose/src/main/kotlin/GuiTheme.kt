@@ -21,14 +21,21 @@ internal val LocalGuiThemeSelection = staticCompositionLocalOf<GuiThemeSelection
     error("GuiTheme must wrap GUI Framework Compose components")
 }
 
+internal val LocalGuiAvailableCapabilities = staticCompositionLocalOf<Set<String>> { emptySet() }
+
 @Composable
 fun GuiTheme(
     theme: GuiThemeId,
     paletteId: String,
+    availableCapabilities: Set<String> = emptySet(),
     content: @Composable () -> Unit,
 ) {
+    require(availableCapabilities.all(String::isNotBlank)) {
+        "GUI capability ids must not be blank"
+    }
     CompositionLocalProvider(
         LocalGuiThemeSelection provides GuiThemeSelection(theme = theme, paletteId = paletteId),
+        LocalGuiAvailableCapabilities provides availableCapabilities.toSet(),
         content = content,
     )
 }
