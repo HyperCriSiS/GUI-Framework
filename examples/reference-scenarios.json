@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "initial-reference-core",
+  "theme": "basic",
+  "palette": "reference-dark",
+  "components": ["button", "input", "switch", "panel", "dialog"],
+  "flows": [
+    { "id": "edit-primary-input", "component": "input", "event": "value-change" },
+    { "id": "toggle-switch", "component": "switch", "event": "checked-change" },
+    { "id": "open-dialog", "component": "button", "event": "activate" },
+    { "id": "dismiss-dialog", "component": "dialog", "event": "dismiss-request" },
+    { "id": "close-dialog-action", "component": "button", "event": "activate" }
+  ],
+  "platformExtensions": {
+    "web": ["palette-toggle", "extension-host-contexts"],
+    "composeDesktop": ["native-window"],
+    "composeAndroid": ["activity-host"]
+  }
+}

@@ -148,6 +148,9 @@ jobs:
       - name: Test Compose Android reference source and build contract
         run: npm run test:kotlin-android-reference
 
+      - name: Test cross-platform reference application parity
+        run: npm run test:reference-parity
+
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 
