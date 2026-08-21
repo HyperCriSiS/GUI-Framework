@@ -30,10 +30,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
 import gui.framework.compose.internal.toComposeUnitlessFloat
+import gui.framework.generated.internal.GuiSwitchContract
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiSwitchState
 import gui.framework.generated.internal.GuiSwitchVariant
@@ -93,12 +95,18 @@ fun GuiSwitch(
     val focused by source.collectIsFocusedAsState()
     val enabled = !disabled
 
-    val recipe = GuiVisualRegistry.component(
+    val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "switch",
     ) ?: error(
         "No Compose visual recipe for switch with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiSwitchContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "switch",
     )
 
     val activeStates = buildSet {

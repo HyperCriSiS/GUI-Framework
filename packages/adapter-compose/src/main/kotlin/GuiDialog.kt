@@ -18,10 +18,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
 import gui.framework.compose.internal.toComposeUnitlessFloat
+import gui.framework.generated.internal.GuiDialogContract
 import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiDialogState
 import gui.framework.generated.internal.GuiDialogVariant
@@ -56,12 +58,18 @@ fun GuiDialog(
     if (!open) return
 
     val selection = LocalGuiThemeSelection.current
-    val recipe = GuiVisualRegistry.component(
+    val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "dialog",
     ) ?: error(
         "No Compose visual recipe for dialog with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiDialogContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "dialog",
     )
 
     val resolved = resolveGuiVisualRecipe(

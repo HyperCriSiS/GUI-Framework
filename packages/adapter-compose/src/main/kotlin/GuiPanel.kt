@@ -16,10 +16,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
 import gui.framework.compose.internal.toComposeUnitlessFloat
+import gui.framework.generated.internal.GuiPanelContract
 import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiPanelState
 import gui.framework.generated.internal.GuiPanelVariant
@@ -52,12 +54,18 @@ fun GuiPanel(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val selection = LocalGuiThemeSelection.current
-    val recipe = GuiVisualRegistry.component(
+    val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "panel",
     ) ?: error(
         "No Compose visual recipe for panel with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiPanelContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "panel",
     )
 
     val resolved = resolveGuiVisualRecipe(

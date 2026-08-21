@@ -35,11 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
 import gui.framework.compose.internal.toComposeSp
 import gui.framework.compose.internal.toComposeUnitlessFloat
+import gui.framework.generated.internal.GuiInputContract
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiInputState
 import gui.framework.generated.internal.GuiInputVariant
@@ -120,12 +122,18 @@ fun GuiInput(
     val focused by source.collectIsFocusedAsState()
     val enabled = !disabled
 
-    val recipe = GuiVisualRegistry.component(
+    val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "input",
     ) ?: error(
         "No Compose visual recipe for input with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiInputContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "input",
     )
 
     val activeStates = buildSet {

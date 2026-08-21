@@ -36,11 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
 import gui.framework.compose.internal.toComposeSp
 import gui.framework.compose.internal.toComposeUnitlessFloat
+import gui.framework.generated.internal.GuiButtonContract
 import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiButtonState
 import gui.framework.generated.internal.GuiButtonVariant
@@ -121,12 +123,18 @@ fun GuiButton(
     val focused by source.collectIsFocusedAsState()
     val enabled = !disabled && !loading
 
-    val recipe = GuiVisualRegistry.component(
+    val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "button",
     ) ?: error(
         "No Compose visual recipe for button with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiButtonContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "button",
     )
 
     val activeStates = buildSet {
