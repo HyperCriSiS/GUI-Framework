@@ -47,6 +47,15 @@ assert.match(source, /setContent \{/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /GuiThemeId\.BASIC/);
 assert.match(source, /paletteId = "reference-dark"/);
+assert.match(source, /ReferenceDensity\.Compact/);
+assert.match(source, /setReferenceDensity\(density: ReferenceDensity\)/);
+for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
+  assert.match(
+    source,
+    new RegExp(`${sizeType}\\.SMALL`),
+    `Android compact reference must map ${sizeType} to SMALL`,
+  );
+}
 for (const component of ["GuiButton", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
@@ -55,8 +64,12 @@ assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
 assert.match(runtimeTest, /createAndroidComposeRule<MainActivity>\(\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Scaled reference"\)/);
+assert.match(runtimeTest, /compactReferenceControlsRemainUsableAtHostScale/);
+assert.match(runtimeTest, /setReferenceDensity\(ReferenceDensity\.Compact\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
-assert.match(runtimeTest, /performTextReplacement\("Scaled reference"\)/);
+assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
 assert.match(runtimeTest, /performClick\(\)/);
 assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
