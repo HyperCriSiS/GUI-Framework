@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "themes": {
+    "basic": {
+      "maxResolvedVisualLeaves": 180,
+      "maxComponentVisualLeaves": 64,
+      "maxVariantsPerComponent": 6,
+      "maxStatesPerComponent": 8,
+      "forbiddenEffectKeys": [
+        "blur",
+        "backdropBlur",
+        "glow"
+      ]
+    }
+  }
+}
