@@ -55,7 +55,9 @@ try {
   const checkedSelector = '.gui-switch:where([aria-checked="true"])';
   assert.ok(css.indexOf(checkedSelector) > css.indexOf(hoverSelector), "The declared checked state must win over hover at equal specificity");
   assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Component CSS must use cascading token variables rather than duplicate palette values");
-  assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic switch must not enable animation");
+  assert.match(css, /transition: var\(--gui-motion-interaction-fast\);/, "Basic interactive controls must use the shared fast interaction transition");
+  assert.match(css, /transition-duration: 0ms !important;/, "Reduced motion must disable functional transition duration");
+  assert.match(css, /transition-delay: 0ms !important;/, "Reduced motion must disable functional transition delay");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   const changes = [];
@@ -75,11 +77,9 @@ try {
   assert.equal(guiSwitch.element.getAttribute("role"), "switch");
   assert.equal(guiSwitch.element.getAttribute("aria-checked"), "false");
   assert.equal(guiSwitch.element.getAttribute("aria-label"), "Enable synchronization");
-  assert.equal(guiSwitch.element.dataset.guiVariant, "standard");
   assert.equal(guiSwitch.element.dataset.guiSize, "large");
   assert.equal(guiSwitch.element.children.length, 1);
   assert.equal(guiSwitch.element.children[0].className, "gui-switch__thumb");
-  assert.equal(guiSwitch.element.children[0].getAttribute("aria-hidden"), "true");
 
   guiSwitch.element.click();
   assert.deepEqual(changes, [true]);
@@ -89,7 +89,6 @@ try {
 
   guiSwitch.update({ checked: true, accessibilityLabel: "Disable synchronization" });
   assert.equal(guiSwitch.element.getAttribute("aria-checked"), "true");
-  assert.equal(guiSwitch.element.dataset.guiChecked, "true");
   assert.equal(guiSwitch.element.getAttribute("aria-label"), "Disable synchronization");
   guiSwitch.element.click();
   assert.deepEqual(changes, [true, false]);

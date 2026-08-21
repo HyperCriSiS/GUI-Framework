@@ -8,7 +8,8 @@
           "radius": "{radius.control}",
           "paddingHorizontal": "{spacing.lg}",
           "paddingVertical": "{spacing.sm}",
-          "gap": "{spacing.sm}"
+          "gap": "{spacing.sm}",
+          "transition": "{motion.interaction.fast}"
         },
         "label": {
           "fontSize": "{typography.size.medium}",
@@ -187,7 +188,8 @@
           "border": {
             "color": "{semantic.color.border}",
             "width": "{border.width.standard}"
-          }
+          },
+          "transition": "{motion.interaction.fast}"
         },
         "placeholder": {
           "foreground": "{semantic.color.textSecondary}"
@@ -265,7 +267,8 @@
           "border": {
             "color": "{semantic.color.border}",
             "width": "{border.width.standard}"
-          }
+          },
+          "transition": "{motion.interaction.fast}"
         },
         "thumb": {
           "fill": "{semantic.color.textSecondary}",

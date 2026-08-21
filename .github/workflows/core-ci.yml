@@ -58,6 +58,9 @@ jobs:
       - name: Test accessibility requirements
         run: npm run test:accessibility
 
+      - name: Test Basic theme quality contract
+        run: npm run test:basic-theme
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 

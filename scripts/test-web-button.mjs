@@ -56,7 +56,9 @@ try {
   assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Component CSS must use cascading token variables rather than duplicate palette values");
   assert.doesNotMatch(css, /#4C8DFF|#684DE2/, "Resolved palette colors must stay in token CSS so the nearest palette scope wins");
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic button must not enable animation");
+  assert.match(css, /transition: var\(--gui-motion-interaction-fast\);/, "Basic interactive controls must use the shared fast interaction transition");
+  assert.match(css, /transition-duration: 0ms !important;/, "Reduced motion must disable functional transition duration");
+  assert.match(css, /transition-delay: 0ms !important;/, "Reduced motion must disable functional transition delay");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into component CSS");
 
   let activations = 0;
