@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The Web reference adapter is complete for this initial set: native semantics/accessibility mappings, keyboard/focus behavior, functional interaction feedback, deterministic capability fallbacks, portable SVG assets, popup/sidebar/options host-context validation, Playwright interactions and read-only visual-regression baselines are covered. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model. The next foundation milestone is completing the corresponding Compose behavior/capability coverage and building Android/Desktop reference applications.
+The complete initial reference-component set is now implemented for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The Web reference adapter is complete for this initial set: native semantics/accessibility mappings, keyboard/focus behavior, functional interaction feedback, deterministic capability fallbacks, portable SVG assets, popup/sidebar/options host-context validation, Playwright interactions and read-only visual-regression baselines are covered. Compose now also generates and selects deterministic capability fallback recipes through a theme-scoped platform capability set, while preserving the same neutral capability contracts as Web. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model. The next foundation milestone is completing Compose semantics/interaction validation and building Android/Desktop reference applications.
 
 ## Phase 0 — Foundation and scope
 
@@ -112,7 +112,7 @@ The second adapter is an architecture test: it must prove that the specification
 - [ ] Complete Compose semantics, input, focus and accessibility behavior. <!-- all five initial reference components are mapped; broader integration validation remains -->
 - [x] Implement vector/SVG integration appropriate to the target.
 - [ ] Complete functional micro-interactions using platform-efficient mechanisms.
-- [ ] Implement capability/fallback mapping for target devices.
+- [x] Implement capability/fallback mapping for target devices. <!-- fallback recipes are generated from neutral IR and selected through a theme-scoped available-capability set for all five current components -->
 - [ ] Validate scaling and older/lower-end device behavior.
 - [ ] Build Android reference application.
 - [ ] Build desktop reference application.
