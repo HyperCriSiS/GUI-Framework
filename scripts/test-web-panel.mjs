@@ -46,7 +46,7 @@ try {
   assert.match(css, /:where\(\[data-gui-size="small"\]\)/);
   assert.match(css, /:where\(\[data-gui-size="large"\]\)/);
   assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Panel CSS must inherit cascading palette token variables");
-  assert.doesNotMatch(css, /transition-duration: 120ms;/, "The v1 Basic panel must not enable animation");
+  assert.doesNotMatch(css, /\.gui-panel[^{]*\{[^}]*transition:/s, "The Basic panel must remain static");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into panel CSS");
 
   const panel = createGuiPanel(fakeDocument);

@@ -101,7 +101,7 @@ try {
   assert.match(css, /:where\(\[data-gui-size="small"\]\)/);
   assert.match(css, /:where\(\[data-gui-size="large"\]\)/);
   assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Dialog CSS must inherit cascading palette token variables");
-  assert.doesNotMatch(css, /transition: var\(/, "The v1 Basic dialog must not add custom open or close animation");
+  assert.doesNotMatch(css, /\.gui-dialog[^{]*\{[^}]*transition:/s, "The Basic dialog must not add custom open or close animation");
   assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/, "Unresolved token references must not leak into dialog CSS");
 
   const opener = fakeDocument.createElement("button");
