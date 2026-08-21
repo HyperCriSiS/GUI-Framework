@@ -142,6 +142,9 @@ jobs:
       - name: Test Compose Desktop reference application
         run: npm run test:kotlin-desktop-reference
 
+      - name: Test Compose Android reference source and build contract
+        run: npm run test:kotlin-android-reference
+
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
 
@@ -189,3 +192,44 @@ jobs:
           path: test-results/playwright/
           if-no-files-found: ignore
           retention-days: 7
+
+  compose-android-reference:
+    needs: validate-and-typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "9.5.0"
+          cache-provider: basic
+
+      - name: Install Android API 37 build environment
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+
+      - name: Generate neutral and Compose artifacts
+        run: |
+          npm run compile:spec
+          npm run build:kotlin-contracts
+          npm run build:kotlin-tokens
+          npm run build:kotlin-visuals
+          npm run build:kotlin-assets
+
+      - name: Assemble Android reference APK
+        run: npm run build:kotlin-android-reference
