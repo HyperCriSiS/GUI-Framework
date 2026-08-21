@@ -244,3 +244,78 @@ jobs:
 
       - name: Assemble Android reference APK
         run: npm run build:kotlin-android-reference
+
+  compose-android-runtime:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[device-ci]')
+    needs: validate-and-typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api23-low-end-large-font
+            api-level: 23
+            density: 240
+            font-scale: "1.30"
+            ram-size: 1536M
+          - name: api35-high-density
+            api-level: 35
+            density: 480
+            font-scale: "1.00"
+            ram-size: 2048M
+
+    name: compose-android-runtime (${{ matrix.name }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android build SDK
+        uses: android-actions/setup-android@v4.0.1
+        with:
+          packages: "platform-tools platforms;android-37.0 build-tools;36.0.0"
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "9.5.0"
+          cache-provider: basic
+
+      - name: Generate neutral and Compose artifacts
+        run: |
+          npm run compile:spec
+          npm run build:kotlin-contracts
+          npm run build:kotlin-tokens
+          npm run build:kotlin-visuals
+          npm run build:kotlin-assets
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run scaled Android reference interactions
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: default
+          arch: x86_64
+          ram-size: ${{ matrix.ram-size }}
+          heap-size: 256M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: GUI_TEST_DENSITY=${{ matrix.density }} GUI_TEST_FONT_SCALE=${{ matrix.font-scale }} bash scripts/run-android-runtime-check.sh
