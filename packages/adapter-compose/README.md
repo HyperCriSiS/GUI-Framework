@@ -23,3 +23,11 @@ Palette-dependent resolved values remain separate from palette-independent compo
 The native component mappings intentionally use Compose/Foundation primitives and avoid making Material a requirement for the framework core. Platform-specific interaction and accessibility behavior belongs in this adapter, while the application-facing component semantics remain neutral.
 
 Unsupported value types or rendering capabilities must fail explicitly or use a declared framework fallback; they must not be approximated silently.
+
+## Scaling and minimum-capability behavior
+
+The neutral `px` dimension is a framework reference unit, not a physical device pixel. Layout dimensions are mapped to Compose `dp`; explicit typography dimensions are mapped to `sp` so host font scaling remains effective. Drawing code may convert already-mapped `Dp` values to DrawScope pixels only at the final rendering boundary.
+
+The default `GuiTheme` capability set is empty. This is the minimum-capability profile: optional effects are never assumed merely because a device API exists. Applications may advertise additional capabilities at the theme host, and each component resolves the same ordered neutral fallback chain. This lets lower-end targets deliberately remain on simpler recipes without changing application-facing component APIs.
+
+CI source-gates these rules for the initial reference set. Runtime validation across density/font-scale combinations and older/lower-end Android targets remains a separate device/emulator validation step.

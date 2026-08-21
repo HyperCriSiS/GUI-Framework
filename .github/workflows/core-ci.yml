@@ -139,6 +139,9 @@ jobs:
       - name: Test Compose semantics and interactions
         run: npm run test:kotlin-semantics
 
+      - name: Test Compose scaling and minimum-capability behavior
+        run: npm run test:kotlin-scaling
+
       - name: Test Compose Desktop reference application
         run: npm run test:kotlin-desktop-reference
 

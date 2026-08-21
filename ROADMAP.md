@@ -113,7 +113,7 @@ The second adapter is an architecture test: it must prove that the specification
 - [x] Implement vector/SVG integration appropriate to the target.
 - [x] Complete functional micro-interactions using platform-efficient mechanisms. <!-- hover/focus/press/checked/loading/error/dismiss behavior uses native Foundation/Dialog state without a decorative animation layer -->
 - [x] Implement capability/fallback mapping for target devices. <!-- fallback recipes are generated from neutral IR and selected through a theme-scoped available-capability set for all five current components -->
-- [ ] Validate scaling and older/lower-end device behavior.
+- [ ] Validate scaling and older/lower-end device behavior. <!-- dp/sp and minimum-capability contracts are CI-gated; runtime density/font-scale and older/lower-end device/emulator validation remains -->
 - [ ] Build Android reference application.
 - [x] Build desktop reference application. <!-- stateful native Window reference exercises all five current components and is compiled/source-gated in Core CI -->
 - [ ] Complete Web/Compose behavior and visual-intent comparison. <!-- initial component-level comparison exists for Button/Input/Switch/Panel/Dialog; application-level comparison remains -->
