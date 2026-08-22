@@ -2,10 +2,25 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 set -euo pipefail
 
-: "${GUI_TEST_DENSITY:?GUI_TEST_DENSITY is required}"
-: "${GUI_TEST_FONT_SCALE:?GUI_TEST_FONT_SCALE is required}"
-
 adb wait-for-device
+
+GUI_TEST_FONT_SCALE="${GUI_TEST_FONT_SCALE:-${1:-}}"
+if [[ -z "${GUI_TEST_FONT_SCALE}" ]]; then
+  echo "GUI_TEST_FONT_SCALE or positional font-scale argument is required" >&2
+  exit 1
+fi
+
+if [[ -z "${GUI_TEST_DENSITY:-}" ]]; then
+  GUI_TEST_DENSITY="$(adb shell getprop qemu.sf.lcd_density | tr -d '\r')"
+fi
+if [[ -z "${GUI_TEST_DENSITY}" ]]; then
+  GUI_TEST_DENSITY="$(adb shell wm density | sed -n 's/^Physical density: //p' | tr -d '\r')"
+fi
+if [[ -z "${GUI_TEST_DENSITY}" ]]; then
+  echo "Unable to resolve GUI_TEST_DENSITY from the environment or emulator" >&2
+  exit 1
+fi
+
 adb shell wm density "${GUI_TEST_DENSITY}"
 adb shell settings put system font_scale "${GUI_TEST_FONT_SCALE}"
 adb shell am force-stop gui.framework.examples.android || true
