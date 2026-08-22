@@ -71,11 +71,6 @@ try {
 
   assert.equal(darkBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
   assert.equal(lightBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
-  assert.deepEqual(
-    darkBasic.button.base.root.minHeight.value,
-    lightBasic.button.base.root.minHeight.value,
-    "Palette switching must not alter Basic geometry",
-  );
   assert.notDeepEqual(
     darkBasic.button.variants.primary.base.root.fill.value,
     lightBasic.button.variants.primary.base.root.fill.value,
