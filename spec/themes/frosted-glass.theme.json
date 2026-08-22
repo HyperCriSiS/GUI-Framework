@@ -1,5 +1,6 @@
 {
   "specVersion": "0.1.0",
   "theme": "frosted-glass",
+  "extends": "glass",
   "components": {}
 }

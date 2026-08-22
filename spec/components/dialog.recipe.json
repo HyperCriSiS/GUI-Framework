@@ -64,10 +64,12 @@
   "capabilities": {
     "required": [],
     "optional": [
+      "backdropBlur",
       "advancedBlendModes",
       "shaderEffects"
     ],
     "fallbackOrder": [
+      "frosted",
       "standard",
       "minimal"
     ]
