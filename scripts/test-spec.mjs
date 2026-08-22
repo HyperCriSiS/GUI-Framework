@@ -177,7 +177,29 @@ try {
     "Modern must inherit semantic palette changes without forking its geometry recipe",
   );
 
-  for (const themeId of ["cyberpunk", "frosted-glass", "glass", "spacey"]) {
+  const darkGlassPanel = darkPalette.themes.glass.components.panel;
+  const lightGlassPanel = lightPalette.themes.glass.components.panel;
+  const darkGlassDialog = darkPalette.themes.glass.components.dialog;
+  const lightGlassDialog = lightPalette.themes.glass.components.dialog;
+  assert.ok(darkGlassPanel && lightGlassPanel && darkGlassDialog && lightGlassDialog, "Glass must compile its inherited Panel/Dialog surface layer for every palette");
+  assert.equal(darkGlassPanel.base.root.fill.reference, "{semantic.color.surfaceTranslucent}");
+  assert.equal(darkGlassDialog.base.root.fill.reference, "{semantic.color.surfaceElevatedTranslucent}");
+  assert.equal(darkGlassPanel.base.root.fill.value.alpha, 0.72);
+  assert.equal(lightGlassPanel.base.root.fill.value.alpha, 0.72);
+  assert.equal(darkGlassDialog.base.root.fill.value.alpha, 0.82);
+  assert.equal(lightGlassDialog.base.root.fill.value.alpha, 0.82);
+  assert.deepEqual(
+    darkGlassPanel.base.root.radius.value,
+    lightGlassPanel.base.root.radius.value,
+    "Glass geometry must remain palette-neutral",
+  );
+  assert.notDeepEqual(
+    darkGlassPanel.base.root.fill.value.components,
+    lightGlassPanel.base.root.fill.value.components,
+    "Glass translucent surfaces must inherit palette-specific semantic color values",
+  );
+
+  for (const themeId of ["cyberpunk", "frosted-glass", "spacey"]) {
     assert.deepEqual(
       darkPalette.themes[themeId].components,
       {},
