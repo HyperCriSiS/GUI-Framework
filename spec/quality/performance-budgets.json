@@ -23,6 +23,19 @@
         "backdropBlur",
         "glow"
       ]
+    },
+    "glass": {
+      "maxResolvedVisualLeaves": 190,
+      "maxComponentVisualLeaves": 70,
+      "maxVariantsPerComponent": 6,
+      "maxStatesPerComponent": 8,
+      "maxShadowProperties": 2,
+      "maxTranslucentFillProperties": 2,
+      "forbiddenEffectKeys": [
+        "blur",
+        "backdropBlur",
+        "glow"
+      ]
     }
   }
 }

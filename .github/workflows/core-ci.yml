@@ -73,6 +73,9 @@ jobs:
       - name: Test Glass theme foundation contract
         run: npm run test:glass-theme
 
+      - name: Test Glass theme performance budget
+        run: npm run test:glass-performance
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
