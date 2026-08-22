@@ -93,6 +93,50 @@ export function applyWebCapabilityFallback(element, selection) {
   return selection;
 }
 
+
+function findById(values, id) {
+  return Array.isArray(values) ? values.find((entry) => entry?.id === id) ?? null : null;
+}
+
+export function getWebComponentCapabilityProfile(ir, { paletteId, themeId, componentId } = {}) {
+  if (!ir || typeof ir !== "object") throw new TypeError("ir must be a compiled GUI specification object");
+  if (typeof paletteId !== "string" || paletteId === "") throw new TypeError("paletteId must be a non-empty string");
+  if (typeof themeId !== "string" || themeId === "") throw new TypeError("themeId must be a non-empty string");
+  if (typeof componentId !== "string" || componentId === "") throw new TypeError("componentId must be a non-empty string");
+
+  const palette = findById(ir.palettes, paletteId);
+  if (!palette) throw new Error(`Unknown compiled palette: ${paletteId}`);
+
+  const component = palette.components?.[componentId];
+  if (!component) throw new Error(`Unknown compiled component for ${paletteId}: ${componentId}`);
+
+  const theme = palette.themes?.[themeId];
+  if (!theme) throw new Error(`Unknown compiled theme for ${paletteId}: ${themeId}`);
+
+  const visual = theme.components?.[componentId] ?? {};
+  const capabilities = component.capabilities ?? {};
+  return {
+    required: capabilities.required ?? [],
+    optional: capabilities.optional ?? [],
+    fallbackOrder: capabilities.fallbackOrder ?? [],
+    fallbacks: visual.fallbacks ?? {},
+  };
+}
+
+export function configureWebComponentCapabilities(element, ir, context = {}, options = {}) {
+  const componentId = element?.dataset?.guiComponent;
+  if (typeof componentId !== "string" || componentId === "") {
+    throw new TypeError("element must expose data-gui-component");
+  }
+
+  const profile = getWebComponentCapabilityProfile(ir, {
+    paletteId: context.paletteId,
+    themeId: context.themeId,
+    componentId,
+  });
+  return configureWebCapabilityFallback(element, profile, options);
+}
+
 export function configureWebCapabilityFallback(element, profile, options = {}) {
   const availableCapabilities =
     options.availableCapabilities ??

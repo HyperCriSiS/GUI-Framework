@@ -6,7 +6,9 @@ import { spawnSync } from "node:child_process";
 import {
   applyWebCapabilityFallback,
   configureWebCapabilityFallback,
+  configureWebComponentCapabilities,
   detectWebCapabilities,
+  getWebComponentCapabilityProfile,
   selectWebCapabilityFallback,
 } from "../packages/adapter-web/src/capabilities.mjs";
 import { selectCapabilityFallback } from "../packages/compiler/src/theme-resolution.mjs";
@@ -20,6 +22,48 @@ const profile = {
     minimal: { requires: [] },
   },
 };
+const frostedIr = {
+  palettes: [
+    {
+      id: "reference-dark",
+      components: {
+        panel: {
+          capabilities: {
+            required: [],
+            optional: ["backdropBlur", "advancedBlendModes", "shaderEffects"],
+            fallbackOrder: ["high", "standard", "minimal"],
+          },
+        },
+      },
+      themes: {
+        "frosted-glass": {
+          components: {
+            panel: {
+              fallbacks: {
+                high: { requires: ["backdropBlur"], recipe: {} },
+              },
+            },
+          },
+        },
+      },
+    },
+  ],
+};
+
+assert.deepEqual(
+  getWebComponentCapabilityProfile(frostedIr, {
+    paletteId: "reference-dark",
+    themeId: "frosted-glass",
+    componentId: "panel",
+  }),
+  {
+    required: [],
+    optional: ["backdropBlur", "advancedBlendModes", "shaderEffects"],
+    fallbackOrder: ["high", "standard", "minimal"],
+    fallbacks: { high: { requires: ["backdropBlur"], recipe: {} } },
+  },
+);
+
 const neutralVisual = {
   fallbacks: {
     standard: { requires: ["advancedBlendModes"], recipe: {} },
@@ -103,6 +147,30 @@ const element = {
     attributes.delete(name);
   },
 };
+const componentAttributes = new Map();
+const componentElement = {
+  dataset: { guiComponent: "panel" },
+  setAttribute(name, value) { componentAttributes.set(name, String(value)); },
+  removeAttribute(name) { componentAttributes.delete(name); },
+};
+const frostedSelection = configureWebComponentCapabilities(
+  componentElement,
+  frostedIr,
+  { paletteId: "reference-dark", themeId: "frosted-glass" },
+  { availableCapabilities: ["backdropBlur"] },
+);
+assert.equal(frostedSelection.selectedFallback, "high");
+assert.equal(componentAttributes.get("data-gui-fallback"), "high");
+
+const crispSelection = configureWebComponentCapabilities(
+  componentElement,
+  frostedIr,
+  { paletteId: "reference-dark", themeId: "frosted-glass" },
+  { availableCapabilities: [] },
+);
+assert.equal(crispSelection.selectedFallback, null);
+assert.equal(componentAttributes.has("data-gui-fallback"), false);
+
 applyWebCapabilityFallback(element, {
   supported: true,
   missingRequired: [],

@@ -4,11 +4,12 @@ import { expect, test } from "@playwright/test";
 
 const referencePath = "/examples/web-reference/";
 
-async function openReference(page, context = "page", density = "standard", theme = "basic") {
+async function openReference(page, context = "page", density = "standard", theme = "basic", capabilityMode = "auto") {
   const query = new URLSearchParams();
   if (context !== "page") query.set("context", context);
   if (density !== "standard") query.set("density", density);
   if (theme !== "basic") query.set("theme", theme);
+  if (capabilityMode !== "auto") query.set("capabilities", capabilityMode);
   const suffix = query.size === 0 ? "" : `?${query.toString()}`;
   await page.goto(`${referencePath}${suffix}`);
   const root = page.locator("#gui-reference-root");
@@ -192,6 +193,84 @@ test("Glass reference keeps translucency crisp without backdrop blur", async ({ 
   expect(lightPanelStyle.backdropFilter).toBe("none");
 });
 
+test("Frosted Glass enables native backdrop blur only on the declared surfaces", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "frosted-glass");
+  await expect(root).toHaveAttribute("data-gui-theme", "frosted-glass");
+
+  const panel = page.locator(".gui-panel").first();
+  await expect(panel).toHaveAttribute("data-gui-fallback", "high");
+  const panelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      backdropFilter: style.backdropFilter,
+      borderRadius: style.borderRadius,
+    };
+  });
+  expect(panelStyle.backgroundColor).toBe("rgba(23, 26, 33, 0.72)");
+  expect(panelStyle.backdropFilter).toBe("blur(24px)");
+  expect(panelStyle.borderRadius).toBe("20px");
+
+  for (const control of [
+    page.getByRole("button", { name: "Save settings" }),
+    page.getByLabel("Display name"),
+    page.getByRole("switch", { name: "Activity notifications" }),
+  ]) {
+    await expect(control).not.toHaveAttribute("data-gui-fallback", "high");
+    expect(await control.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
+  }
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute("data-gui-fallback", "high");
+  expect(await dialog.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("blur(24px)");
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  await expect(panel).toHaveAttribute("data-gui-fallback", "high");
+  const lightPanelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { backgroundColor: style.backgroundColor, backdropFilter: style.backdropFilter };
+  });
+  expect(lightPanelStyle).toEqual({
+    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    backdropFilter: "blur(24px)",
+  });
+});
+
+test("Frosted Glass falls back exactly to crisp Glass when backdrop blur is unavailable", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "frosted-glass", "none");
+  await expect(root).toHaveAttribute("data-gui-theme", "frosted-glass");
+
+  const panel = page.locator(".gui-panel").first();
+  await expect(panel).not.toHaveAttribute("data-gui-fallback");
+  const frostedFallback = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+
+  const glassRoot = await openReference(page, "page", "standard", "glass", "none");
+  await expect(glassRoot).toHaveAttribute("data-gui-theme", "glass");
+  const glassStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+  expect(frostedFallback).toEqual(glassStyle);
+  expect(frostedFallback.backdropFilter).toBe("none");
+});
+
 for (const host of [
   { context: "extension-popup", width: 360, height: 600 },
   { context: "extension-sidebar", width: 420, height: 800 },
@@ -224,8 +303,9 @@ for (const host of [
   });
 }
 
-for (const theme of ["basic", "modern", "glass"]) {
-  test(`${theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : "Glass"} compact density remains usable at the minimum reference width`, async ({ page }) => {
+for (const theme of ["basic", "modern", "glass", "frosted-glass"]) {
+  const label = theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : theme === "glass" ? "Glass" : "Frosted Glass";
+  test(`${label} compact density remains usable at the minimum reference width`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await openReference(page, "page", "compact", theme);
     await expectNoHorizontalOverflow(page);

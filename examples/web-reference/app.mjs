@@ -5,8 +5,18 @@ import { createGuiInput } from "../../packages/adapter-web/src/input.mjs";
 import { createGuiSwitch } from "../../packages/adapter-web/src/switch.mjs";
 import { createGuiPanel } from "../../packages/adapter-web/src/panel.mjs";
 import { createGuiDialog } from "../../packages/adapter-web/src/dialog.mjs";
+import {
+  configureWebComponentCapabilities,
+  detectWebCapabilities,
+} from "../../packages/adapter-web/src/capabilities.mjs";
 
-const themes = new Set(["basic", "modern", "glass"]);
+const themes = new Set(["basic", "modern", "glass", "frosted-glass"]);
+const themeLabels = new Map([
+  ["basic", "Basic"],
+  ["modern", "Modern"],
+  ["glass", "Glass"],
+  ["frosted-glass", "Frosted Glass"],
+]);
 const palettes = new Set(["reference-dark", "reference-light"]);
 const hostContexts = new Set(["page", "extension-popup", "extension-sidebar", "extension-options"]);
 const densities = new Set(["standard", "compact"]);
@@ -43,6 +53,28 @@ export function mountReferenceApp(document, root, options = {}) {
   const density = options.density ?? "standard";
   if (!densities.has(density)) throw new Error(`Unknown Web reference density: ${density}`);
   const compact = density === "compact";
+  const capabilityIr = options.capabilityIr ?? null;
+  const availableCapabilities = options.availableCapabilities ??
+    (capabilityIr ? detectWebCapabilities() : null);
+  if (capabilityIr !== null && (typeof capabilityIr !== "object" || Array.isArray(capabilityIr))) {
+    throw new TypeError("Reference app capabilityIr must be a compiled GUI specification object or null");
+  }
+  if (availableCapabilities !== null && !Array.isArray(availableCapabilities)) {
+    throw new TypeError("Reference app availableCapabilities must be an array when provided");
+  }
+
+  let capabilityTargets = [];
+  function applyCapabilityFallbacks() {
+    if (!capabilityIr || !availableCapabilities) return;
+    for (const component of capabilityTargets) {
+      configureWebComponentCapabilities(
+        component.element,
+        capabilityIr,
+        { paletteId: state.palette, themeId: theme },
+        { availableCapabilities },
+      );
+    }
+  }
 
   const state = {
     name: options.name ?? "Ada Lovelace",
@@ -63,7 +95,7 @@ export function mountReferenceApp(document, root, options = {}) {
   const surface = createElement(document, "div", "gui-reference");
   const header = createElement(document, "header", "gui-reference__header");
   header.append(
-    createElement(document, "p", "gui-reference__eyebrow", `${theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : "Glass"} theme · Web adapter`),
+    createElement(document, "p", "gui-reference__eyebrow", `${themeLabels.get(theme)} theme · Web adapter`),
     createElement(document, "h1", "", "Reference settings"),
     createElement(
       document,
@@ -111,6 +143,7 @@ export function mountReferenceApp(document, root, options = {}) {
     notificationValue.textContent = state.notifications ? "Enabled" : "Disabled";
     paletteValue.textContent = state.palette === "reference-dark" ? "Reference dark" : "Reference light";
     root.dataset.guiPalette = state.palette;
+    applyCapabilityFallbacks();
   }
 
   let nameInput;
@@ -253,6 +286,8 @@ export function mountReferenceApp(document, root, options = {}) {
     dialog,
     closeDialogButton,
   };
+  capabilityTargets = Object.values(components);
+  applyCapabilityFallbacks();
 
   return {
     root,
@@ -276,14 +311,35 @@ export function mountReferenceApp(document, root, options = {}) {
   };
 }
 
+async function loadReferenceIr() {
+  const response = await fetch("../../build/spec-ir.json", { cache: "no-store" });
+  if (!response.ok) throw new Error(`Unable to load compiled GUI specification: HTTP ${response.status}`);
+  return response.json();
+}
+
 if (typeof document !== "undefined") {
   const root = document.querySelector?.("#gui-reference-root");
   if (root) {
     const query = new URLSearchParams(globalThis.location?.search ?? "");
-    mountReferenceApp(document, root, {
-      hostContext: query.get("context") ?? "page",
-      density: query.get("density") ?? "standard",
-      theme: query.get("theme") ?? "basic",
-    });
+    const capabilityMode = query.get("capabilities") ?? "auto";
+    const availableCapabilities = capabilityMode === "none" ? [] : undefined;
+    if (capabilityMode !== "auto" && capabilityMode !== "none") {
+      throw new Error(`Unknown Web reference capability mode: ${capabilityMode}`);
+    }
+
+    loadReferenceIr()
+      .then((capabilityIr) => {
+        mountReferenceApp(document, root, {
+          hostContext: query.get("context") ?? "page",
+          density: query.get("density") ?? "standard",
+          theme: query.get("theme") ?? "basic",
+          capabilityIr,
+          availableCapabilities,
+        });
+      })
+      .catch((error) => {
+        root.dataset.guiReferenceError = "true";
+        console.error(error);
+      });
   }
 }
