@@ -1,5 +1,95 @@
 {
   "specVersion": "0.1.0",
   "theme": "cyberpunk",
-  "components": {}
+  "extends": "basic",
+  "components": {
+    "button": {
+      "base": {
+        "root": {
+          "radius": "{radius.sm}"
+        }
+      }
+    },
+    "input": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surface}",
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.accent}",
+            "width": "{border.width.standard}"
+          }
+        }
+      },
+      "states": {
+        "hover": {
+          "root": {
+            "border": {
+              "color": "{semantic.color.focus}",
+              "width": "{border.width.standard}"
+            }
+          }
+        }
+      }
+    },
+    "switch": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surface}",
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.accent}",
+            "width": "{border.width.standard}"
+          }
+        },
+        "thumb": {
+          "radius": "{radius.sm}"
+        }
+      },
+      "states": {
+        "hover": {
+          "root": {
+            "border": {
+              "color": "{semantic.color.focus}",
+              "width": "{border.width.standard}"
+            }
+          }
+        },
+        "pressed": {
+          "root": {
+            "border": {
+              "color": "{semantic.color.focus}",
+              "width": "{border.width.standard}"
+            }
+          }
+        }
+      }
+    },
+    "panel": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surface}",
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.accent}",
+            "width": "{border.width.standard}"
+          },
+          "shadow": "{elevation.shadow.low}"
+        }
+      }
+    },
+    "dialog": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceElevated}",
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.focus}",
+            "width": "{border.width.standard}"
+          },
+          "shadow": "{elevation.shadow.medium}"
+        }
+      }
+    }
+  }
 }
