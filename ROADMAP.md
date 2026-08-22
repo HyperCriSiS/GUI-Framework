@@ -6,7 +6,7 @@ This document is the public implementation roadmap for the GUI Framework.
 
 The project is in the foundation phase. The framework defines a language-neutral design and component specification that is compiled or adapted to platform-native UI technologies rather than replacing platform UI stacks.
 
-The complete initial reference-component set is now implemented for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The Web reference adapter is complete for this initial set: native semantics/accessibility mappings, keyboard/focus behavior, functional interaction feedback, deterministic capability fallbacks, portable SVG assets, popup/sidebar/options host-context validation, Playwright interactions and read-only visual-regression baselines are covered. Compose covers the same initial set with native semantics/input/focus behavior, functional interaction state mappings, deterministic capability fallbacks and portable assets. Stateful native Desktop and Android reference applications exercise the components, and the Android application is assembled as a real APK in Core CI. A shared neutral reference scenario gates the common Basic/reference-dark component set and interaction flows across Web, Compose Desktop and Compose Android while allowing platform-specific integration extensions. Renderer-neutral JSON contracts are additionally protected by a CI boundary test against Web-, Android- and Compose-specific vocabulary; the second-adapter architecture audit exposed no specification assumption requiring rework. Runtime validation now also exercises the Android reference application on API 23 with reduced memory and 1.30 font scale plus API 35 at high density. Phase 4 is complete. Phase 5 has completed the Basic theme contract: the full reference-component set, declared sizes/states, shared functional interaction motion, reduced-motion behavior, minimum-capability low-cost guards, dense/compact validation and a deterministic performance budget are CI-gated. Modern implementation has started as a deliberately small geometry/surface layer inherited from Basic, preserving palette independence and avoiding enhanced effects until both renderers map them consistently. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model.
+The complete initial reference-component set is now implemented for both Web and Compose: Button, Input, Switch, Panel/Card and Dialog. Their contracts, theme visuals and platform mappings originate from the same neutral specification. The Web reference adapter is complete for this initial set: native semantics/accessibility mappings, keyboard/focus behavior, functional interaction feedback, deterministic capability fallbacks, portable SVG assets, popup/sidebar/options host-context validation, Playwright interactions and read-only visual-regression baselines are covered. Compose covers the same initial set with native semantics/input/focus behavior, functional interaction state mappings, deterministic capability fallbacks and portable assets. Stateful native Desktop and Android reference applications exercise the components, and the Android application is assembled as a real APK in Core CI. A shared neutral reference scenario gates the common Basic/reference-dark component set and interaction flows across Web, Compose Desktop and Compose Android while allowing platform-specific integration extensions. Renderer-neutral JSON contracts are additionally protected by a CI boundary test against Web-, Android- and Compose-specific vocabulary; the second-adapter architecture audit exposed no specification assumption requiring rework. Runtime validation now also exercises the Android reference application on API 23 with reduced memory and 1.30 font scale plus API 35 at high density. Phase 4 is complete. Phase 5 has completed the Basic theme contract: the full reference-component set, declared sizes/states, shared functional interaction motion, reduced-motion behavior, minimum-capability low-cost guards, dense/compact validation and a deterministic performance budget are CI-gated. Modern implementation now builds on Basic with palette-neutral rounded geometry and neutral DTCG drop-shadow elevation for Panel/Card and Dialog. The shadow model is mapped consistently to Web CSS and Compose, including alpha-preserving generated tokens. The same reference-dark/reference-light palettes are CI-proven across Basic and Modern without theme forks. Web now exercises Modern through the same functional reference application and 320 px compact-layout path as Basic; Compose Desktop and Android expose equivalent Modern selection paths, with Android runtime instrumentation added for device validation. Modern also has a deterministic CI-enforced structural performance budget. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model.
 
 ## Phase 0 — Foundation and scope
 
@@ -89,28 +89,23 @@ The Web adapter uses native browser mechanisms rather than a custom rendering ru
 - [x] Complete functional micro-interactions for the initial reference-component set. <!-- native control feedback plus controlled Dialog open/dismiss/focus restoration are implemented -->
 - [x] Implement reduced-motion handling for generated interactive-control CSS.
 - [x] Implement capability detection and deterministic visual fallbacks.
-- [x] Verify browser-extension popup, sidebar and options-page use cases. <!-- representative viewport, keyboard, overflow and dialog-fit/focus behavior covered in Playwright -->
+- [x] Implement initial reference components: Button, Input, Switch, Panel/Card and Dialog.
+- [x] Build a real functional reference application using the Web adapter.
+- [x] Add browser-driven interaction and visual-regression tests.
+- [x] Validate popup/sidebar/options host contexts for browser-extension use. <!-- Playwright validates constrained extension-style widths, overflow, keyboard focus and dialog fit -->
+- [x] Verify the initial adapter remains portable beyond browser-extension hosts. <!-- page reference stays the canonical baseline while host-context CSS is additive -->
 
-### Initial reference components
+## Phase 4 — Compose reference adapter
 
-- [x] Button
-- [x] Input
-- [x] Switch
-- [x] Panel/Card
-- [x] Dialog
+Compose is the second architecture-validation adapter and covers Android plus Desktop.
 
-- [x] Build a real Web reference application using these components.
-- [x] Establish visual-regression and interaction baselines.
-
-## Phase 4 — Compose adapter and architecture validation
-
-The second adapter is an architecture test: it must prove that the specification is not Web-shaped.
-
-- [x] Generate and compile Kotlin-facing contracts from the neutral specification.
-- [x] Generate typed Kotlin representations of neutral primitive and semantic tokens.
-- [x] Map current recipes/tokens to Compose Android/Desktop primitives. <!-- includes sRGB Color, DTCG px -> dp, duration -> Kotlin Duration and Basic Button/Input/Switch/Panel/Dialog visuals -->
-- [x] Complete Compose semantics, input, focus and accessibility behavior. <!-- neutral roles and state mappings are explicitly source-gated against native Compose primitives for all five initial reference components -->
-- [x] Implement vector/SVG integration appropriate to the target.
+- [x] Generate Kotlin-facing contracts from the neutral specification.
+- [x] Generate Kotlin token bindings from resolved neutral values.
+- [x] Generate Compose-facing visual recipes from the same neutral theme data.
+- [x] Generate portable SVG asset metadata and resource paths for Compose.
+- [x] Implement native Compose mappings without introducing framework-specific layout primitives.
+- [x] Implement initial reference components: Button, Input, Switch, Panel/Card and Dialog.
+- [x] Preserve native semantics/input/focus behavior for the initial interactive controls.
 - [x] Complete functional micro-interactions using platform-efficient mechanisms. <!-- hover/focus/press/checked/loading/error/dismiss behavior uses native Foundation/Dialog state without a decorative animation layer -->
 - [x] Implement capability/fallback mapping for target devices. <!-- fallback recipes are generated from neutral IR and selected through a theme-scoped available-capability set for all five current components -->
 - [x] Validate scaling and older/lower-end device behavior. <!-- dp/sp and minimum-capability contracts are CI-gated; runtime instrumentation passes on API 23 with 1536 MB RAM / 1.30 font scale / 240 dpi and API 35 with 2048 MB RAM / 480 dpi -->
@@ -124,7 +119,7 @@ The second adapter is an architecture test: it must prove that the specification
 Themes:
 
 - [x] Basic <!-- all five reference components, declared sizes/states, shared functional interaction motion, reduced-motion handling, palette/contrast coverage, minimum-capability low-cost guards, dense/compact validation and deterministic performance budget are CI-gated -->
-- [ ] Modern <!-- foundation started: inherits Basic and defines palette-neutral rounded geometry for all five reference components; border/elevation/effects and dedicated visual validation remain -->
+- [ ] Modern <!-- inherited rounded geometry and neutral drop-shadow elevation are mapped in Web/Compose; shared palettes, Web reference/compact validation and deterministic performance budget are CI-gated; Compose Modern selection and Android instrumentation are implemented; dedicated visual baseline, device-runtime confirmation and final contrast/quality closure remain -->
 - [ ] Glass
 - [ ] Frosted Glass
 - [ ] Spacey
@@ -147,7 +142,7 @@ Palette work:
 
 - [x] Define non-final reference palettes for early implementation.
 - [x] Prove palette swapping without modifying component recipes.
-- [ ] Prove the same palette can be reused across multiple themes where appropriate.
+- [x] Prove the same palette can be reused across multiple themes where appropriate. <!-- reference-dark and reference-light compile against both Basic and Modern without palette-specific theme forks -->
 - [x] Prove a theme can use multiple substantially different palettes without forking the theme.
 
 ## Phase 6 — Extended component set
@@ -199,22 +194,24 @@ These are integration/reference applications, not mockup-only deliverables.
 
 Baseline interaction feedback belongs to the core specification. This phase covers richer non-essential motion.
 
-- [ ] Extend motion recipes for richer justified patterns.
-- [ ] Evaluate optional Rive state-machine integration.
-- [ ] Add renderer-native advanced transitions where appropriate.
+- [ ] Define optional spring/physics motion tokens.
+- [ ] Define optional entrance/exit transitions.
+- [ ] Define optional shared-element or continuity effects where platforms support them.
+- [ ] Define capability/fallback rules for advanced motion.
+- [ ] Keep reduced-motion support mandatory for all optional motion.
+
+## Continuous engineering requirements
+
+- [ ] Keep public APIs platform-neutral unless a renderer package explicitly owns the API.
+- [ ] Keep platform adapters thin and replaceable.
+- [ ] Keep component behavior native where platform primitives are sufficient.
+- [ ] Keep theme and palette data editable without changing renderer code.
+- [ ] Keep palette/theme switching deterministic and testable.
+- [ ] Keep all non-trivial effects behind capability checks or renderer support.
+- [ ] Keep functional interaction feedback efficient and mandatory.
 - [ ] Keep decorative motion optional.
-- [ ] Preserve full usability with reduced motion.
-
-## Continuous requirements
-
-- [ ] Keep the canonical specification language-neutral.
-- [ ] Keep themes independent from color palettes.
-- [ ] Preserve renderer-independent application-facing semantics.
-- [ ] Prefer host-platform layout, text, focus, input and accessibility systems.
-- [ ] Maintain deterministic fallback behavior.
-- [ ] Validate theme/palette combinations.
-- [ ] Benchmark startup, interaction latency, memory and rendering cost.
-- [ ] Test common DPI/scaling configurations.
-- [ ] Avoid visual regressions between themes, palettes and platforms.
-- [ ] Keep optional visual dependencies modular.
-- [ ] Do not expand into a general-purpose replacement for existing platform UI stacks.
+- [ ] Maintain automated tests for compiler determinism and renderer parity.
+- [ ] Maintain screenshots/reference captures for visual review.
+- [ ] Benchmark startup, interaction latency, memory and rendering cost on representative targets.
+- [ ] Maintain the compatibility/support matrix as dependencies evolve.
+- [ ] Maintain license headers and dependency-license review.
