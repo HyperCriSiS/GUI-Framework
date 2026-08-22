@@ -23,9 +23,20 @@ try {
   assert.match(source, /data class GuiVisualFallback/);
   assert.match(source, /val fallbacks: Map<String, GuiVisualFallback> = emptyMap\(\)/);
   assert.match(source, /object GuiVisualRegistry/);
-  assert.match(source, /"reference-dark" to mapOf/);
-  assert.match(source, /"reference-light" to mapOf/);
-  assert.match(source, /"basic" to mapOf/);
+  assert.match(
+    source,
+    /private fun palette\d+Theme\d+\(\): Map<String, GuiVisualRecipe> = mapOf\(/,
+    "Compose visual generation must shard theme recipe construction into bounded helper methods",
+  );
+  assert.match(
+    source,
+    /private fun palette\d+\(\): Map<String, Map<String, GuiVisualRecipe>> = mapOf\(/,
+    "Compose visual generation must shard palette construction away from the registry static initializer",
+  );
+  assert.match(source, /"reference-dark" to palette\d+\(\)/);
+  assert.match(source, /"reference-light" to palette\d+\(\)/);
+  assert.match(source, /"basic" to palette\d+Theme\d+\(\)/);
+  assert.match(source, /"cyberpunk" to palette\d+Theme\d+\(\)/);
   assert.match(source, /"button" to GuiVisualRecipe/);
   assert.match(source, /"dialog" to GuiVisualRecipe/);
   assert.match(source, /"input" to GuiVisualRecipe/);
@@ -40,8 +51,8 @@ try {
   assert.match(source, /GuiVisualOutline/);
   assert.match(source, /val shadow: GuiShadowValue\? = null/);
   assert.match(source, /val backdropBlur: GuiDimensionValue\? = null/);
-  assert.match(source, /"modern" to mapOf/);
-  assert.match(source, /"frosted-glass" to mapOf/);
+  assert.match(source, /"modern" to palette\d+Theme\d+\(\)/);
+  assert.match(source, /"frosted-glass" to palette\d+Theme\d+\(\)/);
   assert.match(source, /"high" to GuiVisualFallback\(requires = setOf\("backdropBlur"\), recipe = GuiVisualRecipe\(/);
   assert.match(source, /backdropBlur = GuiDimensionValue\(24\.0, "px"\)/);
   assert.match(source, /shadow = GuiShadowValue\(color = GuiColorValue\("srgb", listOf\(0\.0, 0\.0, 0\.0\), null, 0\.14\)/);
@@ -69,7 +80,7 @@ try {
     "Compose output must preserve deterministic capability fallback recipes",
   );
 
-  console.log("Compose visual and capability fallback generation tests passed.");
+  console.log("Compose visual and capability fallback generation tests passed with sharded registry initialization.");
 } finally {
   await Promise.all([
     rm(irPath, { force: true }),
