@@ -61,7 +61,7 @@ class FakeDialogElement extends FakeElement {
 
 const fakeDocument = {
   createElement(tagName) {
-    return tagName.toLowerCase() === "dialog" ? new FakeDialogElement() : new FakeElement(tagName);
+    return tagName.toLowerCase() === "dialog" ? new FakeDialogElement(tagName) : new FakeElement(tagName);
   },
 };
 
@@ -74,6 +74,7 @@ assert.equal(root.dataset.guiHostContext, "page");
 assert.equal(root.dataset.guiDensity, "standard");
 assert.equal(app.hostContext, "page");
 assert.equal(app.density, "standard");
+assert.equal(app.theme, "basic");
 assert.equal(root.className, "gui-reference-host");
 assert.equal(root.children.length, 2, "The theme host must contain the layout surface and dialog");
 assert.equal(root.children[0], app.surface);
@@ -143,6 +144,16 @@ assert.equal(extensionApp.hostContext, "extension-popup");
 extensionApp.destroy();
 assert.equal(extensionRoot.dataset.guiHostContext, undefined);
 
+const modernRoot = new FakeElement("main");
+const modernApp = mountReferenceApp(fakeDocument, modernRoot, { theme: "modern", palette: "reference-light" });
+assert.equal(modernRoot.dataset.guiTheme, "modern");
+assert.equal(modernRoot.dataset.guiPalette, "reference-light");
+assert.equal(modernApp.theme, "modern");
+modernApp.components.paletteButton.element.click();
+assert.equal(modernRoot.dataset.guiPalette, "reference-dark", "Modern must reuse the same palette-switching path");
+modernApp.destroy();
+assert.equal(modernRoot.dataset.guiTheme, undefined);
+
 const [html, css] = await Promise.all([
   readFile("examples/web-reference/index.html", "utf8"),
   readFile("examples/web-reference/reference.css", "utf8"),
@@ -171,6 +182,7 @@ assert.equal(root.className, "");
 
 assert.throws(() => mountReferenceApp(null, root), /Document-like object/);
 assert.throws(() => mountReferenceApp(fakeDocument, null), /Element-like root/);
+assert.throws(() => mountReferenceApp(fakeDocument, root, { theme: "unknown" }), /Unknown Web reference theme/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { palette: "unknown" }), /Unknown reference palette/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { hostContext: "unknown" }), /Unknown Web reference host context/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { density: "unknown" }), /Unknown Web reference density/);

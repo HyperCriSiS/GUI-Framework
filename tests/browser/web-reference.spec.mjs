@@ -4,14 +4,15 @@ import { expect, test } from "@playwright/test";
 
 const referencePath = "/examples/web-reference/";
 
-async function openReference(page, context = "page", density = "standard") {
+async function openReference(page, context = "page", density = "standard", theme = "basic") {
   const query = new URLSearchParams();
   if (context !== "page") query.set("context", context);
   if (density !== "standard") query.set("density", density);
+  if (theme !== "basic") query.set("theme", theme);
   const suffix = query.size === 0 ? "" : `?${query.toString()}`;
   await page.goto(`${referencePath}${suffix}`);
   const root = page.locator("#gui-reference-root");
-  await expect(root).toHaveAttribute("data-gui-theme", "basic");
+  await expect(root).toHaveAttribute("data-gui-theme", theme);
   await expect(root).toHaveAttribute("data-gui-palette", "reference-dark");
   await expect(root).toHaveAttribute("data-gui-host-context", context);
   await expect(root).toHaveAttribute("data-gui-density", density);
@@ -55,6 +56,34 @@ test("controlled native interactions remain synchronized", async ({ page }) => {
   await expect(dialog).not.toBeVisible();
   await expect(reviewButton).toBeFocused();
   await expect(page.getByText("Review closed.")).toBeVisible();
+});
+
+test("Modern reference reuses the same components and palette interaction path", async ({ page }) => {
+  const basicRoot = await openReference(page);
+  const basicPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+  });
+  await expect(basicRoot).toHaveAttribute("data-gui-theme", "basic");
+
+  const modernRoot = await openReference(page, "page", "standard", "modern");
+  const modernPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+  });
+  expect(modernPanelStyle.borderRadius).not.toBe(basicPanelStyle.borderRadius);
+  expect(modernPanelStyle.boxShadow).not.toBe("none");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(modernRoot).toHaveAttribute("data-gui-palette", "reference-light");
+  await expect(page.getByRole("button", { name: "Use dark palette" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  const dialogShadow = await dialog.evaluate((element) => getComputedStyle(element).boxShadow);
+  expect(dialogShadow).not.toBe("none");
+  await page.keyboard.press("Escape");
 });
 
 for (const host of [
