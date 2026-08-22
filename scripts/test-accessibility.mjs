@@ -240,7 +240,7 @@ try {
   ]);
   const ir = JSON.parse(irSource);
   const policy = JSON.parse(policySource);
-  const themeIds = ["basic", "modern", "glass"];
+  const themeIds = ["basic", "modern", "glass", "frosted-glass"];
   for (const palette of ir.palettes) {
     verifySemanticContrastPolicy(palette, policy);
     const background = token(palette, "semantic.color.background");
@@ -252,7 +252,7 @@ try {
       verifySwitch(palette, background, themeId);
     }
   }
-  console.log(`Semantic palette contrast policy and Basic/Modern/Glass WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
+  console.log(`Semantic palette contrast policy and Basic/Modern/Glass/Frosted Glass WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
   await rm(irPath, { force: true });
 }
