@@ -86,6 +86,59 @@ test("Modern reference reuses the same components and palette interaction path",
   await page.keyboard.press("Escape");
 });
 
+test("Modern visual delta baseline remains exact and palette-neutral", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "modern");
+
+  const buttonStyle = await page.getByRole("button", { name: "Save settings" }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius };
+  });
+  const inputStyle = await page.getByLabel("Display name").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius };
+  });
+  const switchStyle = await page.getByRole("switch", { name: "Activity notifications" }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    const thumb = element.querySelector(".gui-switch__thumb");
+    if (!thumb) throw new Error("Modern switch thumb is missing");
+    return {
+      borderRadius: style.borderRadius,
+      thumbBorderRadius: getComputedStyle(thumb).borderRadius,
+    };
+  });
+  const panelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+  });
+
+  expect(buttonStyle.borderRadius).toBe("14px");
+  expect(inputStyle.borderRadius).toBe("14px");
+  expect(switchStyle).toEqual({ borderRadius: "999px", thumbBorderRadius: "999px" });
+  expect(panelStyle.borderRadius).toBe("20px");
+  expect(panelStyle.boxShadow).toContain("0px 2px 6px 0px");
+  expect(panelStyle.boxShadow).toContain("0.14");
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  const dialogStyle = await dialog.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+  });
+  expect(dialogStyle.borderRadius).toBe("20px");
+  expect(dialogStyle.boxShadow).toContain("0px 6px 18px -2px");
+  expect(dialogStyle.boxShadow).toContain("0.18");
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  const lightPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+  });
+  expect(lightPanelStyle).toEqual(panelStyle);
+});
+
 for (const host of [
   { context: "extension-popup", width: 360, height: 600 },
   { context: "extension-sidebar", width: 420, height: 800 },
