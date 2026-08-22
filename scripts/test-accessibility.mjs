@@ -55,6 +55,35 @@ function assertContrast(left, right, minimum, label) {
   );
 }
 
+function compositedComponents(topToken, bottomToken, label) {
+  assert.equal(topToken?.type, "color", `${label} foreground layer must be a compiled color`);
+  assert.equal(bottomToken?.type, "color", `${label} background layer must be a compiled color`);
+  assert.equal(topToken.value?.colorSpace, "srgb", `${label} foreground layer must use sRGB`);
+  assert.equal(bottomToken.value?.colorSpace, "srgb", `${label} background layer must use sRGB`);
+  assert.equal(bottomToken.value?.alpha ?? 1, 1, `${label} background layer must be opaque`);
+  const alpha = topToken.value?.alpha ?? 1;
+  assert.ok(alpha > 0 && alpha <= 1, `${label} foreground alpha must be within (0, 1]`);
+  return topToken.value.components.map(
+    (channel, index) => channel * alpha + bottomToken.value.components[index] * (1 - alpha),
+  );
+}
+
+function contrastComponents(left, right) {
+  const leftLuminance = luminance(left);
+  const rightLuminance = luminance(right);
+  return (Math.max(leftLuminance, rightLuminance) + 0.05) /
+    (Math.min(leftLuminance, rightLuminance) + 0.05);
+}
+
+function assertContrastAgainstComponents(foregroundToken, backgroundComponents, minimum, label) {
+  const foreground = colorComponents(foregroundToken, `${label} foreground`);
+  const ratio = contrastComponents(foreground, backgroundComponents);
+  assert.ok(
+    ratio >= minimum,
+    `${label} contrast ${ratio.toFixed(3)}:1 is below ${minimum}:1`,
+  );
+}
+
 function resolve(recipe, contract, { variant, size = "medium", state } = {}) {
   return resolveComponentVisualRecipe(recipe, {
     variant,
@@ -77,6 +106,47 @@ function verifySemanticContrastPolicy(palette, policy) {
       token(palette, check.background),
       check.minimum,
       `${palette.id} semantic contrast ${check.id}`,
+    );
+  }
+}
+
+function verifyGlassTranslucentSurfaces(palette, background) {
+  const textPrimary = token(palette, "semantic.color.textPrimary");
+  const textSecondary = token(palette, "semantic.color.textSecondary");
+  const border = token(palette, "semantic.color.border");
+
+  for (const surfacePath of [
+    "semantic.color.surfaceTranslucent",
+    "semantic.color.surfaceElevatedTranslucent",
+  ]) {
+    const surface = token(palette, surfacePath);
+    assert.ok(
+      (surface.value?.alpha ?? 1) < 1,
+      `${palette.id} ${surfacePath} must remain translucent for Glass`,
+    );
+    const composedSurface = compositedComponents(
+      surface,
+      background,
+      `${palette.id} ${surfacePath}`,
+    );
+
+    assertContrastAgainstComponents(
+      textPrimary,
+      composedSurface,
+      MIN_TEXT_CONTRAST,
+      `${palette.id} glass primary text on ${surfacePath}`,
+    );
+    assertContrastAgainstComponents(
+      textSecondary,
+      composedSurface,
+      MIN_TEXT_CONTRAST,
+      `${palette.id} glass secondary text on ${surfacePath}`,
+    );
+    assertContrastAgainstComponents(
+      border,
+      composedSurface,
+      MIN_NON_TEXT_CONTRAST,
+      `${palette.id} glass boundary on ${surfacePath}`,
     );
   }
 }
@@ -170,10 +240,11 @@ try {
   ]);
   const ir = JSON.parse(irSource);
   const policy = JSON.parse(policySource);
-  const themeIds = ["basic", "modern"];
+  const themeIds = ["basic", "modern", "glass"];
   for (const palette of ir.palettes) {
     verifySemanticContrastPolicy(palette, policy);
     const background = token(palette, "semantic.color.background");
+    verifyGlassTranslucentSurfaces(palette, background);
     for (const themeId of themeIds) {
       assert.ok(palette.themes[themeId], `${palette.id} must compile ${themeId} for accessibility validation`);
       verifyButtons(palette, background, themeId);
@@ -181,7 +252,7 @@ try {
       verifySwitch(palette, background, themeId);
     }
   }
-  console.log(`Semantic palette contrast policy and Basic/Modern WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
+  console.log(`Semantic palette contrast policy and Basic/Modern/Glass WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
   await rm(irPath, { force: true });
 }
