@@ -34,22 +34,38 @@ enum class ReferenceDensity {
     Compact,
 }
 
+private fun referenceThemeFromSystemProperty(): GuiThemeId =
+    when (System.getProperty("gui.reference.theme")?.lowercase()) {
+        null, "", "basic" -> GuiThemeId.BASIC
+        "modern" -> GuiThemeId.MODERN
+        else -> error("Unsupported GUI reference theme; expected basic or modern")
+    }
+
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "GUI Framework — Compose Desktop Reference",
     ) {
-        GuiTheme(
-            theme = GuiThemeId.BASIC,
-            paletteId = "reference-dark",
-        ) {
-            DesktopReferenceApp()
-        }
+        DesktopReferenceApp(theme = referenceThemeFromSystemProperty())
     }
 }
 
 @Composable
-private fun DesktopReferenceApp(density: ReferenceDensity = ReferenceDensity.Standard) {
+private fun DesktopReferenceApp(
+    theme: GuiThemeId = GuiThemeId.BASIC,
+    paletteId: String = "reference-dark",
+    density: ReferenceDensity = ReferenceDensity.Standard,
+) {
+    GuiTheme(
+        theme = theme,
+        paletteId = paletteId,
+    ) {
+        DesktopReferenceContent(density = density)
+    }
+}
+
+@Composable
+private fun DesktopReferenceContent(density: ReferenceDensity) {
     var name by remember { mutableStateOf("Compose") }
     var enabled by remember { mutableStateOf(true) }
     var dialogOpen by remember { mutableStateOf(false) }

@@ -35,16 +35,21 @@ enum class ReferenceDensity {
 
 class MainActivity : ComponentActivity() {
     private var referenceDensity by mutableStateOf(ReferenceDensity.Standard)
+    private var referenceTheme by mutableStateOf(GuiThemeId.BASIC)
 
     fun applyReferenceDensity(density: ReferenceDensity) {
         referenceDensity = density
+    }
+
+    fun applyReferenceTheme(theme: GuiThemeId) {
+        referenceTheme = theme
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             GuiTheme(
-                theme = GuiThemeId.BASIC,
+                theme = referenceTheme,
                 paletteId = "reference-dark",
             ) {
                 AndroidReferenceApp(density = referenceDensity)

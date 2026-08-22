@@ -44,8 +44,9 @@ assert.match(manifest, /android\.intent\.action\.MAIN/);
 
 assert.match(source, /class MainActivity : ComponentActivity\(\)/);
 assert.match(source, /setContent \{/);
-assert.match(source, /GuiTheme\(/);
-assert.match(source, /GuiThemeId\.BASIC/);
+assert.match(source, /referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
+assert.match(source, /applyReferenceTheme\(theme: GuiThemeId\)/);
+assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
@@ -68,6 +69,9 @@ assert.match(runtimeTest, /exerciseReferenceControls\("Scaled reference"\)/);
 assert.match(runtimeTest, /compactReferenceControlsRemainUsableAtHostScale/);
 assert.match(runtimeTest, /applyReferenceDensity\(ReferenceDensity\.Compact\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference"\)/);
+assert.match(runtimeTest, /modernReferenceControlsRemainUsableAtHostScale/);
+assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.MODERN\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Modern reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
 assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
@@ -76,4 +80,4 @@ assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern theme selection.");

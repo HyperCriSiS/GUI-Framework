@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import gui.framework.generated.internal.GuiThemeId
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,6 +32,16 @@ class ReferenceRuntimeTest {
         composeRule.waitForIdle()
 
         exerciseReferenceControls("Compact reference")
+    }
+
+    @Test
+    fun modernReferenceControlsRemainUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.applyReferenceTheme(GuiThemeId.MODERN)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Modern reference")
     }
 
     private fun exerciseReferenceControls(replacement: String) {
