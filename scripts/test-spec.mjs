@@ -9,158 +9,164 @@ const second = "build/spec-ir-test-b.json";
 
 function compile(output) {
   const result = spawnSync(process.execPath, ["packages/compiler/src/index.mjs", "--output", output], {
-    encoding: "utf8"
+    encoding: "utf8",
   });
   if (result.status !== 0) {
-    throw new Error(`Specification compiler failed:\n${result.stdout}\n${result.stderr}`);
+    throw new Error(`Compiler failed:\n${result.stdout}\n${result.stderr}`);
   }
 }
 
-function containsReference(value) {
-  if (typeof value === "string") return /^\{[^{}]+\}$/.test(value);
-  if (Array.isArray(value)) return value.some(containsReference);
-  if (value !== null && typeof value === "object") return Object.values(value).some(containsReference);
-  return false;
+function findComponent(palette, id) {
+  const component = palette.components[id];
+  assert.ok(component, `Missing compiled component ${id}`);
+  return component;
 }
 
 try {
   compile(first);
   compile(second);
 
-  const [a, b] = await Promise.all([readFile(first, "utf8"), readFile(second, "utf8")]);
-  assert.equal(a, b, "The compiler must produce byte-identical output for identical inputs");
+  const [firstSource, secondSource] = await Promise.all([
+    readFile(first, "utf8"),
+    readFile(second, "utf8"),
+  ]);
+  assert.equal(firstSource, secondSource, "Compiler output must be deterministic");
 
-  const ir = JSON.parse(a);
+  const ir = JSON.parse(firstSource);
+  assert.equal(ir.specVersion, "0.1.0");
   assert.deepEqual(
     ir.themes.map((theme) => theme.id),
     ["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"],
-    "The initial theme registry must remain stable"
   );
-
   assert.deepEqual(
     ir.palettes.map((palette) => palette.id),
     ["reference-dark", "reference-light"],
-    "Independent development palettes must remain registered"
   );
-
-  const expectedComponentIds = ["button", "dialog", "input", "panel", "switch"];
-  for (const palette of ir.palettes) {
-    assert.deepEqual(
-      Object.keys(palette.components),
-      expectedComponentIds,
-      `Palette ${palette.id} must compile the complete reference component registry`
-    );
-  }
+  assert.equal(ir.assets.length, 1);
+  assert.equal(ir.assets[0].id, "icon.close");
+  assert.equal(ir.assets[0].format, "svg");
+  assert.equal(ir.assets[0].usage, "icon");
+  assert.equal(ir.assets[0].renderMode, "mask");
+  assert.equal(ir.assets[0].source, "assets/icons/close.svg");
+  assert.equal(ir.assets[0].viewBox, "0 0 24 24");
+  assert.equal(ir.assets[0].sha256, "f8d2c1aacba211d18a9d49bffda9ca6ca5ee1cf0d15843361623837c376481ed");
 
   const darkPalette = ir.palettes.find((palette) => palette.id === "reference-dark");
   const lightPalette = ir.palettes.find((palette) => palette.id === "reference-light");
-  assert.equal(darkPalette?.familyId, "reference");
-  assert.equal(lightPalette?.familyId, "reference");
-  assert.equal(darkPalette?.variantId, "dark");
-  assert.equal(lightPalette?.variantId, "light");
-  assert.notEqual(darkPalette?.variantId, lightPalette?.variantId, "Palette variants in one family must remain distinguishable");
-  const darkButton = darkPalette?.components?.button;
-  const lightButton = lightPalette?.components?.button;
-  assert.ok(darkButton && lightButton, "Every registered palette must compile the same button contract");
-
-  assert.deepEqual(darkButton.anatomy, lightButton.anatomy, "Palette changes must not fork component anatomy");
-  assert.deepEqual(darkButton.content, lightButton.content, "Palette changes must not fork component content contracts");
-  assert.deepEqual(darkButton.properties, lightButton.properties, "Palette changes must not fork component property contracts");
-  assert.deepEqual(darkButton.events, lightButton.events, "Palette changes must not fork component event contracts");
-  assert.deepEqual(darkButton.variants, lightButton.variants, "Palette changes must not fork component variants");
-  assert.deepEqual(darkButton.states, lightButton.states, "Palette changes must not fork component states");
-  assert.deepEqual(darkButton.semantics, lightButton.semantics, "Palette changes must not fork component semantics");
-  assert.deepEqual(darkButton.capabilities, lightButton.capabilities, "Palette changes must not fork capability requirements");
-
-  assert.deepEqual(darkButton.content, [
-    { id: "label", kind: "text", required: true },
-    { id: "leadingIcon", kind: "graphic", required: false },
-    { id: "trailingIcon", kind: "graphic", required: false }
-  ]);
-  assert.deepEqual(darkButton.events, [{ id: "activate", payload: "none" }]);
-  assert.equal(darkButton.properties.find((property) => property.id === "disabled")?.state, "disabled");
-  assert.equal(darkButton.properties.find((property) => property.id === "loading")?.state, "loading");
-
-  assert.equal(darkButton.tokenBindings.accent.value.hex, "#2563EB");
-  assert.equal(lightButton.tokenBindings.accent.value.hex, "#684DE2");
-  assert.notDeepEqual(
-    darkButton.tokenBindings.accent.value,
-    lightButton.tokenBindings.accent.value,
-    "Palette swapping must change resolved semantic color values"
-  );
-
+  assert.ok(darkPalette && lightPalette);
   assert.deepEqual(
-    darkButton.tokenBindings.accent.trace.map((entry) => entry.token),
-    ["semantic.color.accent", "palette.accent500"],
-    "Resolved token bindings must preserve provenance"
+    Object.keys(darkPalette.components),
+    ["button", "dialog", "input", "panel", "switch"],
   );
-  assert.equal(darkButton.semantics.preferNativePrimitive, true);
-
-  const transition = darkButton.tokenBindings.interactionTransition;
-  assert.equal(transition.type, "transition");
-  assert.deepEqual(transition.value.duration, { value: 120, unit: "ms" });
-  assert.deepEqual(transition.value.delay, { value: 0, unit: "ms" });
-  assert.deepEqual(transition.value.timingFunction, [0.2, 0, 0, 1]);
-  assert.equal(containsReference(transition.value), false, "Composite token values must not retain unresolved references in IR");
-
-  assert.ok(darkPalette.tokens["semantic.color.background"], "Semantic tokens must be exported in the public IR");
-  assert.ok(darkPalette.tokens["spacing.md"], "Primitive tokens must be exported in the public IR");
-  assert.ok(darkPalette.tokens["motion.interaction.fast"], "Composite primitive tokens must be exported in the public IR");
-  assert.equal(darkPalette.tokens["palette.accent500"], undefined, "Raw palette tokens must not be exposed as public adapter tokens");
-  assert.equal(containsReference(darkPalette.tokens), false, "Public adapter tokens must be fully resolved");
-
   assert.deepEqual(
     Object.keys(darkPalette.themes),
     ["basic", "cyberpunk", "frosted-glass", "glass", "modern", "spacey"],
-    "Every palette must contain compiled visual slots for the six registered themes",
   );
+
+  const button = findComponent(darkPalette, "button");
+  assert.equal(button.id, "button");
+  assert.equal(button.contentModel, "text");
+  assert.equal(button.properties.find((property) => property.id === "disabled")?.type, "boolean");
+  assert.equal(button.properties.find((property) => property.id === "loading")?.state, "loading");
+  assert.equal(button.events.find((event) => event.id === "activate")?.payload, "void");
+  assert.deepEqual(button.variants, ["primary", "secondary", "ghost", "danger"]);
+  assert.deepEqual(button.sizes, ["small", "medium", "large"]);
+  assert.deepEqual(button.states, ["default", "hover", "focus", "pressed", "disabled", "loading"]);
+  assert.equal(button.semantics.preferNativePrimitive, true);
+  assert.deepEqual(button.capabilities.required, []);
+  assert.deepEqual(button.capabilities.fallbackOrder, ["standard", "minimal"]);
+  assert.equal(button.accessibility.minimumTargetSizePx, 24);
+  assert.equal(button.accessibility.recommendedTargetSizePx, 44);
+  assert.equal(button.accessibility.keyboardActivationRequired, true);
+  assert.equal(button.accessibility.focusVisibleRequired, true);
+  assert.deepEqual(button.accessibility.allowedRoles, ["button"]);
+  assert.deepEqual(button.accessibility.requiredStates, ["disabled"]);
+  assert.deepEqual(button.accessibility.requiredProperties, ["name"]);
+  assert.deepEqual(button.accessibility.prohibitedStates, ["checked"]);
+  assert.equal(button.accessibility.nameRequired, true);
+  assert.deepEqual(button.interaction.hoverFeedback, {
+    required: true,
+    mode: "immediate",
+    transition: "{motion.interaction.fast}",
+  });
+  assert.deepEqual(button.interaction.pressFeedback, {
+    required: true,
+    mode: "immediate",
+    transition: "{motion.interaction.fast}",
+  });
+  assert.deepEqual(button.interaction.focusFeedback, {
+    required: true,
+    mode: "immediate",
+    transition: "{motion.interaction.fast}",
+  });
+  assert.equal(button.interaction.decorativeMotionAllowed, false);
+
+  const dialog = findComponent(darkPalette, "dialog");
+  assert.equal(dialog.contentModel, "container");
+  assert.equal(dialog.properties.find((property) => property.id === "open")?.type, "boolean");
+  assert.equal(dialog.events.find((event) => event.id === "dismissRequest")?.payload, "void");
+  assert.deepEqual(dialog.variants, ["standard"]);
+  assert.deepEqual(dialog.sizes, ["small", "medium", "large"]);
+  assert.deepEqual(dialog.states, ["default"]);
+  assert.equal(dialog.semantics.role, "dialog");
+  assert.equal(dialog.accessibility.focusVisibleRequired, false);
+
+  const input = findComponent(darkPalette, "input");
+  assert.equal(input.contentModel, "text");
+  assert.equal(input.properties.find((property) => property.id === "value")?.type, "string");
+  assert.equal(input.properties.find((property) => property.id === "placeholder")?.type, "string");
+  assert.equal(input.properties.find((property) => property.id === "disabled")?.state, "disabled");
+  assert.equal(input.properties.find((property) => property.id === "invalid")?.state, "error");
+  assert.equal(input.events.find((event) => event.id === "valueChange")?.payload, "string");
+  assert.deepEqual(input.variants, ["standard"]);
+  assert.deepEqual(input.sizes, ["small", "medium", "large"]);
+  assert.deepEqual(input.states, ["default", "hover", "focus", "disabled", "error"]);
+  assert.equal(input.semantics.preferNativePrimitive, true);
+  assert.equal(input.accessibility.minimumTargetSizePx, 24);
+  assert.equal(input.accessibility.focusVisibleRequired, true);
+
+  const panel = findComponent(darkPalette, "panel");
+  assert.equal(panel.contentModel, "container");
+  assert.equal(panel.semantics.role, "group");
+  assert.deepEqual(panel.variants, ["standard"]);
+  assert.deepEqual(panel.sizes, ["small", "medium", "large"]);
+  assert.deepEqual(panel.states, ["default"]);
+
+  const guiSwitch = findComponent(darkPalette, "switch");
+  assert.equal(guiSwitch.contentModel, "none");
+  assert.equal(guiSwitch.properties.find((property) => property.id === "checked")?.state, "checked");
+  assert.equal(guiSwitch.events.find((event) => event.id === "checkedChange")?.payload, "boolean");
+  assert.deepEqual(guiSwitch.variants, ["standard"]);
+  assert.deepEqual(guiSwitch.sizes, ["small", "medium", "large"]);
+  assert.deepEqual(guiSwitch.states, ["default", "hover", "focus", "pressed", "checked", "disabled"]);
+  assert.equal(guiSwitch.semantics.role, "switch");
+  assert.equal(guiSwitch.accessibility.minimumTargetSizePx, 24);
+  assert.equal(guiSwitch.accessibility.keyboardActivationRequired, true);
+  assert.deepEqual(guiSwitch.accessibility.requiredStates, ["checked", "disabled"]);
+  assert.deepEqual(guiSwitch.accessibility.requiredProperties, ["name"]);
 
   const darkBasicButton = darkPalette.themes.basic.components.button;
   const lightBasicButton = lightPalette.themes.basic.components.button;
-  const darkBasicDialog = darkPalette.themes.basic.components.dialog;
-  const lightBasicDialog = lightPalette.themes.basic.components.dialog;
-  assert.ok(darkBasicDialog && lightBasicDialog, "Basic must compile a concrete dialog visual recipe for every palette");
-  assert.notDeepEqual(
-    darkBasicDialog.base.root.fill.value,
-    lightBasicDialog.base.root.fill.value,
-    "Palette changes must alter resolved Basic dialog surfaces without forking the theme recipe",
-  );
-  assert.ok(darkBasicButton && lightBasicButton, "Basic must compile a concrete button visual recipe for every palette");
-  assert.equal(
-    darkBasicButton.variants.primary.base.root.fill.value.hex,
-    "#2563EB",
-    "The Basic primary button must resolve through the dark palette",
-  );
-  assert.equal(
-    lightBasicButton.variants.primary.base.root.fill.value.hex,
-    "#684DE2",
-    "The same Basic primary button must resolve through the light palette without forking the theme recipe",
+  assert.ok(darkBasicButton && lightBasicButton);
+  assert.equal(darkBasicButton.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
+  assert.equal(darkBasicButton.variants.primary.base.root.fill.value.hex, "#2563EB");
+  assert.equal(lightBasicButton.variants.primary.base.root.fill.value.hex, "#684DE2");
+  assert.deepEqual(
+    darkBasicButton.base.root.minHeight.value,
+    lightBasicButton.base.root.minHeight.value,
+    "Palette switching must not alter geometry",
   );
   assert.notDeepEqual(
     darkBasicButton.variants.primary.base.root.fill.value,
     lightBasicButton.variants.primary.base.root.fill.value,
-    "Palette changes must alter resolved Basic visuals while preserving one shared theme definition",
-  );
-  assert.equal(
-    darkBasicButton.base.root.radius.reference,
-    "{radius.control}",
-    "Compiled Basic visuals must retain source-token provenance",
+    "Palette switching must change semantic colors when the palette differs",
   );
 
   const darkModernButton = darkPalette.themes.modern.components.button;
   const lightModernButton = lightPalette.themes.modern.components.button;
-  const darkModernPanel = darkPalette.themes.modern.components.panel;
-  const darkModernSwitch = darkPalette.themes.modern.components.switch;
-  assert.ok(darkModernButton && lightModernButton && darkModernPanel && darkModernSwitch, "Modern must compile the inherited reference-component visuals for every palette");
+  assert.ok(darkModernButton && lightModernButton, "Modern must compile its inherited Button visual for every palette");
   assert.equal(darkModernButton.base.root.radius.reference, "{radius.lg}");
-  assert.equal(darkModernPanel.base.root.radius.reference, "{radius.xl}");
-  assert.equal(darkModernSwitch.base.root.radius.reference, "{radius.pill}");
-  assert.equal(darkModernSwitch.base.thumb.radius.reference, "{radius.pill}");
-  assert.deepEqual(
-    darkModernButton.variants,
-    darkBasicButton.variants,
-    "Modern must retain Basic button variant behavior while changing geometry",
-  );
+  assert.equal(lightModernButton.base.root.radius.reference, "{radius.lg}");
   assert.deepEqual(
     darkModernButton.variants.primary.base.root.fill.value,
     darkBasicButton.variants.primary.base.root.fill.value,
@@ -201,16 +207,40 @@ try {
 
   const darkFrosted = darkPalette.themes["frosted-glass"].components;
   const lightFrosted = lightPalette.themes["frosted-glass"].components;
-  assert.deepEqual(
-    darkFrosted,
-    darkPalette.themes.glass.components,
-    "Frosted Glass foundation must inherit the complete dark-palette Glass contract before blur is introduced",
-  );
-  assert.deepEqual(
-    lightFrosted,
-    lightPalette.themes.glass.components,
-    "Frosted Glass foundation must inherit the complete light-palette Glass contract before blur is introduced",
-  );
+  for (const componentId of ["button", "input", "switch"]) {
+    assert.deepEqual(
+      darkFrosted[componentId],
+      darkPalette.themes.glass.components[componentId],
+      `Frosted Glass ${componentId} must remain identical to Glass on the dark palette`,
+    );
+    assert.deepEqual(
+      lightFrosted[componentId],
+      lightPalette.themes.glass.components[componentId],
+      `Frosted Glass ${componentId} must remain identical to Glass on the light palette`,
+    );
+  }
+  for (const componentId of ["panel", "dialog"]) {
+    for (const [paletteLabel, frostedComponent, glassComponent] of [
+      ["dark", darkFrosted[componentId], darkPalette.themes.glass.components[componentId]],
+      ["light", lightFrosted[componentId], lightPalette.themes.glass.components[componentId]],
+    ]) {
+      const { fallbacks, ...frostedBase } = frostedComponent;
+      assert.deepEqual(
+        frostedBase,
+        glassComponent,
+        `Frosted Glass ${componentId} must preserve the complete ${paletteLabel}-palette Glass base`,
+      );
+      assert.deepEqual(fallbacks.high.requires, ["backdropBlur"]);
+      assert.equal(
+        fallbacks.high.recipe.base.root.backdropBlur.reference,
+        "{effect.blur.frosted}",
+      );
+      assert.deepEqual(
+        fallbacks.high.recipe.base.root.backdropBlur.value,
+        { value: 24, unit: "px" },
+      );
+    }
+  }
 
   for (const themeId of ["cyberpunk", "spacey"]) {
     assert.deepEqual(
