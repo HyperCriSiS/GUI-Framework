@@ -62,6 +62,7 @@ assert.match(web, /label: "Close"[\s\S]*onActivate: closeDialog/);
 
 assert.match(desktop, /theme: GuiThemeId = GuiThemeId\.BASIC/);
 assert.match(desktop, /"modern" -> GuiThemeId\.MODERN/);
+assert.match(desktop, /"glass" -> GuiThemeId\.GLASS/);
 assert.match(desktop, /theme = theme/);
 assert.match(desktop, /paletteId: String = "reference-dark"/);
 assert.match(desktop, /paletteId = paletteId/);
@@ -81,7 +82,7 @@ for (const marker of ["GuiButton(", "GuiInput(", "GuiSwitch(", "GuiPanel(", "Gui
   assert.match(shared, new RegExp(escapeRegExp(marker)), `Shared Compose reference screen must exercise ${marker}`);
 }
 
-console.log("Cross-platform reference application parity tests passed with Basic defaults, Modern cross-platform selection and Glass Web selection.");
+console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass selection paths.");
 
 async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));

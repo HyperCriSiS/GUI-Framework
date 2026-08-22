@@ -72,6 +72,9 @@ assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference"\)/);
 assert.match(runtimeTest, /modernReferenceControlsRemainUsableAtHostScale/);
 assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.MODERN\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Modern reference"\)/);
+assert.match(runtimeTest, /glassReferenceControlsRemainUsableAtHostScale/);
+assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.GLASS\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Glass reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
 assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
@@ -80,4 +83,4 @@ assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern theme selection.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern/Glass theme selection.");

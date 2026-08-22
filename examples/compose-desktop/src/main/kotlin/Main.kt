@@ -38,7 +38,8 @@ private fun referenceThemeFromSystemProperty(): GuiThemeId =
     when (System.getProperty("gui.reference.theme")?.lowercase()) {
         null, "", "basic" -> GuiThemeId.BASIC
         "modern" -> GuiThemeId.MODERN
-        else -> error("Unsupported GUI reference theme; expected basic or modern")
+        "glass" -> GuiThemeId.GLASS
+        else -> error("Unsupported GUI reference theme; expected basic, modern or glass")
     }
 
 fun main() = application {

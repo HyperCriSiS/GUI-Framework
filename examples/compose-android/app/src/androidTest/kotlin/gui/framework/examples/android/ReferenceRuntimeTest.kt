@@ -44,6 +44,16 @@ class ReferenceRuntimeTest {
         exerciseReferenceControls("Modern reference")
     }
 
+    @Test
+    fun glassReferenceControlsRemainUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.applyReferenceTheme(GuiThemeId.GLASS)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Glass reference")
+    }
+
     private fun exerciseReferenceControls(replacement: String) {
         composeRule
             .onNodeWithContentDescription("Reference name")
