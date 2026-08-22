@@ -184,6 +184,16 @@ assert.equal(spaceyRoot.dataset.guiPalette, "reference-light", "Spacey must reus
 spaceyApp.destroy();
 assert.equal(spaceyRoot.dataset.guiTheme, undefined);
 
+const cyberpunkRoot = new FakeElement("main");
+const cyberpunkApp = mountReferenceApp(fakeDocument, cyberpunkRoot, { theme: "cyberpunk" });
+assert.equal(cyberpunkRoot.dataset.guiTheme, "cyberpunk");
+assert.equal(cyberpunkRoot.dataset.guiPalette, "reference-dark");
+assert.equal(cyberpunkApp.theme, "cyberpunk");
+cyberpunkApp.components.paletteButton.element.click();
+assert.equal(cyberpunkRoot.dataset.guiPalette, "reference-light", "Cyberpunk must reuse the same palette-switching path");
+cyberpunkApp.destroy();
+assert.equal(cyberpunkRoot.dataset.guiTheme, undefined);
+
 const [html, css] = await Promise.all([
   readFile("examples/web-reference/index.html", "utf8"),
   readFile("examples/web-reference/reference.css", "utf8"),
