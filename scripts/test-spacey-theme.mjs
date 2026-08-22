@@ -90,7 +90,10 @@ for (const [componentId, parts] of Object.entries(expectedFoundation)) {
 
 assert.deepEqual(
   spaceyEntry.definition.components.switch.states?.checked?.root?.border,
-  { color: "{semantic.color.borderStrong}" },
+  {
+    color: "{semantic.color.borderStrong}",
+    width: "{border.width.standard}",
+  },
   "Spacey checked Switch must keep the instrument frame while inheriting the active Accent fill",
 );
 
