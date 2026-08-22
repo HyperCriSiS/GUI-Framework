@@ -6,25 +6,33 @@ on:
       - main
       - "feat/**"
   pull_request:
-  workflow_dispatch:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   validate-and-typecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.19.0
+          node-version: "24"
+          package-manager-cache: false
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -170,17 +178,20 @@ jobs:
   web-browser-regression:
     needs: validate-and-typecheck
     runs-on: ubuntu-24.04
+    timeout-minutes: 12
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.19.0
+          node-version: "24"
+          package-manager-cache: false
 
       - name: Install pinned browser-test dependency
-        run: npm install --ignore-scripts --no-save --package-lock=false @playwright/test@1.58.2
+        run: npm install --ignore-scripts --no-save --package-lock=false @playwright/test@1.62.1
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -195,44 +206,53 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify browser interactions and visual regressions
-        run: npm run test:web-reference-browser
+        run: npm run test:web-browser
 
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: web-browser-failure-artifacts
-          path: |
-            test-results/
-            playwright-report/
+          name: web-browser-failure-${{ github.run_id }}
+          path: test-results/playwright/
           if-no-files-found: ignore
           retention-days: 7
 
   compose-android-reference:
     needs: validate-and-typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.19.0
+          node-version: "24"
+          package-manager-cache: false
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Install Android platform package
+        run: |
+          sdkmanager "platforms;android-37" "build-tools;37.0.0"
+          yes | sdkmanager --licenses >/dev/null || true
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "9.5.0"
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Generate neutral and Compose artifacts
         run: |
@@ -243,12 +263,10 @@ jobs:
           npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation tests
-        working-directory: examples/compose-android
-        run: gradle :app:compileDebugAndroidTestKotlin
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon --stacktrace
 
       - name: Assemble Android reference APK
-        working-directory: examples/compose-android
-        run: gradle :app:assembleDebug
+        run: npm run build:kotlin-android-reference
 
   compose-android-runtime:
     needs:
@@ -259,6 +277,7 @@ jobs:
       github.event_name == 'pull_request' ||
       contains(github.event.head_commit.message, '[device-ci]')
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -279,20 +298,38 @@ jobs:
             heap-size: 256M
             density: 480
             font-scale: 1.00
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.19.0
+          node-version: "24"
+          package-manager-cache: false
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform package
+        run: |
+          sdkmanager "platforms;android-37" "build-tools;37.0.0"
+          yes | sdkmanager --licenses >/dev/null || true
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: "9.5.0"
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Generate neutral and Compose artifacts
         run: |
@@ -301,6 +338,9 @@ jobs:
           npm run build:kotlin-tokens
           npm run build:kotlin-visuals
           npm run build:kotlin-assets
+
+      - name: Compile Android reference instrumentation tests
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon --stacktrace
 
       - name: Run scaled Android reference instrumentation
         uses: reactivecircus/android-emulator-runner@v2
@@ -315,4 +355,4 @@ jobs:
           disable-animations: true
           script: |
             adb shell settings put system font_scale ${{ matrix.font-scale }}
-            gradle -p examples/compose-android :app:connectedDebugAndroidTest
+            gradle -p examples/compose-android :app:connectedDebugAndroidTest --no-daemon --stacktrace
