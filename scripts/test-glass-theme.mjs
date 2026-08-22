@@ -93,8 +93,8 @@ for (const componentId of ["panel", "dialog"]) {
   );
   assert.equal(
     component.capabilities.fallbackOrder[0],
-    "frosted",
-    `${componentId} must prefer the future frosted capability tier before standard/minimal fallbacks`,
+    "high",
+    `${componentId} must prefer the generic high-capability tier for the future Frosted Glass path before standard/minimal fallbacks`,
   );
 }
 
@@ -109,7 +109,7 @@ const paletteExpectations = {
   },
 };
 
-for (const entry of manifest.palttes ?? manifest.palettes) {
+for (const entry of manifest.palettes) {
   const paletteSource = JSON.parse(await readFile(join("spec", entry.source), "utf8"));
   const expected = paletteExpectations[entry.id];
   assert.ok(expected, `Glass foundation must explicitly cover palette ${entry.id}`);

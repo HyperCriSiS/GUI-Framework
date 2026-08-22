@@ -56,7 +56,7 @@
       "shaderEffects"
     ],
     "fallbackOrder": [
-      "frosted",
+      "high",
       "standard",
       "minimal"
     ]
