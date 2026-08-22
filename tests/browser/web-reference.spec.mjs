@@ -118,52 +118,54 @@ for (const host of [
   });
 }
 
-test("Basic compact density remains usable at the minimum reference width", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 720 });
-  await openReference(page, "page", "compact");
-  await expectNoHorizontalOverflow(page);
+for (const theme of ["basic", "modern"]) {
+  test(`${theme === "basic" ? "Basic" : "Modern"} compact density remains usable at the minimum reference width`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    await openReference(page, "page", "compact", theme);
+    await expectNoHorizontalOverflow(page);
 
-  for (const locator of [
-    page.getByLabel("Display name"),
-    page.getByRole("switch", { name: "Activity notifications" }),
-    page.getByRole("button", { name: "Save settings" }),
-    page.getByRole("button", { name: "Use light palette" }),
-    page.getByRole("button", { name: "Review changes" }),
-  ]) {
-    await expect(locator).toHaveAttribute("data-gui-size", "small");
-    const bounds = await locator.boundingBox();
-    expect(bounds).not.toBeNull();
-    expect(bounds.height).toBeGreaterThanOrEqual(24);
-  }
+    for (const locator of [
+      page.getByLabel("Display name"),
+      page.getByRole("switch", { name: "Activity notifications" }),
+      page.getByRole("button", { name: "Save settings" }),
+      page.getByRole("button", { name: "Use light palette" }),
+      page.getByRole("button", { name: "Review changes" }),
+    ]) {
+      await expect(locator).toHaveAttribute("data-gui-size", "small");
+      const bounds = await locator.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds.height).toBeGreaterThanOrEqual(24);
+    }
 
-  for (const panel of await page.locator(".gui-panel").all()) {
-    await expect(panel).toHaveAttribute("data-gui-size", "small");
-  }
+    for (const panel of await page.locator(".gui-panel").all()) {
+      await expect(panel).toHaveAttribute("data-gui-size", "small");
+    }
 
-  const input = page.getByLabel("Display name");
-  const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
-  const saveButton = page.getByRole("button", { name: "Save settings" });
-  await input.focus();
-  await page.keyboard.press("Tab");
-  await expect(notificationSwitch).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(saveButton).toBeFocused();
+    const input = page.getByLabel("Display name");
+    const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
+    const saveButton = page.getByRole("button", { name: "Save settings" });
+    await input.focus();
+    await page.keyboard.press("Tab");
+    await expect(notificationSwitch).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(saveButton).toBeFocused();
 
-  const reviewButton = page.getByRole("button", { name: "Review changes" });
-  await reviewButton.click();
-  const dialog = page.getByRole("dialog", { name: "Review settings" });
-  await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveAttribute("data-gui-size", "small");
-  await expect(page.getByRole("button", { name: "Close" })).toHaveAttribute("data-gui-size", "small");
+    const reviewButton = page.getByRole("button", { name: "Review changes" });
+    await reviewButton.click();
+    const dialog = page.getByRole("dialog", { name: "Review settings" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAttribute("data-gui-size", "small");
+    await expect(page.getByRole("button", { name: "Close" })).toHaveAttribute("data-gui-size", "small");
 
-  const dialogBounds = await dialog.boundingBox();
-  expect(dialogBounds).not.toBeNull();
-  expect(dialogBounds.x).toBeGreaterThanOrEqual(0);
-  expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(320);
-  await expectNoHorizontalOverflow(page);
-  await page.keyboard.press("Escape");
-  await expect(reviewButton).toBeFocused();
-});
+    const dialogBounds = await dialog.boundingBox();
+    expect(dialogBounds).not.toBeNull();
+    expect(dialogBounds.x).toBeGreaterThanOrEqual(0);
+    expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(320);
+    await expectNoHorizontalOverflow(page);
+    await page.keyboard.press("Escape");
+    await expect(reviewButton).toBeFocused();
+  });
+}
 
 test("Basic reference dark desktop visual baseline", async ({ page }) => {
   await openReference(page);
