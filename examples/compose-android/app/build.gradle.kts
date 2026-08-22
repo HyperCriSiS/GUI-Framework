@@ -18,6 +18,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    installation {
+        // The deliberately constrained API 23 runtime lane can take materially longer
+        // than a normal device to commit the APK installation through ddmlib/UTP.
+        timeOutInMs = 600_000
+    }
+
     buildFeatures {
         compose = true
     }
