@@ -62,8 +62,10 @@ try {
   const lightFrosted = light.themes["frosted-glass"].components;
   const darkSpacey = dark.themes.spacey.components;
   const lightSpacey = light.themes.spacey.components;
+  const darkCyberpunk = dark.themes.cyberpunk.components;
+  const lightCyberpunk = light.themes.cyberpunk.components;
 
-  for (const components of [darkBasic, lightBasic, darkModern, lightModern, darkGlass, lightGlass, darkFrosted, lightFrosted, darkSpacey, lightSpacey]) {
+  for (const components of [darkBasic, lightBasic, darkModern, lightModern, darkGlass, lightGlass, darkFrosted, lightFrosted, darkSpacey, lightSpacey, darkCyberpunk, lightCyberpunk]) {
     assert.deepEqual(
       Object.keys(components),
       expectedComponentIds,
@@ -125,17 +127,33 @@ try {
     }
   }
 
-  for (const palette of [dark, light]) {
-    for (const themeId of ["cyberpunk"]) {
-      assert.deepEqual(
-        palette.themes[themeId].components,
-        {},
-        `${themeId} visual IR must remain empty until deliberately implemented`,
-      );
-    }
+  for (const [cyberpunk, basic] of [
+    [darkCyberpunk, darkBasic],
+    [lightCyberpunk, lightBasic],
+  ]) {
+    assert.equal(cyberpunk.button.base.root.radius.reference, "{radius.sm}");
+    assert.equal(cyberpunk.input.base.root.border.color.reference, "{semantic.color.accent}");
+    assert.equal(cyberpunk.switch.base.root.border.color.reference, "{semantic.color.accent}");
+    assert.equal(cyberpunk.panel.base.root.shadow.reference, "{elevation.shadow.low}");
+    assert.equal(cyberpunk.dialog.base.root.shadow.reference, "{elevation.shadow.medium}");
+    assert.deepEqual(
+      cyberpunk.button.variants.primary.base.root.fill.value,
+      basic.button.variants.primary.base.root.fill.value,
+      "Cyberpunk must keep Basic semantic fills and derive color from the selected palette",
+    );
   }
+  assert.deepEqual(
+    darkCyberpunk.button.base.root.radius.value,
+    lightCyberpunk.button.base.root.radius.value,
+    "Cyberpunk geometry must remain palette-neutral",
+  );
+  assert.notDeepEqual(
+    darkCyberpunk.input.base.root.border.color.value,
+    lightCyberpunk.input.base.root.border.color.value,
+    "Cyberpunk signal frames must resolve through the selected semantic palette",
+  );
 
-  console.log("Compiler determinism, registry, palette/theme resolution and Frosted fallback tests passed.");
+  console.log("Compiler determinism, registry, palette/theme resolution, Frosted fallback and Cyberpunk inheritance tests passed.");
 } finally {
   await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);
 }
