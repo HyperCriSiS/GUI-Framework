@@ -10,13 +10,14 @@ import {
   detectWebCapabilities,
 } from "../../packages/adapter-web/src/capabilities.mjs";
 
-const themes = new Set(["basic", "modern", "glass", "frosted-glass", "spacey"]);
+const themes = new Set(["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"]);
 const themeLabels = new Map([
   ["basic", "Basic"],
   ["modern", "Modern"],
   ["glass", "Glass"],
   ["frosted-glass", "Frosted Glass"],
   ["spacey", "Spacey"],
+  ["cyberpunk", "Cyberpunk"],
 ]);
 const palettes = new Set(["reference-dark", "reference-light"]);
 const hostContexts = new Set(["page", "extension-popup", "extension-sidebar", "extension-options"]);
