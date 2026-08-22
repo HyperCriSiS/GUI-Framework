@@ -13,6 +13,7 @@ assert.match(source, /"modern" -> GuiThemeId\.MODERN/);
 assert.match(source, /"glass" -> GuiThemeId\.GLASS/);
 assert.match(source, /"frosted-glass" -> GuiThemeId\.FROSTED_GLASS/);
 assert.match(source, /"spacey" -> GuiThemeId\.SPACEY/);
+assert.match(source, /"cyberpunk" -> GuiThemeId\.CYBERPUNK/);
 assert.match(source, /theme: GuiThemeId = GuiThemeId\.BASIC/);
 assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
@@ -25,4 +26,4 @@ assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
-console.log("Compose Desktop reference application source contract tests passed with Basic/Modern/Glass/Frosted Glass/Spacey theme selection.");
+console.log("Compose Desktop reference application source contract tests passed with Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk theme selection.");
