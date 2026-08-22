@@ -28,11 +28,20 @@ assert.ok(frostedEntry, "The Frosted Glass theme must remain registered");
 assert.ok(frosted, "The Frosted Glass theme must resolve");
 assert.equal(frostedEntry.definition.extends, "glass", "Frosted Glass must build on the validated Glass contract");
 assert.deepEqual(frosted.inheritance, ["basic", "modern", "glass", "frosted-glass"]);
-assert.deepEqual(
-  frosted.components,
-  glass.components,
-  "The Frosted Glass foundation must initially preserve the complete validated Glass visual contract",
-);
+for (const componentId of ["button", "input", "switch"]) {
+  assert.deepEqual(
+    frosted.components[componentId],
+    glass.components[componentId],
+    `${componentId} must remain identical between Glass and Frosted Glass`,
+  );
+}
+for (const componentId of ["panel", "dialog"]) {
+  assert.deepEqual(
+    frosted.components[componentId].base,
+    glass.components[componentId].base,
+    `${componentId} must preserve the validated crisp Glass base before optional frosting`,
+  );
+}
 
 const componentIds = manifest.components.map((entry) => entry.id).sort();
 assert.deepEqual(
@@ -125,5 +134,5 @@ for (const entry of manifest.palettes) {
 }
 
 console.log(
-  "Glass remains crisp and blur-free; Frosted Glass now inherits it as a gated foundation with optional backdropBlur capability prepared.",
+  "Glass remains crisp and blur-free while Frosted Glass layers optional backdrop blur over the same validated base.",
 );

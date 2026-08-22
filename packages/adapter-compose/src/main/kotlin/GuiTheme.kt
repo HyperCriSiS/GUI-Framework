@@ -33,6 +33,9 @@ fun GuiTheme(
     require(availableCapabilities.all(String::isNotBlank)) {
         "GUI capability ids must not be blank"
     }
+    require("backdropBlur" !in availableCapabilities) {
+        "Compose adapter does not render backdropBlur; Frosted Glass falls back to crisp Glass."
+    }
     CompositionLocalProvider(
         LocalGuiThemeSelection provides GuiThemeSelection(theme = theme, paletteId = paletteId),
         LocalGuiAvailableCapabilities provides availableCapabilities.toSet(),

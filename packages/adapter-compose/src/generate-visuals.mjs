@@ -77,7 +77,7 @@ function optional(value, mapper, label) {
 }
 
 function styleExpr(style, label) {
-  for (const property of ["blur", "backdropBlur", "glow"]) {
+  for (const property of ["blur", "glow"]) {
     if (style[property] !== undefined) {
       throw new Error(`${label}: Compose reference adapter does not yet map ${property}`);
     }
@@ -105,6 +105,7 @@ function styleExpr(style, label) {
     `lineHeight = ${optional(style.lineHeight, numberExpr, `${label}.lineHeight`)}, ` +
     `border = ${border}, outline = ${outline}, ` +
     `shadow = ${optional(style.shadow, shadowExpr, `${label}.shadow`)}, ` +
+    `backdropBlur = ${optional(style.backdropBlur, dimensionExpr, `${label}.backdropBlur`)}, ` +
     `transition = ${optional(style.transition, transitionExpr, `${label}.transition`)}` +
     `)`;
 }
@@ -186,6 +187,7 @@ function generate(ir) {
     "    val border: GuiVisualBorder? = null,",
     "    val outline: GuiVisualOutline? = null,",
     "    val shadow: GuiShadowValue? = null,",
+    "    val backdropBlur: GuiDimensionValue? = null,",
     "    val transition: GuiTransitionValue? = null,",
     ")",
     "",

@@ -5,6 +5,7 @@ package gui.framework.compose.internal
 import gui.framework.generated.internal.GuiComponentCapabilities
 import gui.framework.generated.internal.GuiVisualPartStyle
 import gui.framework.generated.internal.GuiVisualRecipe
+import gui.framework.generated.internal.GuiVisualScopedRecipe
 
 
 internal data class GuiCapabilitySelection(
@@ -47,7 +48,8 @@ internal fun resolveGuiCapabilityRecipe(
         "GUI component $componentId requires unavailable capabilities: " +
             selection.missingRequired.joinToString()
     }
-    return selection.fallbackId?.let(recipe.fallbacks::get)?.recipe ?: recipe
+    val fallback = selection.fallbackId?.let(recipe.fallbacks::get)?.recipe ?: return recipe
+    return recipe.overlay(fallback)
 }
 
 internal fun GuiVisualPartStyle.overlay(override: GuiVisualPartStyle): GuiVisualPartStyle = copy(
@@ -66,6 +68,7 @@ internal fun GuiVisualPartStyle.overlay(override: GuiVisualPartStyle): GuiVisual
     border = override.border ?: border,
     outline = override.outline ?: outline,
     shadow = override.shadow ?: shadow,
+    backdropBlur = override.backdropBlur ?: backdropBlur,
     transition = override.transition ?: transition,
 )
 
@@ -80,6 +83,45 @@ private fun mergePartMaps(
     }
     return output
 }
+
+private fun mergePartMapGroups(
+    base: Map<String, Map<String, GuiVisualPartStyle>>,
+    override: Map<String, Map<String, GuiVisualPartStyle>>,
+): Map<String, Map<String, GuiVisualPartStyle>> {
+    if (override.isEmpty()) return base
+    val output = base.toMutableMap()
+    for ((id, partMap) in override) {
+        output[id] = mergePartMaps(output[id].orEmpty(), partMap)
+    }
+    return output
+}
+
+private fun GuiVisualScopedRecipe.overlay(override: GuiVisualScopedRecipe): GuiVisualScopedRecipe =
+    GuiVisualScopedRecipe(
+        base = mergePartMaps(base, override.base),
+        sizes = mergePartMapGroups(sizes, override.sizes),
+        states = mergePartMapGroups(states, override.states),
+    )
+
+private fun mergeScopedRecipes(
+    base: Map<String, GuiVisualScopedRecipe>,
+    override: Map<String, GuiVisualScopedRecipe>,
+): Map<String, GuiVisualScopedRecipe> {
+    if (override.isEmpty()) return base
+    val output = base.toMutableMap()
+    for ((id, scoped) in override) {
+        output[id] = output[id]?.overlay(scoped) ?: scoped
+    }
+    return output
+}
+
+private fun GuiVisualRecipe.overlay(override: GuiVisualRecipe): GuiVisualRecipe = GuiVisualRecipe(
+    base = mergePartMaps(base, override.base),
+    sizes = mergePartMapGroups(sizes, override.sizes),
+    states = mergePartMapGroups(states, override.states),
+    variants = mergeScopedRecipes(variants, override.variants),
+    fallbacks = emptyMap(),
+)
 
 internal fun resolveGuiVisualRecipe(
     recipe: GuiVisualRecipe,

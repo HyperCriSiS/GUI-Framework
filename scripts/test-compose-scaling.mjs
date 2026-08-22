@@ -44,6 +44,11 @@ assert.match(
   /LocalGuiAvailableCapabilities provides availableCapabilities\.toSet\(\)/,
   "capabilities must be supplied once at the theme host instead of hard-coded per component",
 );
+assert.match(
+  theme,
+  /require\("backdropBlur" !in availableCapabilities\)/,
+  "Compose must reject backdropBlur advertisement until it has a native renderer mapping",
+);
 
 componentSources.forEach((source, index) => {
   const file = componentFiles[index];

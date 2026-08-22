@@ -22,6 +22,13 @@ export function detectWebCapabilities({
     available.add("advancedBlendModes");
   }
 
+  if (
+    cssSupports("backdrop-filter", "blur(1px)") === true ||
+    cssSupports("-webkit-backdrop-filter", "blur(1px)") === true
+  ) {
+    available.add("backdropBlur");
+  }
+
   // Arbitrary shader effects are not a baseline browser capability. Optional
   // providers may advertise shaderEffects through providedCapabilities.
   return sortedUnique(available);

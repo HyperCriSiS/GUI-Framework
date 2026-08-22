@@ -39,7 +39,11 @@ try {
   assert.match(source, /GuiDimensionValue\(14\.0, "px"\)/);
   assert.match(source, /GuiVisualOutline/);
   assert.match(source, /val shadow: GuiShadowValue\? = null/);
+  assert.match(source, /val backdropBlur: GuiDimensionValue\? = null/);
   assert.match(source, /"modern" to mapOf/);
+  assert.match(source, /"frosted-glass" to mapOf/);
+  assert.match(source, /"high" to GuiVisualFallback\(requires = setOf\("backdropBlur"\), recipe = GuiVisualRecipe\(/);
+  assert.match(source, /backdropBlur = GuiDimensionValue\(24\.0, "px"\)/);
   assert.match(source, /shadow = GuiShadowValue\(color = GuiColorValue\("srgb", listOf\(0\.0, 0\.0, 0\.0\), null, 0\.14\)/);
   assert.match(source, /shadow = GuiShadowValue\(color = GuiColorValue\("srgb", listOf\(0\.0, 0\.0, 0\.0\), null, 0\.18\)/);
   assert.match(source, /inset = false/);

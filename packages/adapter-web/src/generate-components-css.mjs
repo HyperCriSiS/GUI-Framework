@@ -49,7 +49,13 @@ function styleDeclarations(style, label) {
         break;
       case "transition": output.push(...transitionDeclarations(value, `${label}.transition`)); break;
       case "shadow": output.push(`box-shadow: ${compiledValue(value, `${label}.shadow`)}`); break;
-      case "blur": case "backdropBlur": case "glow": throw new Error(`${label}: visual property ${property} is not yet mapped by the Web reference adapter`);
+      case "backdropBlur": {
+        const blurValue = compiledValue(value, `${label}.backdropBlur`);
+        output.push(`-webkit-backdrop-filter: blur(${blurValue})`);
+        output.push(`backdrop-filter: blur(${blurValue})`);
+        break;
+      }
+      case "blur": case "glow": throw new Error(`${label}: visual property ${property} is not yet mapped by the Web reference adapter`);
       default: throw new Error(`${label}: unsupported visual property ${property}`);
     }
   }

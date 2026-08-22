@@ -35,6 +35,18 @@ assert.deepEqual(
 );
 assert.deepEqual(
   detectWebCapabilities({
+    cssSupports: (property, value) => property === "backdrop-filter" && value === "blur(1px)",
+  }),
+  ["backdropBlur"],
+);
+assert.deepEqual(
+  detectWebCapabilities({
+    cssSupports: (property, value) => property === "-webkit-backdrop-filter" && value === "blur(1px)",
+  }),
+  ["backdropBlur"],
+);
+assert.deepEqual(
+  detectWebCapabilities({
     cssSupports: () => false,
     providedCapabilities: ["shaderEffects", "customProvider", "shaderEffects"],
   }),
@@ -143,6 +155,16 @@ const ir = {
                 },
               },
               fallbacks: {
+                high: {
+                  requires: ["backdropBlur"],
+                  recipe: {
+                    base: {
+                      root: {
+                        backdropBlur: compiledValue("{effect.blur.frosted}", "dimension"),
+                      },
+                    },
+                  },
+                },
                 minimal: {
                   requires: [],
                   recipe: {
@@ -178,6 +200,16 @@ const ir = {
                 },
               },
               fallbacks: {
+                high: {
+                  requires: ["backdropBlur"],
+                  recipe: {
+                    base: {
+                      root: {
+                        backdropBlur: compiledValue("{effect.blur.frosted}", "dimension"),
+                      },
+                    },
+                  },
+                },
                 minimal: {
                   requires: [],
                   recipe: {
@@ -214,6 +246,12 @@ try {
     /\[data-gui-theme="basic"\] \.gui-button:where\(\[data-gui-fallback="minimal"\]\) \{/,
   );
   assert.match(css, /opacity: var\(--gui-opacity-disabled\);/);
+  assert.match(
+    css,
+    /\[data-gui-theme="basic"\] \.gui-button:where\(\[data-gui-fallback="high"\]\) \{/,
+  );
+  assert.match(css, /-webkit-backdrop-filter: blur\(var\(--gui-effect-blur-frosted\)\);/);
+  assert.match(css, /backdrop-filter: blur\(var\(--gui-effect-blur-frosted\)\);/);
   console.log("Web capability detection, neutral fallback parity and CSS fallback emission tests passed.");
 } finally {
   await Promise.all([rm(irPath, { force: true }), rm(cssPath, { force: true })]);
