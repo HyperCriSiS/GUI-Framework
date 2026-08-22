@@ -32,7 +32,7 @@ for (const component of scenario.components) {
   assert.ok(registered.has(component), `Scenario component ${component} must be registered`);
 }
 
-assert.match(web, /const themes = new Set\(\["basic", "modern", "glass", "frosted-glass", "spacey"\]\)/);
+assert.match(web, /const themes = new Set\(\["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\]\)/);
 assert.match(web, /const theme = options\.theme \?\? "basic"/);
 assert.match(web, /if \(!themes\.has\(theme\)\) throw new Error/);
 assert.match(web, /root\.dataset\.guiTheme = theme/);
@@ -59,6 +59,7 @@ assert.match(desktop, /"modern" -> GuiThemeId\.MODERN/);
 assert.match(desktop, /"glass" -> GuiThemeId\.GLASS/);
 assert.match(desktop, /"frosted-glass" -> GuiThemeId\.FROSTED_GLASS/);
 assert.match(desktop, /"spacey" -> GuiThemeId\.SPACEY/);
+assert.match(desktop, /"cyberpunk" -> GuiThemeId\.CYBERPUNK/);
 assert.match(desktop, /theme = theme/);
 assert.match(desktop, /paletteId: String = "reference-dark"/);
 assert.match(desktop, /paletteId = paletteId/);
@@ -89,4 +90,4 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass/Frosted/Spacey selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
