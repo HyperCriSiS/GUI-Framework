@@ -6,33 +6,25 @@ on:
       - main
       - "feat/**"
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 jobs:
   validate-and-typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          package-manager-cache: false
+          node-version: 24.19.0
 
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -67,6 +59,9 @@ jobs:
       - name: Test Modern theme foundation contract
         run: npm run test:modern-theme
 
+      - name: Test Modern theme performance budget
+        run: npm run test:modern-performance
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
@@ -81,6 +76,9 @@ jobs:
 
       - name: Generate Web component output
         run: npm run build:web-components
+
+      - name: Test Web capability fallback generation
+        run: npm run test:web-capabilities
 
       - name: Test native Web Basic Button
         run: npm run test:web-button
@@ -172,20 +170,17 @@ jobs:
   web-browser-regression:
     needs: validate-and-typecheck
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          package-manager-cache: false
+          node-version: 24.19.0
 
       - name: Install pinned browser-test dependency
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        run: npm install --ignore-scripts --no-save --package-lock=false @playwright/test@1.58.2
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -200,48 +195,44 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify browser interactions and visual regressions
-        run: npm run test:web-browser
+        run: npm run test:web-reference-browser
 
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: web-browser-regression-failure
-          path: test-results/playwright/
+          name: web-browser-failure-artifacts
+          path: |
+            test-results/
+            playwright-report/
           if-no-files-found: ignore
           retention-days: 7
 
   compose-android-reference:
     needs: validate-and-typecheck
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          package-manager-cache: false
+          node-version: 24.19.0
 
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v4.0.1
-        with:
-          packages: "platform-tools platforms;android-37.0 build-tools;36.0.0"
+        uses: android-actions/setup-android@v3
 
       - name: Set up Gradle 9.5.0
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "9.5.0"
-          cache-provider: basic
 
       - name: Generate neutral and Compose artifacts
         run: |
@@ -253,59 +244,55 @@ jobs:
 
       - name: Compile Android reference instrumentation tests
         working-directory: examples/compose-android
-        run: gradle :app:compileDebugAndroidTestKotlin --no-daemon
+        run: gradle :app:compileDebugAndroidTestKotlin
 
       - name: Assemble Android reference APK
-        run: npm run build:kotlin-android-reference
+        working-directory: examples/compose-android
+        run: gradle :app:assembleDebug
 
   compose-android-runtime:
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[device-ci]')
-    needs: validate-and-typecheck
+    needs:
+      - validate-and-typecheck
+      - compose-android-reference
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.message, '[device-ci]')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: api23-low-end-large-font
             api-level: 23
-            density: 240
-            font-scale: "1.30"
+            target: google_apis
+            arch: x86_64
             ram-size: 1536M
+            heap-size: 192M
+            density: 240
+            font-scale: 1.30
           - name: api35-high-density
             api-level: 35
-            density: 480
-            font-scale: "1.00"
+            target: google_apis
+            arch: x86_64
             ram-size: 2048M
-
-    name: compose-android-runtime (${{ matrix.name }})
-
+            heap-size: 256M
+            density: 480
+            font-scale: 1.00
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          package-manager-cache: false
+          node-version: 24.19.0
 
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-
-      - name: Set up Android build SDK
-        uses: android-actions/setup-android@v4.0.1
-        with:
-          packages: "platform-tools platforms;android-37.0 build-tools;36.0.0"
-
-      - name: Set up Gradle 9.5.0
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          gradle-version: "9.5.0"
-          cache-provider: basic
 
       - name: Generate neutral and Compose artifacts
         run: |
@@ -315,20 +302,17 @@ jobs:
           npm run build:kotlin-visuals
           npm run build:kotlin-assets
 
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Run scaled Android reference interactions
-        uses: reactivecircus/android-emulator-runner@v2.38.0
+      - name: Run scaled Android reference instrumentation
+        uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: default
-          arch: x86_64
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          cores: 2
           ram-size: ${{ matrix.ram-size }}
-          heap-size: 256M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          heap-size: ${{ matrix.heap-size }}
+          density: ${{ matrix.density }}
           disable-animations: true
-          script: GUI_TEST_DENSITY=${{ matrix.density }} GUI_TEST_FONT_SCALE=${{ matrix.font-scale }} bash scripts/run-android-runtime-check.sh
+          script: |
+            adb shell settings put system font_scale ${{ matrix.font-scale }}
+            gradle -p examples/compose-android :app:connectedDebugAndroidTest
