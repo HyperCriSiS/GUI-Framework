@@ -21,7 +21,7 @@ try {
   const source = await readFile(contractsPath, "utf8");
   assert.match(source, /export const guiRegisteredThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
-  assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey"\] as const;/);
+  assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
   assert.match(source, /export const guiComponentIds = \["button", "dialog", "input", "panel", "switch"\] as const;/);
 
@@ -86,6 +86,7 @@ try {
   assert.match(source, /"glass": \{/);
   assert.match(source, /"frosted-glass": \{/);
   assert.match(source, /"spacey": \{/);
+  assert.match(source, /"cyberpunk": \{/);
   assert.match(source, /"button": \{/);
   assert.match(source, /"optional": \[/);
   assert.match(source, /"advancedBlendModes"/);
