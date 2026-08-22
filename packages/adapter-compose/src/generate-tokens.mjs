@@ -19,18 +19,50 @@ function kotlinList(values) {
   return `listOf(${values.map(kotlinDouble).join(", ")})`;
 }
 
+function colorValueExpr(value, label) {
+  if (!value || typeof value !== "object" || !Array.isArray(value.components) || value.components.length !== 3) {
+    throw new Error(`${label}: expected resolved color value with three components`);
+  }
+  if (value.components.some((component) => typeof component !== "number" || !Number.isFinite(component) || component < 0 || component > 1)) {
+    throw new Error(`${label}: expected color components in the range 0..1`);
+  }
+  if (value.alpha !== undefined && (typeof value.alpha !== "number" || !Number.isFinite(value.alpha) || value.alpha < 0 || value.alpha > 1)) {
+    throw new Error(`${label}: expected color alpha in the range 0..1`);
+  }
+  const hex = typeof value.hex === "string" ? kotlinString(value.hex) : "null";
+  const alpha = value.alpha === undefined ? "" : `, ${kotlinDouble(value.alpha)}`;
+  return `GuiColorValue(${kotlinString(value.colorSpace)}, ${kotlinList(value.components)}, ${hex}${alpha})`;
+}
+
+function dimensionValueExpr(value, label) {
+  if (!value || typeof value !== "object") {
+    throw new Error(`${label}: expected resolved dimension value`);
+  }
+  return `GuiDimensionValue(${kotlinDouble(value.value)}, ${kotlinString(value.unit)})`;
+}
+
+function shadowValueExpr(value, label) {
+  if (!value || typeof value !== "object") {
+    throw new Error(`${label}: expected resolved shadow value`);
+  }
+  return `GuiShadowValue(` +
+    `color = ${colorValueExpr(value.color, `${label}.color`)}, ` +
+    `offsetX = ${dimensionValueExpr(value.offsetX, `${label}.offsetX`)}, ` +
+    `offsetY = ${dimensionValueExpr(value.offsetY, `${label}.offsetY`)}, ` +
+    `blur = ${dimensionValueExpr(value.blur, `${label}.blur`)}, ` +
+    `spread = ${dimensionValueExpr(value.spread, `${label}.spread`)}, ` +
+    `inset = ${value.inset === true ? "true" : "false"}` +
+    `)`;
+}
+
 function tokenValue(token, label) {
   switch (token.type) {
-    case "color": {
-      const value = token.value;
-      if (!value || typeof value !== "object" || !Array.isArray(value.components)) {
-        throw new Error(`${label}: expected resolved color value`);
-      }
-      const hex = typeof value.hex === "string" ? kotlinString(value.hex) : "null";
-      return `GuiColorValue(${kotlinString(value.colorSpace)}, ${kotlinList(value.components)}, ${hex})`;
-    }
+    case "color":
+      return colorValueExpr(token.value, label);
     case "dimension":
-      return `GuiDimensionValue(${kotlinDouble(token.value.value)}, ${kotlinString(token.value.unit)})`;
+      return dimensionValueExpr(token.value, label);
+    case "shadow":
+      return shadowValueExpr(token.value, label);
     case "duration":
       return `GuiDurationValue(${kotlinDouble(token.value.value)}, ${kotlinString(token.value.unit)})`;
     case "number":
@@ -108,10 +140,19 @@ function generate(ir) {
     "data class GuiColorValue(",
     "    val colorSpace: String,",
     "    val components: List<Double>,",
-    "    val hex: String?",
+    "    val hex: String?,",
+    "    val alpha: Double = 1.0,",
     ") : GuiTokenValue",
     "",
     "data class GuiDimensionValue(val value: Double, val unit: String) : GuiTokenValue",
+    "data class GuiShadowValue(",
+    "    val color: GuiColorValue,",
+    "    val offsetX: GuiDimensionValue,",
+    "    val offsetY: GuiDimensionValue,",
+    "    val blur: GuiDimensionValue,",
+    "    val spread: GuiDimensionValue,",
+    "    val inset: Boolean = false,",
+    ") : GuiTokenValue",
     "data class GuiDurationValue(val value: Double, val unit: String) : GuiTokenValue",
     "data class GuiNumberValue(val value: Double) : GuiTokenValue",
     "data class GuiCubicBezierValue(val x1: Double, val y1: Double, val x2: Double, val y2: Double) : GuiTokenValue",

@@ -23,11 +23,12 @@ function colorExpr(token, label) {
   if (!Array.isArray(value.components) || value.components.length !== 3) {
     throw new Error(`${label}: expected three color components`);
   }
-  if (value.alpha !== undefined && value.alpha !== 1) {
-    throw new Error(`${label}: alpha colors are not yet supported by the Compose visual generator`);
+  if (value.alpha !== undefined && (typeof value.alpha !== "number" || !Number.isFinite(value.alpha) || value.alpha < 0 || value.alpha > 1)) {
+    throw new Error(`${label}: expected alpha in the range 0..1`);
   }
   const components = value.components.map((entry, index) => kotlinDouble(entry, `${label}.components[${index}]`)).join(", ");
-  return `GuiColorValue(${kotlinString(value.colorSpace)}, listOf(${components}), ${typeof value.hex === "string" ? kotlinString(value.hex) : "null"})`;
+  const alpha = value.alpha === undefined ? "" : `, ${kotlinDouble(value.alpha, `${label}.alpha`)}`;
+  return `GuiColorValue(${kotlinString(value.colorSpace)}, listOf(${components}), ${typeof value.hex === "string" ? kotlinString(value.hex) : "null"}${alpha})`;
 }
 
 function dimensionExpr(token, label) {
@@ -35,6 +36,21 @@ function dimensionExpr(token, label) {
     throw new Error(`${label}: expected compiled dimension`);
   }
   return `GuiDimensionValue(${kotlinDouble(token.value.value, `${label}.value`)}, ${kotlinString(token.value.unit)})`;
+}
+
+function shadowExpr(token, label) {
+  if (token.type !== "shadow" || !token.value || typeof token.value !== "object") {
+    throw new Error(`${label}: expected compiled shadow`);
+  }
+  const value = token.value;
+  return `GuiShadowValue(` +
+    `color = ${colorExpr({ type: "color", value: value.color }, `${label}.color`)}, ` +
+    `offsetX = ${dimensionExpr({ type: "dimension", value: value.offsetX }, `${label}.offsetX`)}, ` +
+    `offsetY = ${dimensionExpr({ type: "dimension", value: value.offsetY }, `${label}.offsetY`)}, ` +
+    `blur = ${dimensionExpr({ type: "dimension", value: value.blur }, `${label}.blur`)}, ` +
+    `spread = ${dimensionExpr({ type: "dimension", value: value.spread }, `${label}.spread`)}, ` +
+    `inset = ${value.inset === true ? "true" : "false"}` +
+    `)`;
 }
 
 function numberExpr(token, label) {
@@ -61,7 +77,7 @@ function optional(value, mapper, label) {
 }
 
 function styleExpr(style, label) {
-  for (const property of ["shadow", "blur", "backdropBlur", "glow"]) {
+  for (const property of ["blur", "backdropBlur", "glow"]) {
     if (style[property] !== undefined) {
       throw new Error(`${label}: Compose reference adapter does not yet map ${property}`);
     }
@@ -88,6 +104,7 @@ function styleExpr(style, label) {
     `fontWeight = ${optional(style.fontWeight, numberExpr, `${label}.fontWeight`)}, ` +
     `lineHeight = ${optional(style.lineHeight, numberExpr, `${label}.lineHeight`)}, ` +
     `border = ${border}, outline = ${outline}, ` +
+    `shadow = ${optional(style.shadow, shadowExpr, `${label}.shadow`)}, ` +
     `transition = ${optional(style.transition, transitionExpr, `${label}.transition`)}` +
     `)`;
 }
@@ -168,6 +185,7 @@ function generate(ir) {
     "    val lineHeight: GuiNumberValue? = null,",
     "    val border: GuiVisualBorder? = null,",
     "    val outline: GuiVisualOutline? = null,",
+    "    val shadow: GuiShadowValue? = null,",
     "    val transition: GuiTransitionValue? = null,",
     ")",
     "",
