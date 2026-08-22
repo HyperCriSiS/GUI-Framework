@@ -6,7 +6,7 @@ import { createGuiSwitch } from "../../packages/adapter-web/src/switch.mjs";
 import { createGuiPanel } from "../../packages/adapter-web/src/panel.mjs";
 import { createGuiDialog } from "../../packages/adapter-web/src/dialog.mjs";
 
-const themes = new Set(["basic", "modern"]);
+const themes = new Set(["basic", "modern", "glass"]);
 const palettes = new Set(["reference-dark", "reference-light"]);
 const hostContexts = new Set(["page", "extension-popup", "extension-sidebar", "extension-options"]);
 const densities = new Set(["standard", "compact"]);
@@ -63,7 +63,7 @@ export function mountReferenceApp(document, root, options = {}) {
   const surface = createElement(document, "div", "gui-reference");
   const header = createElement(document, "header", "gui-reference__header");
   header.append(
-    createElement(document, "p", "gui-reference__eyebrow", `${theme === "basic" ? "Basic" : "Modern"} theme · Web adapter`),
+    createElement(document, "p", "gui-reference__eyebrow", `${theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : "Glass"} theme · Web adapter`),
     createElement(document, "h1", "", "Reference settings"),
     createElement(
       document,

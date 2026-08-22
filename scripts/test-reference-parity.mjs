@@ -3,12 +3,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, desktop, android] = await Promise.all([
-  readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
-  readFile("spec/manifest.json", "utf8").then(JSON.parse),
+const [scenario, manifest, web, desktop, android, shared] = await Promise.all([
+  readJson("spec/quality/reference-app-scenario.json"),
+  readJson("spec/manifest.json"),
   readFile("examples/web-reference/app.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
+  readFile("examples/compose-reference-shared/src/main/kotlin/gui/framework/examples/reference/ReferenceScreen.kt", "utf8"),
 ]);
 
 assert.equal(scenario.version, 1);
@@ -16,39 +17,46 @@ assert.equal(scenario.theme, "basic");
 assert.equal(scenario.palette, "reference-dark");
 assert.deepEqual(scenario.components, ["button", "input", "switch", "panel", "dialog"]);
 assert.deepEqual(scenario.densityProfiles, {
-  standard: { usesComponentDefaults: true },
-  compact: { componentSize: "small", minimumViewportWidth: 320 },
+  standard: {
+    controlSize: "medium",
+    inputSize: "large",
+    primaryPanelSize: "large",
+    secondaryPanelSize: "medium",
+    dialogSize: "medium",
+  },
+  compact: {
+    controlSize: "small",
+    inputSize: "small",
+    primaryPanelSize: "small",
+    secondaryPanelSize: "small",
+    dialogSize: "small",
+  },
 });
-assert.deepEqual(scenario.flows.map(({ id }) => id), [
-  "edit-primary-input",
-  "toggle-switch",
-  "open-dialog",
-  "dismiss-dialog",
-  "close-dialog-action",
-]);
 
-const registered = new Set(manifest.components.map((entry) => entry.id));
+const registered = new Set(manifest.components.map((component) => component.id));
 for (const component of scenario.components) {
   assert.ok(registered.has(component), `Scenario component ${component} must be registered`);
 }
 
-assert.match(web, /const themes = new Set\(\["basic", "modern"\]\)/);
+assert.match(web, /const themes = new Set\(\["basic", "modern", "glass"\]\)/);
 assert.match(web, /const theme = options\.theme \?\? "basic"/);
 assert.match(web, /if \(!themes\.has\(theme\)\) throw new Error/);
 assert.match(web, /root\.dataset\.guiTheme = theme/);
 assert.match(web, /options\.palette \?\? "reference-dark"/);
 assert.match(web, /options\.density \?\? "standard"/);
 assert.match(web, /const compact = density === "compact"/);
-assert.ok(
-  (web.match(/size: compact \? "small" :/g) ?? []).length >= 8,
-  "Web compact reference must route its reference components through the existing small size",
-);
-for (const factory of ["createGuiButton", "createGuiInput", "createGuiSwitch", "createGuiPanel", "createGuiDialog"]) {
-  assert.match(web, new RegExp(`\\b${factory}\\(`), `Web reference must exercise ${factory}`);
-}
-assert.match(web, /onValueChange\(nextValue\)/);
-assert.match(web, /onCheckedChange\(nextChecked\)/);
-assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
+assert.match(web, /size: compact \? "small" : "large"/);
+assert.match(web, /size: compact \? "small" : "medium"/);
+assert.match(web, /state\.name = nextValue/);
+assert.match(web, /nameInput\.update\(\{ value: nextValue \}\)/);
+assert.match(web, /state\.notifications = nextChecked/);
+assert.match(web, /notificationSwitch\.update\(\{ checked: nextChecked \}\)/);
+assert.match(web, /state\.palette = state\.palette === "reference-dark" \? "reference-light" : "reference-dark"/);
+assert.match(web, /paletteButton\.update\(/);
+assert.match(web, /state\.dialogOpen = true/);
+assert.match(web, /dialog\.update\(\{ open: true \}\)/);
+assert.match(web, /function closeDialog\(\)/);
+assert.match(web, /dialog\.update\(\{ open: false \}\)/);
 assert.match(web, /onDismissRequest: closeDialog/);
 assert.match(web, /label: "Close"[\s\S]*onActivate: closeDialog/);
 
@@ -64,24 +72,21 @@ assert.match(android, /theme = referenceTheme/);
 assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
-  assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
-    assert.match(
-      source,
-      new RegExp(`${sizeType}\\.SMALL`),
-      `${name} compact reference must map ${sizeType} to its existing SMALL size`,
-    );
+  for (const marker of ["GuiButton(", "GuiInput(", "GuiSwitch(", "GuiPanel(", "GuiDialog("]) {
+    assert.doesNotMatch(source, new RegExp(escapeRegExp(marker)), `${name} must reuse the shared reference screen instead of duplicating ${marker}`);
   }
-  for (const component of ["GuiButton", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
-    assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
-  }
-  assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
-  assert.match(source, /onCheckedChange = \{ enabled = it \}/, `${name} must expose the switch toggle flow`);
-  assert.match(source, /onActivate = \{ dialogOpen = true \}/, `${name} must expose the dialog open flow`);
-  assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/, `${name} must expose the dialog dismiss flow`);
-  assert.match(source, /label = "Close"[\s\S]*onActivate = \{ dialogOpen = false \}/, `${name} must expose the explicit close action`);
 }
 
-assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
+for (const marker of ["GuiButton(", "GuiInput(", "GuiSwitch(", "GuiPanel(", "GuiDialog("]) {
+  assert.match(shared, new RegExp(escapeRegExp(marker)), `Shared Compose reference screen must exercise ${marker}`);
+}
 
-console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic defaults, Modern cross-platform selection and Glass Web selection.");
+
+async function readJson(path) {
+  return JSON.parse(await readFile(path, "utf8"));
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

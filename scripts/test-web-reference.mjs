@@ -154,6 +154,16 @@ assert.equal(modernRoot.dataset.guiPalette, "reference-dark", "Modern must reuse
 modernApp.destroy();
 assert.equal(modernRoot.dataset.guiTheme, undefined);
 
+const glassRoot = new FakeElement("main");
+const glassApp = mountReferenceApp(fakeDocument, glassRoot, { theme: "glass" });
+assert.equal(glassRoot.dataset.guiTheme, "glass");
+assert.equal(glassRoot.dataset.guiPalette, "reference-dark");
+assert.equal(glassApp.theme, "glass");
+glassApp.components.paletteButton.element.click();
+assert.equal(glassRoot.dataset.guiPalette, "reference-light", "Glass must reuse the same palette-switching path");
+glassApp.destroy();
+assert.equal(glassRoot.dataset.guiTheme, undefined);
+
 const [html, css] = await Promise.all([
   readFile("examples/web-reference/index.html", "utf8"),
   readFile("examples/web-reference/reference.css", "utf8"),

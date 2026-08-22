@@ -139,6 +139,59 @@ test("Modern visual delta baseline remains exact and palette-neutral", async ({ 
   expect(lightPanelStyle).toEqual(panelStyle);
 });
 
+test("Glass reference keeps translucency crisp without backdrop blur", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "glass");
+
+  const panel = page.locator(".gui-panel").first();
+  const darkPanelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+  expect(darkPanelStyle.backgroundColor).toBe("rgba(23, 26, 33, 0.72)");
+  expect(darkPanelStyle.borderRadius).toBe("20px");
+  expect(darkPanelStyle.boxShadow).toContain("0px 2px 6px 0px");
+  expect(darkPanelStyle.backdropFilter).toBe("none");
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  const darkDialogStyle = await dialog.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+  expect(darkDialogStyle.backgroundColor).toBe("rgba(32, 36, 45, 0.82)");
+  expect(darkDialogStyle.borderRadius).toBe("20px");
+  expect(darkDialogStyle.boxShadow).toContain("0px 6px 18px -2px");
+  expect(darkDialogStyle.backdropFilter).toBe("none");
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  const lightPanelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+  expect(lightPanelStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.72)");
+  expect(lightPanelStyle.borderRadius).toBe(darkPanelStyle.borderRadius);
+  expect(lightPanelStyle.boxShadow).toBe(darkPanelStyle.boxShadow);
+  expect(lightPanelStyle.backdropFilter).toBe("none");
+});
+
 for (const host of [
   { context: "extension-popup", width: 360, height: 600 },
   { context: "extension-sidebar", width: 420, height: 800 },
@@ -171,8 +224,8 @@ for (const host of [
   });
 }
 
-for (const theme of ["basic", "modern"]) {
-  test(`${theme === "basic" ? "Basic" : "Modern"} compact density remains usable at the minimum reference width`, async ({ page }) => {
+for (const theme of ["basic", "modern", "glass"]) {
+  test(`${theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : "Glass"} compact density remains usable at the minimum reference width`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await openReference(page, "page", "compact", theme);
     await expectNoHorizontalOverflow(page);
