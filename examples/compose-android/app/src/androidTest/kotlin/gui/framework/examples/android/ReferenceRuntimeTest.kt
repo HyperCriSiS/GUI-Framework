@@ -54,6 +54,16 @@ class ReferenceRuntimeTest {
         exerciseReferenceControls("Glass reference")
     }
 
+    @Test
+    fun frostedGlassReferenceFallsBackAndRemainsUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.applyReferenceTheme(GuiThemeId.FROSTED_GLASS)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Frosted Glass reference")
+    }
+
     private fun exerciseReferenceControls(replacement: String) {
         composeRule
             .onNodeWithContentDescription("Reference name")

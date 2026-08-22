@@ -57,6 +57,7 @@ assert.match(web, /label: "Close"[\s\S]*onActivate: closeDialog/);
 assert.match(desktop, /theme: GuiThemeId = GuiThemeId\.BASIC/);
 assert.match(desktop, /"modern" -> GuiThemeId\.MODERN/);
 assert.match(desktop, /"glass" -> GuiThemeId\.GLASS/);
+assert.match(desktop, /"frosted-glass" -> GuiThemeId\.FROSTED_GLASS/);
 assert.match(desktop, /theme = theme/);
 assert.match(desktop, /paletteId: String = "reference-dark"/);
 assert.match(desktop, /paletteId = paletteId/);
@@ -87,4 +88,4 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass/Frosted Web selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass/Frosted selection paths.");
