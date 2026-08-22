@@ -15,12 +15,24 @@ const definitions = await Promise.all(
 const resolvedThemes = resolveThemeDefinitions(definitions);
 const glassEntry = definitions.find((theme) => theme.id === "glass");
 const glass = resolvedThemes.find((theme) => theme.id === "glass");
+const frostedEntry = definitions.find((theme) => theme.id === "frosted-glass");
+const frosted = resolvedThemes.find((theme) => theme.id === "frosted-glass");
 
 assert.ok(glassEntry, "The Glass theme must remain registered");
 assert.ok(glass, "The Glass theme must resolve");
 assert.equal(glassEntry.definition.theme, "glass");
 assert.equal(glassEntry.definition.extends, "modern", "Glass must build on the validated Modern contract");
 assert.deepEqual(glass.inheritance, ["basic", "modern", "glass"]);
+
+assert.ok(frostedEntry, "The Frosted Glass theme must remain registered");
+assert.ok(frosted, "The Frosted Glass theme must resolve");
+assert.equal(frostedEntry.definition.extends, "glass", "Frosted Glass must build on the validated Glass contract");
+assert.deepEqual(frosted.inheritance, ["basic", "modern", "glass", "frosted-glass"]);
+assert.deepEqual(
+  frosted.components,
+  glass.components,
+  "The Frosted Glass foundation must initially preserve the complete validated Glass visual contract",
+);
 
 const componentIds = manifest.components.map((entry) => entry.id).sort();
 assert.deepEqual(
@@ -72,6 +84,20 @@ assert.deepEqual(
   "Glass must provide crisp translucency without blur, glow or whole-component opacity",
 );
 
+for (const componentId of ["panel", "dialog"]) {
+  const componentEntry = manifest.components.find((entry) => entry.id === componentId);
+  const component = JSON.parse(await readFile(join("spec", componentEntry.source), "utf8"));
+  assert.ok(
+    component.capabilities.optional.includes("backdropBlur"),
+    `${componentId} must declare backdropBlur as optional before Frosted Glass adds it`,
+  );
+  assert.equal(
+    component.capabilities.fallbackOrder[0],
+    "frosted",
+    `${componentId} must prefer the future frosted capability tier before standard/minimal fallbacks`,
+  );
+}
+
 const paletteExpectations = {
   "reference-dark": {
     surface: { alpha: 0.72, components: [0.0902, 0.102, 0.1294] },
@@ -83,7 +109,7 @@ const paletteExpectations = {
   },
 };
 
-for (const entry of manifest.palettes) {
+for (const entry of manifest.palttes ?? manifest.palettes) {
   const paletteSource = JSON.parse(await readFile(join("spec", entry.source), "utf8"));
   const expected = paletteExpectations[entry.id];
   assert.ok(expected, `Glass foundation must explicitly cover palette ${entry.id}`);
@@ -99,5 +125,5 @@ for (const entry of manifest.palettes) {
 }
 
 console.log(
-  "Glass inherits Modern and defines palette-neutral crisp translucent Panel/Dialog surfaces without backdrop blur.",
+  "Glass remains crisp and blur-free; Frosted Glass now inherits it as a gated foundation with optional backdropBlur capability prepared.",
 );
