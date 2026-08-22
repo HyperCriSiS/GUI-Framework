@@ -40,7 +40,8 @@ private fun referenceThemeFromSystemProperty(): GuiThemeId =
         "modern" -> GuiThemeId.MODERN
         "glass" -> GuiThemeId.GLASS
         "frosted-glass" -> GuiThemeId.FROSTED_GLASS
-        else -> error("Unsupported GUI reference theme; expected basic, modern, glass or frosted-glass")
+        "spacey" -> GuiThemeId.SPACEY
+        else -> error("Unsupported GUI reference theme; expected basic, modern, glass, frosted-glass or spacey")
     }
 
 fun main() = application {

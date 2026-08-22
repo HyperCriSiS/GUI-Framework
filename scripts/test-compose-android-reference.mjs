@@ -78,6 +78,9 @@ assert.match(runtimeTest, /exerciseReferenceControls\("Glass reference"\)/);
 assert.match(runtimeTest, /frostedGlassReferenceFallsBackAndRemainsUsableAtHostScale/);
 assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.FROSTED_GLASS\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Frosted Glass reference"\)/);
+assert.match(runtimeTest, /spaceyReferenceControlsRemainUsableAtHostScale/);
+assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.SPACEY\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Spacey reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
 assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
@@ -86,4 +89,4 @@ assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern/Glass/Frosted Glass theme selection.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern/Glass/Frosted Glass/Spacey theme selection.");

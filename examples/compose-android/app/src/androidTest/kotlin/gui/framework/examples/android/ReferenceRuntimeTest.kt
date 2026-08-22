@@ -64,6 +64,16 @@ class ReferenceRuntimeTest {
         exerciseReferenceControls("Frosted Glass reference")
     }
 
+    @Test
+    fun spaceyReferenceControlsRemainUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.applyReferenceTheme(GuiThemeId.SPACEY)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Spacey reference")
+    }
+
     private fun exerciseReferenceControls(replacement: String) {
         composeRule
             .onNodeWithContentDescription("Reference name")

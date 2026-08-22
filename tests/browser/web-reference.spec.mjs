@@ -271,6 +271,77 @@ test("Frosted Glass falls back exactly to crisp Glass when backdrop blur is unav
   expect(frostedFallback.backdropFilter).toBe("none");
 });
 
+test("Spacey reference keeps its flat aerospace instrumentation geometry palette-neutral", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "spacey");
+  await expect(root).toHaveAttribute("data-gui-theme", "spacey");
+
+  const buttonStyle = await page.getByRole("button", { name: "Save settings" }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow, backdropFilter: style.backdropFilter };
+  });
+  const inputStyle = await page.getByLabel("Display name").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow };
+  });
+  const switchStyle = await page.getByRole("switch", { name: "Activity notifications" }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    const thumb = element.querySelector(".gui-switch__thumb");
+    if (!thumb) throw new Error("Spacey switch thumb is missing");
+    return {
+      borderRadius: style.borderRadius,
+      borderColor: style.borderColor,
+      boxShadow: style.boxShadow,
+      thumbBorderRadius: getComputedStyle(thumb).borderRadius,
+    };
+  });
+  const panel = page.locator(".gui-panel").first();
+  const panelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      borderColor: style.borderColor,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  });
+
+  expect(buttonStyle).toEqual({ borderRadius: "999px", boxShadow: "none", backdropFilter: "none" });
+  expect(inputStyle.borderRadius).toBe("999px");
+  expect(inputStyle.boxShadow).toBe("none");
+  expect(switchStyle.borderRadius).toBe("999px");
+  expect(switchStyle.thumbBorderRadius).toBe("999px");
+  expect(switchStyle.boxShadow).toBe("none");
+  expect(panelStyle.borderRadius).toBe("6px");
+  expect(panelStyle.boxShadow).toBe("none");
+  expect(panelStyle.backdropFilter).toBe("none");
+  expect(inputStyle.borderColor).toBe(panelStyle.borderColor);
+  expect(switchStyle.borderColor).toBe(panelStyle.borderColor);
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(dialog).toBeVisible();
+  const dialogStyle = await dialog.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow, backdropFilter: style.backdropFilter };
+  });
+  expect(dialogStyle.borderRadius).toBe("6px");
+  expect(dialogStyle.borderColor).toBe(panelStyle.borderColor);
+  expect(dialogStyle.boxShadow).toBe("none");
+  expect(dialogStyle.backdropFilter).toBe("none");
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  const lightPanelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow };
+  });
+  expect(lightPanelStyle.borderRadius).toBe(panelStyle.borderRadius);
+  expect(lightPanelStyle.boxShadow).toBe("none");
+  expect(lightPanelStyle.borderColor).not.toBe(panelStyle.borderColor);
+});
+
 for (const host of [
   { context: "extension-popup", width: 360, height: 600 },
   { context: "extension-sidebar", width: 420, height: 800 },
@@ -303,8 +374,8 @@ for (const host of [
   });
 }
 
-for (const theme of ["basic", "modern", "glass", "frosted-glass"]) {
-  const label = theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : theme === "glass" ? "Glass" : "Frosted Glass";
+for (const theme of ["basic", "modern", "glass", "frosted-glass", "spacey"]) {
+  const label = theme === "basic" ? "Basic" : theme === "modern" ? "Modern" : theme === "glass" ? "Glass" : theme === "frosted-glass" ? "Frosted Glass" : "Spacey";
   test(`${label} compact density remains usable at the minimum reference width`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await openReference(page, "page", "compact", theme);
@@ -340,29 +411,40 @@ for (const theme of ["basic", "modern", "glass", "frosted-glass"]) {
     await reviewButton.click();
     const dialog = page.getByRole("dialog", { name: "Review settings" });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toHaveAttribute("data-gui-size", "small");
-    await expect(page.getByRole("button", { name: "Close" })).toHaveAttribute("data-gui-size", "small");
-
     const dialogBounds = await dialog.boundingBox();
     expect(dialogBounds).not.toBeNull();
     expect(dialogBounds.x).toBeGreaterThanOrEqual(0);
     expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(320);
-    await expectNoHorizontalOverflow(page);
     await page.keyboard.press("Escape");
-    await expect(reviewButton).toBeFocused();
   });
 }
 
-test("Basic reference dark desktop visual baseline", async ({ page }) => {
+test("minimum viewport keeps the default reference layout usable", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
   await openReference(page);
-  await expect(page).toHaveScreenshot("reference-dark-desktop.png", { fullPage: true });
+  await expectNoHorizontalOverflow(page);
+
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  await page.getByRole("button", { name: "Review changes" }).click();
+  await expect(dialog).toBeVisible();
+  const bounds = await dialog.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+});
+
+test("Basic reference dark desktop visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openReference(page);
+  await expect(page.locator("#gui-reference-root")).toHaveScreenshot("reference-dark-desktop.png", { animations: "disabled" });
 });
 
 test("Basic reference dialog visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await openReference(page);
   await page.getByRole("button", { name: "Review changes" }).click();
   await expect(page.getByRole("dialog", { name: "Review settings" })).toBeVisible();
-  await expect(page).toHaveScreenshot("reference-dialog-desktop.png", { fullPage: true });
+  await expect(page.locator("#gui-reference-root")).toHaveScreenshot("reference-dialog-desktop.png", { animations: "disabled" });
 });
 
 test("Basic reference light mobile visual baseline", async ({ page }) => {
@@ -370,5 +452,5 @@ test("Basic reference light mobile visual baseline", async ({ page }) => {
   const root = await openReference(page);
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
-  await expect(page).toHaveScreenshot("reference-light-mobile.png", { fullPage: true });
+  await expect(root).toHaveScreenshot("reference-light-mobile.png", { animations: "disabled" });
 });

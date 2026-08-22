@@ -174,6 +174,16 @@ assert.equal(frostedRoot.dataset.guiPalette, "reference-light", "Frosted Glass m
 frostedApp.destroy();
 assert.equal(frostedRoot.dataset.guiTheme, undefined);
 
+const spaceyRoot = new FakeElement("main");
+const spaceyApp = mountReferenceApp(fakeDocument, spaceyRoot, { theme: "spacey" });
+assert.equal(spaceyRoot.dataset.guiTheme, "spacey");
+assert.equal(spaceyRoot.dataset.guiPalette, "reference-dark");
+assert.equal(spaceyApp.theme, "spacey");
+spaceyApp.components.paletteButton.element.click();
+assert.equal(spaceyRoot.dataset.guiPalette, "reference-light", "Spacey must reuse the same palette-switching path");
+spaceyApp.destroy();
+assert.equal(spaceyRoot.dataset.guiTheme, undefined);
+
 const [html, css] = await Promise.all([
   readFile("examples/web-reference/index.html", "utf8"),
   readFile("examples/web-reference/reference.css", "utf8"),
