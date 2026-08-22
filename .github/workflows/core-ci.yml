@@ -89,6 +89,12 @@ jobs:
       - name: Test Spacey performance budget
         run: npm run test:spacey-performance
 
+      - name: Test Cyberpunk theme foundation contract
+        run: npm run test:cyberpunk-theme
+
+      - name: Test Cyberpunk performance budget
+        run: npm run test:cyberpunk-performance
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
