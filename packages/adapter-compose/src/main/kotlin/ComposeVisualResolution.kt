@@ -65,6 +65,7 @@ internal fun GuiVisualPartStyle.overlay(override: GuiVisualPartStyle): GuiVisual
     lineHeight = override.lineHeight ?: lineHeight,
     border = override.border ?: border,
     outline = override.outline ?: outline,
+    shadow = override.shadow ?: shadow,
     transition = override.transition ?: transition,
 )
 

@@ -24,6 +24,9 @@ assert.match(source, /dismissOnBackPress = dismissible/);
 assert.match(source, /dismissOnClickOutside = dismissible/);
 assert.match(source, /if \(dismissible\) onDismissRequest\(\)/);
 assert.match(source, /paneTitle = accessibilityLabel/);
+assert.match(source, /\.dropShadow\(/);
+assert.match(source, /toComposeShadow\(\)/);
+assert.match(source, /root\.shadow\?\.let/);
 assert.match(source, /\.background\(/);
 assert.match(source, /\.border\(/);
 assert.match(source, /\.padding\(/);
@@ -32,4 +35,4 @@ assert.doesNotMatch(source, /\.clickable\(|\.toggleable\(|\.hoverable\(/);
 assert.doesNotMatch(source, /animate[A-Z]|Animated/);
 assert.doesNotMatch(source, /windowTitle|securePolicy|decorFitsSystemWindows|windowType|windowToken/);
 
-console.log("Compose Basic Dialog source contract tests passed.");
+console.log("Compose Dialog source contract tests passed, including neutral drop-shadow mapping.");

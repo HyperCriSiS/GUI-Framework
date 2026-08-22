@@ -13,6 +13,9 @@ assert.match(source, /accessibilityLabel: String = ""/);
 assert.match(source, /content: @Composable BoxScope\.\(\) -> Unit/);
 assert.match(source, /GuiPanelState\.entries\.map \{ it\.wireValue \}/);
 assert.match(source, /activeStates = emptySet<String>\(\)/);
+assert.match(source, /\.dropShadow\(/);
+assert.match(source, /toComposeShadow\(\)/);
+assert.match(source, /root\.shadow\?\.let/);
 assert.match(source, /\.background\(/);
 assert.match(source, /\.border\(/);
 assert.match(source, /\.padding\(/);
@@ -23,4 +26,4 @@ assert.doesNotMatch(source, /\.clickable\(|\.toggleable\(|\.hoverable\(/);
 assert.doesNotMatch(source, /Role\./);
 assert.doesNotMatch(source, /animate[A-Z]|Animated/);
 
-console.log("Compose Basic Panel source contract tests passed.");
+console.log("Compose Panel source contract tests passed, including neutral drop-shadow mapping.");

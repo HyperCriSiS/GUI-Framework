@@ -3,7 +3,9 @@
 package gui.framework.compose.internal
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -11,6 +13,7 @@ import gui.framework.generated.internal.GuiColorValue
 import gui.framework.generated.internal.GuiDimensionValue
 import gui.framework.generated.internal.GuiDurationValue
 import gui.framework.generated.internal.GuiNumberValue
+import gui.framework.generated.internal.GuiShadowValue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -26,12 +29,15 @@ internal fun GuiColorValue.toComposeColor(): Color {
     require(components.all { it in 0.0..1.0 }) {
         "Neutral sRGB components must be in the range 0..1"
     }
+    require(alpha.isFinite() && alpha in 0.0..1.0) {
+        "Neutral sRGB alpha must be in the range 0..1"
+    }
 
     return Color(
         red = components[0].toFloat(),
         green = components[1].toFloat(),
         blue = components[2].toFloat(),
-        alpha = 1f,
+        alpha = alpha.toFloat(),
     )
 }
 
@@ -69,6 +75,22 @@ internal fun GuiNumberValue.toComposeUnitlessFloat(): Float {
         "Neutral number value must be finite"
     }
     return value.toFloat()
+}
+
+/** Maps a resolved neutral DTCG drop shadow to Compose's precise shadow primitive. */
+internal fun GuiShadowValue.toComposeShadow(): Shadow {
+    require(!inset) {
+        "Inset neutral shadows require an inner-shadow mapping instead of dropShadow"
+    }
+    return Shadow(
+        radius = blur.toComposeDp(),
+        color = color.toComposeColor(),
+        spread = spread.toComposeDp(),
+        offset = DpOffset(
+            x = offsetX.toComposeDp(),
+            y = offsetY.toComposeDp(),
+        ),
+    )
 }
 
 /** Maps a resolved neutral duration token to Kotlin's platform-neutral Duration. */

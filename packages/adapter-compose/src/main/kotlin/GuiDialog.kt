@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
 import gui.framework.compose.internal.toComposeDp
+import gui.framework.compose.internal.toComposeShadow
 import gui.framework.compose.internal.toComposeUnitlessFloat
 import gui.framework.generated.internal.GuiDialogContract
 import gui.framework.generated.internal.GuiDialogSize
@@ -97,7 +99,9 @@ fun GuiDialog(
                 minWidth = root.minWidth?.toComposeDp() ?: 0.dp,
                 minHeight = root.minHeight?.toComposeDp() ?: 0.dp,
             )
-            .clip(shape)
+
+        root.shadow?.let { dialogModifier = dialogModifier.dropShadow(shape, it.toComposeShadow()) }
+        dialogModifier = dialogModifier.clip(shape)
 
         root.fill?.let { dialogModifier = dialogModifier.background(it.toComposeColor(), shape) }
         root.border?.let {

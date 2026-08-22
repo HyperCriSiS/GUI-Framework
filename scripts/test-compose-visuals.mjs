@@ -38,6 +38,11 @@ try {
   assert.match(source, /GuiDimensionValue\(36\.0, "px"\)/);
   assert.match(source, /GuiDimensionValue\(14\.0, "px"\)/);
   assert.match(source, /GuiVisualOutline/);
+  assert.match(source, /val shadow: GuiShadowValue\? = null/);
+  assert.match(source, /"modern" to mapOf/);
+  assert.match(source, /shadow = GuiShadowValue\(color = GuiColorValue\("srgb", listOf\(0\.0, 0\.0, 0\.0\), null, 0\.14\)/);
+  assert.match(source, /shadow = GuiShadowValue\(color = GuiColorValue\("srgb", listOf\(0\.0, 0\.0, 0\.0\), null, 0\.18\)/);
+  assert.match(source, /inset = false/);
   assert.doesNotMatch(source, /motion\.interaction\.fast/, "Active animation tokens must not be emitted for v1 Basic controls");
 
   const fallbackIr = JSON.parse(await readFile(irPath, "utf8"));
