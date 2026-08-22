@@ -39,7 +39,8 @@
         "checked": {
           "root": {
             "border": {
-              "color": "{semantic.color.borderStrong}"
+              "color": "{semantic.color.borderStrong}",
+              "width": "{border.width.standard}"
             }
           }
         }
