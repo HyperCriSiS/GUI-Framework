@@ -88,6 +88,12 @@ for (const [componentId, parts] of Object.entries(expectedFoundation)) {
   }
 }
 
+assert.deepEqual(
+  spaceyEntry.definition.components.switch.states?.checked?.root?.border,
+  { color: "{semantic.color.borderStrong}" },
+  "Spacey checked Switch must keep the instrument frame while inheriting the active Accent fill",
+);
+
 function collectKeys(value, predicate, path = "spacey") {
   if (!value || typeof value !== "object") return [];
   const findings = [];
@@ -123,8 +129,9 @@ assert.deepEqual(
     "spacey.input.base.root.border.color",
     "spacey.panel.base.root.border.color",
     "spacey.switch.base.root.border.color",
+    "spacey.switch.states.checked.root.border.color",
   ],
-  "Spacey strong instrumentation outlines must stay limited to the intended four surfaces",
+  "Spacey strong instrumentation outlines must stay limited to the intended surfaces and preserve the checked switch frame",
 );
 
 for (const entry of manifest.components) {
