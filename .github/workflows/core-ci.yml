@@ -2,11 +2,12 @@ name: Core CI
 
 on:
   push:
-    branches:
-      - main
-      - feat/core-foundation
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -16,19 +17,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: 17
           cache: maven
 
       - name: Validate neutral specification
@@ -189,16 +190,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
       - name: Install pinned browser-test dependency
-        run: npm install --no-save --package-lock=false @playwright/test@1.58.2
+        run: npm install --ignore-scripts --no-package-lock --no-save @playwright/test@1.62.1
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -213,16 +214,14 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify browser interactions and visual regressions
-        run: npm run test:browser
+        run: npm run test:web-browser
 
       - name: Upload browser failure diagnostics
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
-          name: web-browser-regression-diagnostics
-          path: |
-            test-results
-            playwright-report
+          name: web-browser-regression-output
+          path: test-results
           if-no-files-found: ignore
 
   compose-android-reference:
@@ -230,33 +229,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: 17
           cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
       - name: Install Android 17 preview SDK
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.5.0'
+          gradle-version: 9.5.0
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -274,19 +271,14 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation
-        working-directory: examples/compose-android
-        run: gradle --no-daemon --stacktrace :app:compileDebugAndroidTestKotlin
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
 
       - name: Assemble Android reference APKs
-        working-directory: examples/compose-android
-        run: gradle --no-daemon --stacktrace :app:assembleDebug :app:assembleDebugAndroidTest
+        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
 
   compose-android-runtime:
-    if: >-
-      github.ref == 'refs/heads/main' ||
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.message, '[device-ci]')
     needs: validate-and-typecheck
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[device-ci]') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -298,49 +290,47 @@ jobs:
             ram-size: 1536M
             heap-size: 192M
             density: 240
-            font-scale: '1.30'
+            font-scale: "1.30"
           - api-level: 35
             target: google_apis
             arch: x86_64
             ram-size: 2048M
             heap-size: 256M
             density: 480
-            font-scale: '1.00'
+            font-scale: "1.00"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Enable KVM for Android emulator
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: 17
           cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Install Android 17 preview SDK
+      - name: Enable KVM acceleration
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Android 17 preview SDK
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.5.0'
+          gradle-version: 9.5.0
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -363,20 +353,11 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          disk-size: 2048M
+          profile: pixel_2
           emulator-options: >-
-            -no-window
-            -no-snapshot
-            -noaudio
-            -no-boot-anim
-            -camera-back none
-            -camera-front none
+            -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+            -prop qemu.sf.lcd_density=${{ matrix.density }}
           disable-animations: true
-          script: |
-            adb shell settings put system font_scale ${{ matrix.font-scale }}
-            adb shell wm density ${{ matrix.density }}
-            gradle --no-daemon --stacktrace :app:connectedDebugAndroidTest
-          working-directory: examples/compose-android
+          script: bash scripts/run-android-runtime-check.sh "${{ matrix.font-scale }}"
