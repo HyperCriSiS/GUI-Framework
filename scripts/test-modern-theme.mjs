@@ -29,33 +29,47 @@ assert.deepEqual(
   "Modern must retain every registered reference component through inheritance",
 );
 
-const expectedGeometry = {
-  button: { root: "{radius.lg}" },
-  input: { root: "{radius.lg}" },
-  switch: { root: "{radius.pill}", thumb: "{radius.pill}" },
-  panel: { root: "{radius.xl}" },
-  dialog: { root: "{radius.xl}" },
+const expectedFoundation = {
+  button: { root: { radius: "{radius.lg}" } },
+  input: { root: { radius: "{radius.lg}" } },
+  switch: {
+    root: { radius: "{radius.pill}" },
+    thumb: { radius: "{radius.pill}" },
+  },
+  panel: {
+    root: { radius: "{radius.xl}", shadow: "{elevation.shadow.low}" },
+  },
+  dialog: {
+    root: { radius: "{radius.xl}", shadow: "{elevation.shadow.medium}" },
+  },
 };
 
-for (const [componentId, parts] of Object.entries(expectedGeometry)) {
+for (const [componentId, parts] of Object.entries(expectedFoundation)) {
   const directBase = modernEntry.definition.components[componentId]?.base;
-  assert.ok(directBase, `Modern ${componentId} must define its geometry override`);
+  assert.ok(directBase, `Modern ${componentId} must define its direct foundation override`);
 
-  for (const [partId, radius] of Object.entries(parts)) {
+  for (const [partId, expectedStyle] of Object.entries(parts)) {
     assert.deepEqual(
       directBase[partId],
-      { radius },
-      `Modern ${componentId}.${partId} foundation must stay isolated to geometry`,
+      expectedStyle,
+      `Modern ${componentId}.${partId} foundation must remain deterministic`,
     );
     assert.equal(
       modern.components[componentId].base[partId].radius,
-      radius,
+      expectedStyle.radius,
       `Modern ${componentId}.${partId} radius must survive theme resolution`,
     );
+    if (expectedStyle.shadow) {
+      assert.equal(
+        modern.components[componentId].base[partId].shadow,
+        expectedStyle.shadow,
+        `Modern ${componentId}.${partId} shadow must survive theme resolution`,
+      );
+    }
   }
 }
 
-const unsupportedEffectKeys = new Set(["shadow", "blur", "backdropBlur", "glow"]);
+const unsupportedEffectKeys = new Set(["blur", "backdropBlur", "glow"]);
 function collectKeys(value, predicate, path = "modern") {
   if (!value || typeof value !== "object") return [];
   const findings = [];
@@ -70,7 +84,7 @@ function collectKeys(value, predicate, path = "modern") {
 assert.deepEqual(
   collectKeys(modernEntry.definition.components, (key) => unsupportedEffectKeys.has(key)),
   [],
-  "Modern foundation must not introduce effects that Web/Compose cannot map yet",
+  "Modern must not introduce effects that the reference adapters cannot map yet",
 );
 assert.deepEqual(
   collectKeys(
@@ -101,5 +115,5 @@ for (const entry of manifest.components) {
 }
 
 console.log(
-  "Modern theme inherits the complete Basic contract and establishes palette-neutral rounded geometry without unsupported effects.",
+  "Modern theme inherits the complete Basic contract and establishes palette-neutral rounded geometry with deterministic drop-shadow elevation.",
 );
