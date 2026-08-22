@@ -60,8 +60,10 @@ try {
   const lightGlass = light.themes.glass.components;
   const darkFrosted = dark.themes["frosted-glass"].components;
   const lightFrosted = light.themes["frosted-glass"].components;
+  const darkSpacey = dark.themes.spacey.components;
+  const lightSpacey = light.themes.spacey.components;
 
-  for (const components of [darkBasic, lightBasic, darkModern, lightModern, darkGlass, lightGlass, darkFrosted, lightFrosted]) {
+  for (const components of [darkBasic, lightBasic, darkModern, lightModern, darkGlass, lightGlass, darkFrosted, lightFrosted, darkSpacey, lightSpacey]) {
     assert.deepEqual(
       Object.keys(components),
       expectedComponentIds,
@@ -124,7 +126,7 @@ try {
   }
 
   for (const palette of [dark, light]) {
-    for (const themeId of ["spacey", "cyberpunk"]) {
+    for (const themeId of ["cyberpunk"]) {
       assert.deepEqual(
         palette.themes[themeId].components,
         {},

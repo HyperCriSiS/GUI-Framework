@@ -1,5 +1,63 @@
 {
   "specVersion": "0.1.0",
   "theme": "spacey",
-  "components": {}
+  "extends": "basic",
+  "components": {
+    "button": {
+      "base": {
+        "root": {
+          "radius": "{radius.pill}"
+        }
+      }
+    },
+    "input": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surface}",
+          "radius": "{radius.pill}",
+          "border": {
+            "color": "{semantic.color.borderStrong}",
+            "width": "{border.width.standard}"
+          }
+        }
+      }
+    },
+    "switch": {
+      "base": {
+        "root": {
+          "radius": "{radius.pill}",
+          "border": {
+            "color": "{semantic.color.borderStrong}",
+            "width": "{border.width.standard}"
+          }
+        },
+        "thumb": {
+          "radius": "{radius.pill}"
+        }
+      }
+    },
+    "panel": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surface}",
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.borderStrong}",
+            "width": "{border.width.standard}"
+          }
+        }
+      }
+    },
+    "dialog": {
+      "base": {
+        "root": {
+          "radius": "{radius.sm}",
+          "border": {
+            "color": "{semantic.color.borderStrong}",
+            "width": "{border.width.standard}"
+          }
+        }
+      }
+    }
+  }
 }

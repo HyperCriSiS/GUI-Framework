@@ -59,7 +59,7 @@ try {
   );
   assert.doesNotMatch(
     css,
-    /data-gui-theme="(?:spacey|cyberpunk)"/,
+    /data-gui-theme="cyberpunk"/,
     "Themes without deliberate component recipes must remain absent from generated CSS",
   );
   assert.match(css, /:where\(\[data-gui-variant="primary"\]\)/);
