@@ -211,31 +211,46 @@ function generate(ir) {
     ")",
     "",
     "object GuiVisualRegistry {",
-    "    private val byPalette: Map<String, Map<String, Map<String, GuiVisualRecipe>>> = mapOf("
   ];
 
+  const paletteFunctions = [];
   ir.palettes.forEach((palette, paletteIndex) => {
     const themeEntries = Object.entries(palette.themes ?? {})
       .map(([themeId, theme]) => [themeId, theme.components ?? {}])
       .filter(([, components]) => Object.keys(components).length > 0)
       .sort(([a], [b]) => a.localeCompare(b));
-    const paletteSuffix = paletteIndex === ir.palettes.length - 1 ? "" : ",";
-    if (themeEntries.length === 0) {
-      lines.push(`        ${kotlinString(palette.id)} to emptyMap()${paletteSuffix}`);
-      return;
-    }
-    lines.push(`        ${kotlinString(palette.id)} to mapOf(`);
+    const paletteFunction = `palette${paletteIndex}`;
+    const themeFunctions = [];
+
     themeEntries.forEach(([themeId, components], themeIndex) => {
+      const themeFunction = `${paletteFunction}Theme${themeIndex}`;
+      themeFunctions.push([themeId, themeFunction]);
+      lines.push(`    private fun ${themeFunction}(): Map<String, GuiVisualRecipe> = mapOf(`);
       const componentEntries = Object.entries(components).sort(([a], [b]) => a.localeCompare(b));
-      const themeSuffix = themeIndex === themeEntries.length - 1 ? "" : ",";
-      lines.push(`            ${kotlinString(themeId)} to mapOf(`);
       componentEntries.forEach(([componentId, recipe], componentIndex) => {
         const componentSuffix = componentIndex === componentEntries.length - 1 ? "" : ",";
-        lines.push(`                ${kotlinString(componentId)} to ${recipeExpr(recipe, `${palette.id}.${themeId}.${componentId}`)}${componentSuffix}`);
+        lines.push(`        ${kotlinString(componentId)} to ${recipeExpr(recipe, `${palette.id}.${themeId}.${componentId}`)}${componentSuffix}`);
       });
-      lines.push(`            )${themeSuffix}`);
+      lines.push("    )", "");
     });
-    lines.push(`        )${paletteSuffix}`);
+
+    if (themeFunctions.length === 0) {
+      lines.push(`    private fun ${paletteFunction}(): Map<String, Map<String, GuiVisualRecipe>> = emptyMap()`, "");
+    } else {
+      lines.push(`    private fun ${paletteFunction}(): Map<String, Map<String, GuiVisualRecipe>> = mapOf(`);
+      themeFunctions.forEach(([themeId, themeFunction], themeIndex) => {
+        const themeSuffix = themeIndex === themeFunctions.length - 1 ? "" : ",";
+        lines.push(`        ${kotlinString(themeId)} to ${themeFunction}()${themeSuffix}`);
+      });
+      lines.push("    )", "");
+    }
+    paletteFunctions.push([palette.id, paletteFunction]);
+  });
+
+  lines.push("    private val byPalette: Map<String, Map<String, Map<String, GuiVisualRecipe>>> = mapOf(");
+  paletteFunctions.forEach(([paletteId, paletteFunction], paletteIndex) => {
+    const paletteSuffix = paletteIndex === paletteFunctions.length - 1 ? "" : ",";
+    lines.push(`        ${kotlinString(paletteId)} to ${paletteFunction}()${paletteSuffix}`);
   });
 
   lines.push(
