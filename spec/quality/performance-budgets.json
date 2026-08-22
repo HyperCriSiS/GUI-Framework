@@ -36,6 +36,20 @@
         "backdropBlur",
         "glow"
       ]
+    },
+    "frosted-glass": {
+      "maxResolvedVisualLeaves": 200,
+      "maxComponentVisualLeaves": 74,
+      "maxVariantsPerComponent": 6,
+      "maxStatesPerComponent": 8,
+      "maxShadowProperties": 2,
+      "maxTranslucentFillProperties": 2,
+      "maxBackdropBlurProperties": 2,
+      "maxCapabilityFallbacksPerComponent": 1,
+      "forbiddenEffectKeys": [
+        "blur",
+        "glow"
+      ]
     }
   }
 }

@@ -2,12 +2,11 @@ name: Core CI
 
 on:
   push:
+    branches:
+      - main
+      - feat/core-foundation
   pull_request:
   workflow_dispatch:
-
-concurrency:
-  group: core-ci-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -17,19 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
           cache: maven
 
       - name: Validate neutral specification
@@ -76,6 +75,9 @@ jobs:
 
       - name: Test Frosted Glass capability contract
         run: npm run test:frosted-theme
+
+      - name: Test Frosted Glass performance budget
+        run: npm run test:frosted-performance
 
       - name: Generate Web token output
         run: npm run build:web-tokens
@@ -187,16 +189,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Install pinned browser-test dependency
-        run: npm install --ignore-scripts --no-package-lock --no-save @playwright/test@1.62.1
+        run: npm install --no-save --package-lock=false @playwright/test@1.58.2
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -211,14 +213,16 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify browser interactions and visual regressions
-        run: npm run test:web-browser
+        run: npm run test:browser
 
       - name: Upload browser failure diagnostics
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: web-browser-regression-output
-          path: test-results
+          name: web-browser-regression-diagnostics
+          path: |
+            test-results
+            playwright-report
           if-no-files-found: ignore
 
   compose-android-reference:
@@ -226,31 +230,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
           cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
       - name: Install Android 17 preview SDK
-        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 9.5.0
+          gradle-version: '9.5.0'
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -268,14 +274,19 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation
-        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
+        working-directory: examples/compose-android
+        run: gradle --no-daemon --stacktrace :app:compileDebugAndroidTestKotlin
 
       - name: Assemble Android reference APKs
-        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+        working-directory: examples/compose-android
+        run: gradle --no-daemon --stacktrace :app:assembleDebug :app:assembleDebugAndroidTest
 
   compose-android-runtime:
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.message, '[device-ci]')
     needs: validate-and-typecheck
-    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[device-ci]') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -287,47 +298,49 @@ jobs:
             ram-size: 1536M
             heap-size: 192M
             density: 240
-            font-scale: "1.30"
+            font-scale: '1.30'
           - api-level: 35
             target: google_apis
             arch: x86_64
             ram-size: 2048M
             heap-size: 256M
             density: 480
-            font-scale: "1.00"
+            font-scale: '1.00'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          package-manager-cache: false
-
-      - name: Set up Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: gradle
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
-
-      - name: Enable KVM acceleration
+      - name: Enable KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
       - name: Install Android 17 preview SDK
-        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 9.5.0
+          gradle-version: '9.5.0'
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -350,11 +363,20 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
+          profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          profile: pixel_2
+          disk-size: 2048M
           emulator-options: >-
-            -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-            -prop qemu.sf.lcd_density=${{ matrix.density }}
+            -no-window
+            -no-snapshot
+            -noaudio
+            -no-boot-anim
+            -camera-back none
+            -camera-front none
           disable-animations: true
-          script: bash scripts/run-android-runtime-check.sh "${{ matrix.font-scale }}"
+          script: |
+            adb shell settings put system font_scale ${{ matrix.font-scale }}
+            adb shell wm density ${{ matrix.density }}
+            gradle --no-daemon --stacktrace :app:connectedDebugAndroidTest
+          working-directory: examples/compose-android
