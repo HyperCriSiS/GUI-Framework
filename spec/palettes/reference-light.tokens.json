@@ -24,6 +24,8 @@
       "background": { "$value": "{palette.neutral025}" },
       "surface": { "$value": "{palette.white}" },
       "surfaceElevated": { "$value": "{palette.neutral050}" },
+      "surfaceTranslucent": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.72, "hex": "#FFFFFF" } },
+      "surfaceElevatedTranslucent": { "$value": { "colorSpace": "srgb", "components": [0.9569, 0.9686, 0.9843], "alpha": 0.82, "hex": "#F4F7FB" } },
       "textPrimary": { "$value": "{palette.neutral900}" },
       "textSecondary": { "$value": "{palette.neutral700}" },
       "textDisabled": { "$value": "{palette.neutral500}" },
