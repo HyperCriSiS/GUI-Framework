@@ -32,7 +32,10 @@ for (const component of scenario.components) {
   assert.ok(registered.has(component), `Scenario component ${component} must be registered`);
 }
 
-assert.match(web, /root\.dataset\.guiTheme = "basic"/);
+assert.match(web, /const themes = new Set\(\["basic", "modern"\]\)/);
+assert.match(web, /const theme = options\.theme \?\? "basic"/);
+assert.match(web, /if \(!themes\.has\(theme\)\) throw new Error/);
+assert.match(web, /root\.dataset\.guiTheme = theme/);
 assert.match(web, /options\.palette \?\? "reference-dark"/);
 assert.match(web, /options\.density \?\? "standard"/);
 assert.match(web, /const compact = density === "compact"/);
