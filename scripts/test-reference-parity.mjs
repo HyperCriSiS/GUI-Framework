@@ -52,9 +52,18 @@ assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true
 assert.match(web, /onDismissRequest: closeDialog/);
 assert.match(web, /label: "Close"[\s\S]*onActivate: closeDialog/);
 
+assert.match(desktop, /theme: GuiThemeId = GuiThemeId\.BASIC/);
+assert.match(desktop, /"modern" -> GuiThemeId\.MODERN/);
+assert.match(desktop, /theme = theme/);
+assert.match(desktop, /paletteId: String = "reference-dark"/);
+assert.match(desktop, /paletteId = paletteId/);
+
+assert.match(android, /referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
+assert.match(android, /applyReferenceTheme\(theme: GuiThemeId\)/);
+assert.match(android, /theme = referenceTheme/);
+assert.match(android, /paletteId = "reference-dark"/);
+
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
-  assert.match(source, /theme = GuiThemeId\.BASIC/);
-  assert.match(source, /paletteId = "reference-dark"/);
   assert.match(source, /ReferenceDensity\.Compact/);
   for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
     assert.match(
@@ -75,4 +84,4 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed.");
+console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern selection paths.");
