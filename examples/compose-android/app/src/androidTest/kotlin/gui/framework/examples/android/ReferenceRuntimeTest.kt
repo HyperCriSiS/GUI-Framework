@@ -74,6 +74,16 @@ class ReferenceRuntimeTest {
         exerciseReferenceControls("Spacey reference")
     }
 
+    @Test
+    fun cyberpunkReferenceControlsRemainUsableAtHostScale() {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.applyReferenceTheme(GuiThemeId.CYBERPUNK)
+        }
+        composeRule.waitForIdle()
+
+        exerciseReferenceControls("Cyberpunk reference")
+    }
+
     private fun exerciseReferenceControls(replacement: String) {
         composeRule
             .onNodeWithContentDescription("Reference name")
