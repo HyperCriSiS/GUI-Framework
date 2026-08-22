@@ -1,5 +1,21 @@
 {
   "specVersion": "0.1.0",
   "theme": "glass",
-  "components": {}
+  "extends": "modern",
+  "components": {
+    "panel": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceTranslucent}"
+        }
+      }
+    },
+    "dialog": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceElevatedTranslucent}"
+        }
+      }
+    }
+  }
 }
