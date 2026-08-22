@@ -2,28 +2,31 @@ name: Core CI
 
 on:
   push:
+    branches:
+      - main
+      - feat/**
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: core-ci-${{ github.ref }}
   cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
   validate-and-typecheck:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -79,6 +82,12 @@ jobs:
 
       - name: Test Frosted Glass performance budget
         run: npm run test:frosted-performance
+
+      - name: Test Spacey theme foundation contract
+        run: npm run test:spacey-theme
+
+      - name: Test Spacey performance budget
+        run: npm run test:spacey-performance
 
       - name: Generate Web token output
         run: npm run build:web-tokens
@@ -190,16 +199,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Install pinned browser-test dependency
-        run: npm install --ignore-scripts --no-package-lock --no-save @playwright/test@1.62.1
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false --no-save @playwright/test@1.62.1
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -218,24 +227,27 @@ jobs:
 
       - name: Upload browser failure diagnostics
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: web-browser-regression-output
-          path: test-results
+          name: web-browser-failure-diagnostics
+          path: |
+            test-results/
+            tests/visual-regression/
           if-no-files-found: ignore
+          retention-days: 7
 
   compose-android-reference:
     needs: validate-and-typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -245,10 +257,12 @@ jobs:
           cache: gradle
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@v3
 
       - name: Install Android 17 preview SDK
-        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install "platforms;android-CANARY" "build-tools;36.1.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
@@ -271,14 +285,14 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation
-        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestSources --no-daemon
 
       - name: Assemble Android reference APKs
         run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
 
   compose-android-runtime:
     needs: validate-and-typecheck
-    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[device-ci]') }}
+    if: github.ref_name == 'main' || github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[device-ci]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -300,13 +314,13 @@ jobs:
             font-scale: "1.00"
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -316,7 +330,7 @@ jobs:
           cache: gradle
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@v3
 
       - name: Enable KVM acceleration
         run: |
@@ -325,7 +339,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Install Android 17 preview SDK
-        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install "platforms;android-CANARY" "build-tools;36.1.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
@@ -348,16 +364,15 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Run scaled Android reference instrumentation
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: ReactiveCircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          profile: pixel_2
-          emulator-options: >-
-            -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-            -prop qemu.sf.lcd_density=${{ matrix.density }}
+          density: ${{ matrix.density }}
           disable-animations: true
-          script: bash scripts/run-android-runtime-check.sh "${{ matrix.font-scale }}"
+          disable-spellchecker: true
+          disk-size: 4G
+          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}

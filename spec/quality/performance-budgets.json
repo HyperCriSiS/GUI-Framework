@@ -50,6 +50,18 @@
         "blur",
         "glow"
       ]
+    },
+    "spacey": {
+      "maxResolvedVisualLeaves": 180,
+      "maxComponentVisualLeaves": 64,
+      "maxVariantsPerComponent": 6,
+      "maxStatesPerComponent": 8,
+      "forbiddenEffectKeys": [
+        "shadow",
+        "blur",
+        "backdropBlur",
+        "glow"
+      ]
     }
   }
 }
