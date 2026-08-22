@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { resolveThemeDefinitions } from "../packages/compiler/src/theme-resolution.mjs";
 
@@ -114,6 +115,30 @@ for (const entry of manifest.components) {
   }
 }
 
+const irPath = "build/spec-ir-modern-theme-test.json";
+function run(args, label) {
+  const result = spawnSync(process.execPath, args, { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${label} failed:\n${result.stdout}\n${result.stderr}`);
+}
+
+try {
+  run(["packages/compiler/src/index.mjs", "--output", irPath], "Specification compiler");
+  const ir = JSON.parse(await readFile(irPath, "utf8"));
+  for (const paletteId of ["reference-dark", "reference-light"]) {
+    const palette = ir.palettes.find((entry) => entry.id === paletteId);
+    assert.ok(palette, `Compiled IR must contain ${paletteId}`);
+    assert.ok(palette.themes?.basic?.components?.panel, `${paletteId} must compile the Basic theme`);
+    assert.ok(palette.themes?.modern?.components?.panel, `${paletteId} must compile the Modern theme`);
+    assert.equal(
+      palette.themes.modern.components.panel.base.root.shadow.reference,
+      "{elevation.shadow.low}",
+      `${paletteId} must reuse Modern elevation without a palette-specific theme fork`,
+    );
+  }
+} finally {
+  await rm(irPath, { force: true });
+}
+
 console.log(
-  "Modern theme inherits the complete Basic contract and establishes palette-neutral rounded geometry with deterministic drop-shadow elevation.",
+  "Modern theme inherits the complete Basic contract and establishes palette-neutral rounded geometry with deterministic drop-shadow elevation while reusing the same compiled reference palettes.",
 );
