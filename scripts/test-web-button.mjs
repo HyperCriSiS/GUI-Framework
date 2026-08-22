@@ -57,10 +57,10 @@ try {
     /\[data-gui-theme="glass"\] \.gui-button \{[^}]*border-radius: var\(--gui-radius-lg\);/s,
     "Glass controls must inherit Modern rounded geometry without forking ordinary controls",
   );
-  assert.doesNotMatch(
+  assert.match(
     css,
-    /data-gui-theme="cyberpunk"/,
-    "Themes without deliberate component recipes must remain absent from generated CSS",
+    /\[data-gui-theme="cyberpunk"\] \.gui-button \{[^}]*border-radius: var\(--gui-radius-sm\);/s,
+    "Cyberpunk button CSS must expose its sharp signal-frame geometry while inheriting Basic behavior",
   );
   assert.match(css, /:where\(\[data-gui-variant="primary"\]\)/);
   assert.match(css, /:where\(\[data-gui-size="large"\]\)/);
@@ -145,7 +145,7 @@ try {
     /Unknown GUI button variant/,
   );
 
-  console.log("Web Basic/Modern/Glass button vertical-slice tests passed.");
+  console.log("Web Basic/Modern/Glass/Cyberpunk button vertical-slice tests passed.");
 } finally {
   await Promise.all([rm(irPath, { force: true }), rm(cssPath, { force: true })]);
 }
