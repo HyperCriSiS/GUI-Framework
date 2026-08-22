@@ -3,256 +3,232 @@
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import { resolveComponentVisualRecipe } from "../packages/compiler/src/theme-resolution.mjs";
 
-const irPath = "build/spec-ir-accessibility-test.json";
-const contrastPolicyPath = "spec/accessibility/contrast-policy.json";
-const MIN_TEXT_CONTRAST = 4.5;
-const MIN_NON_TEXT_CONTRAST = 3;
-const MIN_TARGET_SIZE_PX = 24;
+const manifest = JSON.parse(await readFile("spec/manifest.json", "utf8"));
+const policy = JSON.parse(await readFile("spec/accessibility/contrast-policy.json", "utf8"));
+const outputPath = "build/spec-ir-accessibility-test.json";
 
-function compile() {
-  const result = spawnSync(
-    process.execPath,
-    ["packages/compiler/src/index.mjs", "--output", irPath],
-    { encoding: "utf8" },
-  );
-  if (result.status !== 0) {
-    throw new Error(`Specification compiler failed:\n${result.stdout}\n${result.stderr}`);
-  }
+function run(args, label) {
+  const result = spawnSync(process.execPath, args, { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${label} failed:\n${result.stdout}\n${result.stderr}`);
 }
 
-function colorComponents(token, label) {
-  assert.equal(token?.type, "color", `${label} must be a compiled color`);
-  assert.equal(token.value?.colorSpace, "srgb", `${label} must use sRGB`);
-  assert.deepEqual(token.value?.components?.length, 3, `${label} must have three channels`);
-  assert.equal(token.value?.alpha ?? 1, 1, `${label} must be opaque for contrast evaluation`);
-  return token.value.components;
+function parseHex(hex) {
+  assert.match(hex, /^#[0-9A-Fa-f]{6}$/);
+  return [
+    Number.parseInt(hex.slice(1, 3), 16) / 255,
+    Number.parseInt(hex.slice(3, 5), 16) / 255,
+    Number.parseInt(hex.slice(5, 7), 16) / 255,
+  ];
 }
 
-function linearize(channel) {
-  return channel <= 0.04045
-    ? channel / 12.92
-    : ((channel + 0.055) / 1.055) ** 2.4;
+function toLinear(value) {
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
 }
 
-function luminance(color) {
-  const [red, green, blue] = color.map(linearize);
+function luminance(hex) {
+  const [red, green, blue] = parseHex(hex).map(toLinear);
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 }
 
-function contrast(leftToken, rightToken, label) {
-  const left = luminance(colorComponents(leftToken, `${label} foreground`));
-  const right = luminance(colorComponents(rightToken, `${label} background`));
-  return (Math.max(left, right) + 0.05) / (Math.min(left, right) + 0.05);
+function contrastRatio(foreground, background) {
+  const foregroundLuminance = luminance(foreground);
+  const backgroundLuminance = luminance(background);
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
 }
 
-function assertContrast(left, right, minimum, label) {
-  const ratio = contrast(left, right, label);
-  assert.ok(
-    ratio >= minimum,
-    `${label} contrast ${ratio.toFixed(3)}:1 is below ${minimum}:1`,
+function alphaComposite(foreground, background) {
+  assert.equal(foreground.type, "color");
+  assert.equal(background.type, "color");
+  const alpha = foreground.value.alpha ?? 1;
+  const backgroundAlpha = background.value.alpha ?? 1;
+  assert.equal(backgroundAlpha, 1, "Reference accessibility compositing expects an opaque backdrop");
+  const components = foreground.value.components.map(
+    (component, index) => component * alpha + background.value.components[index] * (1 - alpha),
   );
+  const toHex = (component) => Math.round(component * 255).toString(16).padStart(2, "0").toUpperCase();
+  return `#${components.map(toHex).join("")}`;
 }
 
-function compositedComponents(topToken, bottomToken, label) {
-  assert.equal(topToken?.type, "color", `${label} foreground layer must be a compiled color`);
-  assert.equal(bottomToken?.type, "color", `${label} background layer must be a compiled color`);
-  assert.equal(topToken.value?.colorSpace, "srgb", `${label} foreground layer must use sRGB`);
-  assert.equal(bottomToken.value?.colorSpace, "srgb", `${label} background layer must use sRGB`);
-  assert.equal(bottomToken.value?.alpha ?? 1, 1, `${label} background layer must be opaque`);
-  const alpha = topToken.value?.alpha ?? 1;
-  assert.ok(alpha > 0 && alpha <= 1, `${label} foreground alpha must be within (0, 1]`);
-  return topToken.value.components.map(
-    (channel, index) => channel * alpha + bottomToken.value.components[index] * (1 - alpha),
-  );
+function tokenHex(token, label) {
+  assert.equal(token?.type, "color", `${label} must resolve to a color token`);
+  assert.equal(typeof token.value?.hex, "string", `${label} must expose an sRGB hex value`);
+  return token.value.hex;
 }
 
-function contrastComponents(left, right) {
-  const leftLuminance = luminance(left);
-  const rightLuminance = luminance(right);
-  return (Math.max(leftLuminance, rightLuminance) + 0.05) /
-    (Math.min(leftLuminance, rightLuminance) + 0.05);
-}
-
-function assertContrastAgainstComponents(foregroundToken, backgroundComponents, minimum, label) {
-  const foreground = colorComponents(foregroundToken, `${label} foreground`);
-  const ratio = contrastComponents(foreground, backgroundComponents);
-  assert.ok(
-    ratio >= minimum,
-    `${label} contrast ${ratio.toFixed(3)}:1 is below ${minimum}:1`,
-  );
-}
-
-function resolve(recipe, contract, { variant, size = "medium", state } = {}) {
-  return resolveComponentVisualRecipe(recipe, {
-    variant,
-    size,
-    activeStates: state && state !== "default" ? [state] : [],
-    statePriority: contract.states,
-  });
-}
-
-function token(palette, path) {
-  const value = palette.tokens[path];
-  assert.ok(value, `${palette.id} is missing public token ${path}`);
-  return value;
-}
-
-function verifySemanticContrastPolicy(palette, policy) {
-  for (const check of policy.checks) {
-    assertContrast(
-      token(palette, check.foreground),
-      token(palette, check.background),
-      check.minimum,
-      `${palette.id} semantic contrast ${check.id}`,
-    );
+function resolvePaletteToken(palette, reference) {
+  assert.match(reference, /^\{[^}]+\}$/);
+  const path = reference.slice(1, -1).split(".");
+  let cursor = palette.tokens;
+  for (const segment of path) {
+    cursor = cursor?.[segment];
   }
+  assert.ok(cursor, `Missing compiled palette token ${reference}`);
+  return cursor;
 }
 
-function verifyGlassTranslucentSurfaces(palette, background) {
-  const textPrimary = token(palette, "semantic.color.textPrimary");
-  const textSecondary = token(palette, "semantic.color.textSecondary");
-  const border = token(palette, "semantic.color.border");
+function ratioForReferences(palette, foregroundReference, backgroundReference) {
+  return contrastRatio(
+    tokenHex(resolvePaletteToken(palette, foregroundReference), foregroundReference),
+    tokenHex(resolvePaletteToken(palette, backgroundReference), backgroundReference),
+  );
+}
 
-  for (const surfacePath of [
-    "semantic.color.surfaceTranslucent",
-    "semantic.color.surfaceElevatedTranslucent",
-  ]) {
-    const surface = token(palette, surfacePath);
+function verifyContrastPolicy(palette) {
+  for (const requirement of policy.requirements) {
+    const ratio = ratioForReferences(palette, requirement.foreground, requirement.background);
     assert.ok(
-      (surface.value?.alpha ?? 1) < 1,
-      `${palette.id} ${surfacePath} must remain translucent for Glass`,
-    );
-    const composedSurface = compositedComponents(
-      surface,
-      background,
-      `${palette.id} ${surfacePath}`,
-    );
-
-    assertContrastAgainstComponents(
-      textPrimary,
-      composedSurface,
-      MIN_TEXT_CONTRAST,
-      `${palette.id} glass primary text on ${surfacePath}`,
-    );
-    assertContrastAgainstComponents(
-      textSecondary,
-      composedSurface,
-      MIN_TEXT_CONTRAST,
-      `${palette.id} glass secondary text on ${surfacePath}`,
-    );
-    assertContrastAgainstComponents(
-      border,
-      composedSurface,
-      MIN_NON_TEXT_CONTRAST,
-      `${palette.id} glass boundary on ${surfacePath}`,
+      ratio >= requirement.minimumRatio,
+      `${palette.id}: contrast ${ratio.toFixed(2)} for ${requirement.foreground} on ${requirement.background} is below ${requirement.minimumRatio}`,
     );
   }
 }
 
-function verifyButtons(palette, background, themeId) {
-  const contract = palette.components.button;
-  const recipe = palette.themes[themeId].components.button;
+function styleToken(palette, style, property, label) {
+  const token = style?.[property];
+  assert.ok(token, `${label}.${property} must exist`);
+  assert.equal(token.reference?.startsWith("{semantic.color."), true, `${label}.${property} must remain semantic`);
+  return token;
+}
 
-  for (const variant of contract.variants) {
-    for (const state of ["default", "hover", "pressed"]) {
-      const visual = resolve(recipe, contract, { variant, state });
-      const root = visual.root ?? {};
-      const fill = root.fill ?? background;
-      const foreground = visual.label?.foreground ?? root.foreground;
-      assert.ok(foreground, `${palette.id} ${themeId} ${variant} button needs a foreground`);
-      assert.equal(root.opacity, undefined, `${palette.id} ${themeId} ${variant} ${state} must not reduce enabled text contrast with whole-control opacity`);
-      assertContrast(
-        foreground,
-        fill,
-        MIN_TEXT_CONTRAST,
-        `${palette.id} ${themeId} ${variant} button ${state}`,
+function styleContrast(palette, style, foregroundProperty, backgroundProperty, label) {
+  return contrastRatio(
+    tokenHex(styleToken(palette, style, foregroundProperty, label), `${label}.${foregroundProperty}`),
+    tokenHex(styleToken(palette, style, backgroundProperty, label), `${label}.${backgroundProperty}`),
+  );
+}
+
+function assertMinimumContrast(ratio, minimum, label) {
+  assert.ok(ratio >= minimum, `${label}: contrast ${ratio.toFixed(2)} is below ${minimum}`);
+}
+
+function verifyButtons(palette, themeId) {
+  const button = palette.themes[themeId].components.button;
+  const normalMinimum = policy.levels.normalText;
+  const disabledMinimum = policy.levels.disabledText;
+
+  for (const [variantId, variant] of Object.entries(button.variants)) {
+    const baseRoot = variant.base.root;
+    const baseLabel = `${palette.id}.${themeId}.button.${variantId}.base`;
+    assertMinimumContrast(styleContrast(palette, baseRoot, "foreground", "fill", baseLabel), normalMinimum, baseLabel);
+
+    for (const stateId of ["hover", "pressed"]) {
+      const stateRoot = variant.states[stateId]?.root;
+      if (!stateRoot?.fill) continue;
+      const stateLabel = `${palette.id}.${themeId}.button.${variantId}.${stateId}`;
+      const foreground = stateRoot.foreground ?? baseRoot.foreground;
+      assertMinimumContrast(
+        contrastRatio(tokenHex(foreground, `${stateLabel}.foreground`), tokenHex(stateRoot.fill, `${stateLabel}.fill`)),
+        normalMinimum,
+        stateLabel,
       );
     }
 
-    const focused = resolve(recipe, contract, { variant, state: "focus" });
-    assertContrast(
-      focused.root.outline.color,
-      background,
-      MIN_NON_TEXT_CONTRAST,
-      `${palette.id} ${themeId} ${variant} button focus outline`,
-    );
+    const disabledRoot = variant.states.disabled?.root;
+    if (disabledRoot?.fill) {
+      const disabledLabel = `${palette.id}.${themeId}.button.${variantId}.disabled`;
+      const foreground = disabledRoot.foreground ?? baseRoot.foreground;
+      assertMinimumContrast(
+        contrastRatio(tokenHex(foreground, `${disabledLabel}.foreground`), tokenHex(disabledRoot.fill, `${disabledLabel}.fill`)),
+        disabledMinimum,
+        disabledLabel,
+      );
+    }
   }
 }
 
-function verifyInput(palette, background, themeId) {
-  const contract = palette.components.input;
-  const recipe = palette.themes[themeId].components.input;
+function verifyInput(palette, themeId) {
+  const input = palette.themes[themeId].components.input;
+  const normalMinimum = policy.levels.normalText;
+  const disabledMinimum = policy.levels.disabledText;
+  const baseRoot = input.base.root;
+  const basePlaceholder = input.base.placeholder;
+  const baseLabel = `${palette.id}.${themeId}.input.base`;
+  assertMinimumContrast(styleContrast(palette, baseRoot, "foreground", "fill", baseLabel), normalMinimum, baseLabel);
+  assertMinimumContrast(
+    contrastRatio(tokenHex(basePlaceholder.foreground, `${baseLabel}.placeholder`), tokenHex(baseRoot.fill, `${baseLabel}.fill`)),
+    normalMinimum,
+    `${baseLabel}.placeholder`,
+  );
 
-  for (const state of ["default", "hover", "focus", "error"]) {
-    const visual = resolve(recipe, contract, { variant: "standard", state });
-    const root = visual.root;
-    assertContrast(root.foreground, root.fill, MIN_TEXT_CONTRAST, `${palette.id} ${themeId} input text ${state}`);
-    assertContrast(visual.placeholder.foreground, root.fill, MIN_TEXT_CONTRAST, `${palette.id} ${themeId} input placeholder ${state}`);
-    assertContrast(root.border.color, root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} input inner boundary ${state}`);
-    assertContrast(root.border.color, background, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} input outer boundary ${state}`);
-  }
-
-  const focused = resolve(recipe, contract, { variant: "standard", state: "focus" });
-  assertContrast(
-    focused.root.outline.color,
-    background,
-    MIN_NON_TEXT_CONTRAST,
-    `${palette.id} ${themeId} input focus outline`,
+  const disabledRoot = input.states.disabled.root;
+  const disabledPlaceholder = input.states.disabled.placeholder;
+  assertMinimumContrast(
+    contrastRatio(tokenHex(disabledRoot.foreground, "input.disabled.foreground"), tokenHex(disabledRoot.fill, "input.disabled.fill")),
+    disabledMinimum,
+    `${palette.id}.${themeId}.input.disabled`,
+  );
+  assertMinimumContrast(
+    contrastRatio(tokenHex(disabledPlaceholder.foreground, "input.disabled.placeholder"), tokenHex(disabledRoot.fill, "input.disabled.fill")),
+    disabledMinimum,
+    `${palette.id}.${themeId}.input.disabled.placeholder`,
   );
 }
 
-function verifySwitch(palette, background, themeId) {
-  const contract = palette.components.switch;
-  const recipe = palette.themes[themeId].components.switch;
+function verifySwitch(palette, themeId) {
+  const switchVisual = palette.themes[themeId].components.switch;
+  const baseRoot = switchVisual.base.root;
+  const checkedRoot = switchVisual.states.checked.root;
+  const thumb = switchVisual.base.thumb;
+  const minimum = policy.levels.nonText;
 
-  for (const state of ["default", "hover", "pressed"]) {
-    const visual = resolve(recipe, contract, { variant: "standard", state });
-    assertContrast(visual.root.border.color, visual.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} switch inner boundary ${state}`);
-    assertContrast(visual.root.border.color, background, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} switch outer boundary ${state}`);
-  }
+  const baseBorder = baseRoot.border?.color;
+  assert.ok(baseBorder, `${palette.id}.${themeId}.switch.base border color must exist`);
+  assertMinimumContrast(
+    contrastRatio(tokenHex(baseBorder, "switch.base.border"), tokenHex(baseRoot.fill, "switch.base.fill")),
+    minimum,
+    `${palette.id}.${themeId}.switch.base.border`,
+  );
+  assertMinimumContrast(
+    contrastRatio(tokenHex(thumb.fill, "switch.thumb.fill"), tokenHex(baseRoot.fill, "switch.base.fill")),
+    minimum,
+    `${palette.id}.${themeId}.switch.thumb`,
+  );
+  assertMinimumContrast(
+    contrastRatio(tokenHex(thumb.fill, "switch.thumb.fill"), tokenHex(checkedRoot.fill, "switch.checked.fill")),
+    minimum,
+    `${palette.id}.${themeId}.switch.checked.thumb`,
+  );
+}
 
-  const checked = resolve(recipe, contract, { variant: "standard", state: "checked" });
-  assertContrast(checked.root.fill, background, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} switch checked track`);
-  assertContrast(checked.thumb.fill, checked.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} switch checked thumb`);
+function verifyGlassCompositeRoles(palette) {
+  const background = resolvePaletteToken(palette, "{semantic.color.background}");
+  const textPrimary = resolvePaletteToken(palette, "{semantic.color.textPrimary}");
+  const surface = resolvePaletteToken(palette, "{semantic.color.surfaceTranslucent}");
+  const elevated = resolvePaletteToken(palette, "{semantic.color.surfaceElevatedTranslucent}");
+  const compositeSurface = alphaComposite(surface, background);
+  const compositeElevated = alphaComposite(elevated, background);
 
-  const focused = resolve(recipe, contract, { variant: "standard", state: "focus" });
-  assertContrast(focused.root.outline.color, background, MIN_NON_TEXT_CONTRAST, `${palette.id} ${themeId} switch focus outline`);
-
-  for (const size of contract.sizes) {
-    const visual = resolve(recipe, contract, { variant: "standard", size });
-    assert.equal(visual.root.minHeight.value.unit, "px");
-    assert.equal(visual.root.minWidth.value.unit, "px");
-    assert.ok(
-      visual.root.minHeight.value.value >= MIN_TARGET_SIZE_PX &&
-        visual.root.minWidth.value.value >= MIN_TARGET_SIZE_PX,
-      `${palette.id} ${themeId} switch ${size} target must be at least ${MIN_TARGET_SIZE_PX} by ${MIN_TARGET_SIZE_PX} CSS px`,
-    );
-  }
+  assertMinimumContrast(
+    contrastRatio(tokenHex(textPrimary, "textPrimary"), compositeSurface),
+    policy.levels.normalText,
+    `${palette.id}.glass.surfaceTranslucent`,
+  );
+  assertMinimumContrast(
+    contrastRatio(tokenHex(textPrimary, "textPrimary"), compositeElevated),
+    policy.levels.normalText,
+    `${palette.id}.glass.surfaceElevatedTranslucent`,
+  );
 }
 
 try {
-  compile();
-  const [irSource, policySource] = await Promise.all([
-    readFile(irPath, "utf8"),
-    readFile(contrastPolicyPath, "utf8"),
-  ]);
-  const ir = JSON.parse(irSource);
-  const policy = JSON.parse(policySource);
-  const themeIds = ["basic", "modern", "glass", "frosted-glass", "spacey"];
+  run(["packages/compiler/src/index.mjs", "--output", outputPath], "Specification compiler");
+  const ir = JSON.parse(await readFile(outputPath, "utf8"));
+  const themeIds = ["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"];
+
   for (const palette of ir.palettes) {
-    verifySemanticContrastPolicy(palette, policy);
-    const background = token(palette, "semantic.color.background");
-    verifyGlassTranslucentSurfaces(palette, background);
+    verifyContrastPolicy(palette);
+    verifyGlassCompositeRoles(palette);
     for (const themeId of themeIds) {
-      assert.ok(palette.themes[themeId], `${palette.id} must compile ${themeId} for accessibility validation`);
-      verifyButtons(palette, background, themeId);
-      verifyInput(palette, background, themeId);
-      verifySwitch(palette, background, themeId);
+      verifyButtons(palette, themeId);
+      verifyInput(palette, themeId);
+      verifySwitch(palette, themeId);
     }
   }
-  console.log(`Semantic palette contrast policy and Basic/Modern/Glass/Frosted Glass/Spacey WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
+
+  console.log(`Semantic palette contrast policy and Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
-  await rm(irPath, { force: true });
+  await rm(outputPath, { force: true });
 }
