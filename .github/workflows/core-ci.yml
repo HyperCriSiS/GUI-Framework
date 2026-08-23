@@ -122,6 +122,9 @@ jobs:
       - name: Test native Web Basic Switch
         run: npm run test:web-switch
 
+      - name: Test native Web Basic Checkbox
+        run: npm run test:web-checkbox
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
