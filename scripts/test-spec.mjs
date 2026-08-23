@@ -38,8 +38,8 @@ try {
     "The reference palette variants must remain registered",
   );
 
-  const expectedContractComponentIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
-  const expectedReferenceVisualIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
+  const expectedContractComponentIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "switch"];
+  const expectedReferenceVisualIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "switch"];
   for (const palette of ir.palettes) {
     assert.deepEqual(
       Object.keys(palette.components),
