@@ -125,6 +125,9 @@ jobs:
       - name: Test native Web Basic Checkbox
         run: npm run test:web-checkbox
 
+      - name: Test native Web Basic Radio
+        run: npm run test:web-radio
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
@@ -178,6 +181,9 @@ jobs:
 
       - name: Test native Compose Basic Checkbox
         run: npm run test:kotlin-checkbox
+
+      - name: Test native Compose Basic Radio
+        run: npm run test:kotlin-radio
 
       - name: Test native Compose Basic Panel
         run: npm run test:kotlin-panel
