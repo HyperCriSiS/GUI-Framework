@@ -14,11 +14,13 @@ const definitions = await Promise.all(
 );
 const resolvedThemes = resolveThemeDefinitions(definitions);
 const glassEntry = definitions.find((theme) => theme.id === "glass");
+const modern = resolvedThemes.find((theme) => theme.id === "modern");
 const glass = resolvedThemes.find((theme) => theme.id === "glass");
 const frostedEntry = definitions.find((theme) => theme.id === "frosted-glass");
 const frosted = resolvedThemes.find((theme) => theme.id === "frosted-glass");
 
 assert.ok(glassEntry, "The Glass theme must remain registered");
+assert.ok(modern, "The Modern theme must resolve before validating Glass inheritance");
 assert.ok(glass, "The Glass theme must resolve");
 assert.equal(glassEntry.definition.theme, "glass");
 assert.equal(glassEntry.definition.extends, "modern", "Glass must build on the validated Modern contract");
@@ -43,11 +45,11 @@ for (const componentId of ["panel", "dialog"]) {
   );
 }
 
-const componentIds = manifest.components.map((entry) => entry.id).sort();
+const visualComponentIds = Object.keys(modern.components).sort();
 assert.deepEqual(
   Object.keys(glass.components).sort(),
-  componentIds,
-  "Glass must retain every registered reference component through inheritance",
+  visualComponentIds,
+  "Glass must retain every Modern visual component through inheritance without claiming newly registered contracts before their visuals exist",
 );
 
 assert.deepEqual(
