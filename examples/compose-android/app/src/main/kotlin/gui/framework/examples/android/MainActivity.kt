@@ -7,21 +7,26 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import gui.framework.compose.GuiButton
+import gui.framework.compose.GuiCheckbox
 import gui.framework.compose.GuiDialog
 import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTheme
 import gui.framework.generated.internal.GuiButtonSize
+import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiPanelSize
@@ -52,19 +57,27 @@ class MainActivity : ComponentActivity() {
                 theme = referenceTheme,
                 paletteId = "reference-dark",
             ) {
-                AndroidReferenceApp(density = referenceDensity)
+                AndroidReferenceApp(
+                    density = referenceDensity,
+                    includeExtendedComponents = referenceTheme == GuiThemeId.BASIC,
+                )
             }
         }
     }
 }
 
 @Composable
-fun AndroidReferenceApp(density: ReferenceDensity = ReferenceDensity.Standard) {
+fun AndroidReferenceApp(
+    density: ReferenceDensity = ReferenceDensity.Standard,
+    includeExtendedComponents: Boolean = true,
+) {
     var value by remember { mutableStateOf("Android") }
     var enabled by remember { mutableStateOf(true) }
+    var diagnosticsEnabled by remember { mutableStateOf(false) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
+    val checkboxSize = if (density == ReferenceDensity.Compact) GuiCheckboxSize.SMALL else GuiCheckboxSize.MEDIUM
     val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
@@ -92,6 +105,20 @@ fun AndroidReferenceApp(density: ReferenceDensity = ReferenceDensity.Standard) {
                 accessibilityLabel = "Reference switch",
                 size = switchSize,
             )
+            if (includeExtendedComponents) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GuiCheckbox(
+                        checked = diagnosticsEnabled,
+                        onCheckedChange = { diagnosticsEnabled = it },
+                        accessibilityLabel = "Reference checkbox",
+                        size = checkboxSize,
+                    )
+                    BasicText("Enable diagnostics")
+                }
+            }
             GuiButton(
                 label = "Open dialog",
                 onActivate = { dialogOpen = true },
