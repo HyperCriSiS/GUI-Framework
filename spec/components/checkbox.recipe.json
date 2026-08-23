@@ -1,0 +1,90 @@
+{
+  "specVersion": "0.1.0",
+  "component": "checkbox",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "indicator",
+      "required": true
+    }
+  ],
+  "content": [],
+  "properties": [
+    {
+      "id": "checked",
+      "type": "boolean",
+      "required": true,
+      "state": "checked"
+    },
+    {
+      "id": "indeterminate",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "indeterminate"
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    }
+  ],
+  "events": [
+    {
+      "id": "checkedChange",
+      "payload": "boolean"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed",
+    "checked",
+    "indeterminate",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "checkbox",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "box": "{semantic.color.surfaceElevated}",
+    "indicator": "{semantic.color.onAccent}",
+    "checked": "{semantic.color.accent}",
+    "indeterminate": "{semantic.color.accent}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

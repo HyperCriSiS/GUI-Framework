@@ -84,7 +84,7 @@
           "type": { "enum": ["boolean", "string", "number"] },
           "required": { "type": "boolean" },
           "default": {},
-          "state": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "disabled", "loading", "error", "success", "expanded"] }
+          "state": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "indeterminate", "disabled", "loading", "error", "success", "expanded"] }
         }
       }
     },
@@ -106,7 +106,7 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "disabled", "loading", "error", "success", "expanded"] },
+      "items": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "indeterminate", "disabled", "loading", "error", "success", "expanded"] },
       "contains": { "const": "default" }
     },
     "semantics": {

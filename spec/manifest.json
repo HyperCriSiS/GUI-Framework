@@ -89,6 +89,10 @@
       "source": "components/button.recipe.json"
     },
     {
+      "id": "checkbox",
+      "source": "components/checkbox.recipe.json"
+    },
+    {
       "id": "input",
       "source": "components/input.recipe.json"
     },

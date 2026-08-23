@@ -68,6 +68,54 @@
           }
         }
       }
+    },
+    "checkbox": {
+      "box": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 16,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 20,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "indicator": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 10,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 14,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 18,
+              "unit": "px"
+            }
+          }
+        }
+      }
     }
   }
 }
