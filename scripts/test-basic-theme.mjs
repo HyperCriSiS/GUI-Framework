@@ -11,7 +11,7 @@ assert.ok(basicEntry, "The Basic theme must remain registered");
 const basic = JSON.parse(await readFile(join("spec", basicEntry.source), "utf8"));
 assert.equal(basic.theme, "basic");
 
-const referenceComponentIds = ["button", "dialog", "input", "panel", "switch"];
+const referenceComponentIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
 const componentEntries = manifest.components
   .filter((entry) => referenceComponentIds.includes(entry.id))
   .sort((left, right) => left.id.localeCompare(right.id));
@@ -19,7 +19,7 @@ const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(
   visualComponentIds,
   referenceComponentIds,
-  "Basic Phase 5 quality gate must remain scoped to the completed reference visual set",
+  "Basic quality gate must cover the completed reference visual set including Phase 6 additions",
 );
 
 const functionalStateIds = new Set(["hover", "focus", "pressed", "checked", "loading", "error"]);
