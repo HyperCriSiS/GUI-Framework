@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { createGuiButton } from "../../packages/adapter-web/src/button.mjs";
+import { createGuiCheckbox } from "../../packages/adapter-web/src/checkbox.mjs";
 import { createGuiInput } from "../../packages/adapter-web/src/input.mjs";
 import { createGuiSwitch } from "../../packages/adapter-web/src/switch.mjs";
 import { createGuiPanel } from "../../packages/adapter-web/src/panel.mjs";
@@ -55,6 +56,13 @@ export function mountReferenceApp(document, root, options = {}) {
   const density = options.density ?? "standard";
   if (!densities.has(density)) throw new Error(`Unknown Web reference density: ${density}`);
   const compact = density === "compact";
+  const extendedComponent = options.extendedComponent ?? null;
+  if (extendedComponent !== null && extendedComponent !== "checkbox") {
+    throw new Error(`Unknown Web reference extended component: ${extendedComponent}`);
+  }
+  if (extendedComponent === "checkbox" && theme !== "basic") {
+    throw new Error("Web reference Checkbox visual is currently available only for Basic");
+  }
   const capabilityIr = options.capabilityIr ?? null;
   const availableCapabilities = options.availableCapabilities ??
     (capabilityIr ? detectWebCapabilities() : null);
@@ -86,6 +94,8 @@ export function mountReferenceApp(document, root, options = {}) {
   };
   if (typeof state.name !== "string") throw new TypeError("Reference app name must be a string");
   if (typeof state.notifications !== "boolean") throw new TypeError("Reference app notifications must be a boolean");
+  let diagnosticsEnabled = options.diagnostics ?? false;
+  if (typeof diagnosticsEnabled !== "boolean") throw new TypeError("Reference app diagnostics must be a boolean");
 
   root.replaceChildren();
   root.className = "gui-reference-host";
@@ -184,6 +194,28 @@ export function mountReferenceApp(document, root, options = {}) {
   });
   notificationSetting.append(notificationCopy, notificationSwitch.element);
 
+  let diagnosticsCheckbox = null;
+  let diagnosticsSetting = null;
+  if (extendedComponent === "checkbox") {
+    diagnosticsSetting = createElement(document, "div", "gui-reference__setting");
+    const diagnosticsCopy = createElement(document, "div", "gui-reference__setting-copy");
+    diagnosticsCopy.append(
+      createElement(document, "div", "gui-reference__setting-title", "Diagnostic logging"),
+      createElement(document, "p", "", "Exercise the Basic Checkbox adapter without changing completed theme baselines."),
+    );
+    diagnosticsCheckbox = createGuiCheckbox(document, {
+      checked: diagnosticsEnabled,
+      accessibilityLabel: "Diagnostic logging",
+      size: compact ? "small" : "medium",
+      onCheckedChange(nextChecked) {
+        diagnosticsEnabled = nextChecked;
+        diagnosticsCheckbox.update({ checked: nextChecked });
+        status.textContent = `Diagnostic logging ${nextChecked ? "enabled" : "disabled"}.`;
+      },
+    });
+    diagnosticsSetting.append(diagnosticsCopy, diagnosticsCheckbox.element);
+  }
+
   const actions = createElement(document, "div", "gui-reference__actions");
 
   const saveButton = createGuiButton(document, {
@@ -220,7 +252,9 @@ export function mountReferenceApp(document, root, options = {}) {
   });
 
   actions.append(saveButton.element, paletteButton.element, openDialogButton.element);
-  settingsPanel.element.append(settingsTitle, nameField, notificationSetting, actions, status);
+  settingsPanel.element.append(settingsTitle, nameField, notificationSetting);
+  if (diagnosticsSetting) settingsPanel.element.append(diagnosticsSetting);
+  settingsPanel.element.append(actions, status);
   summaryPanel.element.append(summaryTitle, summaryList);
 
   const detailPanel = createGuiPanel(document, { accessibilityLabel: "Integration scope", size: compact ? "small" : "medium" });
@@ -230,7 +264,9 @@ export function mountReferenceApp(document, root, options = {}) {
       document,
       "p",
       "gui-reference__secondary",
-      "This surface uses the real Button, Input, Switch, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS.",
+      extendedComponent === "checkbox"
+        ? "This surface uses the real Button, Input, Switch, Checkbox, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS."
+        : "This surface uses the real Button, Input, Switch, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS.",
     ),
   );
 
@@ -288,6 +324,7 @@ export function mountReferenceApp(document, root, options = {}) {
     dialog,
     closeDialogButton,
   };
+  if (diagnosticsCheckbox) components.diagnosticsCheckbox = diagnosticsCheckbox;
   capabilityTargets = Object.values(components);
   applyCapabilityFallbacks();
 
@@ -297,6 +334,7 @@ export function mountReferenceApp(document, root, options = {}) {
     hostContext,
     density,
     theme,
+    extendedComponent,
     components,
     getState() {
       return { ...state };
@@ -335,6 +373,7 @@ if (typeof document !== "undefined") {
           hostContext: query.get("context") ?? "page",
           density: query.get("density") ?? "standard",
           theme: query.get("theme") ?? "basic",
+          extendedComponent: query.get("extended"),
           capabilityIr,
           availableCapabilities,
         });
