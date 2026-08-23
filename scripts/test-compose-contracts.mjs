@@ -36,6 +36,17 @@ try {
   assert.match(source, /GuiContentSlot\("label", "text", true\)/);
   assert.match(source, /GuiComponentSemantics\("button", true\)/);
 
+  assert.match(source, /enum class GuiCheckboxVariant/);
+  assert.match(source, /enum class GuiCheckboxSize/);
+  assert.match(source, /enum class GuiCheckboxState/);
+  assert.match(source, /INDETERMINATE\("indeterminate"\)/);
+  assert.match(source, /data class GuiCheckboxProperties\(/);
+  assert.match(source, /val checked: Boolean/);
+  assert.match(source, /val indeterminate: Boolean = false/);
+  assert.match(source, /val accessibilityLabel: String/);
+  assert.match(source, /GuiEventContract\("checkedChange", "boolean"\)/);
+  assert.match(source, /GuiComponentSemantics\("checkbox", true\)/);
+
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
   assert.match(source, /enum class GuiDialogState/);
