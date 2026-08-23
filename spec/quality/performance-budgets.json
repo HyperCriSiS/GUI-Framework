@@ -2,7 +2,7 @@
   "version": 1,
   "themes": {
     "basic": {
-      "maxResolvedVisualLeaves": 180,
+      "maxResolvedVisualLeaves": 220,
       "maxComponentVisualLeaves": 64,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
