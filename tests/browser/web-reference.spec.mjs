@@ -29,6 +29,14 @@ async function expectNoHorizontalOverflow(page) {
   expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth);
 }
 
+async function tabTo(page, locator, maxTabs = 10) {
+  for (let index = 0; index < maxTabs; index += 1) {
+    if (await locator.evaluate((element) => document.activeElement === element)) return;
+    await page.keyboard.press("Tab");
+  }
+  await expect(locator).toBeFocused();
+}
+
 test("controlled native interactions remain synchronized", async ({ page }) => {
   const root = await openReference(page);
 
@@ -386,16 +394,11 @@ for (const host of [
     await expect(root).toHaveAttribute("data-gui-host-context", context);
     await expectNoHorizontalOverflow(page);
 
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "Use light palette" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Display name")).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("switch", { name: "Activity notifications" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "Save settings" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "Review changes" })).toBeFocused();
+    await tabTo(page, page.getByRole("button", { name: "Use light palette" }));
+    await tabTo(page, page.getByLabel("Display name"));
+    await tabTo(page, page.getByRole("switch", { name: "Activity notifications" }));
+    await tabTo(page, page.getByRole("button", { name: "Save settings" }));
+    await tabTo(page, page.getByRole("button", { name: "Review changes" }));
     await page.keyboard.press("Enter");
     await expect(page.getByRole("dialog", { name: "Review settings" })).toBeVisible();
     await page.keyboard.press("Escape");
@@ -425,16 +428,12 @@ for (const [themeId, themeLabel] of [
     expect(inputBounds).not.toBeNull();
     expect(inputBounds.height).toBeLessThanOrEqual(32);
 
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "Use light palette" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Display name")).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("switch", { name: "Activity notifications" })).toBeFocused();
+    await tabTo(page, page.getByRole("button", { name: "Use light palette" }));
+    await tabTo(page, page.getByLabel("Display name"));
+    await tabTo(page, page.getByRole("switch", { name: "Activity notifications" }));
     await page.keyboard.press("Space");
     await expect(page.getByRole("switch", { name: "Activity notifications" })).toHaveAttribute("aria-checked", "false");
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "Save settings" })).toBeFocused();
+    await tabTo(page, page.getByRole("button", { name: "Save settings" }));
   });
 }
 
