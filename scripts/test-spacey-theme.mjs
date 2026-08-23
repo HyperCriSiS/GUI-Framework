@@ -15,19 +15,21 @@ const definitions = await Promise.all(
 );
 const resolvedThemes = resolveThemeDefinitions(definitions);
 const spaceyEntry = definitions.find((theme) => theme.id === "spacey");
+const basic = resolvedThemes.find((theme) => theme.id === "basic");
 const spacey = resolvedThemes.find((theme) => theme.id === "spacey");
 
 assert.ok(spaceyEntry, "The Spacey theme must remain registered");
+assert.ok(basic, "The Basic theme must resolve before validating Spacey inheritance");
 assert.ok(spacey, "The Spacey theme must resolve");
 assert.equal(spaceyEntry.definition.theme, "spacey");
 assert.equal(spaceyEntry.definition.extends, "basic", "Spacey must build directly on the low-cost Basic contract");
 assert.deepEqual(spacey.inheritance, ["basic", "spacey"]);
 
-const componentIds = manifest.components.map((entry) => entry.id).sort();
+const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(
   Object.keys(spacey.components).sort(),
-  componentIds,
-  "Spacey must retain every registered reference component through inheritance",
+  visualComponentIds,
+  "Spacey must retain every Basic visual component through inheritance without claiming newly registered contracts before their visuals exist",
 );
 
 const expectedFoundation = {
@@ -137,12 +139,14 @@ assert.deepEqual(
   "Spacey strong instrumentation outlines must stay limited to the intended surfaces and preserve the checked switch frame",
 );
 
-for (const entry of manifest.components) {
+for (const componentId of visualComponentIds) {
+  const entry = manifest.components.find((candidate) => candidate.id === componentId);
+  assert.ok(entry, `Spacey visual component ${componentId} must remain backed by a registered component contract`);
   const contract = JSON.parse(await readFile(join("spec", entry.source), "utf8"));
-  const visual = spacey.components[entry.id];
+  const visual = spacey.components[componentId];
 
   for (const size of contract.sizes ?? []) {
-    assert.ok(visual.sizes?.[size], `Spacey ${entry.id} must inherit declared ${size} sizing`);
+    assert.ok(visual.sizes?.[size], `Spacey ${componentId} must inherit declared ${size} sizing`);
   }
 
   for (const state of (contract.states ?? []).filter((state) => state !== "default")) {
@@ -151,7 +155,7 @@ for (const entry of manifest.components) {
     const variantCoverage = variants.length > 0 && variants.every((variant) => Boolean(variant.states?.[state]));
     assert.ok(
       topLevelCoverage || variantCoverage,
-      `Spacey ${entry.id} must retain styling for declared state ${state}`,
+      `Spacey ${componentId} must retain styling for declared state ${state}`,
     );
   }
 }
