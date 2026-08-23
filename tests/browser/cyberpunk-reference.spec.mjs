@@ -103,6 +103,10 @@ test("Cyberpunk renders sharp palette-driven signal frames with bounded native e
 
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  await expect.poll(
+    () => page.getByLabel("Display name").evaluate((element) => getComputedStyle(element).borderColor),
+    { message: "Cyberpunk input border must settle on the light-palette semantic accent" },
+  ).toBe("rgb(104, 77, 226)");
   const lightStyles = await page.evaluate(() => {
     const input = document.querySelector(".gui-input");
     const panel = document.querySelector(".gui-panel");
