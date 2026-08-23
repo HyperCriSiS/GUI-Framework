@@ -37,12 +37,13 @@ try {
     "The reference palette variants must remain registered",
   );
 
-  const expectedComponentIds = ["button", "dialog", "input", "panel", "switch"];
+  const expectedContractComponentIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
+  const expectedReferenceVisualIds = ["button", "dialog", "input", "panel", "switch"];
   for (const palette of ir.palettes) {
     assert.deepEqual(
       Object.keys(palette.components),
-      expectedComponentIds,
-      `Palette ${palette.id} must compile the complete reference component registry`,
+      expectedContractComponentIds,
+      `Palette ${palette.id} must compile the complete component contract registry`,
     );
   }
 
@@ -68,8 +69,8 @@ try {
   for (const components of [darkBasic, lightBasic, darkModern, lightModern, darkGlass, lightGlass, darkFrosted, lightFrosted, darkSpacey, lightSpacey, darkCyberpunk, lightCyberpunk]) {
     assert.deepEqual(
       Object.keys(components),
-      expectedComponentIds,
-      "Every available theme must resolve the complete reference component set",
+      expectedReferenceVisualIds,
+      "Every available theme must resolve the complete implemented reference visual set",
     );
   }
 
