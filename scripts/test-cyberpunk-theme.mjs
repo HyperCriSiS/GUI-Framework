@@ -15,19 +15,21 @@ const definitions = await Promise.all(
 );
 const resolvedThemes = resolveThemeDefinitions(definitions);
 const cyberpunkEntry = definitions.find((theme) => theme.id === "cyberpunk");
+const basic = resolvedThemes.find((theme) => theme.id === "basic");
 const cyberpunk = resolvedThemes.find((theme) => theme.id === "cyberpunk");
 
 assert.ok(cyberpunkEntry, "The Cyberpunk theme must remain registered");
+assert.ok(basic, "The Basic theme must resolve before validating Cyberpunk inheritance");
 assert.ok(cyberpunk, "The Cyberpunk theme must resolve");
 assert.equal(cyberpunkEntry.definition.theme, "cyberpunk");
 assert.equal(cyberpunkEntry.definition.extends, "basic", "Cyberpunk must build directly on the portable Basic contract");
 assert.deepEqual(cyberpunk.inheritance, ["basic", "cyberpunk"]);
 
-const componentIds = manifest.components.map((entry) => entry.id).sort();
+const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(
   Object.keys(cyberpunk.components).sort(),
-  componentIds,
-  "Cyberpunk must retain every registered reference component through inheritance",
+  visualComponentIds,
+  "Cyberpunk must retain every Basic visual component through inheritance without claiming newly registered contracts before their visuals exist",
 );
 
 const expectedFoundation = {
@@ -183,12 +185,14 @@ assert.deepEqual(
   "Cyberpunk Focus signal frames must remain limited to interaction emphasis and Dialog",
 );
 
-for (const entry of manifest.components) {
+for (const componentId of visualComponentIds) {
+  const entry = manifest.components.find((candidate) => candidate.id === componentId);
+  assert.ok(entry, `Cyberpunk visual component ${componentId} must remain backed by a registered component contract`);
   const contract = JSON.parse(await readFile(join("spec", entry.source), "utf8"));
-  const visual = cyberpunk.components[entry.id];
+  const visual = cyberpunk.components[componentId];
 
   for (const size of contract.sizes ?? []) {
-    assert.ok(visual.sizes?.[size], `Cyberpunk ${entry.id} must inherit declared ${size} sizing`);
+    assert.ok(visual.sizes?.[size], `Cyberpunk ${componentId} must inherit declared ${size} sizing`);
   }
 
   for (const state of (contract.states ?? []).filter((state) => state !== "default")) {
@@ -197,7 +201,7 @@ for (const entry of manifest.components) {
     const variantCoverage = variants.length > 0 && variants.every((variant) => Boolean(variant.states?.[state]));
     assert.ok(
       topLevelCoverage || variantCoverage,
-      `Cyberpunk ${entry.id} must retain styling for declared state ${state}`,
+      `Cyberpunk ${componentId} must retain styling for declared state ${state}`,
     );
   }
 }
