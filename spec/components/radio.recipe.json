@@ -1,0 +1,36 @@
+{
+  "specVersion": "0.1.0",
+  "component": "radio",
+  "anatomy": [
+    { "id": "root", "required": true },
+    { "id": "indicator", "required": true }
+  ],
+  "content": [],
+  "properties": [
+    { "id": "selected", "type": "boolean", "required": true, "state": "selected" },
+    { "id": "accessibilityLabel", "type": "string", "required": true },
+    { "id": "groupName", "type": "string", "required": true },
+    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" }
+  ],
+  "events": [
+    { "id": "selectedChange", "payload": "boolean" }
+  ],
+  "variants": ["standard"],
+  "sizes": ["small", "medium", "large"],
+  "states": ["default", "hover", "focus", "pressed", "selected", "disabled"],
+  "semantics": { "role": "radio", "preferNativePrimitive": true },
+  "tokenBindings": {
+    "control": "{semantic.color.surfaceElevated}",
+    "indicator": "{semantic.color.onAccent}",
+    "selected": "{semantic.color.accent}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": ["advancedBlendModes", "shaderEffects"],
+    "fallbackOrder": ["standard", "minimal"]
+  }
+}
