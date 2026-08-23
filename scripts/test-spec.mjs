@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { analyzeThemeAvailability } from "../packages/compiler/src/theme-availability.mjs";
 
 const first = "build/spec-ir-test-a.json";
 const second = "build/spec-ir-test-b.json";
@@ -74,6 +75,23 @@ try {
     );
   }
 
+  const availability = analyzeThemeAvailability(ir);
+  assert.deepEqual(
+    availability.componentIds,
+    expectedContractComponentIds,
+    "Theme availability must preserve the complete contract registry",
+  );
+  assert.deepEqual(
+    availability.visualComponentIds,
+    expectedReferenceVisualIds,
+    "Theme availability must track the independently implemented visual registry",
+  );
+  assert.deepEqual(
+    availability.availableThemeIds,
+    ["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"],
+    "Pre-registering a future component contract must not disable completed visual themes",
+  );
+
   assert.equal(darkBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
   assert.equal(lightBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
   assert.notDeepEqual(
@@ -120,38 +138,62 @@ try {
       assert.deepEqual(
         frostedBase,
         glassComponent,
-        `Frosted Glass ${componentId} must preserve the complete crisp Glass base`,
+        `Frosted Glass ${componentId} base must remain identical to Glass`,
+      );
+      assert.deepEqual(
+        Object.keys(fallbacks ?? {}),
+        ["high"],
+        `Frosted Glass ${componentId} must expose exactly one high capability fallback`,
       );
       assert.deepEqual(fallbacks.high.requires, ["backdropBlur"]);
-      assert.equal(fallbacks.high.recipe.base.root.backdropBlur.reference, "{effect.blur.frosted}");
-      assert.deepEqual(fallbacks.high.recipe.base.root.backdropBlur.value, { value: 24, unit: "px" });
+      assert.equal(
+        fallbacks.high.recipe.base.root.backdropBlur.reference,
+        "{effect.blur.frosted}",
+        `Frosted Glass ${componentId} high fallback must resolve the neutral frosted blur token`,
+      );
+      assert.equal(fallbacks.high.recipe.base.root.backdropBlur.value.value, 24);
+      assert.equal(fallbacks.high.recipe.base.root.backdropBlur.value.unit, "px");
     }
   }
 
-  for (const [cyberpunk, basic] of [
-    [darkCyberpunk, darkBasic],
-    [lightCyberpunk, lightBasic],
-  ]) {
-    assert.equal(cyberpunk.button.base.root.radius.reference, "{radius.sm}");
-    assert.equal(cyberpunk.input.base.root.border.color.reference, "{semantic.color.accent}");
-    assert.equal(cyberpunk.switch.base.root.border.color.reference, "{semantic.color.accent}");
-    assert.equal(cyberpunk.panel.base.root.shadow.reference, "{elevation.shadow.low}");
-    assert.equal(cyberpunk.dialog.base.root.shadow.reference, "{elevation.shadow.medium}");
-    assert.deepEqual(
-      cyberpunk.button.variants.primary.base.root.fill.value,
-      basic.button.variants.primary.base.root.fill.value,
-      "Cyberpunk must keep Basic semantic fills and derive color from the selected palette",
-    );
-  }
+  assert.equal(darkSpacey.button.base.root.radius.reference, "{radius.pill}");
+  assert.equal(lightSpacey.button.base.root.radius.reference, "{radius.pill}");
+  assert.equal(darkSpacey.panel.base.root.radius.reference, "{radius.sm}");
+  assert.equal(lightSpacey.panel.base.root.radius.reference, "{radius.sm}");
+  assert.equal(darkSpacey.panel.base.root.border.color.reference, "{semantic.color.borderStrong}");
+  assert.equal(lightSpacey.panel.base.root.border.color.reference, "{semantic.color.borderStrong}");
+  assert.equal(darkSpacey.panel.base.root.shadow, undefined);
+  assert.equal(lightSpacey.panel.base.root.shadow, undefined);
   assert.deepEqual(
-    darkCyberpunk.button.base.root.radius.value,
-    lightCyberpunk.button.base.root.radius.value,
+    darkSpacey.panel.base.root.radius.value,
+    lightSpacey.panel.base.root.radius.value,
+    "Spacey geometry must remain palette-neutral",
+  );
+  assert.notDeepEqual(
+    darkSpacey.panel.base.root.border.color.value,
+    lightSpacey.panel.base.root.border.color.value,
+    "Spacey semantic instrumentation borders must follow the active palette",
+  );
+
+  assert.equal(darkCyberpunk.button.base.root.radius.reference, "{radius.sm}");
+  assert.equal(lightCyberpunk.button.base.root.radius.reference, "{radius.sm}");
+  assert.equal(darkCyberpunk.input.base.root.border.color.reference, "{semantic.color.accent}");
+  assert.equal(lightCyberpunk.input.base.root.border.color.reference, "{semantic.color.accent}");
+  assert.equal(darkCyberpunk.panel.base.root.shadow.reference, "{elevation.shadow.low}");
+  assert.equal(lightCyberpunk.panel.base.root.shadow.reference, "{elevation.shadow.low}");
+  assert.equal(darkCyberpunk.dialog.base.root.shadow.reference, "{elevation.shadow.medium}");
+  assert.equal(lightCyberpunk.dialog.base.root.shadow.reference, "{elevation.shadow.medium}");
+  assert.equal(darkCyberpunk.panel.base.root.backdropBlur, undefined);
+  assert.equal(lightCyberpunk.panel.base.root.backdropBlur, undefined);
+  assert.deepEqual(
+    darkCyberpunk.panel.base.root.radius.value,
+    lightCyberpunk.panel.base.root.radius.value,
     "Cyberpunk geometry must remain palette-neutral",
   );
   assert.notDeepEqual(
     darkCyberpunk.input.base.root.border.color.value,
     lightCyberpunk.input.base.root.border.color.value,
-    "Cyberpunk signal frames must resolve through the selected semantic palette",
+    "Cyberpunk semantic signal frames must follow the active palette",
   );
 
   console.log("Compiler determinism, registry, palette/theme resolution, Frosted fallback and Cyberpunk inheritance tests passed.");
