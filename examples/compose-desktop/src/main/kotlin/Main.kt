@@ -4,6 +4,7 @@ package gui.framework.examples.desktop
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -12,17 +13,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import gui.framework.compose.GuiButton
+import gui.framework.compose.GuiCheckbox
 import gui.framework.compose.GuiDialog
 import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTheme
 import gui.framework.generated.internal.GuiButtonSize
+import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiPanelSize
@@ -64,17 +68,25 @@ private fun DesktopReferenceApp(
         theme = theme,
         paletteId = paletteId,
     ) {
-        DesktopReferenceContent(density = density)
+        DesktopReferenceContent(
+            density = density,
+            includeExtendedComponents = theme == GuiThemeId.BASIC,
+        )
     }
 }
 
 @Composable
-private fun DesktopReferenceContent(density: ReferenceDensity) {
+private fun DesktopReferenceContent(
+    density: ReferenceDensity,
+    includeExtendedComponents: Boolean,
+) {
     var name by remember { mutableStateOf("Compose") }
     var enabled by remember { mutableStateOf(true) }
+    var diagnosticsEnabled by remember { mutableStateOf(false) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
+    val checkboxSize = if (density == ReferenceDensity.Compact) GuiCheckboxSize.SMALL else GuiCheckboxSize.MEDIUM
     val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
@@ -106,6 +118,20 @@ private fun DesktopReferenceContent(density: ReferenceDensity) {
                     accessibilityLabel = "Reference switch",
                     size = switchSize,
                 )
+                if (includeExtendedComponents) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        GuiCheckbox(
+                            checked = diagnosticsEnabled,
+                            onCheckedChange = { diagnosticsEnabled = it },
+                            accessibilityLabel = "Reference checkbox",
+                            size = checkboxSize,
+                        )
+                        BasicText("Enable diagnostics")
+                    }
+                }
                 GuiButton(
                     label = "Open dialog",
                     onActivate = { dialogOpen = true },
