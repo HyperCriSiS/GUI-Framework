@@ -39,7 +39,7 @@ try {
   );
 
   const expectedContractComponentIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
-  const expectedReferenceVisualIds = ["button", "dialog", "input", "panel", "switch"];
+  const expectedReferenceVisualIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
   for (const palette of ir.palettes) {
     assert.deepEqual(
       Object.keys(palette.components),
