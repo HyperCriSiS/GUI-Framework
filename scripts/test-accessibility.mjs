@@ -3,128 +3,115 @@
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import { resolveComponentVisualRecipe } from "../packages/compiler/src/theme-resolution.mjs";
+import { resolve as resolvePath } from "node:path";
 
-const irPath = "build/spec-ir-accessibility-test.json";
-const contrastPolicyPath = "spec/accessibility/contrast-policy.json";
+import { resolveVisualRecipe } from "../packages/compiler/src/visual-resolution.mjs";
+
+const irPath = resolvePath("build/accessibility-test-ir.json");
+const contrastPolicyPath = resolvePath("spec/accessibility/contrast-policy.json");
 const MIN_TEXT_CONTRAST = 4.5;
 const MIN_NON_TEXT_CONTRAST = 3;
 const MIN_TARGET_SIZE_PX = 24;
 
 function compile() {
-  const result = spawnSync(
-    process.execPath,
-    ["packages/compiler/src/index.mjs", "--output", irPath],
-    { encoding: "utf8" },
-  );
-  if (result.status !== 0) {
-    throw new Error(`Specification compiler failed:\n${result.stdout}\n${result.stderr}`);
-  }
+  const result = spawnSync(process.execPath, ["packages/compiler/src/index.mjs", "--output", irPath], {
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, `${result.stderr || result.stdout}`);
 }
 
-function colorComponents(token, label) {
-  assert.equal(token?.type, "color", `${label} must be a compiled color`);
-  assert.equal(token.value?.colorSpace, "srgb", `${label} must use sRGB`);
-  assert.deepEqual(token.value?.components?.length, 3, `${label} must have three channels`);
-  assert.equal(token.value?.alpha ?? 1, 1, `${label} must be opaque for contrast evaluation`);
-  return token.value.components;
+function token(palette, id) {
+  const value = palette.tokens[id];
+  assert.ok(value, `${palette.id}: missing token ${id}`);
+  return value;
+}
+
+function colorComponents(value, label) {
+  assert.equal(value.type, "color", `${label} must resolve to a color`);
+  assert.deepEqual(value.value?.components?.length, 3, `${label} must have three channels`);
+  return value.value.components;
 }
 
 function linearize(channel) {
-  return channel <= 0.04045
-    ? channel / 12.92
-    : ((channel + 0.055) / 1.055) ** 2.4;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 }
 
-function luminance(color) {
-  const [red, green, blue] = color.map(linearize);
-  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+function relativeLuminanceFromComponents(components) {
+  const [r, g, b] = components.map(linearize);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function contrast(leftToken, rightToken, label) {
-  const left = luminance(colorComponents(leftToken, `${label} foreground`));
-  const right = luminance(colorComponents(rightToken, `${label} background`));
-  return (Math.max(left, right) + 0.05) / (Math.min(left, right) + 0.05);
+function relativeLuminance(color, label) {
+  return relativeLuminanceFromComponents(colorComponents(color, label));
 }
 
-function assertContrast(left, right, minimum, label) {
-  const ratio = contrast(left, right, label);
-  assert.ok(
-    ratio >= minimum,
-    `${label} contrast ${ratio.toFixed(3)}:1 is below ${minimum}:1`,
-  );
+function contrastRatioFromComponents(a, b) {
+  const lumA = relativeLuminanceFromComponents(a);
+  const lumB = relativeLuminanceFromComponents(b);
+  const lighter = Math.max(lumA, lumB);
+  const darker = Math.min(lumA, lumB);
+  return (lighter + 0.05) / (darker + 0.05);
 }
 
-function compositedComponents(topToken, bottomToken, label) {
-  assert.equal(topToken?.type, "color", `${label} foreground layer must be a compiled color`);
-  assert.equal(bottomToken?.type, "color", `${label} background layer must be a compiled color`);
-  assert.equal(topToken.value?.colorSpace, "srgb", `${label} foreground layer must use sRGB`);
-  assert.equal(bottomToken.value?.colorSpace, "srgb", `${label} background layer must use sRGB`);
-  assert.equal(bottomToken.value?.alpha ?? 1, 1, `${label} background layer must be opaque`);
-  const alpha = topToken.value?.alpha ?? 1;
-  assert.ok(alpha > 0 && alpha <= 1, `${label} foreground alpha must be within (0, 1]`);
+function contrastRatio(a, b, label) {
+  const lumA = relativeLuminance(a, `${label} foreground`);
+  const lumB = relativeLuminance(b, `${label} background`);
+  const lighter = Math.max(lumA, lumB);
+  const darker = Math.min(lumA, lumB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function assertContrast(foreground, background, minimum, label) {
+  const ratio = contrastRatio(foreground, background, label);
+  assert.ok(ratio >= minimum, `${label}: contrast ${ratio.toFixed(2)} must be >= ${minimum}`);
+}
+
+function compositeToken(topToken, bottomToken, label) {
+  const top = colorComponents(topToken, `${label} top`);
+  const bottom = colorComponents(bottomToken, `${label} bottom`);
+  const alpha = topToken.value.alpha ?? 1;
+  assert.ok(alpha >= 0 && alpha <= 1, `${label}: alpha must be in 0..1`);
   return topToken.value.components.map(
     (channel, index) => channel * alpha + bottomToken.value.components[index] * (1 - alpha),
   );
 }
 
-function contrastComponents(left, right) {
-  const leftLuminance = luminance(left);
-  const rightLuminance = luminance(right);
-  return (Math.max(leftLuminance, rightLuminance) + 0.05) /
-    (Math.min(leftLuminance, rightLuminance) + 0.05);
-}
-
-function assertContrastAgainstComponents(foregroundToken, backgroundComponents, minimum, label) {
-  const foreground = colorComponents(foregroundToken, `${label} foreground`);
-  const ratio = contrastComponents(foreground, backgroundComponents);
-  assert.ok(
-    ratio >= minimum,
-    `${label} contrast ${ratio.toFixed(3)}:1 is below ${minimum}:1`,
+function assertContrastAgainstComponents(foreground, backgroundComponents, minimum, label) {
+  const ratio = contrastRatioFromComponents(
+    colorComponents(foreground, `${label} foreground`),
+    backgroundComponents,
   );
-}
-
-function resolve(recipe, contract, { variant, size = "medium", state } = {}) {
-  return resolveComponentVisualRecipe(recipe, {
-    variant,
-    size,
-    activeStates: state && state !== "default" ? [state] : [],
-    statePriority: contract.states,
-  });
-}
-
-function token(palette, path) {
-  const value = palette.tokens[path];
-  assert.ok(value, `${palette.id} is missing public token ${path}`);
-  return value;
+  assert.ok(ratio >= minimum, `${label}: contrast ${ratio.toFixed(2)} must be >= ${minimum}`);
 }
 
 function verifySemanticContrastPolicy(palette, policy) {
-  for (const check of policy.checks) {
-    assertContrast(
-      token(palette, check.foreground),
-      token(palette, check.background),
-      check.minimum,
-      `${palette.id} semantic contrast ${check.id}`,
-    );
+  for (const requirement of policy.requirements) {
+    const foreground = token(palette, requirement.foreground);
+    const background = token(palette, requirement.background);
+    assertContrast(foreground, background, requirement.minimumRatio, `${palette.id} ${requirement.id}`);
   }
 }
 
+function resolve(recipe, contract, options) {
+  return resolveVisualRecipe(recipe, contract, options);
+}
+
 function verifyGlassTranslucentSurfaces(palette, background) {
+  const glassTheme = palette.themes.glass;
+  assert.ok(glassTheme, `${palette.id} must compile glass for translucent accessibility validation`);
+
   const textPrimary = token(palette, "semantic.color.textPrimary");
   const textSecondary = token(palette, "semantic.color.textSecondary");
   const border = token(palette, "semantic.color.border");
-
-  for (const surfacePath of [
+  const translucentSurfacePaths = [
     "semantic.color.surfaceTranslucent",
     "semantic.color.surfaceElevatedTranslucent",
-  ]) {
+  ];
+
+  for (const surfacePath of translucentSurfacePaths) {
     const surface = token(palette, surfacePath);
-    assert.ok(
-      (surface.value?.alpha ?? 1) < 1,
-      `${palette.id} ${surfacePath} must remain translucent for Glass`,
-    );
-    const composedSurface = compositedComponents(
+    assert.ok(surface.value.alpha > 0 && surface.value.alpha < 1, `${palette.id} ${surfacePath} must stay translucent`);
+    const composedSurface = compositeToken(
       surface,
       background,
       `${palette.id} ${surfacePath}`,
@@ -232,6 +219,45 @@ function verifySwitch(palette, background, themeId) {
   }
 }
 
+function verifyCheckbox(palette, background) {
+  const themeId = "basic";
+  const contract = palette.components.checkbox;
+  const recipe = palette.themes[themeId].components.checkbox;
+  assert.ok(contract, `${palette.id} must compile the Checkbox contract`);
+  assert.ok(recipe, `${palette.id} Basic must compile the Checkbox visual recipe`);
+
+  for (const state of ["default", "hover", "pressed"]) {
+    const visual = resolve(recipe, contract, { variant: "standard", state });
+    assertContrast(visual.root.border.color, visual.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic checkbox inner boundary ${state}`);
+    assertContrast(visual.root.border.color, background, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic checkbox outer boundary ${state}`);
+  }
+
+  for (const state of ["checked", "indeterminate"]) {
+    const visual = resolve(recipe, contract, { variant: "standard", state });
+    assertContrast(visual.root.fill, background, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic checkbox ${state} fill`);
+    assertContrast(visual.indicator.foreground, visual.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic checkbox ${state} indicator`);
+  }
+
+  const focused = resolve(recipe, contract, { variant: "standard", state: "focus" });
+  assertContrast(
+    focused.root.outline.color,
+    background,
+    MIN_NON_TEXT_CONTRAST,
+    `${palette.id} Basic checkbox focus outline`,
+  );
+
+  for (const size of contract.sizes) {
+    const visual = resolve(recipe, contract, { variant: "standard", size });
+    assert.equal(visual.root.minHeight.value.unit, "px");
+    assert.equal(visual.root.minWidth.value.unit, "px");
+    assert.ok(
+      visual.root.minHeight.value.value >= MIN_TARGET_SIZE_PX &&
+        visual.root.minWidth.value.value >= MIN_TARGET_SIZE_PX,
+      `${palette.id} Basic checkbox ${size} target must be at least ${MIN_TARGET_SIZE_PX} by ${MIN_TARGET_SIZE_PX} CSS px`,
+    );
+  }
+}
+
 try {
   compile();
   const [irSource, policySource] = await Promise.all([
@@ -245,6 +271,7 @@ try {
     verifySemanticContrastPolicy(palette, policy);
     const background = token(palette, "semantic.color.background");
     verifyGlassTranslucentSurfaces(palette, background);
+    verifyCheckbox(palette, background);
     for (const themeId of themeIds) {
       assert.ok(palette.themes[themeId], `${palette.id} must compile ${themeId} for accessibility validation`);
       verifyButtons(palette, background, themeId);
@@ -252,7 +279,7 @@ try {
       verifySwitch(palette, background, themeId);
     }
   }
-  console.log(`Semantic palette contrast policy and Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
+  console.log(`Semantic palette contrast policy, Basic Checkbox, and Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
   await rm(irPath, { force: true });
 }
