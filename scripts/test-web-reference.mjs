@@ -137,6 +137,24 @@ for (const componentId of [
 compactApp.destroy();
 assert.equal(compactRoot.dataset.guiDensity, undefined);
 
+const checkboxRoot = new FakeElement("main");
+const checkboxApp = mountReferenceApp(fakeDocument, checkboxRoot, { extendedComponent: "checkbox" });
+assert.equal(checkboxApp.extendedComponent, "checkbox");
+assert.equal(checkboxApp.components.diagnosticsCheckbox.element.dataset.guiComponent, "checkbox");
+assert.equal(checkboxApp.components.diagnosticsCheckbox.element.dataset.guiSize, "medium");
+assert.equal(checkboxApp.components.diagnosticsCheckbox.element.getAttribute("aria-checked"), "false");
+checkboxApp.components.diagnosticsCheckbox.element.click();
+assert.equal(checkboxApp.components.diagnosticsCheckbox.element.getAttribute("aria-checked"), "true");
+checkboxApp.destroy();
+
+const compactCheckboxRoot = new FakeElement("main");
+const compactCheckboxApp = mountReferenceApp(fakeDocument, compactCheckboxRoot, {
+  density: "compact",
+  extendedComponent: "checkbox",
+});
+assert.equal(compactCheckboxApp.components.diagnosticsCheckbox.element.dataset.guiSize, "small");
+compactCheckboxApp.destroy();
+
 const extensionRoot = new FakeElement("main");
 const extensionApp = mountReferenceApp(fakeDocument, extensionRoot, { hostContext: "extension-popup" });
 assert.equal(extensionRoot.dataset.guiHostContext, "extension-popup");
@@ -226,5 +244,10 @@ assert.throws(() => mountReferenceApp(fakeDocument, root, { theme: "unknown" }),
 assert.throws(() => mountReferenceApp(fakeDocument, root, { palette: "unknown" }), /Unknown reference palette/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { hostContext: "unknown" }), /Unknown Web reference host context/);
 assert.throws(() => mountReferenceApp(fakeDocument, root, { density: "unknown" }), /Unknown Web reference density/);
+assert.throws(() => mountReferenceApp(fakeDocument, root, { extendedComponent: "unknown" }), /Unknown Web reference extended component/);
+assert.throws(
+  () => mountReferenceApp(fakeDocument, root, { theme: "modern", extendedComponent: "checkbox" }),
+  /Checkbox visual is currently available only for Basic/,
+);
 
 console.log("Functional Web reference application integration tests passed.");
