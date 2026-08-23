@@ -1,24 +1,46 @@
 {
   "component": {
+    "$type": "dimension",
     "switch": {
+      "thumb": {
+        "$type": "dimension",
+        "small": {
+          "$value": {
+            "value": 16,
+            "unit": "px"
+          }
+        },
+        "medium": {
+          "$value": {
+            "value": 20,
+            "unit": "px"
+          }
+        },
+        "large": {
+          "$value": {
+            "value": 24,
+            "unit": "px"
+          }
+        }
+      },
       "track": {
         "width": {
           "$type": "dimension",
           "small": {
             "$value": {
-              "value": 36,
+              "value": 32,
               "unit": "px"
             }
           },
           "medium": {
             "$value": {
-              "value": 44,
+              "value": 40,
               "unit": "px"
             }
           },
           "large": {
             "$value": {
-              "value": 52,
+              "value": 48,
               "unit": "px"
             }
           }
@@ -44,29 +66,6 @@
             }
           }
         }
-      },
-      "thumb": {
-        "size": {
-          "$type": "dimension",
-          "small": {
-            "$value": {
-              "value": 18,
-              "unit": "px"
-            }
-          },
-          "medium": {
-            "$value": {
-              "value": 22,
-              "unit": "px"
-            }
-          },
-          "large": {
-            "$value": {
-              "value": 26,
-              "unit": "px"
-            }
-          }
-        }
       }
     },
     "checkbox": {
@@ -75,19 +74,19 @@
           "$type": "dimension",
           "small": {
             "$value": {
-              "value": 16,
+              "value": 24,
               "unit": "px"
             }
           },
           "medium": {
             "$value": {
-              "value": 20,
+              "value": 28,
               "unit": "px"
             }
           },
           "large": {
             "$value": {
-              "value": 24,
+              "value": 32,
               "unit": "px"
             }
           }
