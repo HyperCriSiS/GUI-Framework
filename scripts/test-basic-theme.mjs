@@ -11,7 +11,7 @@ assert.ok(basicEntry, "The Basic theme must remain registered");
 const basic = JSON.parse(await readFile(join("spec", basicEntry.source), "utf8"));
 assert.equal(basic.theme, "basic");
 
-const referenceComponentIds = ["button", "checkbox", "dialog", "input", "panel", "switch"];
+const referenceComponentIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "switch"];
 const componentEntries = manifest.components
   .filter((entry) => referenceComponentIds.includes(entry.id))
   .sort((left, right) => left.id.localeCompare(right.id));
@@ -22,7 +22,7 @@ assert.deepEqual(
   "Basic quality gate must cover the completed reference visual set including Phase 6 additions",
 );
 
-const functionalStateIds = new Set(["hover", "focus", "pressed", "checked", "loading", "error"]);
+const functionalStateIds = new Set(["hover", "focus", "pressed", "checked", "selected", "loading", "error"]);
 const expensiveEffectKeys = new Set(["blur", "backdropBlur", "glow"]);
 
 function containsExpensiveEffect(value, path = "root") {
