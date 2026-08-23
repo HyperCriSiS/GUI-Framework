@@ -139,6 +139,8 @@ function emitFoundation(lines, themeIds) {
   lines.push(
     `${scope} .gui-button {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-flex;", "  align-items: center;", "  justify-content: center;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font-family: inherit;", "  cursor: pointer;", "  user-select: none;", "  text-decoration: none;", "  vertical-align: middle;", "}", "",
     `${scope} .gui-button:disabled { cursor: default; }`, `${scope} .gui-button:focus { outline: none; }`, "",
+    `${scope} .gui-checkbox {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-grid;", "  place-items: center;", "  border-style: solid;", "  border-width: 0;", "  padding: 0;", "  background: transparent;", "  color: inherit;", "  font-family: inherit;", "  cursor: pointer;", "  user-select: none;", "  vertical-align: middle;", "  outline: none;", "}", "",
+    `${scope} .gui-checkbox:disabled { cursor: default; }`, `${scope} .gui-checkbox__indicator {`, "  display: grid;", "  place-items: center;", "  inline-size: 100%;", "  block-size: 100%;", "  pointer-events: none;", "}", "",
     `${scope} .gui-input {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-block;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font-family: inherit;", "  vertical-align: middle;", "  outline: none;", "}", "",
     `${scope} .gui-input::placeholder { opacity: 1; }`, `${scope} .gui-input:disabled { cursor: default; }`, "",
     `${scope} .gui-switch {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-flex;", "  align-items: center;", "  justify-content: flex-start;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font: inherit;", "  cursor: pointer;", "  user-select: none;", "  vertical-align: middle;", "  outline: none;", "}", "",
@@ -159,7 +161,7 @@ function generate(ir) {
       emitVisual(lines, `[data-gui-theme="${theme.id}"]`, componentId, component, visual, `${theme.id}.${componentId}`);
     }
   }
-  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
+  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
   return `${lines.join("\n")}\n`;
 }
 
