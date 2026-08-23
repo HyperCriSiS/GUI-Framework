@@ -21,7 +21,7 @@ class ReferenceRuntimeTest {
 
     @Test
     fun referenceControlsRemainUsableAtHostScale() {
-        exerciseReferenceControls("Scaled reference")
+        exerciseReferenceControls("Scaled reference", includeCheckbox = true)
     }
 
     @Test
@@ -31,7 +31,7 @@ class ReferenceRuntimeTest {
         }
         composeRule.waitForIdle()
 
-        exerciseReferenceControls("Compact reference")
+        exerciseReferenceControls("Compact reference", includeCheckbox = true)
     }
 
     @Test
@@ -84,7 +84,10 @@ class ReferenceRuntimeTest {
         exerciseReferenceControls("Cyberpunk reference")
     }
 
-    private fun exerciseReferenceControls(replacement: String) {
+    private fun exerciseReferenceControls(
+        replacement: String,
+        includeCheckbox: Boolean = false,
+    ) {
         composeRule
             .onNodeWithContentDescription("Reference name")
             .assertIsDisplayed()
@@ -93,6 +96,12 @@ class ReferenceRuntimeTest {
         val referenceSwitch = composeRule.onNodeWithContentDescription("Reference switch")
         referenceSwitch.assertIsDisplayed().performClick()
         referenceSwitch.performClick()
+
+        if (includeCheckbox) {
+            val referenceCheckbox = composeRule.onNodeWithContentDescription("Reference checkbox")
+            referenceCheckbox.assertIsDisplayed().performClick()
+            referenceCheckbox.performClick()
+        }
 
         composeRule
             .onNodeWithText("Open dialog")
