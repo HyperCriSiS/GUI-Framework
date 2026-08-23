@@ -50,25 +50,28 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
   assert.match(
     source,
     new RegExp(`${sizeType}\\.SMALL`),
     `Android compact reference must map ${sizeType} to SMALL`,
   );
 }
-for (const component of ["GuiButton", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
+assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
+assert.match(source, /if \(includeExtendedComponents\) \{/);
+assert.match(source, /accessibilityLabel = "Reference checkbox"/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
 assert.match(runtimeTest, /createAndroidComposeRule<MainActivity>\(\)/);
-assert.match(runtimeTest, /exerciseReferenceControls\("Scaled reference"\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Scaled reference", includeCheckbox = true\)/);
 assert.match(runtimeTest, /compactReferenceControlsRemainUsableAtHostScale/);
 assert.match(runtimeTest, /applyReferenceDensity\(ReferenceDensity\.Compact\)/);
-assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference"\)/);
+assert.match(runtimeTest, /exerciseReferenceControls\("Compact reference", includeCheckbox = true\)/);
 assert.match(runtimeTest, /modernReferenceControlsRemainUsableAtHostScale/);
 assert.match(runtimeTest, /applyReferenceTheme\(GuiThemeId\.MODERN\)/);
 assert.match(runtimeTest, /exerciseReferenceControls\("Modern reference"\)/);
@@ -87,9 +90,11 @@ assert.match(runtimeTest, /exerciseReferenceControls\("Cyberpunk reference"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference name"\)/);
 assert.match(runtimeTest, /performTextReplacement\(replacement\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Reference switch"\)/);
+assert.match(runtimeTest, /includeCheckbox: Boolean = false/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Reference checkbox"\)/);
 assert.match(runtimeTest, /performClick\(\)/);
 assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk theme selection.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox coverage and Phase 5 theme selection isolation.");
