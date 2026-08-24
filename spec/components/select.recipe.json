@@ -23,8 +23,8 @@
       "required": false
     },
     {
-      "id": "option",
-      "required": false
+      "id": "options",
+      "required": true
     }
   ],
   "content": [
