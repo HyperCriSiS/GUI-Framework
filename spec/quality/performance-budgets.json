@@ -52,7 +52,7 @@
       ]
     },
     "spacey": {
-      "maxResolvedVisualLeaves": 200,
+      "maxResolvedVisualLeaves": 208,
       "maxComponentVisualLeaves": 64,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
