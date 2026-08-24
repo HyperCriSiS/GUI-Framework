@@ -12,9 +12,12 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -75,6 +78,22 @@ private fun GuiVisualPartStyle.radioOpacity(): Float {
     return value
 }
 
+private val LocalGuiRadioGroupName = compositionLocalOf<String?> { null }
+
+@Composable
+fun GuiRadioGroup(
+    groupName: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    require(groupName.isNotBlank()) { "GUI radio groupName must not be blank" }
+    CompositionLocalProvider(LocalGuiRadioGroupName provides groupName) {
+        Box(modifier = modifier.selectableGroup()) {
+            content()
+        }
+    }
+}
+
 private fun GuiVisualPartStyle.radioTextStyle(root: GuiVisualPartStyle): TextStyle {
     val sizeToken = fontSize
     val composeFontSize = sizeToken?.toComposeSp() ?: TextUnit.Unspecified
@@ -109,6 +128,11 @@ fun GuiRadio(
 ) {
     require(accessibilityLabel.isNotBlank()) { "GUI radio accessibilityLabel must not be blank" }
     require(groupName.isNotBlank()) { "GUI radio groupName must not be blank" }
+    LocalGuiRadioGroupName.current?.let { parentGroupName ->
+        require(groupName == parentGroupName) {
+            "GUI radio groupName '$groupName' does not match enclosing group '$parentGroupName'"
+        }
+    }
 
     val selection = LocalGuiThemeSelection.current
     val source = interactionSource ?: remember { MutableInteractionSource() }
