@@ -48,6 +48,14 @@ assert.ok(
 for (const factory of ["createGuiButton", "createGuiInput", "createGuiSwitch", "createGuiPanel", "createGuiDialog"]) {
   assert.match(web, new RegExp(`\\b${factory}\\(`), `Web reference must exercise ${factory}`);
 }
+for (const factory of ["createGuiCheckbox", "createGuiRadio"]) {
+  assert.match(web, new RegExp(`\\b${factory}\\(`), `Web Basic extension must exercise ${factory}`);
+}
+assert.match(web, /new Set\(\["checkbox", "radio"\]\)/);
+assert.match(web, /extendedComponent !== null && theme !== "basic"/);
+assert.match(web, /role", "radiogroup"/);
+assert.match(web, /accessibilityLabel: "Summary review"/);
+assert.match(web, /accessibilityLabel: "Detailed review"/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -71,14 +79,14 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiSwitchSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSwitchSize"]) {
     assert.match(
       source,
       new RegExp(`${sizeType}\\.SMALL`),
       `${name} compact reference must map ${sizeType} to its existing SMALL size`,
     );
   }
-  for (const component of ["GuiButton", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -86,8 +94,12 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /onActivate = \{ dialogOpen = true \}/, `${name} must expose the dialog open flow`);
   assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/, `${name} must expose the dialog dismiss flow`);
   assert.match(source, /label = "Close"[\s\S]*onActivate = \{ dialogOpen = false \}/, `${name} must expose the explicit close action`);
+  assert.match(source, /includeExtendedComponents/, `${name} must isolate Phase 6 reference extensions`);
+  assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/, `${name} must expose a semantic Radio group`);
+  assert.match(source, /accessibilityLabel = "Summary review"/, `${name} must expose the summary Radio option`);
+  assert.match(source, /accessibilityLabel = "Detailed review"/, `${name} must expose the detailed Radio option`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic defaults and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
