@@ -270,6 +270,42 @@ function verifyCheckbox(palette, background) {
   }
 }
 
+function verifyRadio(palette, background) {
+  const contract = palette.components.radio;
+  const recipe = palette.themes.basic.components.radio;
+  assert.ok(contract, `${palette.id} must compile the Radio contract`);
+  assert.ok(recipe, `${palette.id} Basic must compile the Radio visual recipe`);
+
+  for (const state of ["default", "hover", "pressed"]) {
+    const visual = resolve(recipe, contract, { variant: "standard", state });
+    assertContrast(visual.root.border.color, visual.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic radio inner boundary ${state}`);
+    assertContrast(visual.root.border.color, background, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic radio outer boundary ${state}`);
+  }
+
+  const selected = resolve(recipe, contract, { variant: "standard", state: "selected" });
+  assertContrast(selected.root.fill, background, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic radio selected fill`);
+  assertContrast(selected.indicator.foreground, selected.root.fill, MIN_NON_TEXT_CONTRAST, `${palette.id} Basic radio selected indicator`);
+
+  const focused = resolve(recipe, contract, { variant: "standard", state: "focus" });
+  assertContrast(
+    focused.root.outline.color,
+    background,
+    MIN_NON_TEXT_CONTRAST,
+    `${palette.id} Basic radio focus outline`,
+  );
+
+  for (const size of contract.sizes) {
+    const visual = resolve(recipe, contract, { variant: "standard", size });
+    assert.equal(visual.root.minHeight.value.unit, "px");
+    assert.equal(visual.root.minWidth.value.unit, "px");
+    assert.ok(
+      visual.root.minHeight.value.value >= MIN_TARGET_SIZE_PX &&
+        visual.root.minWidth.value.value >= MIN_TARGET_SIZE_PX,
+      `${palette.id} Basic radio ${size} target must be at least ${MIN_TARGET_SIZE_PX} by ${MIN_TARGET_SIZE_PX} CSS px`,
+    );
+  }
+}
+
 try {
   compile();
   const [irSource, policySource] = await Promise.all([
@@ -284,6 +320,7 @@ try {
     const background = token(palette, "semantic.color.background");
     verifyGlassTranslucentSurfaces(palette, background);
     verifyCheckbox(palette, background);
+    verifyRadio(palette, background);
     for (const themeId of themeIds) {
       assert.ok(palette.themes[themeId], `${palette.id} must compile ${themeId} for accessibility validation`);
       verifyButtons(palette, background, themeId);
@@ -291,7 +328,7 @@ try {
       verifySwitch(palette, background, themeId);
     }
   }
-  console.log(`Semantic palette contrast policy, Basic Checkbox, and Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
+  console.log(`Semantic palette contrast policy, Basic Checkbox/Radio, and Basic/Modern/Glass/Frosted Glass/Spacey/Cyberpunk WCAG 2.2 AA integration checks passed for ${ir.palettes.length} palette(s).`);
 } finally {
   await rm(irPath, { force: true });
 }
