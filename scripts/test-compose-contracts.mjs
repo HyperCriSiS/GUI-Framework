@@ -47,6 +47,17 @@ try {
   assert.match(source, /GuiEventContract\("checkedChange", "boolean"\)/);
   assert.match(source, /GuiComponentSemantics\("checkbox", true\)/);
 
+  assert.match(source, /enum class GuiRadioVariant/);
+  assert.match(source, /enum class GuiRadioSize/);
+  assert.match(source, /enum class GuiRadioState/);
+  assert.match(source, /SELECTED\("selected"\)/);
+  assert.match(source, /data class GuiRadioProperties\(/);
+  assert.match(source, /val selected: Boolean/);
+  assert.match(source, /val accessibilityLabel: String/);
+  assert.match(source, /val groupName: String/);
+  assert.match(source, /GuiEventContract\("selectedChange", "boolean"\)/);
+  assert.match(source, /GuiComponentSemantics\("radio", true\)/);
+
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
   assert.match(source, /enum class GuiDialogState/);
