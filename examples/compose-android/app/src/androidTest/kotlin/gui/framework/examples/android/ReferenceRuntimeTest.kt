@@ -3,6 +3,8 @@
 package gui.framework.examples.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -21,7 +23,7 @@ class ReferenceRuntimeTest {
 
     @Test
     fun referenceControlsRemainUsableAtHostScale() {
-        exerciseReferenceControls("Scaled reference", includeCheckbox = true)
+        exerciseReferenceControls("Scaled reference", includeExtendedComponents = true)
     }
 
     @Test
@@ -31,7 +33,7 @@ class ReferenceRuntimeTest {
         }
         composeRule.waitForIdle()
 
-        exerciseReferenceControls("Compact reference", includeCheckbox = true)
+        exerciseReferenceControls("Compact reference", includeExtendedComponents = true)
     }
 
     @Test
@@ -86,7 +88,7 @@ class ReferenceRuntimeTest {
 
     private fun exerciseReferenceControls(
         replacement: String,
-        includeCheckbox: Boolean = false,
+        includeExtendedComponents: Boolean = false,
     ) {
         composeRule
             .onNodeWithContentDescription("Reference name")
@@ -97,10 +99,18 @@ class ReferenceRuntimeTest {
         referenceSwitch.assertIsDisplayed().performClick()
         referenceSwitch.performClick()
 
-        if (includeCheckbox) {
+        if (includeExtendedComponents) {
             val referenceCheckbox = composeRule.onNodeWithContentDescription("Reference checkbox")
             referenceCheckbox.assertIsDisplayed().performClick()
             referenceCheckbox.performClick()
+
+            val summaryRadio = composeRule.onNodeWithContentDescription("Summary review")
+            val detailedRadio = composeRule.onNodeWithContentDescription("Detailed review")
+            summaryRadio.assertIsDisplayed().assertIsSelected()
+            detailedRadio.assertIsDisplayed().assertIsNotSelected().performClick()
+            composeRule.waitForIdle()
+            summaryRadio.assertIsNotSelected()
+            detailedRadio.assertIsSelected()
         }
 
         composeRule
