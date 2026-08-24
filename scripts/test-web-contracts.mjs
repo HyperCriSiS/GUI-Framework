@@ -23,7 +23,7 @@ try {
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
   assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "switch"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "radio", "switch"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -36,6 +36,15 @@ try {
   assert.match(source, /export type GuiCheckboxVariant = \(typeof guiCheckboxContract\.variants\)\[number\];/);
   assert.match(source, /export type GuiCheckboxSize = \(typeof guiCheckboxContract\.sizes\)\[number\];/);
   assert.match(source, /export type GuiCheckboxState = \(typeof guiCheckboxContract\.states\)\[number\];/);
+  assert.match(source, /export const guiRadioContract = \{/);
+  assert.match(source, /export type GuiRadioVariant = \(typeof guiRadioContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiRadioSize = \(typeof guiRadioContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiRadioState = \(typeof guiRadioContract\.states\)\[number\];/);
+  assert.match(source, /states: \["default", "hover", "focus", "pressed", "selected", "disabled"\] as const,/);
+  assert.match(source, /"id": "selected"/);
+  assert.match(source, /"id": "groupName"/);
+  assert.match(source, /"id": "selectedChange"/);
+  assert.match(source, /"role": "radio"/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "checked", "indeterminate", "disabled"\] as const,/);
   assert.match(source, /"id": "indeterminate"/);
   assert.match(source, /"role": "checkbox"/);
