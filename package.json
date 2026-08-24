@@ -55,7 +55,7 @@
     "test:kotlin-desktop-reference": "node scripts/test-compose-desktop-reference.mjs",
     "test:kotlin-android-reference": "node scripts/test-compose-android-reference.mjs",
     "test:reference-parity": "node scripts/test-reference-parity.mjs",
-    "typecheck": "node packages/core/src/index.mjs && node packages/tokens/src/index.mjs && node packages/adapter-web/src/index.mjs && node packages/adapter-compose/src/index.mjs",
+    "typecheck": "npx --yes --package typescript@7.0.2 tsc -p packages/core/tsconfig.json --noEmit",
     "typecheck:web-contracts": "npx --yes --package typescript@7.0.2 tsc --noEmit --strict --target ES2022 --module ESNext build/web/contracts.ts build/web/assets.ts",
     "compile:kotlin-contracts": "mvn -q -f packages/adapter-compose/pom.xml compile",
     "build:kotlin-android-reference": "gradle -p examples/compose-android :app:assembleDebug --no-daemon",
