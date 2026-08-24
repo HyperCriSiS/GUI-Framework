@@ -2,6 +2,7 @@
 
 import { createGuiButton } from "../../packages/adapter-web/src/button.mjs";
 import { createGuiCheckbox } from "../../packages/adapter-web/src/checkbox.mjs";
+import { createGuiRadio } from "../../packages/adapter-web/src/radio.mjs";
 import { createGuiInput } from "../../packages/adapter-web/src/input.mjs";
 import { createGuiSwitch } from "../../packages/adapter-web/src/switch.mjs";
 import { createGuiPanel } from "../../packages/adapter-web/src/panel.mjs";
@@ -57,11 +58,11 @@ export function mountReferenceApp(document, root, options = {}) {
   if (!densities.has(density)) throw new Error(`Unknown Web reference density: ${density}`);
   const compact = density === "compact";
   const extendedComponent = options.extendedComponent ?? null;
-  if (extendedComponent !== null && extendedComponent !== "checkbox") {
+  if (extendedComponent !== null && !new Set(["checkbox", "radio"]).has(extendedComponent)) {
     throw new Error(`Unknown Web reference extended component: ${extendedComponent}`);
   }
-  if (extendedComponent === "checkbox" && theme !== "basic") {
-    throw new Error("Web reference Checkbox visual is currently available only for Basic");
+  if (extendedComponent !== null && theme !== "basic") {
+    throw new Error(`Web reference ${extendedComponent === "checkbox" ? "Checkbox" : "Radio"} visual is currently available only for Basic`);
   }
   const capabilityIr = options.capabilityIr ?? null;
   const availableCapabilities = options.availableCapabilities ??
@@ -96,6 +97,8 @@ export function mountReferenceApp(document, root, options = {}) {
   if (typeof state.notifications !== "boolean") throw new TypeError("Reference app notifications must be a boolean");
   let diagnosticsEnabled = options.diagnostics ?? false;
   if (typeof diagnosticsEnabled !== "boolean") throw new TypeError("Reference app diagnostics must be a boolean");
+  let reviewMode = options.reviewMode ?? "summary";
+  if (!new Set(["summary", "detailed"]).has(reviewMode)) throw new Error(`Unknown reference review mode: ${reviewMode}`);
 
   root.replaceChildren();
   root.className = "gui-reference-host";
@@ -216,6 +219,45 @@ export function mountReferenceApp(document, root, options = {}) {
     diagnosticsSetting.append(diagnosticsCopy, diagnosticsCheckbox.element);
   }
 
+  let summaryReviewRadio = null;
+  let detailedReviewRadio = null;
+  let reviewModeSetting = null;
+  if (extendedComponent === "radio") {
+    reviewModeSetting = createElement(document, "div", "gui-reference__setting");
+    const reviewCopy = createElement(document, "div", "gui-reference__setting-copy");
+    reviewCopy.append(
+      createElement(document, "div", "gui-reference__setting-title", "Review format"),
+      createElement(document, "p", "", "Exercise controlled Radio group semantics, including native focus and keyboard behavior."),
+    );
+    const radioGroup = createElement(document, "div", "gui-reference__radio-group");
+    radioGroup.setAttribute("role", "radiogroup");
+    radioGroup.setAttribute("aria-label", "Review format");
+
+    function selectReviewMode(nextMode) {
+      reviewMode = nextMode;
+      summaryReviewRadio.update({ selected: reviewMode === "summary" });
+      detailedReviewRadio.update({ selected: reviewMode === "detailed" });
+      status.textContent = `Review format changed to ${reviewMode}.`;
+    }
+
+    summaryReviewRadio = createGuiRadio(document, {
+      selected: reviewMode === "summary",
+      accessibilityLabel: "Summary review",
+      groupName: "review-format",
+      size: compact ? "small" : "medium",
+      onSelectedChange() { selectReviewMode("summary"); },
+    });
+    detailedReviewRadio = createGuiRadio(document, {
+      selected: reviewMode === "detailed",
+      accessibilityLabel: "Detailed review",
+      groupName: "review-format",
+      size: compact ? "small" : "medium",
+      onSelectedChange() { selectReviewMode("detailed"); },
+    });
+    radioGroup.append(summaryReviewRadio.element, detailedReviewRadio.element);
+    reviewModeSetting.append(reviewCopy, radioGroup);
+  }
+
   const actions = createElement(document, "div", "gui-reference__actions");
 
   const saveButton = createGuiButton(document, {
@@ -254,6 +296,7 @@ export function mountReferenceApp(document, root, options = {}) {
   actions.append(saveButton.element, paletteButton.element, openDialogButton.element);
   settingsPanel.element.append(settingsTitle, nameField, notificationSetting);
   if (diagnosticsSetting) settingsPanel.element.append(diagnosticsSetting);
+  if (reviewModeSetting) settingsPanel.element.append(reviewModeSetting);
   settingsPanel.element.append(actions, status);
   summaryPanel.element.append(summaryTitle, summaryList);
 
@@ -266,7 +309,9 @@ export function mountReferenceApp(document, root, options = {}) {
       "gui-reference__secondary",
       extendedComponent === "checkbox"
         ? "This surface uses the real Button, Input, Switch, Checkbox, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS."
-        : "This surface uses the real Button, Input, Switch, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS.",
+        : extendedComponent === "radio"
+          ? "This surface uses the real Button, Input, Switch, Radio, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS."
+          : "This surface uses the real Button, Input, Switch, Panel/Card and Dialog adapters. Layout remains host-platform HTML/CSS.",
     ),
   );
 
@@ -325,6 +370,10 @@ export function mountReferenceApp(document, root, options = {}) {
     closeDialogButton,
   };
   if (diagnosticsCheckbox) components.diagnosticsCheckbox = diagnosticsCheckbox;
+  if (summaryReviewRadio && detailedReviewRadio) {
+    components.summaryReviewRadio = summaryReviewRadio;
+    components.detailedReviewRadio = detailedReviewRadio;
+  }
   capabilityTargets = Object.values(components);
   applyCapabilityFallbacks();
 
