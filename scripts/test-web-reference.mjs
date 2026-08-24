@@ -155,6 +155,31 @@ const compactCheckboxApp = mountReferenceApp(fakeDocument, compactCheckboxRoot, 
 assert.equal(compactCheckboxApp.components.diagnosticsCheckbox.element.dataset.guiSize, "small");
 compactCheckboxApp.destroy();
 
+const radioRoot = new FakeElement("main");
+const radioApp = mountReferenceApp(fakeDocument, radioRoot, { extendedComponent: "radio" });
+assert.equal(radioApp.extendedComponent, "radio");
+assert.equal(radioApp.components.summaryReviewRadio.element.dataset.guiComponent, "radio");
+assert.equal(radioApp.components.summaryReviewRadio.element.getAttribute("aria-checked"), "true");
+assert.equal(radioApp.components.detailedReviewRadio.element.getAttribute("aria-checked"), "false");
+assert.equal(radioApp.components.summaryReviewRadio.element.tabIndex, 0);
+assert.equal(radioApp.components.detailedReviewRadio.element.tabIndex, -1);
+radioApp.components.detailedReviewRadio.element.click();
+assert.equal(radioApp.components.summaryReviewRadio.element.getAttribute("aria-checked"), "false");
+assert.equal(radioApp.components.detailedReviewRadio.element.getAttribute("aria-checked"), "true");
+assert.equal(radioApp.components.detailedReviewRadio.element.tabIndex, 0);
+radioApp.destroy();
+
+const compactRadioRoot = new FakeElement("main");
+const compactRadioApp = mountReferenceApp(fakeDocument, compactRadioRoot, {
+  density: "compact",
+  extendedComponent: "radio",
+  reviewMode: "detailed",
+});
+assert.equal(compactRadioApp.components.summaryReviewRadio.element.dataset.guiSize, "small");
+assert.equal(compactRadioApp.components.detailedReviewRadio.element.dataset.guiSize, "small");
+assert.equal(compactRadioApp.components.detailedReviewRadio.element.getAttribute("aria-checked"), "true");
+compactRadioApp.destroy();
+
 const extensionRoot = new FakeElement("main");
 const extensionApp = mountReferenceApp(fakeDocument, extensionRoot, { hostContext: "extension-popup" });
 assert.equal(extensionRoot.dataset.guiHostContext, "extension-popup");
@@ -249,5 +274,10 @@ assert.throws(
   () => mountReferenceApp(fakeDocument, root, { theme: "modern", extendedComponent: "checkbox" }),
   /Checkbox visual is currently available only for Basic/,
 );
+assert.throws(
+  () => mountReferenceApp(fakeDocument, root, { theme: "modern", extendedComponent: "radio" }),
+  /Radio visual is currently available only for Basic/,
+);
+assert.throws(() => mountReferenceApp(fakeDocument, root, { reviewMode: "unknown" }), /Unknown reference review mode/);
 
 console.log("Functional Web reference application integration tests passed.");
