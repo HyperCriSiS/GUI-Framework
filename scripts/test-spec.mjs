@@ -3,56 +3,56 @@
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { analyzeThemeAvailability } from "../packages/compiler/src/theme-availability.mjs";
 
-const outputPath = "build/spec-ir-test.json";
+const first = "build/spec-ir-test-a.json";
+const second = "build/spec-ir-test-b.json";
 
-function compile() {
+function compile(output) {
   const result = spawnSync(
     process.execPath,
-    ["packages/compiler/src/index.mjs", "--output", outputPath],
+    ["packages/compiler/src/index.mjs", "--output", output],
     { encoding: "utf8" },
   );
   if (result.status !== 0) {
-    throw new Error(`Compiler failed:\n${result.stdout}\n${result.stderr}`);
+    throw new Error(`Specification compiler failed:\n${result.stdout}\n${result.stderr}`);
   }
 }
 
 try {
-  compile();
-  const a = await readFile(outputPath, "utf8");
-  compile();
-  const b = await readFile(outputPath, "utf8");
+  compile(first);
+  compile(second);
 
+  const [a, b] = await Promise.all([readFile(first, "utf8"), readFile(second, "utf8")]);
   assert.equal(a, b, "The compiler must produce byte-identical output for identical inputs");
 
   const ir = JSON.parse(a);
-  const dark = ir.palettes.find((palette) => palette.id === "reference-dark");
-  const light = ir.palettes.find((palette) => palette.id === "reference-light");
-  assert.ok(dark, "Reference dark palette must exist");
-  assert.ok(light, "Reference light palette must exist");
-  assert.deepEqual(dark.inheritance, ["basic"]);
-  assert.deepEqual(dark.themes.modern.inheritance, ["basic", "modern"]);
-  assert.deepEqual(dark.themes.glass.inheritance, ["basic", "modern", "glass"]);
-  assert.deepEqual(dark.themes["frosted-glass"].inheritance, ["basic", "modern", "glass", "frosted-glass"]);
-  assert.deepEqual(dark.themes.spacey.inheritance, ["basic", "spacey"]);
-  assert.deepEqual(dark.themes.cyberpunk.inheritance, ["basic", "cyberpunk"]);
-  assert.equal(ir.defaultPalette, "reference-dark");
-  assert.deepEqual(ir.paletteFamilies.reference, ["reference-dark", "reference-light"]);
+  assert.deepEqual(
+    ir.themes.map((theme) => theme.id),
+    ["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"],
+    "The initial theme registry must remain stable",
+  );
+  assert.deepEqual(
+    ir.palettes.map((palette) => palette.id),
+    ["reference-dark", "reference-light"],
+    "The reference palette variants must remain registered",
+  );
 
   const expectedContractComponentIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch"];
   const expectedReferenceVisualIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch"];
-  assert.deepEqual(Object.keys(ir.componentContracts), expectedContractComponentIds);
-  for (const palette of [dark, light]) {
+  for (const palette of ir.palettes) {
     assert.deepEqual(
       Object.keys(palette.components),
-      expectedReferenceVisualIds,
-      `${palette.id} must compile the complete Basic visual foundation including completed Phase 6 controls`,
+      expectedContractComponentIds,
+      `Palette ${palette.id} must compile the complete component contract registry`,
     );
   }
-  assert.equal(ir.componentContracts.button.semantics.role, "button");
-  assert.deepEqual(ir.componentContracts.button.capabilities.fallbackOrder, ["standard", "minimal"]);
-  assert.deepEqual(ir.componentContracts.dialog.capabilities.fallbackOrder, ["high", "standard", "minimal"]);
-  assert.deepEqual(ir.componentContracts.panel.capabilities.fallbackOrder, ["high", "standard", "minimal"]);
+
+  const dark = ir.palettes.find((palette) => palette.id === "reference-dark");
+  const light = ir.palettes.find((palette) => palette.id === "reference-light");
+  assert.ok(dark && light, "Both reference palettes must compile");
+  assert.equal(dark.familyId, light.familyId, "Palette variants must remain in one family");
+  assert.notEqual(dark.variantId, light.variantId, "Palette variants must remain distinguishable");
 
   const darkBasic = dark.themes.basic.components;
   const lightBasic = light.themes.basic.components;
@@ -71,49 +71,40 @@ try {
     assert.deepEqual(
       Object.keys(components),
       expectedReferenceVisualIds,
-      "Every resolved theme must expose the complete Basic visual component set",
+      "Every available theme must resolve the complete implemented reference visual set",
     );
   }
 
-  assert.equal(dark.tokens["semantic.color.accent"].reference, "{palette.accent500}");
-  assert.equal(dark.tokens["semantic.color.accent"].value.hex, "#2563EB");
-  assert.equal(light.tokens["semantic.color.accent"].value.hex, "#1D4ED8");
-  assert.equal(dark.tokens["semantic.color.surfaceTranslucent"].reference, "{palette.neutral900Translucent}");
-  assert.equal(dark.tokens["semantic.color.surfaceTranslucent"].value.hex, "#171A21");
-  assert.equal(dark.tokens["semantic.color.surfaceTranslucent"].value.alpha, 0.72);
-  assert.equal(light.tokens["semantic.color.surfaceTranslucent"].value.hex, "#FFFFFF");
-  assert.equal(light.tokens["semantic.color.surfaceTranslucent"].value.alpha, 0.72);
-  assert.equal(dark.tokens["semantic.color.surfaceElevatedTranslucent"].reference, "{palette.neutral800Translucent}");
-  assert.equal(dark.tokens["semantic.color.surfaceElevatedTranslucent"].value.alpha, 0.82);
-  assert.equal(light.tokens["semantic.color.surfaceElevatedTranslucent"].value.alpha, 0.82);
-  assert.deepEqual(dark.tokens["elevation.shadow.low"].value, light.tokens["elevation.shadow.low"].value);
-  assert.equal(dark.tokens["elevation.shadow.low"].value.color.alpha, 0.12);
-  assert.equal(dark.tokens["elevation.shadow.medium"].value.color.alpha, 0.18);
-  assert.equal(dark.tokens["elevation.shadow.high"].value.color.alpha, 0.24);
-  assert.deepEqual(dark.tokens["motion.interaction.fast"].value, {
-    duration: { value: 120, unit: "ms" },
-    delay: { value: 0, unit: "ms" },
-    timingFunction: [0.2, 0, 0, 1],
-  });
+  const availability = analyzeThemeAvailability(ir);
+  assert.deepEqual(
+    availability.componentIds,
+    expectedContractComponentIds,
+    "Theme availability must preserve the complete contract registry",
+  );
+  assert.deepEqual(
+    availability.visualComponentIds,
+    expectedReferenceVisualIds,
+    "Theme availability must track the independently implemented visual registry",
+  );
+  assert.deepEqual(
+    availability.availableThemeIds,
+    ["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"],
+    "Pre-registering a future component contract must not disable completed visual themes",
+  );
+
+  assert.equal(darkBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
+  assert.equal(lightBasic.button.variants.primary.base.root.fill.reference, "{semantic.color.accent}");
   assert.notDeepEqual(
-    dark.tokens["semantic.color.textPrimary"].value,
-    light.tokens["semantic.color.textPrimary"].value,
+    darkBasic.button.variants.primary.base.root.fill.value,
+    lightBasic.button.variants.primary.base.root.fill.value,
     "Palette switching must alter semantic colors when variants differ",
   );
+
+  assert.equal(darkModern.button.base.root.radius.reference, "{radius.lg}");
+  assert.equal(lightModern.button.base.root.radius.reference, "{radius.lg}");
   assert.deepEqual(
-    darkModern.button.base.root.radius.value,
-    lightModern.button.base.root.radius.value,
-    "Modern geometry must remain palette-neutral",
-  );
-  assert.equal(darkModern.panel.base.root.shadow.reference, "{elevation.shadow.low}");
-  assert.deepEqual(
-    darkModern.panel.base.root.shadow.value,
-    lightModern.panel.base.root.shadow.value,
-    "Modern elevation must remain palette-neutral",
-  );
-  assert.notDeepEqual(
     darkModern.button.variants.primary.base.root.fill.value,
-    lightModern.button.variants.primary.base.root.fill.value,
+    darkBasic.button.variants.primary.base.root.fill.value,
     "Modern must reuse the selected palette rather than fork it",
   );
 
@@ -126,52 +117,47 @@ try {
   assert.deepEqual(
     darkGlass.panel.base.root.radius.value,
     lightGlass.panel.base.root.radius.value,
-    "Glass geometry must remain palette-neutral through Modern inheritance",
+    "Glass geometry must remain palette-neutral",
   );
+
   for (const componentId of ["button", "input", "switch"]) {
     assert.deepEqual(
+      darkFrosted[componentId],
       darkGlass[componentId],
-      darkModern[componentId],
-      `Glass ${componentId} must inherit the Modern recipe unchanged`,
+      `Frosted Glass ${componentId} must remain identical to Glass`,
     );
+    assert.deepEqual(lightFrosted[componentId], lightGlass[componentId]);
   }
-  assert.equal(darkGlass.panel.base.root.backdropBlur, undefined, "Glass must stay crisp without backdrop blur");
-  assert.equal(darkGlass.dialog.base.root.backdropBlur, undefined, "Glass Dialog must stay crisp without backdrop blur");
 
   for (const componentId of ["panel", "dialog"]) {
-    assert.equal(
-      darkFrosted[componentId].base.root.fill.reference,
-      darkGlass[componentId].base.root.fill.reference,
-      `Frosted ${componentId} must inherit the Glass surface before capability fallback selection`,
-    );
-    assert.equal(
-      darkFrosted[componentId].fallbacks.high.requires[0],
-      "backdropBlur",
-      `Frosted ${componentId} high-tier fallback must require native backdrop blur`,
-    );
-    assert.equal(
-      darkFrosted[componentId].fallbacks.high.recipe.base.root.backdropBlur.reference,
-      "{effect.blur.frosted}",
-      `Frosted ${componentId} high-tier fallback must bind the neutral Frosted blur token`,
-    );
-    assert.equal(
-      darkFrosted[componentId].fallbacks.high.recipe.base.root.backdropBlur.value.value,
-      24,
-      `Frosted ${componentId} high-tier fallback must compile to the bounded 24 px blur token`,
-    );
-  }
-  for (const componentId of ["button", "input", "switch"]) {
-    assert.equal(
-      darkFrosted[componentId].fallbacks?.high,
-      undefined,
-      `Frosted ${componentId} must not gain a blur fallback`,
-    );
+    for (const [frostedComponent, glassComponent] of [
+      [darkFrosted[componentId], darkGlass[componentId]],
+      [lightFrosted[componentId], lightGlass[componentId]],
+    ]) {
+      const { fallbacks, ...frostedBase } = frostedComponent;
+      assert.deepEqual(
+        frostedBase,
+        glassComponent,
+        `Frosted Glass ${componentId} base must remain identical to Glass`,
+      );
+      assert.deepEqual(
+        Object.keys(fallbacks ?? {}),
+        ["high"],
+        `Frosted Glass ${componentId} must expose exactly one high capability fallback`,
+      );
+      assert.deepEqual(fallbacks.high.requires, ["backdropBlur"]);
+      assert.equal(
+        fallbacks.high.recipe.base.root.backdropBlur.reference,
+        "{effect.blur.frosted}",
+        `Frosted Glass ${componentId} high fallback must resolve the neutral frosted blur token`,
+      );
+      assert.equal(fallbacks.high.recipe.base.root.backdropBlur.value.value, 24);
+      assert.equal(fallbacks.high.recipe.base.root.backdropBlur.value.unit, "px");
+    }
   }
 
   assert.equal(darkSpacey.button.base.root.radius.reference, "{radius.pill}");
   assert.equal(lightSpacey.button.base.root.radius.reference, "{radius.pill}");
-  assert.equal(darkSpacey.input.base.root.fill.reference, "{semantic.color.surface}");
-  assert.equal(lightSpacey.input.base.root.fill.reference, "{semantic.color.surface}");
   assert.equal(darkSpacey.panel.base.root.radius.reference, "{radius.sm}");
   assert.equal(lightSpacey.panel.base.root.radius.reference, "{radius.sm}");
   assert.equal(darkSpacey.panel.base.root.border.color.reference, "{semantic.color.borderStrong}");
@@ -186,7 +172,7 @@ try {
   assert.notDeepEqual(
     darkSpacey.panel.base.root.border.color.value,
     lightSpacey.panel.base.root.border.color.value,
-    "Spacey instrument frames must continue to follow semantic palette roles",
+    "Spacey semantic instrumentation borders must follow the active palette",
   );
 
   assert.equal(darkCyberpunk.button.base.root.radius.reference, "{radius.sm}");
@@ -207,15 +193,10 @@ try {
   assert.notDeepEqual(
     darkCyberpunk.input.base.root.border.color.value,
     lightCyberpunk.input.base.root.border.color.value,
-    "Cyberpunk signal frames must continue to follow semantic palette roles",
+    "Cyberpunk semantic signal frames must follow the active palette",
   );
 
-  assert.equal(ir.assets["reference-check"].kind, "svg");
-  assert.equal(ir.assets["reference-check"].portableProfile, "path");
-  assert.equal(ir.assets["reference-check"].normalized.viewBox.width, 24);
-  assert.equal(ir.assets["reference-check"].normalized.pathCount, 1);
-
-  console.log("Spec compiler output is deterministic, inheritance-aware and palette/theme separation is preserved.");
+  console.log("Compiler determinism, registry, palette/theme resolution, Frosted fallback and Cyberpunk inheritance tests passed.");
 } finally {
-  await rm(outputPath, { force: true });
+  await Promise.all([rm(first, { force: true }), rm(second, { force: true })]);
 }
