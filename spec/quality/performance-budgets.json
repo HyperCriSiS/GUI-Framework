@@ -2,7 +2,7 @@
   "version": 1,
   "themes": {
     "basic": {
-      "maxResolvedVisualLeaves": 220,
+      "maxResolvedVisualLeaves": 255,
       "maxComponentVisualLeaves": 64,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -13,7 +13,7 @@
       ]
     },
     "modern": {
-      "maxResolvedVisualLeaves": 210,
+      "maxResolvedVisualLeaves": 245,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -25,7 +25,7 @@
       ]
     },
     "glass": {
-      "maxResolvedVisualLeaves": 210,
+      "maxResolvedVisualLeaves": 245,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -38,7 +38,7 @@
       ]
     },
     "frosted-glass": {
-      "maxResolvedVisualLeaves": 220,
+      "maxResolvedVisualLeaves": 255,
       "maxComponentVisualLeaves": 74,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -52,7 +52,7 @@
       ]
     },
     "spacey": {
-      "maxResolvedVisualLeaves": 208,
+      "maxResolvedVisualLeaves": 243,
       "maxComponentVisualLeaves": 64,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -64,7 +64,7 @@
       ]
     },
     "cyberpunk": {
-      "maxResolvedVisualLeaves": 210,
+      "maxResolvedVisualLeaves": 245,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,

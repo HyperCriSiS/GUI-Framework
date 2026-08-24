@@ -11,7 +11,7 @@ assert.ok(basicEntry, "The Basic theme must remain registered");
 const basic = JSON.parse(await readFile(join("spec", basicEntry.source), "utf8"));
 assert.equal(basic.theme, "basic");
 
-const referenceComponentIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "switch"];
+const referenceComponentIds = ["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch"];
 const componentEntries = manifest.components
   .filter((entry) => referenceComponentIds.includes(entry.id))
   .sort((left, right) => left.id.localeCompare(right.id));

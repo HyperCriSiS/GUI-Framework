@@ -23,7 +23,7 @@ try {
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
   assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "radio", "switch"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -45,6 +45,16 @@ try {
   assert.match(source, /"id": "groupName"/);
   assert.match(source, /"id": "selectedChange"/);
   assert.match(source, /"role": "radio"/);
+  assert.match(source, /export const guiSelectContract = \{/);
+  assert.match(source, /export type GuiSelectVariant = \(typeof guiSelectContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiSelectSize = \(typeof guiSelectContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiSelectState = \(typeof guiSelectContract\.states\)\[number\];/);
+  assert.match(source, /states: \["default", "hover", "focus", "expanded", "disabled", "error"\] as const,/);
+  assert.match(source, /"id": "editable"/);
+  assert.match(source, /"id": "query"/);
+  assert.match(source, /"id": "expandedChange"/);
+  assert.match(source, /"id": "options"/);
+  assert.match(source, /"role": "combobox"/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "checked", "indeterminate", "disabled"\] as const,/);
   assert.match(source, /"id": "indeterminate"/);
   assert.match(source, /"role": "checkbox"/);

@@ -58,6 +58,19 @@ try {
   assert.match(source, /GuiEventContract\("selectedChange", "boolean"\)/);
   assert.match(source, /GuiComponentSemantics\("radio", true\)/);
 
+  assert.match(source, /enum class GuiSelectVariant/);
+  assert.match(source, /enum class GuiSelectSize/);
+  assert.match(source, /enum class GuiSelectState/);
+  assert.match(source, /EXPANDED\("expanded"\)/);
+  assert.match(source, /data class GuiSelectProperties\(/);
+  assert.match(source, /val value: String/);
+  assert.match(source, /val query: String = ""/);
+  assert.match(source, /val editable: Boolean = false/);
+  assert.match(source, /val expanded: Boolean = false/);
+  assert.match(source, /GuiEventContract\("expandedChange", "boolean"\)/);
+  assert.match(source, /GuiContentSlot\("options", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("combobox", true\)/);
+
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
   assert.match(source, /enum class GuiDialogState/);

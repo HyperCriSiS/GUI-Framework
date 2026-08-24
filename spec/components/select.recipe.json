@@ -1,0 +1,145 @@
+{
+  "specVersion": "0.1.0",
+  "component": "select",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "value",
+      "required": true
+    },
+    {
+      "id": "placeholder",
+      "required": false
+    },
+    {
+      "id": "indicator",
+      "required": false
+    },
+    {
+      "id": "popup",
+      "required": false
+    },
+    {
+      "id": "option",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "options",
+      "kind": "children",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "value",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "placeholder",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "query",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "editable",
+      "type": "boolean",
+      "required": false,
+      "default": false
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "expanded",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "expanded"
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    },
+    {
+      "id": "error",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "error"
+    }
+  ],
+  "events": [
+    {
+      "id": "valueChange",
+      "payload": "string"
+    },
+    {
+      "id": "queryChange",
+      "payload": "string"
+    },
+    {
+      "id": "expandedChange",
+      "payload": "boolean"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "expanded",
+    "disabled",
+    "error"
+  ],
+  "semantics": {
+    "role": "combobox",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "placeholder": "{semantic.color.textSecondary}",
+    "indicator": "{semantic.color.textSecondary}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "danger": "{semantic.color.danger}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}
