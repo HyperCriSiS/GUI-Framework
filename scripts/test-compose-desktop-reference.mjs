@@ -19,15 +19,19 @@ assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = theme/);
 assert.match(source, /paletteId = paletteId/);
-for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Desktop reference must exercise ${component}`);
 }
 assert.match(source, /GuiCheckboxSize\.SMALL/);
+assert.match(source, /GuiRadioSize\.SMALL/);
 assert.match(source, /includeExtendedComponents = theme == GuiThemeId\.BASIC/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
 assert.match(source, /accessibilityLabel = "Reference checkbox"/);
+assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/);
+assert.match(source, /accessibilityLabel = "Summary review"/);
+assert.match(source, /accessibilityLabel = "Detailed review"/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
-console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox coverage and Phase 5 theme selection isolation.");
+console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio coverage and Phase 5 theme selection isolation.");
