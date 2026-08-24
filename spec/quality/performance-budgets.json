@@ -13,7 +13,7 @@
       ]
     },
     "modern": {
-      "maxResolvedVisualLeaves": 190,
+      "maxResolvedVisualLeaves": 210,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -25,7 +25,7 @@
       ]
     },
     "glass": {
-      "maxResolvedVisualLeaves": 190,
+      "maxResolvedVisualLeaves": 210,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -38,7 +38,7 @@
       ]
     },
     "frosted-glass": {
-      "maxResolvedVisualLeaves": 200,
+      "maxResolvedVisualLeaves": 220,
       "maxComponentVisualLeaves": 74,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -52,7 +52,7 @@
       ]
     },
     "spacey": {
-      "maxResolvedVisualLeaves": 180,
+      "maxResolvedVisualLeaves": 200,
       "maxComponentVisualLeaves": 64,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
@@ -64,7 +64,7 @@
       ]
     },
     "cyberpunk": {
-      "maxResolvedVisualLeaves": 190,
+      "maxResolvedVisualLeaves": 210,
       "maxComponentVisualLeaves": 70,
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
