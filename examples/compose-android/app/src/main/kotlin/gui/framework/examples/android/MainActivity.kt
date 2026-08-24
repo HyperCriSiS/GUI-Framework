@@ -23,6 +23,8 @@ import gui.framework.compose.GuiCheckbox
 import gui.framework.compose.GuiDialog
 import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
+import gui.framework.compose.GuiRadio
+import gui.framework.compose.GuiRadioGroup
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTheme
 import gui.framework.generated.internal.GuiButtonSize
@@ -30,6 +32,7 @@ import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiPanelSize
+import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiThemeId
 
@@ -74,6 +77,7 @@ fun AndroidReferenceApp(
     var value by remember { mutableStateOf("Android") }
     var enabled by remember { mutableStateOf(true) }
     var diagnosticsEnabled by remember { mutableStateOf(false) }
+    var reviewMode by remember { mutableStateOf("summary") }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -81,6 +85,7 @@ fun AndroidReferenceApp(
     val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
+    val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
 
     GuiPanel(
@@ -117,6 +122,36 @@ fun AndroidReferenceApp(
                         size = checkboxSize,
                     )
                     BasicText("Enable diagnostics")
+                }
+                GuiRadioGroup(groupName = "reference-review-mode") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            GuiRadio(
+                                selected = reviewMode == "summary",
+                                onSelectedChange = { if (it) reviewMode = "summary" },
+                                accessibilityLabel = "Summary review",
+                                groupName = "reference-review-mode",
+                                size = radioSize,
+                            )
+                            BasicText("Summary review")
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            GuiRadio(
+                                selected = reviewMode == "detailed",
+                                onSelectedChange = { if (it) reviewMode = "detailed" },
+                                accessibilityLabel = "Detailed review",
+                                groupName = "reference-review-mode",
+                                size = radioSize,
+                            )
+                            BasicText("Detailed review")
+                        }
+                    }
                 }
             }
             GuiButton(
