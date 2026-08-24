@@ -2,40 +2,64 @@
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import process from "node:process";
 import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
 
-function cssVar(reference) { return `--gui-${reference.slice(1, -1).replaceAll(".", "-")}`; }
-function requireReference(leaf, label) { if (!leaf || typeof leaf.reference !== "string") throw new Error(`Missing token reference for ${label}`); return `var(${cssVar(leaf.reference)})`; }
-function assertNeutralLeaf(style, key, label) {
-  const leaf = style?.[key]; if (!leaf) return null;
-  if (typeof leaf.reference !== "string") throw new Error(`${label}.${key} must remain token-backed`);
-  return requireReference(leaf, `${label}.${key}`);
+function cssName(path) { return `--gui-${path.replace(/[^A-Za-z0-9_-]+/g, "-").replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`; }
+function tokenPath(reference, label) {
+  if (typeof reference !== "string" || !/^\{[^{}.]+(?:\.[^{}.]+)*\}$/.test(reference)) throw new Error(`${label}: expected a compiled token reference`);
+  return reference.slice(1, -1);
+}
+function compiledValue(value, label) {
+  if (!value || typeof value !== "object" || typeof value.type !== "string" || typeof value.reference !== "string") throw new Error(`${label}: expected compiled visual value`);
+  switch (value.type) {
+    case "color": case "dimension": case "duration": case "number": case "shadow": return `var(${cssName(tokenPath(value.reference, label))})`;
+    default: throw new Error(`${label}: unsupported visual token type ${value.type}`);
+  }
+}
+function transitionDeclarations(value, label) {
+  if (!value || value.type !== "transition" || !value.value) throw new Error(`${label}: expected compiled transition`);
+  return [`transition: var(${cssName(tokenPath(value.reference, label))})`, "transition-property: background-color, border-color, color, opacity, box-shadow, outline-color"];
 }
 function styleDeclarations(style, label) {
-  if (!style) return [];
-  const out = [];
-  const simple = [["fill","background-color"],["foreground","color"],["fontSize","font-size"],["fontWeight","font-weight"],["lineHeight","line-height"],["minWidth","min-width"],["minHeight","min-height"],["paddingHorizontal","padding-inline"],["paddingVertical","padding-block"],["gap","gap"],["radius","border-radius"],["opacity","opacity"]];
-  for (const [key, css] of simple) { const value = assertNeutralLeaf(style,key,label); if (value) out.push(`${css}: ${value}`); }
-  if (style.border) {
-    const color = requireReference(style.border.color, `${label}.border.color`), width = requireReference(style.border.width, `${label}.border.width`);
-    out.push(`border-color: ${color}`, `border-width: ${width}`);
+  const output = [];
+  for (const [property, value] of Object.entries(style ?? {})) {
+    switch (property) {
+      case "fill": output.push(`background-color: ${compiledValue(value, `${label}.fill`)}`); break;
+      case "foreground": output.push(`color: ${compiledValue(value, `${label}.foreground`)}`); break;
+      case "opacity": output.push(`opacity: ${compiledValue(value, `${label}.opacity`)}`); break;
+      case "radius": output.push(`border-radius: ${compiledValue(value, `${label}.radius`)}`); break;
+      case "paddingHorizontal": output.push(`padding-inline: ${compiledValue(value, `${label}.paddingHorizontal`)}`); break;
+      case "paddingVertical": output.push(`padding-block: ${compiledValue(value, `${label}.paddingVertical`)}`); break;
+      case "gap": output.push(`gap: ${compiledValue(value, `${label}.gap`)}`); break;
+      case "minWidth": output.push(`min-width: ${compiledValue(value, `${label}.minWidth`)}`); break;
+      case "minHeight": output.push(`min-height: ${compiledValue(value, `${label}.minHeight`)}`); break;
+      case "fontSize": output.push(`font-size: ${compiledValue(value, `${label}.fontSize`)}`); break;
+      case "fontWeight": output.push(`font-weight: ${compiledValue(value, `${label}.fontWeight`)}`); break;
+      case "lineHeight": output.push(`line-height: ${compiledValue(value, `${label}.lineHeight`)}`); break;
+      case "border":
+        output.push(`border-color: ${compiledValue(value.color, `${label}.border.color`)}`);
+        output.push(`border-width: ${compiledValue(value.width, `${label}.border.width`)}`);
+        break;
+      case "outline":
+        output.push(`outline-color: ${compiledValue(value.color, `${label}.outline.color`)}`);
+        output.push(`outline-width: ${compiledValue(value.width, `${label}.outline.width`)}`);
+        output.push(`outline-offset: ${compiledValue(value.offset, `${label}.outline.offset`)}`);
+        output.push("outline-style: solid");
+        break;
+      case "transition": output.push(...transitionDeclarations(value, `${label}.transition`)); break;
+      case "shadow": output.push(`box-shadow: ${compiledValue(value, `${label}.shadow`)}`); break;
+      case "backdropBlur": {
+        const blurValue = compiledValue(value, `${label}.backdropBlur`);
+        output.push(`-webkit-backdrop-filter: blur(${blurValue})`);
+        output.push(`backdrop-filter: blur(${blurValue})`);
+        break;
+      }
+      case "blur": case "glow": throw new Error(`${label}: visual property ${property} is not yet mapped by the Web reference adapter`);
+      default: throw new Error(`${label}: unsupported visual property ${property}`);
+    }
   }
-  if (style.outline) {
-    const color = requireReference(style.outline.color, `${label}.outline.color`), width = requireReference(style.outline.width, `${label}.outline.width`), offset = requireReference(style.outline.offset, `${label}.outline.offset`);
-    out.push(`outline-color: ${color}`, `outline-width: ${width}`, `outline-offset: ${offset}`, "outline-style: solid");
-  }
-  if (style.transition) {
-    const transition = requireReference(style.transition, `${label}.transition`);
-    out.push(`transition: ${transition}`, "transition-property: background-color, border-color, color, opacity, box-shadow, outline-color");
-  }
-  if (style.shadow) out.push(`box-shadow: ${requireReference(style.shadow, `${label}.shadow`)}`);
-  if (style.backdropBlur) {
-    const blur = requireReference(style.backdropBlur, `${label}.backdropBlur`);
-    out.push(`-webkit-backdrop-filter: blur(${blur})`, `backdrop-filter: blur(${blur})`);
-  }
-  const allowed = new Set(["fill","foreground","fontSize","fontWeight","lineHeight","minWidth","minHeight","paddingHorizontal","paddingVertical","gap","radius","opacity","border","outline","transition","shadow","backdropBlur"]);
-  for (const key of Object.keys(style)) if (!allowed.has(key)) throw new Error(`Unsupported Web visual property ${label}.${key}`);
-  return out;
+  return output;
 }
 function kebabPart(partId) { return partId.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`); }
 function partSelector(rootSelector, componentId, partId) {
@@ -146,6 +170,6 @@ function generate(ir) {
 const [inputPath = "build/spec-ir.json", outputPath = "build/web/components.css"] = process.argv.slice(2);
 const ir = JSON.parse(await readFile(resolve(inputPath), "utf8"));
 const css = generate(ir);
-await mkdir(dirname(outputPath), { recursive: true });
-await writeFile(outputPath, css, "utf8");
+await mkdir(dirname(resolve(outputPath)), { recursive: true });
+await writeFile(resolve(outputPath), css, "utf8");
 console.log(`Generated Web component CSS at ${outputPath}`);
