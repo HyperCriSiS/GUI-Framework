@@ -25,6 +25,8 @@ import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiRadio
 import gui.framework.compose.GuiRadioGroup
+import gui.framework.compose.GuiSelect
+import gui.framework.compose.GuiSelectOption
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTheme
 import gui.framework.generated.internal.GuiButtonSize
@@ -33,6 +35,7 @@ import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiRadioSize
+import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiThemeId
 
@@ -78,6 +81,8 @@ fun AndroidReferenceApp(
     var enabled by remember { mutableStateOf(true) }
     var diagnosticsEnabled by remember { mutableStateOf(false) }
     var reviewMode by remember { mutableStateOf("summary") }
+    var deliveryChannel by remember { mutableStateOf("email") }
+    var selectExpanded by remember { mutableStateOf(false) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -86,6 +91,7 @@ fun AndroidReferenceApp(
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
+    val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
 
     GuiPanel(
@@ -153,6 +159,20 @@ fun AndroidReferenceApp(
                         }
                     }
                 }
+                GuiSelect(
+                    value = deliveryChannel,
+                    options = listOf(
+                        GuiSelectOption(value = "email", label = "Email"),
+                        GuiSelectOption(value = "push", label = "Push"),
+                        GuiSelectOption(value = "digest", label = "Daily digest"),
+                        GuiSelectOption(value = "legacy", label = "Legacy channel", disabled = true),
+                    ),
+                    onValueChange = { deliveryChannel = it },
+                    expanded = selectExpanded,
+                    onExpandedChange = { selectExpanded = it },
+                    accessibilityLabel = "Delivery channel",
+                    size = selectSize,
+                )
             }
             GuiButton(
                 label = "Open dialog",
