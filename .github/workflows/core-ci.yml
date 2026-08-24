@@ -3,9 +3,10 @@ name: Core CI
 on:
   push:
     branches:
-      - main
-      - feat/**
+      - "**"
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -15,12 +16,25 @@ concurrency:
   group: core-ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  KOTLIN_VERSION: "2.4.10"
+  COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
+  PLAYWRIGHT_VERSION: "1.62.1"
+  GRADLE_VERSION: "9.5.0"
+  AGP_VERSION: "9.3.0"
+  ANDROID_COMPILE_SDK: "37"
+  ANDROID_TARGET_SDK: "37"
+  ANDROID_BUILD_TOOLS: "36.1.0"
+  ANDROID_PREVIEW_SDK: "Baklava"
+  ANDROID_PREVIEW_PLATFORM: "android-Baklava"
+
 jobs:
   validate-and-typecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -32,7 +46,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
           cache: maven
 
       - name: Validate neutral specification
@@ -128,6 +142,9 @@ jobs:
       - name: Test native Web Basic Radio
         run: npm run test:web-radio
 
+      - name: Test native Web Basic Select / ComboBox
+        run: npm run test:web-select
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
@@ -215,9 +232,10 @@ jobs:
   web-browser-regression:
     needs: validate-and-typecheck
     runs-on: ubuntu-24.04
+    timeout-minutes: 12
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -226,7 +244,7 @@ jobs:
           cache: npm
 
       - name: Install pinned browser-test dependency
-        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false --no-save @playwright/test@1.62.1
+        run: npm install --ignore-scripts --no-save "@playwright/test@${PLAYWRIGHT_VERSION}"
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -245,21 +263,20 @@ jobs:
 
       - name: Upload browser failure diagnostics
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
-          name: web-browser-failure-diagnostics
-          path: |
-            test-results/
-            tests/visual-regression/
+          name: web-browser-failure-${{ github.run_id }}
+          path: test-results
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 3
 
   compose-android-reference:
     needs: validate-and-typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 18
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -271,7 +288,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
           cache: gradle
 
       - name: Set up Android SDK
@@ -279,13 +296,18 @@ jobs:
 
       - name: Install Android 17 preview SDK
         run: |
+          set -euo pipefail
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --install "platforms;android-CANARY" "build-tools;36.1.0"
+          sdkmanager \
+            "platform-tools" \
+            "build-tools;${ANDROID_BUILD_TOOLS}" \
+            "platforms;${ANDROID_PREVIEW_PLATFORM}"
+          test -d "${ANDROID_SDK_ROOT}/platforms/${ANDROID_PREVIEW_PLATFORM}"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 9.5.0
+          gradle-version: "${{ env.GRADLE_VERSION }}"
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -303,15 +325,18 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation
-        run: gradle -p examples/compose-android :app:compileDebugAndroidTestSources --no-daemon
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
 
       - name: Assemble Android reference APKs
-        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+        run: npm run build:kotlin-android-reference
 
   compose-android-runtime:
-    needs: validate-and-typecheck
-    if: github.ref_name == 'main' || github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[device-ci]')
+    needs:
+      - validate-and-typecheck
+      - compose-android-reference
+    if: contains(github.event.head_commit.message, '[device-ci]')
     runs-on: ubuntu-latest
+    timeout-minutes: 22
     strategy:
       fail-fast: false
       matrix:
@@ -320,19 +345,19 @@ jobs:
             target: google_apis
             arch: x86_64
             ram-size: 1536M
-            heap-size: 192M
+            vm-heap-size: 192M
             density: 240
             font-scale: "1.30"
           - api-level: 35
             target: google_apis
             arch: x86_64
             ram-size: 2048M
-            heap-size: 256M
+            vm-heap-size: 256M
             density: 480
             font-scale: "1.00"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -344,53 +369,38 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
           cache: gradle
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Enable KVM acceleration
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Install Android 17 preview SDK
-        run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --install "platforms;android-CANARY" "build-tools;36.1.0"
 
       - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 9.5.0
+          gradle-version: "${{ env.GRADLE_VERSION }}"
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Enable KVM access
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -al /dev/kvm
 
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
-
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
-
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Run scaled Android reference instrumentation
-        uses: ReactiveCircus/android-emulator-runner@v2
+      - name: Run Android runtime smoke check
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          GUI_ANDROID_COMPILE_SDK: "${{ env.ANDROID_COMPILE_SDK }}"
+          GUI_ANDROID_TARGET_SDK: "${{ env.ANDROID_TARGET_SDK }}"
+          GUI_ANDROID_BUILD_TOOLS: "${{ env.ANDROID_BUILD_TOOLS }}"
+          GUI_KOTLIN_VERSION: "${{ env.KOTLIN_VERSION }}"
+          GUI_AGP_VERSION: "${{ env.AGP_VERSION }}"
+          GUI_GRADLE_VERSION: "${{ env.GRADLE_VERSION }}"
+          GUI_RUNTIME_HEAP_MB: "${{ matrix.vm-heap-size }}"
+          GUI_RUNTIME_DENSITY: "${{ matrix.density }}"
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          ram-size: ${{ matrix.ram-size }}
-          heap-size: ${{ matrix.heap-size }}
-          density: ${{ matrix.density }}
           disable-animations: true
-          disable-spellchecker: true
-          disk-size: 4G
-          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
+          disk-size: 2048M
+          heap-size: ${{ matrix.ram-size }}
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -memory ${{ matrix.ram-size }} -dpi-device ${{ matrix.density }}
+          script: bash scripts/run-android-runtime-check.sh "${{ matrix.font-scale }}"
