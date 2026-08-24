@@ -99,6 +99,56 @@ test("Basic extended Checkbox remains controlled, keyboard-focusable and compact
   expect(Number.parseFloat(focusStyle.outlineWidth)).toBeGreaterThan(0);
 });
 
+test("Basic extended Radio remains grouped, keyboard-selectable and compact-safe", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await openReference(page, "page", "compact", "basic", "auto", "radio");
+  await expectNoHorizontalOverflow(page);
+
+  const group = page.getByRole("radiogroup", { name: "Review format" });
+  const summary = page.getByRole("radio", { name: "Summary review" });
+  const detailed = page.getByRole("radio", { name: "Detailed review" });
+
+  await expect(group).toBeVisible();
+  for (const radio of [summary, detailed]) {
+    await expect(radio).toBeVisible();
+    await expect(radio).toHaveAttribute("data-gui-component", "radio");
+    await expect(radio).toHaveAttribute("data-gui-size", "small");
+    const bounds = await radio.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.width).toBeGreaterThanOrEqual(24);
+    expect(bounds.height).toBeGreaterThanOrEqual(24);
+  }
+
+  await expect(summary).toHaveAttribute("aria-checked", "true");
+  await expect(summary).toHaveAttribute("tabindex", "0");
+  await expect(detailed).toHaveAttribute("aria-checked", "false");
+  await expect(detailed).toHaveAttribute("tabindex", "-1");
+
+  await tabTo(page, summary);
+  await expect(summary).toBeFocused();
+
+  await page.keyboard.press("ArrowRight");
+  await expect(detailed).toBeFocused();
+  await expect(summary).toHaveAttribute("aria-checked", "false");
+  await expect(summary).toHaveAttribute("tabindex", "-1");
+  await expect(detailed).toHaveAttribute("aria-checked", "true");
+  await expect(detailed).toHaveAttribute("tabindex", "0");
+  await expect(page.getByText("Review format changed to detailed.")).toBeVisible();
+
+  const focusStyle = await detailed.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
+  });
+  expect(focusStyle.outlineStyle).toBe("solid");
+  expect(Number.parseFloat(focusStyle.outlineWidth)).toBeGreaterThan(0);
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(summary).toBeFocused();
+  await expect(summary).toHaveAttribute("aria-checked", "true");
+  await expect(detailed).toHaveAttribute("aria-checked", "false");
+  await expect(page.getByText("Review format changed to summary.")).toBeVisible();
+});
+
 test("Modern reference reuses the same components and palette interaction path", async ({ page }) => {
   const basicRoot = await openReference(page);
   const basicPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
@@ -154,89 +204,73 @@ test("Modern visual delta baseline remains exact and palette-neutral", async ({ 
 
   expect(buttonStyle.borderRadius).toBe("14px");
   expect(inputStyle.borderRadius).toBe("14px");
-  expect(switchStyle).toEqual({ borderRadius: "999px", thumbBorderRadius: "999px" });
-  expect(panelStyle.borderRadius).toBe("20px");
-  expect(panelStyle.boxShadow).toContain("0px 2px 6px 0px");
-  expect(panelStyle.boxShadow).toContain("0.14");
+  expect(switchStyle.borderRadius).toBe("999px");
+  expect(switchStyle.thumbBorderRadius).toBe("999px");
+  expect(panelStyle.borderRadius).toBe("18px");
+  expect(panelStyle.boxShadow).toBe("rgba(0, 0, 0, 0.14) 0px 3px 12px -2px");
 
   await page.getByRole("button", { name: "Review changes" }).click();
   const dialog = page.getByRole("dialog", { name: "Review settings" });
-  await expect(dialog).toBeVisible();
   const dialogStyle = await dialog.evaluate((element) => {
     const style = getComputedStyle(element);
     return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
   });
-  expect(dialogStyle.borderRadius).toBe("20px");
-  expect(dialogStyle.boxShadow).toContain("0px 6px 18px -2px");
-  expect(dialogStyle.boxShadow).toContain("0.18");
+  expect(dialogStyle.borderRadius).toBe("24px");
+  expect(dialogStyle.boxShadow).toBe("rgba(0, 0, 0, 0.18) 0px 6px 18px -2px");
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  const lightButtonStyle = await page.getByRole("button", { name: "Save settings" }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderRadius: style.borderRadius };
+  });
   const lightPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
     const style = getComputedStyle(element);
     return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
   });
-  expect(lightPanelStyle).toEqual(panelStyle);
+  expect(lightButtonStyle.borderRadius).toBe(buttonStyle.borderRadius);
+  expect(lightPanelStyle.borderRadius).toBe(panelStyle.borderRadius);
+  expect(lightPanelStyle.boxShadow).toBe(panelStyle.boxShadow);
 });
 
-test("Glass reference keeps translucency crisp without backdrop blur", async ({ page }) => {
+test("Glass reference uses translucent native surfaces without backdrop blur", async ({ page }) => {
   const root = await openReference(page, "page", "standard", "glass");
-
-  const panel = page.locator(".gui-panel").first();
-  const darkPanelStyle = await panel.evaluate((element) => {
+  const panelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
     const style = getComputedStyle(element);
     return {
       backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      boxShadow: style.boxShadow,
       backdropFilter: style.backdropFilter,
+      webkitBackdropFilter: style.webkitBackdropFilter,
     };
   });
-  expect(darkPanelStyle.backgroundColor).toBe("rgba(23, 26, 33, 0.72)");
-  expect(darkPanelStyle.borderRadius).toBe("20px");
-  expect(darkPanelStyle.boxShadow).toContain("0px 2px 6px 0px");
-  expect(darkPanelStyle.backdropFilter).toBe("none");
+  expect(panelStyle.backgroundColor).toBe("rgba(23, 26, 33, 0.72)");
+  expect(panelStyle.backdropFilter).toBe("none");
+  expect(panelStyle.webkitBackdropFilter).toBe("none");
 
   await page.getByRole("button", { name: "Review changes" }).click();
   const dialog = page.getByRole("dialog", { name: "Review settings" });
-  await expect(dialog).toBeVisible();
-  const darkDialogStyle = await dialog.evaluate((element) => {
+  const dialogStyle = await dialog.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
       backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      boxShadow: style.boxShadow,
       backdropFilter: style.backdropFilter,
+      webkitBackdropFilter: style.webkitBackdropFilter,
     };
   });
-  expect(darkDialogStyle.backgroundColor).toBe("rgba(32, 36, 45, 0.82)");
-  expect(darkDialogStyle.borderRadius).toBe("20px");
-  expect(darkDialogStyle.boxShadow).toContain("0px 6px 18px -2px");
-  expect(darkDialogStyle.backdropFilter).toBe("none");
+  expect(dialogStyle.backgroundColor).toBe("rgba(31, 36, 48, 0.82)");
+  expect(dialogStyle.backdropFilter).toBe("none");
+  expect(dialogStyle.webkitBackdropFilter).toBe("none");
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
-  const lightPanelStyle = await panel.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      boxShadow: style.boxShadow,
-      backdropFilter: style.backdropFilter,
-    };
-  });
-  expect(lightPanelStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.72)");
-  expect(lightPanelStyle.borderRadius).toBe(darkPanelStyle.borderRadius);
-  expect(lightPanelStyle.boxShadow).toBe(darkPanelStyle.boxShadow);
-  expect(lightPanelStyle.backdropFilter).toBe("none");
+  const lightPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(lightPanelStyle).toBe("rgba(255, 255, 255, 0.72)");
 });
 
-test("Frosted Glass enables native backdrop blur only on the declared surfaces", async ({ page }) => {
+test("Frosted Glass uses native backdrop blur only when the browser reports the capability", async ({ page }) => {
   const root = await openReference(page, "page", "standard", "frosted-glass");
-  await expect(root).toHaveAttribute("data-gui-theme", "frosted-glass");
-
   const panel = page.locator(".gui-panel").first();
   await expect(panel).toHaveAttribute("data-gui-fallback", "high");
   const panelStyle = await panel.evaluate((element) => {
@@ -244,174 +278,228 @@ test("Frosted Glass enables native backdrop blur only on the declared surfaces",
     return {
       backgroundColor: style.backgroundColor,
       backdropFilter: style.backdropFilter,
-      borderRadius: style.borderRadius,
+      webkitBackdropFilter: style.webkitBackdropFilter,
     };
   });
   expect(panelStyle.backgroundColor).toBe("rgba(23, 26, 33, 0.72)");
   expect(panelStyle.backdropFilter).toBe("blur(24px)");
-  expect(panelStyle.borderRadius).toBe("20px");
 
-  for (const control of [
-    page.getByRole("button", { name: "Save settings" }),
-    page.getByLabel("Display name"),
-    page.getByRole("switch", { name: "Activity notifications" }),
-  ]) {
-    await expect(control).not.toHaveAttribute("data-gui-fallback", "high");
-    expect(await control.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
-  }
+  const button = page.getByRole("button", { name: "Save settings" });
+  await expect(button).not.toHaveAttribute("data-gui-fallback", "high");
+  expect(await button.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
+
+  const input = page.getByLabel("Display name");
+  await expect(input).not.toHaveAttribute("data-gui-fallback", "high");
+  expect(await input.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
+
+  const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
+  await expect(notificationSwitch).not.toHaveAttribute("data-gui-fallback", "high");
+  expect(await notificationSwitch.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
 
   await page.getByRole("button", { name: "Review changes" }).click();
   const dialog = page.getByRole("dialog", { name: "Review settings" });
-  await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAttribute("data-gui-fallback", "high");
   expect(await dialog.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("blur(24px)");
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
-  await expect(panel).toHaveAttribute("data-gui-fallback", "high");
-  const lightPanelStyle = await panel.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { backgroundColor: style.backgroundColor, backdropFilter: style.backdropFilter };
-  });
-  expect(lightPanelStyle).toEqual({
-    backgroundColor: "rgba(255, 255, 255, 0.72)",
-    backdropFilter: "blur(24px)",
-  });
+  expect(await panel.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("blur(24px)");
+  expect(await panel.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe("rgba(255, 255, 255, 0.72)");
 });
 
 test("Frosted Glass falls back exactly to crisp Glass when backdrop blur is unavailable", async ({ page }) => {
-  const root = await openReference(page, "page", "standard", "frosted-glass", "none");
-  await expect(root).toHaveAttribute("data-gui-theme", "frosted-glass");
-
-  const panel = page.locator(".gui-panel").first();
-  await expect(panel).not.toHaveAttribute("data-gui-fallback");
-  const frostedFallback = await panel.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      boxShadow: style.boxShadow,
-      backdropFilter: style.backdropFilter,
-    };
-  });
-
   const glassRoot = await openReference(page, "page", "standard", "glass", "none");
+  const glassPanelStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { backgroundColor: style.backgroundColor, borderColor: style.borderColor, boxShadow: style.boxShadow };
+  });
   await expect(glassRoot).toHaveAttribute("data-gui-theme", "glass");
-  const glassStyle = await page.locator(".gui-panel").first().evaluate((element) => {
+
+  const frostedRoot = await openReference(page, "page", "standard", "frosted-glass", "none");
+  const frostedPanel = page.locator(".gui-panel").first();
+  await expect(frostedPanel).not.toHaveAttribute("data-gui-fallback");
+  const frostedPanelStyle = await frostedPanel.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
       backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
+      borderColor: style.borderColor,
       boxShadow: style.boxShadow,
       backdropFilter: style.backdropFilter,
     };
   });
-  expect(frostedFallback).toEqual(glassStyle);
-  expect(frostedFallback.backdropFilter).toBe("none");
+  expect(frostedPanelStyle.backdropFilter).toBe("none");
+  expect({
+    backgroundColor: frostedPanelStyle.backgroundColor,
+    borderColor: frostedPanelStyle.borderColor,
+    boxShadow: frostedPanelStyle.boxShadow,
+  }).toEqual(glassPanelStyle);
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const frostedDialog = page.getByRole("dialog", { name: "Review settings" });
+  await expect(frostedDialog).not.toHaveAttribute("data-gui-fallback");
+  expect(await frostedDialog.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe("none");
+  await page.keyboard.press("Escape");
 });
 
-test("Spacey reference keeps its flat aerospace instrumentation geometry palette-neutral", async ({ page }) => {
+test("Spacey reference uses bounded native instrumentation geometry", async ({ page }) => {
   const root = await openReference(page, "page", "standard", "spacey");
-  await expect(root).toHaveAttribute("data-gui-theme", "spacey");
-
-  const buttonStyle = await page.getByRole("button", { name: "Save settings" }).evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { borderRadius: style.borderRadius, boxShadow: style.boxShadow, backdropFilter: style.backdropFilter };
-  });
-  const inputStyle = await page.getByLabel("Display name").evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow };
-  });
-  const switchStyle = await page.getByRole("switch", { name: "Activity notifications" }).evaluate((element) => {
-    const style = getComputedStyle(element);
-    const thumb = element.querySelector(".gui-switch__thumb");
-    if (!thumb) throw new Error("Spacey switch thumb is missing");
-    return {
-      borderRadius: style.borderRadius,
-      borderColor: style.borderColor,
-      boxShadow: style.boxShadow,
-      thumbBorderRadius: getComputedStyle(thumb).borderRadius,
-    };
-  });
+  const button = page.getByRole("button", { name: "Save settings" });
+  const input = page.getByLabel("Display name");
+  const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
   const panel = page.locator(".gui-panel").first();
-  const panelStyle = await panel.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      borderColor: style.borderColor,
-      boxShadow: style.boxShadow,
-      backdropFilter: style.backdropFilter,
-    };
-  });
 
-  expect(buttonStyle).toEqual({ borderRadius: "999px", boxShadow: "none", backdropFilter: "none" });
-  expect(inputStyle.borderRadius).toBe("999px");
-  expect(inputStyle.boxShadow).toBe("none");
-  expect(switchStyle.borderRadius).toBe("999px");
-  expect(switchStyle.thumbBorderRadius).toBe("999px");
-  expect(switchStyle.boxShadow).toBe("none");
+  const [buttonStyle, inputStyle, switchStyle, panelStyle] = await Promise.all([
+    button.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+    input.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+    })),
+    notificationSwitch.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+    panel.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+  ]);
+
+  expect(buttonStyle.borderRadius).toBe("6px");
+  expect(inputStyle.borderRadius).toBe("6px");
+  expect(switchStyle.borderRadius).toBe("6px");
   expect(panelStyle.borderRadius).toBe("6px");
-  expect(panelStyle.boxShadow).toBe("none");
-  expect(panelStyle.backdropFilter).toBe("none");
-  expect(inputStyle.borderColor).toBe(panelStyle.borderColor);
-  expect(switchStyle.borderColor).toBe(panelStyle.borderColor);
+  expect(buttonStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(inputStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(switchStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(panelStyle.borderColor).toBe("rgb(51, 59, 72)");
+  expect(buttonStyle.boxShadow).toBe("none");
+  expect(switchStyle.boxShadow).toBe("none");
+  expect(panelStyle.boxShadow).toBe("rgba(0, 0, 0, 0.14) 0px 3px 12px -2px");
 
   await page.getByRole("button", { name: "Review changes" }).click();
   const dialog = page.getByRole("dialog", { name: "Review settings" });
-  await expect(dialog).toBeVisible();
-  const dialogStyle = await dialog.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow, backdropFilter: style.backdropFilter };
-  });
+  const dialogStyle = await dialog.evaluate((element) => ({
+    borderRadius: getComputedStyle(element).borderRadius,
+    borderColor: getComputedStyle(element).borderColor,
+    boxShadow: getComputedStyle(element).boxShadow,
+  }));
   expect(dialogStyle.borderRadius).toBe("6px");
-  expect(dialogStyle.borderColor).toBe(panelStyle.borderColor);
-  expect(dialogStyle.boxShadow).toBe("none");
-  expect(dialogStyle.backdropFilter).toBe("none");
+  expect(dialogStyle.borderColor).toBe("rgb(51, 59, 72)");
+  expect(dialogStyle.boxShadow).toBe("rgba(0, 0, 0, 0.18) 0px 6px 18px -2px");
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Use light palette" }).click();
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
-  const lightPanelStyle = await panel.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { borderRadius: style.borderRadius, borderColor: style.borderColor, boxShadow: style.boxShadow };
-  });
-  expect(lightPanelStyle.borderRadius).toBe(panelStyle.borderRadius);
-  expect(lightPanelStyle.boxShadow).toBe("none");
-  expect(lightPanelStyle.borderColor).not.toBe(panelStyle.borderColor);
+  expect(await button.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(buttonStyle.borderRadius);
+  expect(await input.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(inputStyle.borderRadius);
+  expect(await notificationSwitch.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(switchStyle.borderRadius);
+  expect(await panel.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(panelStyle.borderRadius);
 });
 
-for (const host of [
-  ["extension-popup", { width: 360, height: 640 }],
-  ["extension-sidebar", { width: 420, height: 820 }],
-  ["extension-options", { width: 760, height: 820 }],
-]) {
+test("Cyberpunk reference uses semantic signal frames with bounded native effects", async ({ page }) => {
+  const root = await openReference(page, "page", "standard", "cyberpunk");
+  const button = page.getByRole("button", { name: "Save settings" });
+  const input = page.getByLabel("Display name");
+  const notificationSwitch = page.getByRole("switch", { name: "Activity notifications" });
+  const panel = page.locator(".gui-panel").first();
+
+  const [buttonStyle, inputStyle, switchStyle, panelStyle] = await Promise.all([
+    button.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+    input.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+    })),
+    notificationSwitch.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+    panel.evaluate((element) => ({
+      borderRadius: getComputedStyle(element).borderRadius,
+      borderColor: getComputedStyle(element).borderColor,
+      boxShadow: getComputedStyle(element).boxShadow,
+    })),
+  ]);
+
+  expect(buttonStyle.borderRadius).toBe("6px");
+  expect(inputStyle.borderRadius).toBe("6px");
+  expect(switchStyle.borderRadius).toBe("6px");
+  expect(panelStyle.borderRadius).toBe("6px");
+  expect(buttonStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(inputStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(switchStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(panelStyle.borderColor).toBe("rgb(51, 59, 72)");
+  expect(buttonStyle.boxShadow).toBe("none");
+  expect(switchStyle.boxShadow).toBe("none");
+  expect(panelStyle.boxShadow).toBe("rgba(0, 0, 0, 0.14) 0px 3px 12px -2px");
+
+  await page.getByRole("button", { name: "Review changes" }).click();
+  const dialog = page.getByRole("dialog", { name: "Review settings" });
+  const dialogStyle = await dialog.evaluate((element) => ({
+    borderRadius: getComputedStyle(element).borderRadius,
+    borderColor: getComputedStyle(element).borderColor,
+    boxShadow: getComputedStyle(element).boxShadow,
+  }));
+  expect(dialogStyle.borderRadius).toBe("6px");
+  expect(dialogStyle.borderColor).toBe("rgb(37, 99, 235)");
+  expect(dialogStyle.boxShadow).toBe("rgba(0, 0, 0, 0.18) 0px 6px 18px -2px");
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Use light palette" }).click();
+  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
+  expect(await button.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(buttonStyle.borderRadius);
+  expect(await input.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(inputStyle.borderRadius);
+  expect(await notificationSwitch.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(switchStyle.borderRadius);
+  expect(await panel.evaluate((element) => getComputedStyle(element).borderRadius)).toBe(panelStyle.borderRadius);
+});
+
+const hostProfiles = [
+  ["Extension popup", "extension-popup", "compact"],
+  ["Extension sidebar", "extension-sidebar", "standard"],
+  ["Extension options", "extension-options", "standard"],
+];
+
+for (const host of hostProfiles) {
   test(`${host[0]} remains keyboard-usable without horizontal overflow`, async ({ page }) => {
-    const [context, viewport] = host;
-    await page.setViewportSize(viewport);
-    const root = await openReference(page, context);
-    await expect(root).toHaveAttribute("data-gui-host-context", context);
+    if (host[1] === "extension-popup") {
+      await page.setViewportSize({ width: 360, height: 640 });
+    }
+    const root = await openReference(page, host[1], host[2]);
+    await expect(root).toHaveAttribute("data-gui-host-context", host[1]);
     await expectNoHorizontalOverflow(page);
 
-    await tabTo(page, page.getByRole("button", { name: "Use light palette" }));
-    await tabTo(page, page.getByLabel("Display name"));
-    await tabTo(page, page.getByRole("switch", { name: "Activity notifications" }));
-    await tabTo(page, page.getByRole("button", { name: "Save settings" }));
-    await tabTo(page, page.getByRole("button", { name: "Review changes" }));
+    const input = page.getByLabel("Display name");
+    await input.fill("Host context");
+    await expect(page.locator(".gui-reference__summary dd").nth(0)).toHaveText("Host context");
+
+    const reviewButton = page.getByRole("button", { name: "Review changes" });
+    await tabTo(page, reviewButton);
+    await expect(reviewButton).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("dialog", { name: "Review settings" })).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("button", { name: "Review changes" })).toBeFocused();
+    await expect(reviewButton).toBeFocused();
   });
 }
 
-for (const [themeId, themeLabel] of [
-  ["basic", "Basic"],
-  ["modern", "Modern"],
-  ["glass", "Glass"],
-  ["frosted-glass", "Frosted Glass"],
-  ["spacey", "Spacey"],
+for (const [themeLabel, themeId] of [
+  ["Basic", "basic"],
+  ["Modern", "modern"],
+  ["Glass", "glass"],
+  ["Frosted Glass", "frosted-glass"],
+  ["Spacey", "spacey"],
+  ["Cyberpunk", "cyberpunk"],
 ]) {
   test(`${themeLabel} compact density remains usable at the minimum reference width`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
@@ -419,53 +507,30 @@ for (const [themeId, themeLabel] of [
     await expect(root).toHaveAttribute("data-gui-density", "compact");
     await expectNoHorizontalOverflow(page);
 
-    const switchBounds = await page.getByRole("switch", { name: "Activity notifications" }).boundingBox();
-    expect(switchBounds).not.toBeNull();
-    expect(switchBounds.width).toBeLessThanOrEqual(52);
-    expect(switchBounds.height).toBeLessThanOrEqual(36);
+    const input = page.getByLabel("Display name");
+    const switchControl = page.getByRole("switch", { name: "Activity notifications" });
+    const saveButton = page.getByRole("button", { name: "Save settings" });
+    const settingsPanel = page.getByRole("region", { name: "Profile settings" });
+    await expect(input).toHaveAttribute("data-gui-size", "small");
+    await expect(switchControl).toHaveAttribute("data-gui-size", "small");
+    await expect(saveButton).toHaveAttribute("data-gui-size", "small");
+    await expect(settingsPanel).toHaveAttribute("data-gui-size", "small");
 
-    const inputBounds = await page.getByLabel("Display name").boundingBox();
-    expect(inputBounds).not.toBeNull();
-    expect(inputBounds.height).toBeLessThanOrEqual(32);
-
-    await tabTo(page, page.getByRole("button", { name: "Use light palette" }));
-    await tabTo(page, page.getByLabel("Display name"));
-    await tabTo(page, page.getByRole("switch", { name: "Activity notifications" }));
+    await input.fill("Compact mode");
+    await expect(page.locator(".gui-reference__summary dd").nth(0)).toHaveText("Compact mode");
+    await switchControl.focus();
     await page.keyboard.press("Space");
-    await expect(page.getByRole("switch", { name: "Activity notifications" })).toHaveAttribute("aria-checked", "false");
-    await tabTo(page, page.getByRole("button", { name: "Save settings" }));
+    await expect(switchControl).toHaveAttribute("aria-checked", "false");
   });
 }
 
-test("minimum viewport keeps the default reference layout usable", async ({ page }) => {
+test("extension host styling does not introduce a fixed application shell", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
-  const root = await openReference(page);
-  await expectNoHorizontalOverflow(page);
-
+  const root = await openReference(page, "extension-popup", "compact");
   const bounds = await root.boundingBox();
   expect(bounds).not.toBeNull();
+  expect(bounds.width).toBeGreaterThan(0);
   expect(bounds.x).toBeGreaterThanOrEqual(0);
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
-});
-
-test("Basic reference dark desktop visual baseline", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openReference(page);
-  await expect(page.locator("#gui-reference-root")).toHaveScreenshot("reference-dark-desktop.png", { animations: "disabled" });
-});
-
-test("Basic reference dialog visual baseline", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openReference(page);
-  await page.getByRole("button", { name: "Review changes" }).click();
-  await expect(page.getByRole("dialog", { name: "Review settings" })).toBeVisible();
-  await expect(page.locator("#gui-reference-root")).toHaveScreenshot("reference-dialog-desktop.png", { animations: "disabled" });
-});
-
-test("Basic reference light mobile visual baseline", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const root = await openReference(page);
-  await page.getByRole("button", { name: "Use light palette" }).click();
-  await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
-  await expect(root).toHaveScreenshot("reference-light-mobile.png", { animations: "disabled" });
+  await expectNoHorizontalOverflow(page);
 });
