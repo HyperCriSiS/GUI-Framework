@@ -22,6 +22,8 @@ assert.match(source, /BasicTextField\(/);
 assert.match(source, /PopupPositionProvider/);
 assert.match(source, /Popup\(/);
 assert.match(source, /onDismissRequest = \{ onExpandedChange\(false\) \}/);
+assert.match(source, /heightIn\(max = 240\.dp\)/);
+assert.match(source, /verticalScroll\(rememberScrollState\(\)\)/);
 assert.match(source, /readOnly = !editable/);
 assert.match(source, /contentDescription = accessibilityLabel/);
 assert.match(source, /onPreviewKeyEvent/);

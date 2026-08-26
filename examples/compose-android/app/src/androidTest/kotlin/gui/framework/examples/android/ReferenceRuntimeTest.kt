@@ -119,10 +119,12 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             composeRule
                 .onNodeWithContentDescription("Legacy channel")
+                .performScrollTo()
                 .assertIsDisplayed()
                 .assertIsNotEnabled()
             composeRule
                 .onNodeWithContentDescription("Push")
+                .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
             composeRule.waitForIdle()
