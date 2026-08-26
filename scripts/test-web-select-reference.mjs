@@ -11,14 +11,19 @@ const [html, source] = await Promise.all([
 assert.match(html, /\.\.\/\.\.\/build\/web\/tokens\.css/);
 assert.match(html, /\.\.\/\.\.\/build\/web\/components\.css/);
 assert.match(html, /select-reference\.mjs/);
-assert.match(source, /createGuiSelect, createGuiSelectOption/);
+assert.match(source, /\bcreateGuiSelect\b/);
+assert.match(source, /\bcreateGuiSelectOption\b/);
 assert.match(source, /data.*guiTheme|dataset\.guiTheme = "basic"/s);
 assert.match(source, /editable: query\.get\("editable"\) === "true"/);
 assert.match(source, /onValueChange\(nextValue\)/);
 assert.match(source, /onQueryChange\(nextQuery\)/);
 assert.match(source, /onExpandedChange\(nextExpanded\)/);
+assert.match(source, /let suppressNextExpandedStatus = false/);
+assert.match(source, /suppressNextExpandedStatus = expanded;[\s\S]*status\.textContent = `Selected \$\{nextValue\}\.`/);
+assert.match(source, /suppressNextExpandedStatus = !expanded;[\s\S]*status\.textContent = `Query \$\{nextQuery \|\| "cleared"\}\.`/);
+assert.match(source, /if \(suppressNextExpandedStatus\) \{[\s\S]*suppressNextExpandedStatus = false;[\s\S]*return;/);
 assert.match(source, /disabled: true/);
 assert.match(source, /select\.refreshOptions\(\)/);
 assert.doesNotMatch(source, /material|bootstrap|tailwind/i);
 
-console.log("Standalone Web Select / ComboBox reference source contract tests passed.");
+console.log("Standalone Web Select / ComboBox reference source contract tests passed with controlled status precedence.");
