@@ -262,7 +262,13 @@ fun GuiSelect(
         fieldModifier = fieldModifier.semantics { contentDescription = accessibilityLabel }
     }
     if (!editable) {
-        fieldModifier = fieldModifier.clickable(enabled = enabled) { onExpandedChange(!expanded) }
+        fieldModifier = fieldModifier.clickable(
+            interactionSource = source,
+            indication = null,
+            enabled = enabled,
+        ) {
+            onExpandedChange(!expanded)
+        }
     }
 
     fieldModifier = fieldModifier
@@ -308,43 +314,68 @@ fun GuiSelect(
             modifier = Modifier.guiSelectFocusOutline(root.outline, radius),
             propagateMinConstraints = true,
         ) {
-            BasicTextField(
-                value = fieldValue,
-                onValueChange = {
-                    if (editable && enabled) {
-                        onQueryChange(it)
-                        if (!expanded) onExpandedChange(true)
-                    }
-                },
-                modifier = fieldModifier,
-                enabled = enabled,
-                readOnly = !editable,
-                textStyle = root.selectTextStyle(),
-                singleLine = true,
-                interactionSource = source,
-                cursorBrush = SolidColor(
-                    root.outline?.color?.toComposeColor()
-                        ?: root.foreground?.toComposeColor()
-                        ?: Color.Unspecified,
-                ),
-                decorationBox = { innerTextField ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            if (fieldValue.isEmpty() && placeholder.isNotEmpty()) {
-                                BasicText(
-                                    text = placeholder,
-                                    style = placeholderStyle.selectTextStyle(root),
-                                )
-                            }
-                            innerTextField()
+            if (editable) {
+                BasicTextField(
+                    value = fieldValue,
+                    onValueChange = {
+                        if (enabled) {
+                            onQueryChange(it)
+                            if (!expanded) onExpandedChange(true)
                         }
-                        BasicText(text = "⌄", style = indicatorStyle.selectTextStyle(root))
+                    },
+                    modifier = fieldModifier,
+                    enabled = enabled,
+                    readOnly = false,
+                    textStyle = root.selectTextStyle(),
+                    singleLine = true,
+                    interactionSource = source,
+                    cursorBrush = SolidColor(
+                        root.outline?.color?.toComposeColor()
+                            ?: root.foreground?.toComposeColor()
+                            ?: Color.Unspecified,
+                    ),
+                    decorationBox = { innerTextField ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (fieldValue.isEmpty() && placeholder.isNotEmpty()) {
+                                    BasicText(
+                                        text = placeholder,
+                                        style = placeholderStyle.selectTextStyle(root),
+                                    )
+                                }
+                                innerTextField()
+                            }
+                            BasicText(text = "⌄", style = indicatorStyle.selectTextStyle(root))
+                        }
+                    },
+                )
+            } else {
+                Row(
+                    modifier = fieldModifier,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        if (fieldValue.isEmpty() && placeholder.isNotEmpty()) {
+                            BasicText(
+                                text = placeholder,
+                                style = placeholderStyle.selectTextStyle(root),
+                            )
+                        } else {
+                            BasicText(
+                                text = fieldValue,
+                                style = root.selectTextStyle(),
+                            )
+                        }
                     }
-                },
-            )
+                    BasicText(text = "⌄", style = indicatorStyle.selectTextStyle(root))
+                }
+            }
         }
 
         if (expanded && enabled) {
