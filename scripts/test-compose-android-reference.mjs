@@ -12,39 +12,44 @@ const [rootBuild, appBuild, settings, manifest, source, runtimeTest] = await Pro
   readFile("examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt", "utf8"),
 ]);
 
-assert.match(rootBuild, /plugins \{/);
-assert.match(rootBuild, /org\.jetbrains\.kotlin\.android/);
-assert.match(rootBuild, /org\.jetbrains\.kotlin\.plugin\.compose/);
-assert.match(rootBuild, /com\.android\.application/);
-assert.match(settings, /pluginManagement/);
-assert.match(settings, /dependencyResolutionManagement/);
+assert.match(rootBuild, /id\("com\.android\.application"\) version "9\.3\.0"/);
+assert.match(rootBuild, /kotlin-gradle-plugin:2\.4\.10/);
+assert.match(rootBuild, /id\("org\.jetbrains\.kotlin\.plugin\.compose"\) version "2\.4\.10"/);
+assert.doesNotMatch(rootBuild, /org\.jetbrains\.kotlin\.android|kotlin-android/, "AGP 9 reference must use built-in Kotlin");
+
 assert.match(settings, /google\(\)/);
 assert.match(settings, /mavenCentral\(\)/);
 assert.match(settings, /include\(":app"\)/);
-assert.match(appBuild, /namespace = "gui\.framework\.examples\.android"/);
-assert.match(appBuild, /compileSdkPreview = "Baklava"/);
-assert.match(appBuild, /targetSdk = 37/);
+
+assert.match(appBuild, /compileSdk = 37/);
 assert.match(appBuild, /minSdk = 23/);
+assert.match(appBuild, /targetSdk = 37/);
 assert.match(appBuild, /testInstrumentationRunner = "androidx\.test\.runner\.AndroidJUnitRunner"/);
-assert.match(appBuild, /androidTestImplementation\("androidx\.compose\.ui:ui-test-junit4/);
-assert.match(appBuild, /debugImplementation\("androidx\.compose\.ui:ui-test-manifest/);
-assert.match(appBuild, /sourceSets\["main"\]\.java\.srcDirs/);
-assert.match(appBuild, /build\/compose/);
-assert.match(appBuild, /packages\/adapter-compose\/src\/main\/kotlin/);
-assert.match(appBuild, /implementation\("org\.jetbrains\.compose\.foundation:foundation/);
+assert.match(appBuild, /compose = true/);
+assert.match(appBuild, /JavaVersion\.VERSION_17/);
+assert.match(appBuild, /sourceSets\.named\("main"\)/);
+assert.match(appBuild, /kotlin\.directories \+= "\.\.\/\.\.\/\.\.\/packages\/adapter-compose\/src\/main\/kotlin"/);
+assert.match(appBuild, /kotlin\.directories \+= "\.\.\/\.\.\/\.\.\/build\/compose"/);
+assert.match(appBuild, /androidx\.compose:compose-bom:2026\.06\.01/);
+assert.match(appBuild, /androidx\.activity:activity-compose:1\.13\.0/);
+assert.match(appBuild, /androidx\.compose\.ui:ui-test-junit4/);
+assert.match(appBuild, /androidx\.test\.ext:junit:1\.3\.0/);
+assert.match(appBuild, /androidx\.test:runner:1\.7\.0/);
+assert.match(appBuild, /androidx\.compose\.ui:ui-test-manifest/);
 assert.doesNotMatch(appBuild, /androidx\.compose\.material/);
+
 assert.match(manifest, /android:name="\.MainActivity"/);
 assert.match(manifest, /android:exported="true"/);
 assert.match(manifest, /android\.intent\.action\.MAIN/);
-assert.match(manifest, /android\.intent\.category\.LAUNCHER/);
 
 assert.match(source, /class MainActivity : ComponentActivity\(\)/);
-assert.match(source, /GuiTheme\(/);
+assert.match(source, /setContent \{/);
 assert.match(source, /referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
 assert.match(source, /applyReferenceTheme\(theme: GuiThemeId\)/);
 assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
+assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
 for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize"]) {
   assert.match(
     source,
