@@ -116,14 +116,13 @@ class ReferenceRuntimeTest {
 
             val deliverySelect = composeRule.onNodeWithContentDescription("Delivery channel")
             deliverySelect.assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
             composeRule
                 .onNodeWithContentDescription("Legacy channel")
-                .performScrollTo()
                 .assertIsDisplayed()
                 .assertIsNotEnabled()
             composeRule
                 .onNodeWithContentDescription("Push")
-                .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
             composeRule.waitForIdle()

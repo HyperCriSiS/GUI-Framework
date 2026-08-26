@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
@@ -23,8 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -32,6 +33,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -46,9 +48,15 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
@@ -120,6 +128,31 @@ private fun GuiVisualPartStyle.selectTextStyle(fallback: GuiVisualPartStyle? = n
         fontWeight = weight?.let(::FontWeight),
         lineHeight = composeLineHeight,
     )
+}
+
+private object GuiSelectPopupPositionProvider : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val preferredX = when (layoutDirection) {
+            LayoutDirection.Ltr -> anchorBounds.left
+            LayoutDirection.Rtl -> anchorBounds.right - popupContentSize.width
+        }
+        val maxX = (windowSize.width - popupContentSize.width).coerceAtLeast(0)
+        val x = preferredX.coerceIn(0, maxX)
+
+        val below = anchorBounds.bottom
+        val above = anchorBounds.top - popupContentSize.height
+        val y = if (below + popupContentSize.height <= windowSize.height) {
+            below
+        } else {
+            above.coerceAtLeast(0)
+        }
+        return IntOffset(x, y)
+    }
 }
 
 /**
@@ -206,6 +239,8 @@ fun GuiSelect(
 
     val selectedLabel = options.firstOrNull { it.value == value }?.label ?: value
     val fieldValue = if (editable) query else selectedLabel
+    val density = LocalDensity.current
+    var anchorSize by remember { mutableStateOf(IntSize.Zero) }
 
     var fieldModifier = Modifier
         .defaultMinSize(
@@ -260,7 +295,10 @@ fun GuiSelect(
             vertical = root.paddingVertical?.toComposeDp() ?: 0.dp,
         )
 
-    Column(modifier = modifier) {
+    Box(
+        modifier = modifier.onSizeChanged { anchorSize = it },
+        propagateMinConstraints = true,
+    ) {
         Box(
             modifier = Modifier.guiSelectFocusOutline(root.outline, radius),
             propagateMinConstraints = true,
@@ -305,41 +343,57 @@ fun GuiSelect(
         }
 
         if (expanded && enabled) {
-            val popupRadius = popupStyle.radius?.toComposeDp() ?: radius
-            val popupShape = RoundedCornerShape(popupRadius)
-            var popupModifier = Modifier.fillMaxWidth().clip(popupShape)
-            popupStyle.fill?.let { popupModifier = popupModifier.background(it.toComposeColor(), popupShape) }
-            popupStyle.border?.let {
-                popupModifier = popupModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), popupShape)
-            }
-            Column(modifier = popupModifier) {
-                options.forEach { option ->
-                    val selectedOption = option.value == value
-                    var optionModifier = Modifier
-                        .fillMaxWidth()
-                        .semantics {
-                            selected = selectedOption
-                            if (option.disabled) disabled()
-                            contentDescription = option.label
-                        }
-                        .clickable(enabled = !option.disabled) {
-                            onValueChange(option.value)
-                            onExpandedChange(false)
-                        }
-                        .padding(
-                            horizontal = optionsStyle.paddingHorizontal?.toComposeDp()
-                                ?: root.paddingHorizontal?.toComposeDp()
-                                ?: 0.dp,
-                            vertical = optionsStyle.paddingVertical?.toComposeDp()
-                                ?: root.paddingVertical?.toComposeDp()
-                                ?: 0.dp,
-                        )
-                    if (option.disabled) optionModifier = optionModifier.alpha(root.selectOpacity())
-                    BasicText(
-                        text = option.label,
-                        modifier = optionModifier,
-                        style = optionsStyle.selectTextStyle(root),
+            Popup(
+                popupPositionProvider = GuiSelectPopupPositionProvider,
+                onDismissRequest = { onExpandedChange(false) },
+            ) {
+                val popupRadius = popupStyle.radius?.toComposeDp() ?: radius
+                val popupShape = RoundedCornerShape(popupRadius)
+                var popupModifier = Modifier.clip(popupShape)
+                if (anchorSize.width > 0) {
+                    popupModifier = popupModifier.width(with(density) { anchorSize.width.toDp() })
+                }
+                popupStyle.fill?.let {
+                    popupModifier = popupModifier.background(it.toComposeColor(), popupShape)
+                }
+                popupStyle.border?.let {
+                    popupModifier = popupModifier.border(
+                        it.width.toComposeDp(),
+                        it.color.toComposeColor(),
+                        popupShape,
                     )
+                }
+                Column(modifier = popupModifier) {
+                    options.forEach { option ->
+                        val selectedOption = option.value == value
+                        var optionModifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                selected = selectedOption
+                                if (option.disabled) disabled()
+                                contentDescription = option.label
+                            }
+                            .clickable(enabled = !option.disabled) {
+                                onValueChange(option.value)
+                                onExpandedChange(false)
+                            }
+                            .padding(
+                                horizontal = optionsStyle.paddingHorizontal?.toComposeDp()
+                                    ?: root.paddingHorizontal?.toComposeDp()
+                                    ?: 0.dp,
+                                vertical = optionsStyle.paddingVertical?.toComposeDp()
+                                    ?: root.paddingVertical?.toComposeDp()
+                                    ?: 0.dp,
+                            )
+                        if (option.disabled) {
+                            optionModifier = optionModifier.alpha(root.selectOpacity())
+                        }
+                        BasicText(
+                            text = option.label,
+                            modifier = optionModifier,
+                            style = optionsStyle.selectTextStyle(root),
+                        )
+                    }
                 }
             }
         }
