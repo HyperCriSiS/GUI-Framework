@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gui.framework.generated.internal.GuiThemeId
@@ -117,10 +118,12 @@ class ReferenceRuntimeTest {
             deliverySelect.assertIsDisplayed().performClick()
             composeRule
                 .onNodeWithContentDescription("Legacy channel")
+                .performScrollTo()
                 .assertIsDisplayed()
                 .assertIsNotEnabled()
             composeRule
                 .onNodeWithContentDescription("Push")
+                .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
             composeRule.waitForIdle()
@@ -129,6 +132,7 @@ class ReferenceRuntimeTest {
 
         composeRule
             .onNodeWithText("Open dialog")
+            .performScrollTo()
             .assertIsDisplayed()
             .performClick()
 
