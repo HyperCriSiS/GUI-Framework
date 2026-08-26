@@ -9,7 +9,7 @@
     {"id":"panel","required":true}
   ],
   "content": [
-    {"id":"tabs","kind":"children","required":true},
+    {"id":"tab","kind":"children","required":true},
     {"id":"panel","kind":"children","required":true}
   ],
   "properties": [
