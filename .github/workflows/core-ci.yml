@@ -155,7 +155,7 @@ jobs:
         run: npm run test:web-reference
 
       - name: Test standalone Web Select / ComboBox reference
-        run: node scripts/test-web-select-reference.mjs
+        run: npm run test:web-select-reference
 
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts

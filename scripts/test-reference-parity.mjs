@@ -3,10 +3,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
+  readFile("examples/web-reference/select.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -56,6 +57,12 @@ assert.match(web, /extendedComponent !== null && theme !== "basic"/);
 assert.match(web, /role", "radiogroup"/);
 assert.match(web, /accessibilityLabel: "Summary review"/);
 assert.match(web, /accessibilityLabel: "Detailed review"/);
+assert.match(webSelect, /createGuiSelect\(/, "Web Select reference must exercise createGuiSelect");
+assert.match(webSelect, /accessibilityLabel: editable \? "Find delivery channel" : "Delivery channel"/);
+assert.match(webSelect, /size: compact \? "small" : "medium"/);
+assert.match(webSelect, /onValueChange: \(nextValue\) =>/);
+assert.match(webSelect, /onQueryChange: \(nextQuery\) =>/);
+assert.match(webSelect, /onExpandedChange: \(nextExpanded\) =>/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -79,14 +86,14 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSwitchSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize"]) {
     assert.match(
       source,
       new RegExp(`${sizeType}\\.SMALL`),
       `${name} compact reference must map ${sizeType} to its existing SMALL size`,
     );
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -98,8 +105,10 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/, `${name} must expose a semantic Radio group`);
   assert.match(source, /accessibilityLabel = "Summary review"/, `${name} must expose the summary Radio option`);
   assert.match(source, /accessibilityLabel = "Detailed review"/, `${name} must expose the detailed Radio option`);
+  assert.match(source, /accessibilityLabel = "Delivery channel"/, `${name} must expose the Select accessibility label`);
+  assert.match(source, /onValueChange = \{ deliveryChannel = it \}/, `${name} must expose the controlled Select value flow`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
