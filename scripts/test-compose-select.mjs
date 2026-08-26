@@ -21,6 +21,7 @@ assert.match(source, /if \(expanded && enabled\) add\("expanded"\)/);
 assert.match(source, /BasicTextField\(/);
 assert.match(source, /PopupPositionProvider/);
 assert.match(source, /Popup\(/);
+assert.match(source, /PopupProperties\(focusable = !editable\)/);
 assert.match(source, /onDismissRequest = \{ onExpandedChange\(false\) \}/);
 assert.match(source, /heightIn\(max = 240\.dp\)/);
 assert.match(source, /verticalScroll\(rememberScrollState\(\)\)/);

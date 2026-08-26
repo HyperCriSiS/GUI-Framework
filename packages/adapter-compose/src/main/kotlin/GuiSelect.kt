@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import gui.framework.compose.internal.resolveGuiCapabilityRecipe
 import gui.framework.compose.internal.resolveGuiVisualRecipe
 import gui.framework.compose.internal.toComposeColor
@@ -350,6 +351,7 @@ fun GuiSelect(
             Popup(
                 popupPositionProvider = GuiSelectPopupPositionProvider,
                 onDismissRequest = { onExpandedChange(false) },
+                properties = PopupProperties(focusable = !editable),
             ) {
                 val popupRadius = popupStyle.radius?.toComposeDp() ?: radius
                 val popupShape = RoundedCornerShape(popupRadius)
