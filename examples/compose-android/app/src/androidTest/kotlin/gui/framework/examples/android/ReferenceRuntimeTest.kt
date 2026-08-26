@@ -2,20 +2,18 @@
 
 package gui.framework.examples.android
 
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.waitUntilAtLeastOneExists
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import gui.framework.generated.internal.GuiThemeId
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,72 +25,67 @@ class ReferenceRuntimeTest {
 
     @Test
     fun referenceControlsRemainUsableAtHostScale() {
-        exerciseReferenceControls(replacement = "Android runtime")
+        exerciseReferenceControls("Scaled reference", includeExtendedComponents = true)
     }
 
     @Test
     fun compactReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setCompactReferenceMode(true)
+            composeRule.activity.applyReferenceDensity(ReferenceDensity.Compact)
         }
         composeRule.waitForIdle()
-        exerciseReferenceControls(
-            replacement = "Compact runtime",
-            includeExtendedComponents = true,
-        )
+
+        exerciseReferenceControls("Compact reference", includeExtendedComponents = true)
     }
 
     @Test
-    fun basicReferenceThemeCanBeSelected() {
-        composeRule
-            .onNodeWithText("Basic", substring = true)
-            .performScrollTo()
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun modernReferenceThemeCanBeSelected() {
+    fun modernReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceTheme("modern")
+            composeRule.activity.applyReferenceTheme(GuiThemeId.MODERN)
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Modern", substring = true).performScrollTo().assertIsDisplayed()
+
+        exerciseReferenceControls("Modern reference")
     }
 
     @Test
-    fun glassReferenceThemeCanBeSelected() {
+    fun glassReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceTheme("glass")
+            composeRule.activity.applyReferenceTheme(GuiThemeId.GLASS)
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Glass", substring = true).performScrollTo().assertIsDisplayed()
+
+        exerciseReferenceControls("Glass reference")
     }
 
     @Test
-    fun frostedReferenceThemeCanBeSelected() {
+    fun frostedGlassReferenceFallsBackAndRemainsUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceTheme("frosted-glass")
+            composeRule.activity.applyReferenceTheme(GuiThemeId.FROSTED_GLASS)
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Frosted Glass", substring = true).performScrollTo().assertIsDisplayed()
+
+        exerciseReferenceControls("Frosted Glass reference")
     }
 
     @Test
-    fun spaceyReferenceThemeCanBeSelected() {
+    fun spaceyReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceTheme("spacey")
+            composeRule.activity.applyReferenceTheme(GuiThemeId.SPACEY)
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Spacey", substring = true).performScrollTo().assertIsDisplayed()
+
+        exerciseReferenceControls("Spacey reference")
     }
 
     @Test
-    fun cyberpunkReferenceThemeCanBeSelected() {
+    fun cyberpunkReferenceControlsRemainUsableAtHostScale() {
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setReferenceTheme("cyberpunk")
+            composeRule.activity.applyReferenceTheme(GuiThemeId.CYBERPUNK)
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Cyberpunk", substring = true).performScrollTo().assertIsDisplayed()
+
+        exerciseReferenceControls("Cyberpunk reference")
     }
 
     private fun exerciseReferenceControls(
@@ -123,10 +116,7 @@ class ReferenceRuntimeTest {
 
             val deliverySelect = composeRule.onNodeWithContentDescription("Delivery channel")
             deliverySelect.assertIsDisplayed().performClick()
-            composeRule.waitUntilAtLeastOneExists(
-                matcher = hasContentDescription("Legacy channel"),
-                timeoutMillis = 2_000,
-            )
+            composeRule.waitForIdle()
             composeRule
                 .onNodeWithContentDescription("Legacy channel")
                 .performScrollTo()
