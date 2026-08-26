@@ -3,6 +3,7 @@
 package gui.framework.examples.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -111,6 +112,19 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             summaryRadio.assertIsNotSelected()
             detailedRadio.assertIsSelected()
+
+            val deliverySelect = composeRule.onNodeWithContentDescription("Delivery channel")
+            deliverySelect.assertIsDisplayed().performClick()
+            composeRule
+                .onNodeWithContentDescription("Legacy channel")
+                .assertIsDisplayed()
+                .assertIsNotEnabled()
+            composeRule
+                .onNodeWithContentDescription("Push")
+                .assertIsDisplayed()
+                .performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Push").assertIsDisplayed()
         }
 
         composeRule

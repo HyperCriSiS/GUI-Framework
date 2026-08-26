@@ -7,7 +7,7 @@ const [scenario, manifest, web, webSelect, desktop, android] = await Promise.all
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
-  readFile("examples/web-reference/select.mjs", "utf8"),
+  readFile("examples/web-reference/select-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
