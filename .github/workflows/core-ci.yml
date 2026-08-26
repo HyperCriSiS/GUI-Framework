@@ -267,6 +267,17 @@ jobs:
       - name: Run Chromium reference regressions
         run: npm run test:web-browser
 
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-browser-failure-diagnostics
+          path: |
+            test-results/
+            tests/visual-regression/
+          if-no-files-found: ignore
+          retention-days: 7
+
   compose-android-reference:
     if: ${{ contains(github.event.head_commit.message, '[android-ci]') || github.event_name == 'workflow_dispatch' }}
     needs: validate-and-typecheck
@@ -286,22 +297,20 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK packages
-        run: >-
-          sdkmanager
-          "platform-tools"
-          "platforms;${ANDROID_PREVIEW_PLATFORM}"
-          "platforms;android-${ANDROID_COMPILE_SDK}"
-          "build-tools;${ANDROID_BUILD_TOOLS}"
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install "platforms;${ANDROID_PREVIEW_PLATFORM}" "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -318,13 +327,34 @@ jobs:
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
 
-      - name: Build Compose Android reference APK
-        run: npm run build:kotlin-android-reference
+      - name: Compile Android reference instrumentation
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestSources --no-daemon
+
+      - name: Assemble Android reference APKs
+        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
 
   compose-android-runtime:
     if: ${{ contains(github.event.head_commit.message, '[device-ci]') || github.event_name == 'workflow_dispatch' }}
     needs: validate-and-typecheck
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 23
+            target: google_apis
+            arch: x86_64
+            ram-size: 1536M
+            heap-size: 192M
+            density: 240
+            font-scale: "1.30"
+          - api-level: 35
+            target: google_apis
+            arch: x86_64
+            ram-size: 2048M
+            heap-size: 256M
+            density: 480
+            font-scale: "1.00"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -340,24 +370,26 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install "platforms;${ANDROID_PREVIEW_PLATFORM}" "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        run: >-
-          sdkmanager
-          "platform-tools"
-          "platforms;${ANDROID_PREVIEW_PLATFORM}"
-          "platforms;android-${ANDROID_COMPILE_SDK}"
-          "build-tools;${ANDROID_BUILD_TOOLS}"
-          "emulator"
-          "system-images;android-36;google_apis;x86_64"
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -374,5 +406,16 @@ jobs:
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
 
-      - name: Exercise Compose Android reference runtime
-        run: bash scripts/run-android-runtime-check.sh
+      - name: Run scaled Android reference instrumentation
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          ram-size: ${{ matrix.ram-size }}
+          heap-size: ${{ matrix.heap-size }}
+          density: ${{ matrix.density }}
+          disable-animations: true
+          disable-spellchecker: true
+          disk-size: 4G
+          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
