@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { createGuiSelect, createGuiSelectOption } from "../../packages/adapter-web/src/select.mjs";
+import {
+  createGuiSelect,
+  createGuiSelectOption,
+} from "../../packages/adapter-web/src/select.mjs";
 
 const densities = new Set(["standard", "compact"]);
 
@@ -27,6 +30,7 @@ export function mountSelectReference(document, root, options = {}) {
   let value = options.value ?? "email";
   let query = options.query ?? "";
   let expanded = false;
+  let suppressNextExpandedStatus = false;
   if (typeof value !== "string" || typeof query !== "string") {
     throw new TypeError("Select reference value and query must be strings");
   }
@@ -67,11 +71,13 @@ export function mountSelectReference(document, root, options = {}) {
     placeholder: editable ? "Type to filter" : "Choose a delivery channel",
     size: density === "compact" ? "small" : "medium",
     onValueChange(nextValue) {
+      suppressNextExpandedStatus = expanded;
       value = nextValue;
       render();
       status.textContent = `Selected ${nextValue}.`;
     },
     onQueryChange(nextQuery) {
+      suppressNextExpandedStatus = !expanded;
       query = nextQuery;
       render();
       status.textContent = `Query ${nextQuery || "cleared"}.`;
@@ -79,6 +85,10 @@ export function mountSelectReference(document, root, options = {}) {
     onExpandedChange(nextExpanded) {
       expanded = nextExpanded;
       render();
+      if (suppressNextExpandedStatus) {
+        suppressNextExpandedStatus = false;
+        return;
+      }
       status.textContent = nextExpanded ? "Options opened." : "Options closed.";
     },
   });
