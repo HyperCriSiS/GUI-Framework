@@ -25,7 +25,8 @@ env:
   AGP_VERSION: "9.3.0"
   ANDROID_COMPILE_SDK: "37"
   ANDROID_TARGET_SDK: "37"
-  ANDROID_BUILD_TOOLS: "36.1.0"
+  ANDROID_BUILD_TOOLS: "37.0.0"
+  ANDROID_PLATFORM_PACKAGE: "android-37.0"
 
 jobs:
   validate-and-typecheck:
@@ -303,7 +304,7 @@ jobs:
       - name: Install Android SDK packages
         run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --install "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
+          sdkmanager --install "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -382,7 +383,7 @@ jobs:
       - name: Install Android SDK packages
         run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --install "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
+          sdkmanager --install "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
