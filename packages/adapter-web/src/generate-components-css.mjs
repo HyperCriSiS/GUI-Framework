@@ -88,6 +88,7 @@ function statePartSelector(rootSelector, componentId, state, partId) {
     : stateSelector(tabSelector, state);
   if (partId === "tab") return interactiveSelector;
   if (partId === "indicator") return `${interactiveSelector} .gui-tabs__indicator`;
+  if (partId === "root" && state === "disabled") return interactiveSelector;
   return partSelector(stateSelector(rootSelector, state), componentId, partId);
 }
 function emitStatePartMap(lines, rootSelector, componentId, state, partMap, label) {
