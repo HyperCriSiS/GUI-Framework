@@ -104,7 +104,7 @@ jobs:
       - name: Test Cyberpunk theme foundation contract
         run: npm run test:cyberpunk-theme
 
-      - name: Test Cyberpunk performance budget
+      - name: Test Cyberpunk theme performance budget
         run: npm run test:cyberpunk-performance
 
       - name: Generate Web token output
@@ -399,4 +399,4 @@ jobs:
           disk-size: 2048M
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
-          script: ./scripts/run-android-runtime-check.sh ${{ matrix.density }} ${{ matrix.font-scale }}
+          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.density }} ${{ matrix.font-scale }}
