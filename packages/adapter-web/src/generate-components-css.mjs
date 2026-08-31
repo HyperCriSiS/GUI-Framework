@@ -80,6 +80,25 @@ function stateSelector(rootSelector, state) {
     default: return `${rootSelector}:where([data-gui-state~="${state}"])`;
   }
 }
+function statePartSelector(rootSelector, componentId, state, partId) {
+  if (componentId !== "tabs") return partSelector(stateSelector(rootSelector, state), componentId, partId);
+  const tabSelector = partSelector(rootSelector, componentId, "tab");
+  const interactiveSelector = state === "selected"
+    ? `${tabSelector}:where([aria-selected="true"])`
+    : stateSelector(tabSelector, state);
+  if (partId === "tab") return interactiveSelector;
+  if (partId === "indicator") return `${interactiveSelector} .gui-tabs__indicator`;
+  return partSelector(stateSelector(rootSelector, state), componentId, partId);
+}
+function emitStatePartMap(lines, rootSelector, componentId, state, partMap, label) {
+  for (const [partId, style] of Object.entries(partMap ?? {})) {
+    const declarations = styleDeclarations(style, `${label}.${partId}`);
+    if (declarations.length === 0) continue;
+    lines.push(`${statePartSelector(rootSelector, componentId, state, partId)} {`);
+    lines.push(...declarations.map((declaration) => `  ${declaration};`));
+    lines.push("}", "");
+  }
+}
 function emitPartMap(lines, selector, componentId, partMap, label) {
   for (const [partId, style] of Object.entries(partMap ?? {})) {
     const declarations = styleDeclarations(style, `${label}.${partId}`);
@@ -100,10 +119,10 @@ function emitScopedVisual(lines, root, componentId, component, visual, label) {
   }
   for (const state of component.states ?? []) {
     if (state === "default") continue;
-    emitPartMap(lines, stateSelector(root, state), componentId, visual?.states?.[state], `${label}.states.${state}`);
+    emitStatePartMap(lines, root, componentId, state, visual?.states?.[state], `${label}.states.${state}`);
     for (const variant of component.variants ?? []) {
       const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
-      emitPartMap(lines, stateSelector(variantRoot, state), componentId, visual?.variants?.[variant]?.states?.[state], `${label}.variants.${variant}.states.${state}`);
+      emitStatePartMap(lines, variantRoot, componentId, state, visual?.variants?.[variant]?.states?.[state], `${label}.variants.${variant}.states.${state}`);
     }
   }
 }
@@ -145,6 +164,10 @@ function emitFoundation(lines, themeIds) {
     `${scope} .gui-input::placeholder { opacity: 1; }`, `${scope} .gui-input:disabled { cursor: default; }`, "",
     `${scope} .gui-select {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-block;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font-family: inherit;", "  vertical-align: middle;", "  outline: none;", "}", "",
     `${scope} .gui-select::placeholder { opacity: 1; }`, `${scope} .gui-select:where([data-gui-editable="false"]) { cursor: pointer; }`, `${scope} .gui-select:disabled { cursor: default; }`, `${scope} .gui-select__popup[hidden] { display: none; }`, "",
+    `${scope} .gui-tabs { box-sizing: border-box; }`, `${scope} .gui-tabs__tab-list {`, "  box-sizing: border-box;", "  display: flex;", "  align-items: stretch;", "  border-style: solid;", "  border-width: 0;", "}", "",
+    `${scope} .gui-tabs__tab {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-flex;", "  flex-direction: column;", "  align-items: center;", "  justify-content: center;", "  border: 0;", "  background: transparent;", "  color: inherit;", "  font: inherit;", "  cursor: pointer;", "  user-select: none;", "  outline: none;", "}", "",
+    `${scope} .gui-tabs__tab:disabled { cursor: default; }`, `${scope} .gui-tabs__indicator {`, "  display: block;", "  inline-size: 100%;", "  visibility: hidden;", "  pointer-events: none;", "}", `${scope} .gui-tabs__tab[aria-selected="true"] .gui-tabs__indicator { visibility: visible; }`, "",
+    `${scope} .gui-tabs__panel { box-sizing: border-box; }`, `${scope} .gui-tabs__panel[hidden] { display: none; }`, "",
     `${scope} .gui-switch {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-flex;", "  align-items: center;", "  justify-content: flex-start;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font: inherit;", "  cursor: pointer;", "  user-select: none;", "  vertical-align: middle;", "  outline: none;", "}", "",
     `${scope} .gui-switch[aria-checked="true"] { justify-content: flex-end; }`, `${scope} .gui-switch:disabled { cursor: default; }`, `${scope} .gui-switch__thumb {`, "  display: block;", "  flex: 0 0 auto;", "  pointer-events: none;", "}", ""
   );
@@ -163,7 +186,7 @@ function generate(ir) {
       emitVisual(lines, `[data-gui-theme="${theme.id}"]`, componentId, component, visual, `${theme.id}.${componentId}`);
     }
   }
-  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
+  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
   return `${lines.join("\n")}\n`;
 }
 
