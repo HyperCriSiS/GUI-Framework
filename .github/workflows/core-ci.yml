@@ -209,6 +209,9 @@ jobs:
       - name: Test native Compose Basic Select / ComboBox
         run: npm run test:kotlin-select
 
+      - name: Test native Compose Basic Tabs
+        run: npm run test:kotlin-tabs
+
       - name: Test native Compose Basic Panel
         run: npm run test:kotlin-panel
 
