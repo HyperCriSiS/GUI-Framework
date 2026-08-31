@@ -129,6 +129,17 @@ class ReferenceRuntimeTest {
                 .performClick()
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Push").assertIsDisplayed()
+
+            val overviewTab = composeRule.onNodeWithText("Overview")
+            val metricsTab = composeRule.onNodeWithText("Metrics")
+            val logsTab = composeRule.onNodeWithText("Logs")
+            overviewTab.performScrollTo().assertIsDisplayed().assertIsSelected()
+            metricsTab.assertIsDisplayed().assertIsNotEnabled()
+            logsTab.assertIsDisplayed().assertIsNotSelected().performClick()
+            composeRule.waitForIdle()
+            overviewTab.assertIsNotSelected()
+            logsTab.assertIsSelected()
+            composeRule.onNodeWithText("Active section: Logs").assertIsDisplayed()
         }
 
         composeRule

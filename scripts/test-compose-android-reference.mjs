@@ -50,14 +50,14 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize"]) {
   assert.match(
     source,
     new RegExp(`${sizeType}\\.SMALL`),
     `Android compact reference must map ${sizeType} to SMALL`,
   );
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
 assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
@@ -67,6 +67,9 @@ assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/);
 assert.match(source, /accessibilityLabel = "Summary review"/);
 assert.match(source, /accessibilityLabel = "Detailed review"/);
 assert.match(source, /accessibilityLabel = "Delivery channel"/);
+assert.match(source, /accessibilityLabel = "Reference tabs"/);
+assert.match(source, /GuiTabItem\(value = "metrics", label = "Metrics", disabled = true\)/);
+assert.match(source, /onValueChange = \{ activeSection = it \}/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
@@ -100,6 +103,10 @@ assert.match(runtimeTest, /onNodeWithContentDescription\("Reference checkbox"\)/
 assert.match(runtimeTest, /onNodeWithContentDescription\("Summary review"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Detailed review"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Delivery channel"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Overview"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Metrics"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Logs"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Active section: Logs"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Legacy channel"\)/);
 assert.match(runtimeTest, /assertIsNotEnabled\(\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Push"\)/);
@@ -110,4 +117,4 @@ assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select coverage and Phase 5 theme selection isolation.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs coverage and Phase 5 theme selection isolation.");

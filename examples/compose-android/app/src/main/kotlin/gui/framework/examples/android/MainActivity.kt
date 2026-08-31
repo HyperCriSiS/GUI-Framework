@@ -30,6 +30,8 @@ import gui.framework.compose.GuiRadioGroup
 import gui.framework.compose.GuiSelect
 import gui.framework.compose.GuiSelectOption
 import gui.framework.compose.GuiSwitch
+import gui.framework.compose.GuiTabItem
+import gui.framework.compose.GuiTabs
 import gui.framework.compose.GuiTheme
 import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiCheckboxSize
@@ -39,6 +41,7 @@ import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
+import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
 
 enum class ReferenceDensity {
@@ -85,6 +88,7 @@ fun AndroidReferenceApp(
     var reviewMode by remember { mutableStateOf("summary") }
     var deliveryChannel by remember { mutableStateOf("email") }
     var selectExpanded by remember { mutableStateOf(false) }
+    var activeSection by remember { mutableStateOf("overview") }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -95,6 +99,7 @@ fun AndroidReferenceApp(
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
+    val tabsSize = if (density == ReferenceDensity.Compact) GuiTabsSize.SMALL else GuiTabsSize.MEDIUM
 
     GuiPanel(
         modifier = Modifier.fillMaxSize(),
@@ -177,6 +182,19 @@ fun AndroidReferenceApp(
                     accessibilityLabel = "Delivery channel",
                     size = selectSize,
                 )
+                GuiTabs(
+                    value = activeSection,
+                    tabs = listOf(
+                        GuiTabItem(value = "overview", label = "Overview"),
+                        GuiTabItem(value = "metrics", label = "Metrics", disabled = true),
+                        GuiTabItem(value = "logs", label = "Logs"),
+                    ),
+                    onValueChange = { activeSection = it },
+                    accessibilityLabel = "Reference tabs",
+                    size = tabsSize,
+                ) { selectedTab ->
+                    BasicText("Active section: ${selectedTab.label}")
+                }
             }
             GuiButton(
                 label = "Open dialog",

@@ -86,14 +86,14 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize"]) {
     assert.match(
       source,
       new RegExp(`${sizeType}\\.SMALL`),
       `${name} compact reference must map ${sizeType} to its existing SMALL size`,
     );
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -107,8 +107,11 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /accessibilityLabel = "Detailed review"/, `${name} must expose the detailed Radio option`);
   assert.match(source, /accessibilityLabel = "Delivery channel"/, `${name} must expose the Select accessibility label`);
   assert.match(source, /onValueChange = \{ deliveryChannel = it \}/, `${name} must expose the controlled Select value flow`);
+  assert.match(source, /accessibilityLabel = "Reference tabs"/, `${name} must expose the Tabs accessibility label`);
+  assert.match(source, /GuiTabItem\(value = "metrics", label = "Metrics", disabled = true\)/, `${name} must expose a disabled Tabs item`);
+  assert.match(source, /onValueChange = \{ activeSection = it \}/, `${name} must expose the controlled Tabs value flow`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
