@@ -70,6 +70,18 @@ try {
   assert.match(source, /GuiEventContract\("expandedChange", "boolean"\)/);
   assert.match(source, /GuiContentSlot\("options", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("combobox", true\)/);
+  assert.match(source, /enum class GuiTabsVariant/);
+  assert.match(source, /enum class GuiTabsSize/);
+  assert.match(source, /enum class GuiTabsState/);
+  assert.match(source, /SELECTED\("selected"\)/);
+  assert.match(source, /data class GuiTabsProperties\(/);
+  assert.match(source, /val value: String/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /GuiEventContract\("valueChange", "string"\)/);
+  assert.match(source, /GuiContentSlot\("tab", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("panel", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("tablist", true\)/);
 
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
