@@ -264,11 +264,14 @@ jobs:
       - name: Generate Web component output
         run: npm run build:web-components
 
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @playwright/test@${PLAYWRIGHT_VERSION}
+
       - name: Install pinned Chromium
-        run: npx --yes --package playwright@${PLAYWRIGHT_VERSION} playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run browser regression suite
-        run: npx --yes --package @playwright/test@${PLAYWRIGHT_VERSION} playwright test -c playwright.config.mjs --project=chromium
+        run: npx playwright test -c playwright.config.mjs --project=chromium
 
   compose-android-reference:
     needs: validate-and-typecheck
