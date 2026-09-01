@@ -142,6 +142,7 @@ export function createGuiTooltip(document, initialProps = {}) {
   let hovered = false;
   let focused = false;
   let destroyed = false;
+  let repositionFrame = null;
 
   element.className = "gui-tooltip";
   popupElement.className = "gui-tooltip__popup";
@@ -161,6 +162,21 @@ export function createGuiTooltip(document, initialProps = {}) {
   function requestOpen(nextOpen) {
     if (nextOpen === props.open) return;
     props.onOpenChange?.(nextOpen);
+  }
+
+  function cancelScheduledReposition() {
+    if (repositionFrame === null) return;
+    windowObject?.cancelAnimationFrame?.(repositionFrame);
+    repositionFrame = null;
+  }
+
+  function scheduleReposition() {
+    cancelScheduledReposition();
+    if (typeof windowObject?.requestAnimationFrame !== "function") return;
+    repositionFrame = windowObject.requestAnimationFrame(() => {
+      repositionFrame = null;
+      reposition();
+    });
   }
 
   function reposition() {
@@ -203,7 +219,9 @@ export function createGuiTooltip(document, initialProps = {}) {
     if (props.open) {
       addAttributeToken(triggerElement, "aria-describedby", popupId);
       reposition();
+      scheduleReposition();
     } else {
+      cancelScheduledReposition();
       removeAttributeToken(triggerElement, "aria-describedby", popupId);
       delete popupElement.dataset.guiResolvedPlacement;
     }
@@ -266,6 +284,7 @@ export function createGuiTooltip(document, initialProps = {}) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      cancelScheduledReposition();
       triggerElement.removeEventListener("mouseenter", onMouseEnter);
       triggerElement.removeEventListener("mouseleave", onMouseLeave);
       triggerElement.removeEventListener("focusin", onFocusIn);
