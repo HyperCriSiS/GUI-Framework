@@ -3,30 +3,24 @@ name: Core CI
 on:
   push:
     branches:
-      - main
-      - feat/core-foundation
+      - "**"
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
-
-permissions:
-  contents: read
 
 concurrency:
   group: core-ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  KOTLIN_VERSION: "2.4.10"
-  COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-  PLAYWRIGHT_VERSION: "1.62.1"
-  GRADLE_VERSION: "9.5.0"
-  AGP_VERSION: "9.3.0"
-  ANDROID_COMPILE_SDK: "37"
-  ANDROID_TARGET_SDK: "37"
-  ANDROID_BUILD_TOOLS: "37.0.0"
-  ANDROID_PLATFORM_PACKAGE: "android-37.0"
+  KOTLIN_VERSION: 2.4.10
+  COMPOSE_MULTIPLATFORM_VERSION: 1.10.3
+  PLAYWRIGHT_VERSION: 1.62.1
+  GRADLE_VERSION: 9.5.0
+  AGP_VERSION: 9.3.0
+  ANDROID_COMPILE_SDK: 37
+  ANDROID_TARGET_SDK: 37
+  ANDROID_BUILD_TOOLS: 37.0.0
+  ANDROID_PLATFORM_PACKAGE: android-37.0
 
 jobs:
   validate-and-typecheck:
@@ -45,7 +39,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -72,39 +65,39 @@ jobs:
         run: npm run test:accessibility
 
       - name: Test Basic theme quality contract
-        run: npm run test:basic-theme
+        run: npm run test:basic
 
       - name: Test Basic theme performance budget
         run: npm run test:basic-performance
 
       - name: Test Modern theme foundation contract
-        run: npm run test:modern-theme
+        run: npm run test:modern
 
       - name: Test Modern theme performance budget
         run: npm run test:modern-performance
 
       - name: Test Glass theme foundation contract
-        run: npm run test:glass-theme
+        run: npm run test:glass
 
       - name: Test Glass theme performance budget
         run: npm run test:glass-performance
 
       - name: Test Frosted Glass capability contract
-        run: npm run test:frosted-theme
+        run: npm run test:frosted
 
       - name: Test Frosted Glass performance budget
         run: npm run test:frosted-performance
 
       - name: Test Spacey theme foundation contract
-        run: npm run test:spacey-theme
+        run: npm run test:spacey
 
       - name: Test Spacey performance budget
         run: npm run test:spacey-performance
 
       - name: Test Cyberpunk theme foundation contract
-        run: npm run test:cyberpunk-theme
+        run: npm run test:cyberpunk
 
-      - name: Test Cyberpunk theme performance budget
+      - name: Test Cyberpunk performance budget
         run: npm run test:cyberpunk-performance
 
       - name: Generate Web token output
@@ -192,49 +185,49 @@ jobs:
         run: npm run test:kotlin-assets
 
       - name: Test native Compose Basic Button
-        run: npm run test:kotlin-button
+        run: npm run test:compose-button
 
       - name: Test native Compose Basic Input
-        run: npm run test:kotlin-input
+        run: npm run test:compose-input
 
       - name: Test native Compose Basic Switch
-        run: npm run test:kotlin-switch
+        run: npm run test:compose-switch
 
       - name: Test native Compose Basic Checkbox
-        run: npm run test:kotlin-checkbox
+        run: npm run test:compose-checkbox
 
       - name: Test native Compose Basic Radio
-        run: npm run test:kotlin-radio
+        run: npm run test:compose-radio
 
       - name: Test native Compose Basic Select / ComboBox
-        run: npm run test:kotlin-select
+        run: npm run test:compose-select
 
       - name: Test native Compose Basic Tabs
-        run: npm run test:kotlin-tabs
+        run: npm run test:compose-tabs
 
       - name: Test native Compose Basic Panel
-        run: npm run test:kotlin-panel
+        run: npm run test:compose-panel
 
       - name: Test native Compose Basic Dialog
-        run: npm run test:kotlin-dialog
+        run: npm run test:compose-dialog
 
       - name: Test Compose semantics and interactions
-        run: npm run test:kotlin-semantics
+        run: npm run test:compose-semantics
 
       - name: Test Compose scaling and minimum-capability behavior
-        run: npm run test:kotlin-scaling
+        run: npm run test:compose-scaling
 
       - name: Test Compose Desktop reference application
-        run: npm run test:kotlin-desktop-reference
+        run: npm run test:compose-desktop-reference
 
       - name: Test Compose Android reference source and build contract
-        run: npm run test:kotlin-android-reference
+        run: npm run test:compose-android-reference
 
       - name: Test cross-platform reference application parity
         run: npm run test:reference-parity
 
       - name: Compile generated Kotlin and Compose adapter output
-        run: npm run compile:kotlin-contracts
+        run: npm run compile:kotlin
 
       - name: Typecheck prototype contracts
         run: npm run typecheck
@@ -252,20 +245,18 @@ jobs:
         with:
           node-version: 24
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Install Chromium runtime dependencies
+        run: npx --yes playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium
 
-      - name: Generate Web token output
-        run: npm run build:web-tokens
+      - name: Build Web reference assets
+        run: |
+          npm run compile:spec
+          npm run build:web-tokens
+          npm run build:web-components
+          npm run build:web-assets
 
-      - name: Generate Web component output
-        run: npm run build:web-components
-
-      - name: Install pinned Chromium
-        run: npx --yes --package playwright@${PLAYWRIGHT_VERSION} playwright install --with-deps chromium
-
-      - name: Run browser regression suite
-        run: npm run test:web-browser
+      - name: Run Chromium reference regression suite
+        run: npx --yes playwright@${PLAYWRIGHT_VERSION} test --config=playwright.config.mjs --project=chromium
 
   compose-android-reference:
     needs: validate-and-typecheck
@@ -313,10 +304,12 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference instrumentation
-        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
+        working-directory: examples/compose-android
+        run: gradle --no-daemon --stacktrace :app:compileDebugAndroidTestKotlin
 
       - name: Assemble Android reference APKs
-        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+        working-directory: examples/compose-android
+        run: gradle --no-daemon --stacktrace :app:assembleDebug :app:assembleDebugAndroidTest
 
   compose-android-runtime:
     needs: validate-and-typecheck
@@ -393,10 +386,10 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          disk-size: 2048M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          density: ${{ matrix.density }}
           disable-animations: true
-          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.density }} ${{ matrix.font-scale }}
+          disable-spellchecker: true
+          disk-size: 4G
+          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
