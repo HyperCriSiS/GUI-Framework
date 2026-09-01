@@ -96,23 +96,24 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [x] Generate Kotlin contracts
 - [x] Generate Kotlin tokens
 - [x] Generate Compose visual recipes
-- [x] Generate Compose portable assets
+- [x] Generate portable asset registry
 - [x] Button adapter
 - [x] Input adapter
 - [x] Switch adapter
 - [x] Panel adapter
 - [x] Dialog adapter
-- [x] Native semantics/input/focus behavior
-- [x] Functional interaction state mapping
-- [x] Capability fallback mapping
-- [x] Desktop reference application
-- [x] Android reference application
+- [x] Capability resolver
+- [x] Stateful Compose Desktop reference application
+- [x] Stateful Compose Android reference application
 - [x] Android APK build in CI
-- [x] Shared reference-scenario parity
-- [x] Second-adapter architecture audit
-- [x] Representative Android runtime matrix
+- [x] Compose semantics/input/focus validation
+- [x] Scaling/minimum-capability validation
+- [x] Shared Web/Desktop/Android parity gate
+- [x] Renderer-neutral second-adapter architecture audit
+- [x] API 23 low-memory / large-font runtime validation
+- [x] API 35 high-density runtime validation
 
-## Phase 5 — Theme foundations
+## Phase 5 — Theme system
 
 - [x] Basic
 - [x] Modern
@@ -120,6 +121,22 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [x] Frosted Glass
 - [x] Spacey
 - [x] Cyberpunk
+- [x] Basic deterministic performance budget
+- [x] Modern deterministic performance budget
+- [x] Glass deterministic performance budget
+- [x] Frosted Glass deterministic performance budget
+- [x] Spacey deterministic performance budget
+- [x] Cyberpunk deterministic performance budget
+- [x] WCAG 2.2 AA integration gate for Basic
+- [x] WCAG 2.2 AA integration gate for Modern
+- [x] WCAG 2.2 AA integration gate for Glass
+- [x] WCAG 2.2 AA integration gate for Frosted Glass
+- [x] WCAG 2.2 AA integration gate for Spacey
+- [x] WCAG 2.2 AA integration gate for Cyberpunk
+- [x] Web reference validation for all six themes
+- [x] Compose Desktop selection for all six themes
+- [x] Compose Android selection for all six themes
+- [x] Representative Android runtime selection validation for all six themes
 
 ## Phase 6 — Extended component set
 
