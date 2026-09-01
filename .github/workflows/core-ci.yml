@@ -271,7 +271,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run browser regression suite
-        run: npx playwright test -c playwright.config.mjs --project=chromium
+        run: npx playwright test -c playwright.config.mjs
 
   compose-android-reference:
     needs: validate-and-typecheck
