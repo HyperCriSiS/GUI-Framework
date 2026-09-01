@@ -1,56 +1,65 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { analyzeThemeAvailability } from "../../compiler/src/theme-resolution.mjs";
-import { parseColorHex } from "../../compiler/src/color.mjs";
-const effects = new Set(["fill", "foreground", "radius", "paddingHorizontal", "paddingVertical", "gap", "minWidth", "minHeight", "fontSize", "fontWeight", "lineHeight", "opacity", "border", "outline", "shadow", "blur", "backdropBlur", "glow", "transition"]);
-const timeUnits = new Set(["ms", "s"]);
-const timingFunctionNames = new Set(["ease", "linear", "ease-in", "ease-out", "ease-in-out", "step-start", "step-end"]);
+import process from "node:process";
+import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
+
 function cssName(path) { return `--gui-${path.replace(/[^A-Za-z0-9_-]+/g, "-").replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`; }
 function tokenPath(reference, label) {
-  if (typeof reference !== "string" || !reference.startsWith("{") || !reference.endsWith("}")) throw new Error(`${label} must be a token reference`);
+  if (typeof reference !== "string" || !/^\{[^{}.]+(?:\.[^{}.]+)*\}$/.test(reference)) throw new Error(`${label}: expected a compiled token reference`);
   return reference.slice(1, -1);
 }
 function compiledValue(value, label) {
-  if (!value || typeof value !== "object" || Array.isArray(value) || !("type" in value) || !("value" in value)) throw new Error(`${label} must be a compiled visual value`);
-  if (value.type === "color") return `var(${cssName(tokenPath(value.reference, label))})`;
-  if (value.type === "dimension") return `var(${cssName(tokenPath(value.reference, label))})`;
-  if (value.type === "number" || value.type === "fontWeight" || value.type === "duration" || value.type === "cubicBezier") return `var(${cssName(tokenPath(value.reference, label))})`;
-  if (value.type === "shadow") return `var(${cssName(tokenPath(value.reference, label))})`;
-  throw new Error(`Unsupported compiled visual type ${value.type} at ${label}`);
+  if (!value || typeof value !== "object" || typeof value.type !== "string" || typeof value.reference !== "string") throw new Error(`${label}: expected compiled visual value`);
+  switch (value.type) {
+    case "color": case "dimension": case "duration": case "number": case "shadow": return `var(${cssName(tokenPath(value.reference, label))})`;
+    default: throw new Error(`${label}: unsupported visual token type ${value.type}`);
+  }
 }
 function transitionDeclarations(value, label) {
-  if (!value || value.type !== "transition" || !value.value) throw new Error(`${label} must be a compiled transition`);
-  const duration = compiledValue(value.value.duration, `${label}.duration`); const easing = compiledValue(value.value.easing, `${label}.easing`);
-  return [`transition-duration: ${duration};`, `transition-timing-function: ${easing};`];
+  if (!value || value.type !== "transition" || !value.value) throw new Error(`${label}: expected compiled transition`);
+  return [`transition: var(${cssName(tokenPath(value.reference, label))})`, "transition-property: background-color, border-color, color, opacity, box-shadow, outline-color"];
 }
 function styleDeclarations(style, label) {
-  const out = [];
-  for (const [key, value] of Object.entries(style ?? {})) {
-    if (!effects.has(key)) throw new Error(`Unsupported visual property ${key} at ${label}`);
-    switch (key) {
-      case "fill": out.push(`background: ${compiledValue(value, `${label}.fill`)};`); break;
-      case "foreground": out.push(`color: ${compiledValue(value, `${label}.foreground`)};`); break;
-      case "radius": out.push(`border-radius: ${compiledValue(value, `${label}.radius`)};`); break;
-      case "paddingHorizontal": { const v=compiledValue(value,`${label}.paddingHorizontal`); out.push(`padding-left: ${v};`,`padding-right: ${v};`); break; }
-      case "paddingVertical": { const v=compiledValue(value,`${label}.paddingVertical`); out.push(`padding-top: ${v};`,`padding-bottom: ${v};`); break; }
-      case "gap": out.push(`gap: ${compiledValue(value, `${label}.gap`)};`); break;
-      case "minWidth": out.push(`min-width: ${compiledValue(value, `${label}.minWidth`)};`); break;
-      case "minHeight": out.push(`min-height: ${compiledValue(value, `${label}.minHeight`)};`); break;
-      case "fontSize": out.push(`font-size: ${compiledValue(value, `${label}.fontSize`)};`); break;
-      case "fontWeight": out.push(`font-weight: ${compiledValue(value, `${label}.fontWeight`)};`); break;
-      case "lineHeight": out.push(`line-height: ${compiledValue(value, `${label}.lineHeight`)};`); break;
-      case "opacity": out.push(`opacity: ${compiledValue(value, `${label}.opacity`)};`); break;
-      case "border": out.push(`border: ${compiledValue(value.width, `${label}.border.width`)} solid ${compiledValue(value.color, `${label}.border.color`)};`); break;
-      case "outline": out.push(`outline: ${compiledValue(value.width, `${label}.outline.width`)} solid ${compiledValue(value.color, `${label}.outline.color`)};`, `outline-offset: ${compiledValue(value.offset, `${label}.outline.offset`)};`); break;
-      case "shadow": out.push(`box-shadow: ${compiledValue(value, `${label}.shadow`)};`); break;
-      case "blur": out.push(`filter: blur(${compiledValue(value, `${label}.blur`)});`); break;
-      case "backdropBlur": { const v=compiledValue(value,`${label}.backdropBlur`); out.push(`-webkit-backdrop-filter: blur(${v});`,`backdrop-filter: blur(${v});`); break; }
-      case "glow": out.push(`box-shadow: 0 0 ${compiledValue(value, `${label}.glow`)} currentColor;`); break;
-      case "transition": out.push(...transitionDeclarations(value, `${label}.transition`)); break;
+  const output = [];
+  for (const [property, value] of Object.entries(style ?? {})) {
+    switch (property) {
+      case "fill": output.push(`background-color: ${compiledValue(value, `${label}.fill`)}`); break;
+      case "foreground": output.push(`color: ${compiledValue(value, `${label}.foreground`)}`); break;
+      case "opacity": output.push(`opacity: ${compiledValue(value, `${label}.opacity`)}`); break;
+      case "radius": output.push(`border-radius: ${compiledValue(value, `${label}.radius`)}`); break;
+      case "paddingHorizontal": output.push(`padding-inline: ${compiledValue(value, `${label}.paddingHorizontal`)}`); break;
+      case "paddingVertical": output.push(`padding-block: ${compiledValue(value, `${label}.paddingVertical`)}`); break;
+      case "gap": output.push(`gap: ${compiledValue(value, `${label}.gap`)}`); break;
+      case "minWidth": output.push(`min-width: ${compiledValue(value, `${label}.minWidth`)}`); break;
+      case "minHeight": output.push(`min-height: ${compiledValue(value, `${label}.minHeight`)}`); break;
+      case "fontSize": output.push(`font-size: ${compiledValue(value, `${label}.fontSize`)}`); break;
+      case "fontWeight": output.push(`font-weight: ${compiledValue(value, `${label}.fontWeight`)}`); break;
+      case "lineHeight": output.push(`line-height: ${compiledValue(value, `${label}.lineHeight`)}`); break;
+      case "border":
+        output.push(`border-color: ${compiledValue(value.color, `${label}.border.color`)}`);
+        output.push(`border-width: ${compiledValue(value.width, `${label}.border.width`)}`);
+        break;
+      case "outline":
+        output.push(`outline-color: ${compiledValue(value.color, `${label}.outline.color`)}`);
+        output.push(`outline-width: ${compiledValue(value.width, `${label}.outline.width`)}`);
+        output.push(`outline-offset: ${compiledValue(value.offset, `${label}.outline.offset`)}`);
+        output.push("outline-style: solid");
+        break;
+      case "transition": output.push(...transitionDeclarations(value, `${label}.transition`)); break;
+      case "shadow": output.push(`box-shadow: ${compiledValue(value, `${label}.shadow`)}`); break;
+      case "backdropBlur": {
+        const blurValue = compiledValue(value, `${label}.backdropBlur`);
+        output.push(`-webkit-backdrop-filter: blur(${blurValue})`);
+        output.push(`backdrop-filter: blur(${blurValue})`);
+        break;
+      }
+      case "blur": case "glow": throw new Error(`${label}: visual property ${property} is not yet mapped by the Web reference adapter`);
+      default: throw new Error(`${label}: unsupported visual property ${property}`);
     }
   }
-  return out;
+  return output;
 }
 function kebabPart(partId) { return partId.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`); }
 function partSelector(rootSelector, componentId, partId) {
@@ -65,8 +74,6 @@ function stateSelector(rootSelector, state) {
     case "focus": return `${rootSelector}:where(:focus-visible)`;
     case "pressed": return `${rootSelector}:where(:active:not(:disabled))`;
     case "checked": return `${rootSelector}:where([aria-checked="true"])`;
-    case "indeterminate": return `${rootSelector}:where([aria-checked="mixed"], [data-gui-indeterminate="true"])`;
-    case "selected": return `${rootSelector}:where([aria-selected="true"])`;
     case "disabled": return `${rootSelector}:where(:disabled)`;
     case "loading": return `${rootSelector}:where([data-gui-loading="true"])`;
     case "error": return `${rootSelector}:where([aria-invalid="true"])`;
@@ -76,11 +83,9 @@ function stateSelector(rootSelector, state) {
 function statePartSelector(rootSelector, componentId, state, partId) {
   if (componentId !== "tabs") return partSelector(stateSelector(rootSelector, state), componentId, partId);
   const tabSelector = partSelector(rootSelector, componentId, "tab");
-  const interactiveSelector = state === "hover" ? `${tabSelector}:where(:hover:not(:disabled))`
-    : state === "focus" ? `${tabSelector}:where(:focus-visible)`
-      : state === "pressed" ? `${tabSelector}:where(:active:not(:disabled))`
-        : state === "selected" ? `${tabSelector}:where([aria-selected="true"])`
-          : state === "disabled" ? `${tabSelector}:where(:disabled)` : stateSelector(tabSelector, state);
+  const interactiveSelector = state === "selected"
+    ? `${tabSelector}:where([aria-selected="true"])`
+    : stateSelector(tabSelector, state);
   if (partId === "tab") return interactiveSelector;
   if (partId === "indicator") return `${interactiveSelector} .gui-tabs__indicator`;
   if (partId === "root" && state === "disabled") return interactiveSelector;
@@ -91,7 +96,7 @@ function emitStatePartMap(lines, rootSelector, componentId, state, partMap, labe
     const declarations = styleDeclarations(style, `${label}.${partId}`);
     if (declarations.length === 0) continue;
     lines.push(`${statePartSelector(rootSelector, componentId, state, partId)} {`);
-    for (const declaration of declarations) lines.push(`  ${declaration}`);
+    lines.push(...declarations.map((declaration) => `  ${declaration};`));
     lines.push("}", "");
   }
 }
@@ -100,49 +105,47 @@ function emitPartMap(lines, selector, componentId, partMap, label) {
     const declarations = styleDeclarations(style, `${label}.${partId}`);
     if (declarations.length === 0) continue;
     lines.push(`${partSelector(selector, componentId, partId)} {`);
-    for (const declaration of declarations) lines.push(`  ${declaration}`);
+    lines.push(...declarations.map((declaration) => `  ${declaration};`));
     lines.push("}", "");
   }
 }
 function emitScopedVisual(lines, root, componentId, component, visual, label) {
   emitPartMap(lines, root, componentId, visual?.base, `${label}.base`);
   for (const size of component.sizes ?? []) emitPartMap(lines, `${root}:where([data-gui-size="${size}"])`, componentId, visual?.sizes?.[size], `${label}.sizes.${size}`);
-  for (const state of component.states ?? []) emitStatePartMap(lines, root, componentId, state, visual?.states?.[state], `${label}.states.${state}`);
   for (const variant of component.variants ?? []) {
-    const scoped=visual?.variants?.[variant]; if(!scoped) continue;
+    const scoped = visual?.variants?.[variant]; if (!scoped) continue;
     const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
     emitPartMap(lines, variantRoot, componentId, scoped.base, `${label}.variants.${variant}.base`);
     for (const size of component.sizes ?? []) emitPartMap(lines, `${variantRoot}:where([data-gui-size="${size}"])`, componentId, scoped.sizes?.[size], `${label}.variants.${variant}.sizes.${size}`);
-    for (const state of component.states ?? []) emitStatePartMap(lines, variantRoot, componentId, state, scoped.states?.[state], `${label}.variants.${variant}.states.${state}`);
   }
   for (const state of component.states ?? []) {
+    if (state === "default") continue;
+    emitStatePartMap(lines, root, componentId, state, visual?.states?.[state], `${label}.states.${state}`);
     for (const variant of component.variants ?? []) {
-      const scoped=visual?.variants?.[variant]; if(!scoped) continue;
       const variantRoot = `${root}:where([data-gui-variant="${variant}"])`;
-      emitStatePartMap(lines, variantRoot, componentId, state, scoped.states?.[state], `${label}.variants.${variant}.states.${state}`);
+      emitStatePartMap(lines, variantRoot, componentId, state, visual?.variants?.[variant]?.states?.[state], `${label}.variants.${variant}.states.${state}`);
     }
   }
 }
 function emitVisual(lines, prefix, componentId, component, visual, label) {
   const root = `${prefix} .gui-${componentId}`;
   emitScopedVisual(lines, root, componentId, component, visual, label);
-  for (const fallback of visual?.fallbacks ?? []) {
-    const fallbackId = fallback.id;
+  for (const [fallbackId, fallback] of Object.entries(visual?.fallbacks ?? {})) {
     emitScopedVisual(lines, `${root}:where([data-gui-fallback="${fallbackId}"])`, componentId, component, fallback.recipe, `${label}.fallbacks.${fallbackId}.recipe`);
   }
 }
 function referenceShape(value) {
   if (Array.isArray(value)) return value.map(referenceShape);
   if (!value || typeof value !== "object") return value;
-  if ("reference" in value && "type" in value && "value" in value) return { reference: value.reference, type: value.type };
-  return Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b)).map(([key, nested]) => [key, referenceShape(nested)]));
+  if (typeof value.reference === "string" && typeof value.type === "string") return { reference: value.reference, type: value.type };
+  return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "trace" && key !== "themeTrace" && key !== "value").map(([key, child]) => [key, referenceShape(child)]));
 }
 function assertPaletteIndependentVisuals(ir) {
-  const reference = ir.palettes?.[0]; if (!reference) throw new Error("Compiled IR has no palette outputs");
-  const referenceComponents = Object.keys(reference.components ?? {}).sort();
+  if (!Array.isArray(ir.palettes) || ir.palettes.length === 0) throw new Error("Compiled IR contains no palettes");
+  const reference = ir.palettes[0]; const referenceComponents = Object.keys(reference.components ?? {}).sort();
   for (const palette of ir.palettes.slice(1)) {
-    const ids = Object.keys(palette.components ?? {}).sort();
-    if (JSON.stringify(ids) !== JSON.stringify(referenceComponents)) throw new Error(`Component registry differs for palette ${palette.id}`);
+    const componentIds = Object.keys(palette.components ?? {}).sort();
+    if (JSON.stringify(componentIds) !== JSON.stringify(referenceComponents)) throw new Error(`Component registry differs for palette ${palette.id}`);
     for (const theme of ir.themes ?? []) {
       const expected = referenceShape(reference.themes?.[theme.id]?.components ?? {});
       const actual = referenceShape(palette.themes?.[theme.id]?.components ?? {});

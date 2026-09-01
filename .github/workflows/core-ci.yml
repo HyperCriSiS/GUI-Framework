@@ -2,11 +2,19 @@ name: Core CI
 
 on:
   push:
+    branches:
+      - main
+      - feat/core-foundation
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: core-ci-${{ github.workflow }}-${{ github.ref }}
+  group: core-ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -30,8 +38,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.13.0
-          cache: npm
+          node-version: 24
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -97,7 +104,7 @@ jobs:
       - name: Test Cyberpunk theme foundation contract
         run: npm run test:cyberpunk-theme
 
-      - name: Test Cyberpunk performance budget
+      - name: Test Cyberpunk theme performance budget
         run: npm run test:cyberpunk-performance
 
       - name: Generate Web token output
@@ -249,8 +256,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.13.0
-          cache: npm
+          node-version: 24
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -262,7 +268,7 @@ jobs:
         run: npm run build:web-components
 
       - name: Install pinned Playwright test runner
-        run: npm install --no-save --no-package-lock @playwright/test@${PLAYWRIGHT_VERSION}
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @playwright/test@${PLAYWRIGHT_VERSION}
 
       - name: Install pinned Chromium
         run: npx playwright install --with-deps chromium
@@ -278,23 +284,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - name: Install Android SDK platform and build tools
-        run: yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Compile neutral specification
+        run: npm run compile:spec
 
-      - name: Assemble Compose Android reference APK
-        run: npm run build:kotlin-android-reference
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Compile Android reference instrumentation
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
+
+      - name: Assemble Android reference APKs
+        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
 
   compose-android-runtime:
     needs: validate-and-typecheck
@@ -305,39 +336,67 @@ jobs:
       matrix:
         include:
           - api-level: 23
-            target: default
+            target: google_apis
             arch: x86_64
+            ram-size: 1536M
+            heap-size: 192M
             density: 240
             font-scale: "1.30"
-            ram-size: 1536M
-            heap-size: 256M
           - api-level: 35
             target: google_apis
             arch: x86_64
+            ram-size: 2048M
+            heap-size: 256M
             density: 480
             font-scale: "1.00"
-            ram-size: 2048M
-            heap-size: 512M
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - name: Install Android SDK platform and build tools
-        run: yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Compile neutral specification
+        run: npm run compile:spec
 
-      - name: Run Android reference instrumentation on API ${{ matrix.api-level }}
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Run scaled Android reference instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -349,4 +408,4 @@ jobs:
           disable-animations: true
           disable-spellchecker: true
           disk-size: 4G
-          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
+          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
