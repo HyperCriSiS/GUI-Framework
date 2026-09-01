@@ -158,6 +158,9 @@ jobs:
       - name: Test standalone Web Select / ComboBox reference
         run: npm run test:web-select-reference
 
+      - name: Test standalone Web Tabs reference
+        run: npm run test:web-tabs-reference
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
