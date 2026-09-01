@@ -154,6 +154,8 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [ ] Tree / Hierarchy primitives
 - [ ] Form layout primitives
 - [ ] Scroll container primitives
+- [ ] Cross-component text/locale robustness (long and unbroken text, Unicode/emoji, RTL/bidi and locale-sensitive layout)
+- [ ] IME/composition robustness for editable controls across Web and Compose
 
 ## Phase 7 — Integration kits
 
@@ -176,6 +178,9 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [ ] Release automation
 - [ ] Security policy
 - [ ] Contributor workflow
+- [ ] Representative consumer fixtures that build from packaged/generated artifacts rather than repository-internal source paths
+- [ ] Public API/neutral-contract compatibility diff gate with lifecycle-appropriate migration notes
+- [ ] Minimum supported consumer toolchain/runtime verification
 
 ## Quality gates
 
@@ -195,6 +200,9 @@ Every completed component/theme should eventually satisfy the applicable subset 
 - browser regression where applicable
 - Android build/runtime validation where applicable
 - cross-platform parity where applicable
+- text/locale/RTL/IME robustness where applicable
+- clean consumer install/build smoke tests where applicable
+- public API/contract compatibility diff where applicable
 
 ## Architecture rules
 
@@ -240,6 +248,12 @@ The initial support policy is intentionally conservative and designed around the
 - After 1.0, breaking contract changes require a major version.
 - Additive tokens, themes and components should remain backward compatible wherever practical.
 - Adapter capability expansion must not silently change deterministic fallback behavior on platforms that do not gain the new capability.
+
+## Engineering review notes
+
+- 2026-09-01: the complete implementation was consolidated from the long-lived `feat/core-foundation` branch back into canonical `main`, restoring the repository invariant defined in `BRANCHING.md`. The merged feature branch should be deleted as repository hygiene.
+- The reusable Software-Engineering-Framework now has a dedicated Library / Framework application module. GUI-specific methodology remains project-local rather than being generalized prematurely.
+- This review deliberately did not add a GUI/design-system-specific reusable module: the existing generic architecture, accessibility, performance and compatibility assurance plus this project's concrete gates already cover those concerns without framework duplication.
 
 ## Deferred decisions
 
