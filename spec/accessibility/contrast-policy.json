@@ -1,0 +1,19 @@
+{
+  "policyVersion": "0.1.0",
+  "checks": [
+    { "id": "primary-text-background", "category": "text", "foreground": "semantic.color.textPrimary", "background": "semantic.color.background", "minimum": 4.5 },
+    { "id": "primary-text-surface", "category": "text", "foreground": "semantic.color.textPrimary", "background": "semantic.color.surface", "minimum": 4.5 },
+    { "id": "secondary-text-background", "category": "text", "foreground": "semantic.color.textSecondary", "background": "semantic.color.background", "minimum": 4.5 },
+    { "id": "secondary-text-surface", "category": "text", "foreground": "semantic.color.textSecondary", "background": "semantic.color.surface", "minimum": 4.5 },
+    { "id": "accent-content", "category": "text", "foreground": "semantic.color.onAccent", "background": "semantic.color.accent", "minimum": 4.5 },
+    { "id": "accent-hover-content", "category": "text", "foreground": "semantic.color.onAccent", "background": "semantic.color.accentHover", "minimum": 4.5 },
+    { "id": "accent-pressed-content", "category": "text", "foreground": "semantic.color.onAccent", "background": "semantic.color.accentPressed", "minimum": 4.5 },
+    { "id": "border-background", "category": "non-text", "foreground": "semantic.color.border", "background": "semantic.color.background", "minimum": 3 },
+    { "id": "border-surface", "category": "non-text", "foreground": "semantic.color.border", "background": "semantic.color.surface", "minimum": 3 },
+    { "id": "strong-border-surface", "category": "non-text", "foreground": "semantic.color.borderStrong", "background": "semantic.color.surface", "minimum": 3 },
+    { "id": "focus-background", "category": "non-text", "foreground": "semantic.color.focus", "background": "semantic.color.background", "minimum": 3 },
+    { "id": "danger-background", "category": "non-text", "foreground": "semantic.color.danger", "background": "semantic.color.background", "minimum": 3 },
+    { "id": "warning-background", "category": "non-text", "foreground": "semantic.color.warning", "background": "semantic.color.background", "minimum": 3 },
+    { "id": "success-background", "category": "non-text", "foreground": "semantic.color.success", "background": "semantic.color.background", "minimum": 3 }
+  ]
+}

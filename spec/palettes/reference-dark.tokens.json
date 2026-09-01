@@ -1,0 +1,47 @@
+{
+  "palette": {
+    "$type": "color",
+    "neutral950": { "$value": { "colorSpace": "srgb", "components": [0.0588, 0.0667, 0.0824], "hex": "#0F1115" } },
+    "neutral900": { "$value": { "colorSpace": "srgb", "components": [0.0902, 0.102, 0.1294], "hex": "#171A21" } },
+    "neutral850": { "$value": { "colorSpace": "srgb", "components": [0.1255, 0.1412, 0.1765], "hex": "#20242D" } },
+    "neutral700": { "$value": { "colorSpace": "srgb", "components": [0.2235, 0.2549, 0.302], "hex": "#39414D" } },
+    "neutral600": { "$value": { "colorSpace": "srgb", "components": [0.349, 0.3843, 0.451], "hex": "#596273" } },
+    "neutral500": { "$value": { "colorSpace": "srgb", "components": [0.4196, 0.4471, 0.502], "hex": "#6B7280" } },
+    "neutral300": { "$value": { "colorSpace": "srgb", "components": [0.6824, 0.7137, 0.7608], "hex": "#AEB6C2" } },
+    "neutral050": { "$value": { "colorSpace": "srgb", "components": [0.9569, 0.9647, 0.9725], "hex": "#F4F6F8" } },
+    "white": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" } },
+    "accent500": { "$value": { "colorSpace": "srgb", "components": [0.1451, 0.3882, 0.9216], "hex": "#2563EB" } },
+    "accent400": { "$value": { "colorSpace": "srgb", "components": [0.1686, 0.4275, 0.9216], "hex": "#2B6DEB" } },
+    "accent600": { "$value": { "colorSpace": "srgb", "components": [0.1137, 0.3059, 0.8471], "hex": "#1D4ED8" } },
+    "success500": { "$value": { "colorSpace": "srgb", "components": [0.2588, 0.7882, 0.5412], "hex": "#42C98A" } },
+    "warning500": { "$value": { "colorSpace": "srgb", "components": [0.898, 0.7255, 0.298], "hex": "#E5B94C" } },
+    "danger400": { "$value": { "colorSpace": "srgb", "components": [0.7922, 0.2745, 0.3294], "hex": "#CA4654" } },
+    "danger500": { "$value": { "colorSpace": "srgb", "components": [0.7608, 0.2549, 0.3098], "hex": "#C2414F" } },
+    "danger600": { "$value": { "colorSpace": "srgb", "components": [0.6627, 0.1804, 0.251], "hex": "#A92E40" } }
+  },
+  "semantic": {
+    "color": {
+      "$type": "color",
+      "background": { "$value": "{palette.neutral950}" },
+      "surface": { "$value": "{palette.neutral900}" },
+      "surfaceElevated": { "$value": "{palette.neutral850}" },
+      "surfaceTranslucent": { "$value": { "colorSpace": "srgb", "components": [0.0902, 0.102, 0.1294], "alpha": 0.72, "hex": "#171A21" } },
+      "surfaceElevatedTranslucent": { "$value": { "colorSpace": "srgb", "components": [0.1255, 0.1412, 0.1765], "alpha": 0.82, "hex": "#20242D" } },
+      "textPrimary": { "$value": "{palette.neutral050}" },
+      "textSecondary": { "$value": "{palette.neutral300}" },
+      "textDisabled": { "$value": "{palette.neutral500}" },
+      "accent": { "$value": "{palette.accent500}" },
+      "accentHover": { "$value": "{palette.accent400}" },
+      "accentPressed": { "$value": "{palette.accent600}" },
+      "onAccent": { "$value": "{palette.white}" },
+      "border": { "$value": "{palette.neutral500}" },
+      "borderStrong": { "$value": "{palette.neutral300}" },
+      "focus": { "$value": "{palette.accent400}" },
+      "success": { "$value": "{palette.success500}" },
+      "warning": { "$value": "{palette.warning500}" },
+      "danger": { "$value": "{palette.danger500}" },
+      "dangerHover": { "$value": "{palette.danger400}" },
+      "dangerPressed": { "$value": "{palette.danger600}" }
+    }
+  }
+}

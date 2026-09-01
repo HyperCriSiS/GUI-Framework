@@ -1,0 +1,100 @@
+{
+  "specVersion": "0.1.0",
+  "component": "input",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "placeholder",
+      "required": false
+    }
+  ],
+  "content": [],
+  "properties": [
+    {
+      "id": "value",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "placeholder",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    },
+    {
+      "id": "readOnly",
+      "type": "boolean",
+      "required": false,
+      "default": false
+    },
+    {
+      "id": "error",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "error"
+    }
+  ],
+  "events": [
+    {
+      "id": "valueChange",
+      "payload": "string"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "disabled",
+    "error"
+  ],
+  "semantics": {
+    "role": "textbox",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "placeholder": "{semantic.color.textSecondary}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "danger": "{semantic.color.danger}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

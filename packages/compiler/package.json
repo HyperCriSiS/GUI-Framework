@@ -1,0 +1,6 @@
+{
+  "name": "@gui-framework/spec-compiler",
+  "private": true,
+  "version": "0.0.0-development",
+  "type": "module"
+}

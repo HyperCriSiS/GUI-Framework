@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GUI Framework component recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "specVersion",
+    "component",
+    "anatomy",
+    "content",
+    "properties",
+    "events",
+    "variants",
+    "sizes",
+    "states",
+    "semantics",
+    "tokenBindings",
+    "capabilities"
+  ],
+  "properties": {
+    "specVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "component": {
+      "$ref": "#/$defs/id"
+    },
+    "anatomy": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "required"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "content": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "required"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "kind": { "enum": ["text", "graphic", "children"] },
+          "required": { "type": "boolean" },
+          "assetReference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["acceptedKinds", "fit", "missingBehavior"],
+            "properties": {
+              "acceptedKinds": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "enum": ["svg", "n-slice", "rive"] }
+              },
+              "fit": { "enum": ["contain", "cover", "stretch", "none"] },
+              "missingBehavior": { "enum": ["omit", "reserve-space", "error"] }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "kind": { "const": "graphic" } }, "required": ["kind"] },
+            "then": {},
+            "else": { "not": { "required": ["assetReference"] } }
+          }
+        ]
+      }
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "required"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "type": { "enum": ["boolean", "string", "number"] },
+          "required": { "type": "boolean" },
+          "default": {},
+          "state": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "indeterminate", "disabled", "loading", "error", "success", "expanded"] }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "payload"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "payload": { "enum": ["none", "boolean", "string", "number"] }
+        }
+      }
+    },
+    "variants": { "$ref": "#/$defs/idArray" },
+    "sizes": { "$ref": "#/$defs/idArray" },
+    "states": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["default", "hover", "focus", "pressed", "selected", "checked", "indeterminate", "disabled", "loading", "error", "success", "expanded"] },
+      "contains": { "const": "default" }
+    },
+    "semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "preferNativePrimitive"],
+      "properties": {
+        "role": { "type": "string", "minLength": 1 },
+        "preferNativePrimitive": { "type": "boolean" }
+      }
+    },
+    "tokenBindings": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/tokenReference" }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "optional", "fallbackOrder"],
+      "properties": {
+        "required": { "$ref": "#/$defs/idArray" },
+        "optional": { "$ref": "#/$defs/idArray" },
+        "fallbackOrder": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["ultra", "high", "standard", "minimal"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9-]*$" },
+    "idArray": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "tokenReference": { "type": "string", "pattern": "^\\{[^{}.]+(?:\\.[^{}.]+)*\\}$" }
+  }
+}

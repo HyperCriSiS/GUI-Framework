@@ -1,0 +1,269 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #111827;
+  color: #f8fafc;
+}
+
+#gui-reference-root {
+  min-height: 100vh;
+  background: var(--gui-semantic-color-surface, #111827);
+  color: var(--gui-semantic-color-text-primary, #f8fafc);
+}
+
+.gui-reference {
+  width: min(100% - 32px, 1040px);
+  margin-inline: auto;
+  padding-block: clamp(24px, 6vw, 64px);
+}
+
+.gui-reference__header {
+  max-width: 720px;
+  margin-block-end: 24px;
+}
+
+.gui-reference__eyebrow {
+  margin: 0 0 8px;
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gui-reference h1,
+.gui-reference h2,
+.gui-reference p {
+  margin-block-start: 0;
+}
+
+.gui-reference h1 {
+  margin-block-end: 8px;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.gui-reference h2 {
+  margin-block-end: 16px;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.gui-reference__lead,
+.gui-reference__secondary {
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+}
+
+.gui-reference__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.gui-reference__stack {
+  display: grid;
+  gap: 16px;
+}
+
+.gui-reference__field {
+  display: grid;
+  gap: 8px;
+  margin-block-end: 18px;
+}
+
+.gui-reference__label,
+.gui-reference__setting-title {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.gui-reference__setting {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 20px;
+}
+
+.gui-reference__setting-copy {
+  min-width: 0;
+}
+
+.gui-reference__setting-copy p {
+  margin: 4px 0 0;
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.gui-reference__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gui-reference__summary {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.gui-reference__summary-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1.3fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.gui-reference__summary dt {
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+  font-size: 0.8125rem;
+}
+
+.gui-reference__summary dd {
+  margin: 0;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.gui-reference__status {
+  margin: 16px 0 0;
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+  font-size: 0.8125rem;
+}
+
+.gui-reference__dialog-content {
+  display: grid;
+  gap: 12px;
+  min-width: min(480px, calc(100vw - 64px));
+  max-width: 560px;
+}
+
+.gui-reference__dialog-content p {
+  margin: 0;
+  color: var(--gui-semantic-color-text-secondary, #94a3b8);
+  line-height: 1.6;
+}
+
+.gui-reference__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-block-start: 8px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference {
+  width: min(100% - 16px, 760px);
+  padding-block: 16px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__header {
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference h1 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference h2 {
+  margin-block-end: 10px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__grid,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__stack {
+  gap: 10px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__field {
+  gap: 4px;
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__setting {
+  gap: 8px;
+  margin-block-end: 12px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__actions,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__summary,
+.gui-reference-host[data-gui-density="compact"] .gui-reference__dialog-actions {
+  gap: 6px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__status {
+  margin-block-start: 8px;
+}
+
+.gui-reference-host[data-gui-density="compact"] .gui-reference__dialog-content {
+  gap: 8px;
+  min-width: min(360px, calc(100vw - 40px));
+  max-width: 440px;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference {
+  width: 100%;
+  padding: 16px;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__header,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference__header {
+  margin-block-end: 16px;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference h1,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference h1 {
+  font-size: 1.75rem;
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__grid,
+.gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference__grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference__actions > * {
+  flex: 1 1 100%;
+}
+
+.gui-reference-host[data-gui-host-context="extension-options"] .gui-reference {
+  width: min(100% - 40px, 960px);
+}
+
+@media (max-width: 720px) {
+  .gui-reference {
+    width: min(100% - 20px, 1040px);
+    padding-block: 24px;
+  }
+
+  .gui-reference__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gui-reference__setting {
+    align-items: flex-start;
+  }
+
+  .gui-reference__actions > * {
+    flex: 1 1 140px;
+  }
+
+  .gui-reference-host[data-gui-host-context="extension-popup"] .gui-reference,
+  .gui-reference-host[data-gui-host-context="extension-sidebar"] .gui-reference {
+    width: 100%;
+    padding: 12px;
+  }
+}

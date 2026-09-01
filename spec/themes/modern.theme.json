@@ -1,0 +1,17 @@
+{
+  "specVersion": "0.1.0",
+  "theme": "modern",
+  "extends": "basic",
+  "components": {
+    "button": { "base": { "root": { "radius": "{radius.lg}" } } },
+    "input": { "base": { "root": { "radius": "{radius.lg}" } } },
+    "switch": {
+      "base": {
+        "root": { "radius": "{radius.pill}" },
+        "thumb": { "radius": "{radius.pill}" }
+      }
+    },
+    "panel": { "base": { "root": { "radius": "{radius.xl}", "shadow": "{elevation.shadow.low}" } } },
+    "dialog": { "base": { "root": { "radius": "{radius.xl}", "shadow": "{elevation.shadow.medium}" } } }
+  }
+}

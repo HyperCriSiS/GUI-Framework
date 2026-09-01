@@ -1,0 +1,7 @@
+{
+  "name": "@gui-framework/core",
+  "private": true,
+  "version": "0.0.0-development",
+  "type": "module",
+  "sideEffects": false
+}

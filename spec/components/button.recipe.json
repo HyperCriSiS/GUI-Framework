@@ -1,0 +1,44 @@
+{
+  "specVersion": "0.1.0",
+  "component": "button",
+  "anatomy": [
+    { "id": "root", "required": true },
+    { "id": "label", "required": true },
+    { "id": "leadingIcon", "required": false },
+    { "id": "trailingIcon", "required": false }
+  ],
+  "content": [
+    { "id": "label", "kind": "text", "required": true },
+    { "id": "leadingIcon", "kind": "graphic", "required": false },
+    { "id": "trailingIcon", "kind": "graphic", "required": false }
+  ],
+  "properties": [
+    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" },
+    { "id": "loading", "type": "boolean", "required": false, "default": false, "state": "loading" }
+  ],
+  "events": [
+    { "id": "activate", "payload": "none" }
+  ],
+  "variants": ["primary", "secondary", "ghost", "danger"],
+  "sizes": ["small", "medium", "large"],
+  "states": ["default", "hover", "focus", "pressed", "disabled", "loading"],
+  "semantics": {
+    "role": "button",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "accent": "{semantic.color.accent}",
+    "accentHover": "{semantic.color.accentHover}",
+    "accentPressed": "{semantic.color.accentPressed}",
+    "onAccent": "{semantic.color.onAccent}",
+    "danger": "{semantic.color.danger}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}",
+    "interactionTransition": "{motion.interaction.fast}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": ["advancedBlendModes", "shaderEffects"],
+    "fallbackOrder": ["standard", "minimal"]
+  }
+}

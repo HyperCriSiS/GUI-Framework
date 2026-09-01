@@ -1,0 +1,64 @@
+{
+  "specVersion": "0.1.0",
+  "component": "panel",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "children",
+      "required": true
+    }
+  ],
+  "content": [
+    {
+      "id": "children",
+      "kind": "children",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "events": [],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default"
+  ],
+  "semantics": {
+    "role": "container",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surface}",
+    "surfaceElevated": "{semantic.color.surfaceElevated}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "backdropBlur",
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "high",
+      "standard",
+      "minimal"
+    ]
+  }
+}

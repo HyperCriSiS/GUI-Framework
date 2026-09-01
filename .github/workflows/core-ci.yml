@@ -1,0 +1,408 @@
+name: Core CI
+
+on:
+  push:
+    branches:
+      - main
+      - feat/core-foundation
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  KOTLIN_VERSION: "2.4.10"
+  COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
+  PLAYWRIGHT_VERSION: "1.62.1"
+  GRADLE_VERSION: "9.5.0"
+  AGP_VERSION: "9.3.0"
+  ANDROID_COMPILE_SDK: "37"
+  ANDROID_TARGET_SDK: "37"
+  ANDROID_BUILD_TOOLS: "37.0.0"
+  ANDROID_PLATFORM_PACKAGE: "android-37.0"
+
+jobs:
+  validate-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Validate neutral specification
+        run: npm run validate:spec
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Test specification compiler
+        run: npm run test:spec
+
+      - name: Guard renderer-neutral specification boundaries
+        run: npm run test:neutral-boundaries
+
+      - name: Test theme inheritance and visual override resolution
+        run: npm run test:theme-resolution
+
+      - name: Test capability fallback resolution
+        run: npm run test:capability-resolution
+
+      - name: Test typed visual recipe resolution
+        run: npm run test:visual-resolution
+
+      - name: Test accessibility requirements
+        run: npm run test:accessibility
+
+      - name: Test Basic theme quality contract
+        run: npm run test:basic-theme
+
+      - name: Test Basic theme performance budget
+        run: npm run test:basic-performance
+
+      - name: Test Modern theme foundation contract
+        run: npm run test:modern-theme
+
+      - name: Test Modern theme performance budget
+        run: npm run test:modern-performance
+
+      - name: Test Glass theme foundation contract
+        run: npm run test:glass-theme
+
+      - name: Test Glass theme performance budget
+        run: npm run test:glass-performance
+
+      - name: Test Frosted Glass capability contract
+        run: npm run test:frosted-theme
+
+      - name: Test Frosted Glass performance budget
+        run: npm run test:frosted-performance
+
+      - name: Test Spacey theme foundation contract
+        run: npm run test:spacey-theme
+
+      - name: Test Spacey performance budget
+        run: npm run test:spacey-performance
+
+      - name: Test Cyberpunk theme foundation contract
+        run: npm run test:cyberpunk-theme
+
+      - name: Test Cyberpunk theme performance budget
+        run: npm run test:cyberpunk-performance
+
+      - name: Generate Web token output
+        run: npm run build:web-tokens
+
+      - name: Generate Web assets
+        run: npm run build:web-assets
+
+      - name: Test Web asset generation
+        run: npm run test:web-assets
+
+      - name: Test Web adapter token generation
+        run: npm run test:web-adapter
+
+      - name: Generate Web component output
+        run: npm run build:web-components
+
+      - name: Test Web capability fallback generation
+        run: npm run test:web-capabilities
+
+      - name: Test native Web Basic Button
+        run: npm run test:web-button
+
+      - name: Test native Web Basic Input
+        run: npm run test:web-input
+
+      - name: Test native Web Basic Switch
+        run: npm run test:web-switch
+
+      - name: Test native Web Basic Checkbox
+        run: npm run test:web-checkbox
+
+      - name: Test native Web Basic Radio
+        run: npm run test:web-radio
+
+      - name: Test native Web Basic Select / ComboBox
+        run: npm run test:web-select
+
+      - name: Test native Web Basic Tabs
+        run: npm run test:web-tabs
+
+      - name: Test native Web Basic Panel
+        run: npm run test:web-panel
+
+      - name: Test native Web Basic Dialog
+        run: npm run test:web-dialog
+
+      - name: Test functional Web reference application
+        run: npm run test:web-reference
+
+      - name: Test standalone Web Select / ComboBox reference
+        run: npm run test:web-select-reference
+
+      - name: Test standalone Web Tabs reference
+        run: npm run test:web-tabs-reference
+
+      - name: Generate Web TypeScript contracts
+        run: npm run build:web-contracts
+
+      - name: Test Web TypeScript contract generation
+        run: npm run test:web-contracts
+
+      - name: Typecheck generated Web TypeScript contracts
+        run: npm run typecheck:web-contracts
+
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Test Kotlin contract generation
+        run: npm run test:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Test Kotlin token generation
+        run: npm run test:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Test Kotlin visual generation
+        run: npm run test:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Test Kotlin asset generation
+        run: npm run test:kotlin-assets
+
+      - name: Test native Compose Basic Button
+        run: npm run test:kotlin-button
+
+      - name: Test native Compose Basic Input
+        run: npm run test:kotlin-input
+
+      - name: Test native Compose Basic Switch
+        run: npm run test:kotlin-switch
+
+      - name: Test native Compose Basic Checkbox
+        run: npm run test:kotlin-checkbox
+
+      - name: Test native Compose Basic Radio
+        run: npm run test:kotlin-radio
+
+      - name: Test native Compose Basic Select / ComboBox
+        run: npm run test:kotlin-select
+
+      - name: Test native Compose Basic Tabs
+        run: npm run test:kotlin-tabs
+
+      - name: Test native Compose Basic Panel
+        run: npm run test:kotlin-panel
+
+      - name: Test native Compose Basic Dialog
+        run: npm run test:kotlin-dialog
+
+      - name: Test Compose semantics and interactions
+        run: npm run test:kotlin-semantics
+
+      - name: Test Compose scaling and minimum-capability behavior
+        run: npm run test:kotlin-scaling
+
+      - name: Test Compose Desktop reference application
+        run: npm run test:kotlin-desktop-reference
+
+      - name: Test Compose Android reference source and build contract
+        run: npm run test:kotlin-android-reference
+
+      - name: Test cross-platform reference application parity
+        run: npm run test:reference-parity
+
+      - name: Compile generated Kotlin and Compose adapter output
+        run: npm run compile:kotlin-contracts
+
+      - name: Typecheck prototype contracts
+        run: npm run typecheck
+
+  web-browser-regression:
+    needs: validate-and-typecheck
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[browser-ci]') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Generate Web token output
+        run: npm run build:web-tokens
+
+      - name: Generate Web component output
+        run: npm run build:web-components
+
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @playwright/test@${PLAYWRIGHT_VERSION}
+
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser regression suite
+        run: npx playwright test -c playwright.config.mjs
+
+  compose-android-reference:
+    needs: validate-and-typecheck
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[android-ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Compile Android reference instrumentation
+        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
+
+      - name: Assemble Android reference APKs
+        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+
+  compose-android-runtime:
+    needs: validate-and-typecheck
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[device-ci]') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 23
+            target: google_apis
+            arch: x86_64
+            ram-size: 1536M
+            heap-size: 192M
+            density: 240
+            font-scale: "1.30"
+          - api-level: 35
+            target: google_apis
+            arch: x86_64
+            ram-size: 2048M
+            heap-size: 256M
+            density: 480
+            font-scale: "1.00"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
+      - name: Run scaled Android reference instrumentation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          ram-size: ${{ matrix.ram-size }}
+          heap-size: ${{ matrix.heap-size }}
+          density: ${{ matrix.density }}
+          disable-animations: true
+          disable-spellchecker: true
+          disk-size: 4G
+          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
