@@ -636,7 +636,7 @@
     },
     "switch": {
       "base": {
-        "track": {
+        "root": {
           "fill": "{semantic.color.surfacePressed}",
           "border": {
             "color": "{semantic.color.borderStrong}",
@@ -653,7 +653,7 @@
       },
       "sizes": {
         "small": {
-          "track": {
+          "root": {
             "minWidth": "{component.switch.track.width.small}",
             "minHeight": "{component.switch.track.height.small}"
           },
@@ -663,7 +663,7 @@
           }
         },
         "medium": {
-          "track": {
+          "root": {
             "minWidth": "{component.switch.track.width.medium}",
             "minHeight": "{component.switch.track.height.medium}"
           },
@@ -673,7 +673,7 @@
           }
         },
         "large": {
-          "track": {
+          "root": {
             "minWidth": "{component.switch.track.width.large}",
             "minHeight": "{component.switch.track.height.large}"
           },
@@ -685,12 +685,12 @@
       },
       "states": {
         "hover": {
-          "track": {
+          "root": {
             "fill": "{semantic.color.surfaceHover}"
           }
         },
         "focus": {
-          "track": {
+          "root": {
             "outline": {
               "color": "{semantic.color.focus}",
               "width": "{focus.ring.width}",
@@ -699,12 +699,12 @@
           }
         },
         "pressed": {
-          "track": {
+          "root": {
             "fill": "{semantic.color.surfacePressed}"
           }
         },
         "checked": {
-          "track": {
+          "root": {
             "fill": "{semantic.color.accent}",
             "border": {
               "color": "{semantic.color.accent}",
