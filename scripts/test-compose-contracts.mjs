@@ -82,6 +82,16 @@ try {
   assert.match(source, /GuiContentSlot\("tab", "children", true\)/);
   assert.match(source, /GuiContentSlot\("panel", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("tablist", true\)/);
+  assert.match(source, /enum class GuiTooltipVariant/);
+  assert.match(source, /enum class GuiTooltipSize/);
+  assert.match(source, /enum class GuiTooltipState/);
+  assert.match(source, /data class GuiTooltipProperties\(/);
+  assert.match(source, /val open: Boolean/);
+  assert.match(source, /val placement: String = "top"/);
+  assert.match(source, /GuiEventContract\("openChange", "boolean"\)/);
+  assert.match(source, /GuiContentSlot\("trigger", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("content", "text", true\)/);
+  assert.match(source, /GuiComponentSemantics\("tooltip", false\)/);
 
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);

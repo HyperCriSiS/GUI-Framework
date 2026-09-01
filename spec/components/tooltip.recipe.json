@@ -1,0 +1,84 @@
+{
+  "specVersion": "0.1.0",
+  "component": "tooltip",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "trigger",
+      "required": true
+    },
+    {
+      "id": "popup",
+      "required": true
+    },
+    {
+      "id": "content",
+      "required": true
+    }
+  ],
+  "content": [
+    {
+      "id": "trigger",
+      "kind": "children",
+      "required": true
+    },
+    {
+      "id": "content",
+      "kind": "text",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "open",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "placement",
+      "type": "string",
+      "required": false,
+      "default": "top"
+    }
+  ],
+  "events": [
+    {
+      "id": "openChange",
+      "payload": "boolean"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default"
+  ],
+  "semantics": {
+    "role": "tooltip",
+    "preferNativePrimitive": false
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "border": "{semantic.color.border}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

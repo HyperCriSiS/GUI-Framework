@@ -23,7 +23,7 @@ try {
   assert.match(source, /export type GuiRegisteredThemeId = \(typeof guiRegisteredThemeIds\)\[number\];/);
   assert.match(source, /export const guiThemeIds = \["basic", "modern", "glass", "frosted-glass", "spacey", "cyberpunk"\] as const;/);
   assert.match(source, /export type GuiThemeId = \(typeof guiThemeIds\)\[number\];/);
-  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch", "tabs"\] as const;/);
+  assert.match(source, /export const guiComponentIds = \["button", "checkbox", "dialog", "input", "panel", "radio", "select", "switch", "tabs", "tooltip"\] as const;/);
 
   assert.match(source, /export type GuiButtonVariant = \(typeof guiButtonContract\.variants\)\[number\];/);
   assert.match(source, /variants: \["primary", "secondary", "ghost", "danger"\] as const,/);
@@ -65,6 +65,16 @@ try {
   assert.match(source, /"id": "tab"/);
   assert.match(source, /"id": "panel"/);
   assert.match(source, /"role": "tablist"/);
+  assert.match(source, /export const guiTooltipContract = \{/);
+  assert.match(source, /export type GuiTooltipVariant = \(typeof guiTooltipContract\.variants\)\[number\];/);
+  assert.match(source, /export type GuiTooltipSize = \(typeof guiTooltipContract\.sizes\)\[number\];/);
+  assert.match(source, /export type GuiTooltipState = \(typeof guiTooltipContract\.states\)\[number\];/);
+  assert.match(source, /"id": "open"/);
+  assert.match(source, /"id": "placement"/);
+  assert.match(source, /"id": "openChange"/);
+  assert.match(source, /"id": "trigger"/);
+  assert.match(source, /"id": "content"/);
+  assert.match(source, /"role": "tooltip"/);
   assert.match(source, /states: \["default", "hover", "focus", "pressed", "checked", "indeterminate", "disabled"\] as const,/);
   assert.match(source, /"id": "indeterminate"/);
   assert.match(source, /"role": "checkbox"/);
