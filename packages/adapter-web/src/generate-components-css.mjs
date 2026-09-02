@@ -81,6 +81,12 @@ function stateSelector(rootSelector, state) {
   }
 }
 function statePartSelector(rootSelector, componentId, state, partId) {
+  if (componentId === "menu" && ["hover", "focus", "pressed", "disabled"].includes(state)) {
+    const itemSelector = partSelector(rootSelector, componentId, "item");
+    const interactiveSelector = stateSelector(itemSelector, state);
+    if (partId === "item") return interactiveSelector;
+    if (partId === "label" || partId === "shortcut") return `${interactiveSelector} .gui-menu__${kebabPart(partId)}`;
+  }
   if (componentId !== "tabs") return partSelector(stateSelector(rootSelector, state), componentId, partId);
   const tabSelector = partSelector(rootSelector, componentId, "tab");
   const interactiveSelector = state === "selected"
@@ -171,6 +177,9 @@ function emitFoundation(lines, themeIds) {
     `${scope} .gui-tabs__panel { box-sizing: border-box; }`, `${scope} .gui-tabs__panel[hidden] { display: none; }`, "",
     `${scope} .gui-tooltip { box-sizing: border-box; pointer-events: none; }`, `${scope} .gui-tooltip__popup {`, "  box-sizing: border-box;", "  position: fixed;", "  max-inline-size: calc(100vw - 8px);", "  border-style: solid;", "  border-width: 0;", "  overflow-wrap: anywhere;", "  pointer-events: none;", "}", "",
     `${scope} .gui-tooltip__popup[hidden] { display: none; }`, `${scope} .gui-tooltip__content { display: block; }`, "",
+    `${scope} .gui-menu { box-sizing: border-box; pointer-events: none; }`, `${scope} .gui-menu__popup {`, "  box-sizing: border-box;", "  position: fixed;", "  max-inline-size: calc(100vw - 8px);", "  max-block-size: calc(100vh - 8px);", "  overflow: auto;", "  border-style: solid;", "  border-width: 0;", "  outline: none;", "  pointer-events: auto;", "}", "",
+    `${scope} .gui-menu__popup[hidden] { display: none; }`, `${scope} .gui-menu__item {`, "  appearance: none;", "  box-sizing: border-box;", "  display: flex;", "  inline-size: 100%;", "  align-items: center;", "  justify-content: space-between;", "  border: 0;", "  background: transparent;", "  color: inherit;", "  font: inherit;", "  text-align: start;", "  cursor: pointer;", "  user-select: none;", "  outline: none;", "}", "",
+    `${scope} .gui-menu__item:disabled { cursor: default; }`, `${scope} .gui-menu__label { min-inline-size: 0; }`, `${scope} .gui-menu__shortcut { margin-inline-start: auto; white-space: nowrap; }`, `${scope} .gui-menu__shortcut[hidden] { display: none; }`, `${scope} .gui-menu__separator { box-sizing: border-box; inline-size: 100%; }`, "",
     `${scope} .gui-switch {`, "  appearance: none;", "  box-sizing: border-box;", "  display: inline-flex;", "  align-items: center;", "  justify-content: flex-start;", "  border-style: solid;", "  border-width: 0;", "  background: transparent;", "  color: inherit;", "  font: inherit;", "  cursor: pointer;", "  user-select: none;", "  vertical-align: middle;", "  outline: none;", "}", "",
     `${scope} .gui-switch[aria-checked="true"] { justify-content: flex-end; }`, `${scope} .gui-switch:disabled { cursor: default; }`, `${scope} .gui-switch__thumb {`, "  display: block;", "  flex: 0 0 auto;", "  pointer-events: none;", "}", ""
   );
@@ -189,7 +198,7 @@ function generate(ir) {
       emitVisual(lines, `[data-gui-theme="${theme.id}"]`, componentId, component, visual, `${theme.id}.${componentId}`);
     }
   }
-  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
+  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", "}", "");
   return `${lines.join("\n")}\n`;
 }
 
