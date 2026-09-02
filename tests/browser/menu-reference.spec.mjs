@@ -31,10 +31,10 @@ test("Basic Menu reference preserves controlled native menu semantics and keyboa
   await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await expect(popup).toBeHidden();
-  await expect(locked).toBeDisabled();
 
   await trigger.click();
   await expect(popup).toBeVisible();
+  await expect(locked).toBeDisabled();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await expect(reload).toBeFocused();
   await expect(page.getByText("Menu open.")).toBeVisible();
@@ -71,11 +71,10 @@ test("Basic Context Menu opens at the pointer, flips inward and Escape restores 
 
   const triggerBounds = await trigger.boundingBox();
   expect(triggerBounds).not.toBeNull();
-  await page.mouse.click(
-    triggerBounds.x + triggerBounds.width - 2,
-    triggerBounds.y + triggerBounds.height - 2,
-    { button: "right" },
-  );
+  await trigger.click({
+    button: "right",
+    position: { x: triggerBounds.width - 2, y: triggerBounds.height - 2 },
+  });
 
   await expect(popup).toBeVisible();
   await expect(popup).toHaveAttribute("data-gui-resolved-placement", "context");
