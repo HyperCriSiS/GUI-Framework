@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - main
-      - feat/core-foundation
+      - feat/**
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,17 +15,6 @@ permissions:
 concurrency:
   group: core-ci-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  KOTLIN_VERSION: "2.4.10"
-  COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-  PLAYWRIGHT_VERSION: "1.62.1"
-  GRADLE_VERSION: "9.5.0"
-  AGP_VERSION: "9.3.0"
-  ANDROID_COMPILE_SDK: "37"
-  ANDROID_TARGET_SDK: "37"
-  ANDROID_BUILD_TOOLS: "37.0.0"
-  ANDROID_PLATFORM_PACKAGE: "android-37.0"
 
 jobs:
   validate-and-typecheck:
@@ -39,13 +27,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -104,7 +92,7 @@ jobs:
       - name: Test Cyberpunk theme foundation contract
         run: npm run test:cyberpunk-theme
 
-      - name: Test Cyberpunk theme performance budget
+      - name: Test Cyberpunk performance budget
         run: npm run test:cyberpunk-performance
 
       - name: Generate Web token output
@@ -227,6 +215,9 @@ jobs:
       - name: Test native Compose Basic Tooltip
         run: npm run test:kotlin-tooltip
 
+      - name: Test native Compose Basic Menu / Context Menu
+        run: npm run test:kotlin-menu
+
       - name: Test native Compose Basic Panel
         run: npm run test:kotlin-panel
 
@@ -254,10 +245,9 @@ jobs:
       - name: Typecheck prototype contracts
         run: npm run typecheck
 
-  web-browser-regression:
+  browser-runtime:
+    runs-on: ubuntu-latest
     needs: validate-and-typecheck
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[browser-ci]') }}
-    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -266,37 +256,23 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: npm
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Install Playwright Chromium
+        run: npx --yes playwright@1.62.1 install --with-deps chromium
 
       - name: Generate Web token output
-        run: npm run build:web-tokens
+        run: npm run compile:spec && npm run build:web-tokens && npm run build:web-components && npm run build:web-assets
 
-      - name: Generate Web component output
-        run: npm run build:web-components
+      - name: Test Web reference runtime and visual baseline
+        run: npm run test:web-browser
 
-      - name: Install pinned Playwright test runner
-        run: npm install --no-save --ignore-scripts --no-audit --no-fund @playwright/test@${PLAYWRIGHT_VERSION}
-
-      - name: Install pinned Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Run browser regression suite
-        run: npx playwright test -c playwright.config.mjs
-
-  compose-android-reference:
-    needs: validate-and-typecheck
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[android-ci]') }}
+  compose-desktop-reference-build:
     runs-on: ubuntu-latest
+    needs: validate-and-typecheck
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -304,68 +280,55 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Generate Compose sources
+        run: npm run compile:spec && npm run build:kotlin-contracts && npm run build:kotlin-tokens && npm run build:kotlin-visuals && npm run build:kotlin-assets
 
-      - name: Install Android SDK packages
-        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Build Compose Desktop reference application
+        run: mvn -q -f examples/compose-desktop/pom.xml package
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
-
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
-
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Compile Android reference instrumentation
-        run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
-
-      - name: Assemble Android reference APKs
-        run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
-
-  compose-android-runtime:
-    needs: validate-and-typecheck
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[device-ci]') }}
+  compose-android-reference-build:
     runs-on: ubuntu-latest
+    needs: validate-and-typecheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Generate Compose sources
+        run: npm run compile:spec && npm run build:kotlin-contracts && npm run build:kotlin-tokens && npm run build:kotlin-visuals && npm run build:kotlin-assets
+
+      - name: Build Compose Android reference APK
+        run: npm run build:kotlin-android-reference
+
+  android-device-runtime:
+    runs-on: ubuntu-latest
+    needs: compose-android-reference-build
     strategy:
       fail-fast: false
       matrix:
         include:
           - api-level: 23
-            target: google_apis
+            target: default
             arch: x86_64
-            ram-size: 1536M
-            heap-size: 192M
-            density: 240
-            font-scale: "1.30"
+            profile: low-memory-large-font
+            ram-size: 768M
+            density: 320
+            font-scale: 1.30
           - api-level: 35
             target: google_apis
             arch: x86_64
+            profile: high-density
             ram-size: 2048M
-            heap-size: 256M
-            density: 480
-            font-scale: "1.00"
+            density: 560
+            font-scale: 1.00
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -373,48 +336,23 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Enable KVM acceleration
+      - name: Enable KVM group permissions
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Install Android SDK packages
-        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Generate Compose sources
+        run: npm run compile:spec && npm run build:kotlin-contracts && npm run build:kotlin-tokens && npm run build:kotlin-visuals && npm run build:kotlin-assets
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
-
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
-
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Run scaled Android reference instrumentation
+      - name: Run Android reference runtime tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           ram-size: ${{ matrix.ram-size }}
-          heap-size: ${{ matrix.heap-size }}
           density: ${{ matrix.density }}
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -prop persist.sys.font_scale=${{ matrix.font-scale }}
           disable-animations: true
-          disable-spellchecker: true
-          disk-size: 4G
-          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
+          script: gradle -p examples/compose-android :app:connectedDebugAndroidTest --no-daemon

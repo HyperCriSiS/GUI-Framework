@@ -370,7 +370,10 @@ private fun GuiMenuItemRow(
             vertical = itemStyle.paddingVertical?.toComposeDp() ?: 0.dp,
         )
     if (requester != null) rowModifier = rowModifier.focusRequester(requester)
-    if (item.disabled) rowModifier = rowModifier.semantics { disabled() }
+    rowModifier = rowModifier.semantics {
+        contentDescription = item.label
+        if (item.disabled) disabled()
+    }
 
     LaunchedEffect(focused) {
         if (focused) onFocus()

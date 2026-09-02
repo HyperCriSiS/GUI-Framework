@@ -90,14 +90,14 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
     assert.match(
       source,
       new RegExp(`${sizeType}\\.SMALL`),
       `${name} compact reference must map ${sizeType} to its existing SMALL size`,
     );
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -117,8 +117,12 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /content = "Reload the current workspace data\."/, `${name} must expose Tooltip content`);
   assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/, `${name} must expose the controlled Tooltip open flow`);
   assert.match(source, /interactionSource = interactionSource/, `${name} must share the Tooltip trigger interaction source`);
+  assert.match(source, /accessibilityLabel = "Workspace actions"/, `${name} must expose the Menu accessibility label`);
+  assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item`);
+  assert.match(source, /onOpenChange = \{ menuOpen = it \}/, `${name} must expose the controlled Menu open flow`);
+  assert.match(source, /onActivate = \{ lastMenuAction = it \}/, `${name} must expose the Menu activation flow`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");

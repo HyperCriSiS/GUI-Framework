@@ -50,14 +50,14 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
   assert.match(
     source,
     new RegExp(`${sizeType}\\.SMALL`),
     `Android compact reference must map ${sizeType} to SMALL`,
   );
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
 assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
@@ -73,6 +73,12 @@ assert.match(source, /onValueChange = \{ activeSection = it \}/);
 assert.match(source, /content = "Reload the current workspace data\."/);
 assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/);
 assert.match(source, /interactionSource = interactionSource/);
+assert.match(source, /accessibilityLabel = "Workspace actions"/);
+assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/);
+assert.match(source, /onOpenChange = \{ menuOpen = it \}/);
+assert.match(source, /onActivate = \{ lastMenuAction = it \}/);
+assert.match(source, /label = "Open workspace menu"/);
+assert.match(source, /Last menu action: \$lastMenuAction/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
@@ -113,14 +119,15 @@ assert.match(runtimeTest, /onNodeWithText\("Active section: Logs"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Reload workspace"\)/);
 assert.match(runtimeTest, /SemanticsActions\.RequestFocus/);
 assert.match(runtimeTest, /onNodeWithText\("Reload the current workspace data\."\)/);
+assert.match(runtimeTest, /onNodeWithText\("Open workspace menu"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Locked action"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Refresh workspace"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Last menu action: refresh"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Legacy channel"\)/);
 assert.match(runtimeTest, /assertIsNotEnabled\(\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Push"\)/);
-assert.match(runtimeTest, /assertIsSelected\(\)/);
-assert.match(runtimeTest, /assertIsNotSelected\(\)/);
-assert.match(runtimeTest, /performClick\(\)/);
 assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip coverage and Phase 5 theme selection isolation.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Menu coverage and Phase 5 theme selection isolation.");

@@ -24,6 +24,8 @@ import gui.framework.compose.GuiButton
 import gui.framework.compose.GuiCheckbox
 import gui.framework.compose.GuiDialog
 import gui.framework.compose.GuiInput
+import gui.framework.compose.GuiMenu
+import gui.framework.compose.GuiMenuItem
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiRadio
 import gui.framework.compose.GuiRadioGroup
@@ -38,6 +40,7 @@ import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
+import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSelectSize
@@ -92,12 +95,15 @@ fun AndroidReferenceApp(
     var selectExpanded by remember { mutableStateOf(false) }
     var activeSection by remember { mutableStateOf("overview") }
     var tooltipOpen by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
+    var lastMenuAction by remember { mutableStateOf("none") }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
     val checkboxSize = if (density == ReferenceDensity.Compact) GuiCheckboxSize.SMALL else GuiCheckboxSize.MEDIUM
     val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
+    val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
@@ -212,6 +218,26 @@ fun AndroidReferenceApp(
                         interactionSource = interactionSource,
                     )
                 }
+                GuiMenu(
+                    open = menuOpen,
+                    items = listOf(
+                        GuiMenuItem(value = "refresh", label = "Refresh workspace", shortcut = "Ctrl+R"),
+                        GuiMenuItem(value = "locked", label = "Locked action", disabled = true),
+                        GuiMenuItem(value = "settings", label = "Workspace settings"),
+                    ),
+                    onOpenChange = { menuOpen = it },
+                    onActivate = { lastMenuAction = it },
+                    accessibilityLabel = "Workspace actions",
+                    size = menuSize,
+                ) { interactionSource ->
+                    GuiButton(
+                        label = "Open workspace menu",
+                        onActivate = { menuOpen = true },
+                        size = buttonSize,
+                        interactionSource = interactionSource,
+                    )
+                }
+                BasicText("Last menu action: $lastMenuAction")
             }
             GuiButton(
                 label = "Open dialog",

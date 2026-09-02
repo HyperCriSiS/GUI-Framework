@@ -158,6 +158,21 @@ class ReferenceRuntimeTest {
                 .performSemanticsAction(SemanticsActions.RequestFocus)
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Reload the current workspace data.").assertDoesNotExist()
+
+            val menuTrigger = composeRule.onNodeWithText("Open workspace menu")
+            menuTrigger.performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule
+                .onNodeWithContentDescription("Locked action")
+                .assertIsDisplayed()
+                .assertIsNotEnabled()
+            composeRule
+                .onNodeWithContentDescription("Refresh workspace")
+                .assertIsDisplayed()
+                .performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithContentDescription("Refresh workspace").assertDoesNotExist()
+            composeRule.onNodeWithText("Last menu action: refresh").assertIsDisplayed()
         }
 
         composeRule
