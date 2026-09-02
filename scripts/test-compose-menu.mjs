@@ -36,6 +36,7 @@ assert.match(source, /collectIsHoveredAsState\(\)/);
 assert.match(source, /collectIsFocusedAsState\(\)/);
 assert.match(source, /\.focusable\(enabled = !item\.disabled/);
 assert.match(source, /\.clickable\(/);
+assert.match(source, /contentDescription = item\.label/);
 assert.match(source, /disabled\(\)/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 assert.doesNotMatch(source, /AnimatedVisibility|animate[A-Z]|Transition\(/);
