@@ -17,85 +17,122 @@ Create a cross-platform, native-rendered GUI framework with a single renderer-ne
 
 Each platform adapter maps that specification onto native primitives. The framework must remain suitable for complex applications while staying clear, sharp, distinctive and performant.
 
-## Phase 0 — Repository and specification foundation
+## Architectural invariants
 
-- [x] Create a dedicated repository
-- [x] Adopt AGPL-3.0-or-later
-- [x] Keep the project roadmap repository-local
-- [x] Define renderer-neutral specification boundaries
-- [x] Define repository layout for spec, compiler and adapters
-- [x] Define contribution/security policy baseline
+- The specification must not depend on one renderer or toolkit.
+- Themes define visual grammar, not application-specific palettes.
+- Palettes are independent semantic token sets and can be switched without duplicating theme definitions.
+- Enhanced visual effects must declare capability requirements and deterministic fallback behavior.
+- Functional interaction feedback is part of component behavior; decorative animation is optional and separable.
+- Platform adapters may use native behavior where appropriate, but deviations from the neutral contract must be explicit and testable.
+- Expensive visual effects are not allowed to become mandatory for basic usability.
+- Generated outputs must be deterministic.
 
-## Phase 1 — Token system
+---
 
-- [x] Define token namespace and DTCG-style schema subset
-- [x] Define primitive color tokens
-- [x] Define semantic color tokens
-- [x] Define typography tokens
-- [x] Define spacing/radius/border/focus/opacity tokens
-- [x] Define semantic motion tokens for functional interaction feedback
-- [x] Define component-specific sizing tokens where primitives are insufficient
-- [x] Add strict schema validation
-- [x] Add token reference resolution
-- [x] Add cycle and missing-reference detection
-- [x] Add deterministic compiler output
+## Phase 0 — Repository foundation
 
-## Phase 2 — Theme and palette model
+- [x] Repository skeleton
+- [x] Restrictive copyleft licensing baseline
+- [x] License policy documentation
+- [x] Workspace/package layout
+- [x] Core CI baseline
+- [x] Line-ending policy
 
-- [x] Separate themes from palettes
-- [x] Register six initial themes: Basic, Modern, Glass, Frosted Glass, Spacey, Cyberpunk
-- [x] Define palette families and variants without hard-coding a light/dark-only data model
-- [x] Keep reference palettes as development examples rather than theme identities
-- [x] Define theme inheritance and override rules
-- [x] Define capability requirements and fallback chains
-- [x] Define capability taxonomy for baseline native rendering versus optional enhanced effects
-- [x] Define deterministic fallback recipe selection
-- [x] Define functional motion semantics independently of decorative animation
+## Phase 1 — Renderer-neutral specification
 
-## Phase 3 — Compiler and generated contracts
+- [x] DTCG-compatible primitive token source
+- [x] Semantic palette token sources
+- [x] Component token source
+- [x] Visual-effect token source
+- [x] Portable asset manifest/profile
+- [x] Framework manifest schema
+- [x] Theme schema
+- [x] Component recipe schema
+- [x] Contrast policy schema
+- [x] Renderer-neutral specification validator
+- [x] Theme inheritance
+- [x] Capability taxonomy and deterministic fallback selection
+- [x] Typed visual recipe resolution
+- [x] Deterministic compiler IR
+- [x] Reference palette family/variant model
+- [x] Renderer-neutral vocabulary boundary test
 
-- [x] Compile neutral specification into deterministic IR
-- [x] Generate Web token output from IR
-- [x] Generate Kotlin token output from IR
-- [x] Generate Web component CSS from theme recipes
-- [x] Generate Web TypeScript contracts
-- [x] Generate Kotlin contracts
-- [x] Generate capability-profile metadata for adapters
-- [x] Generate typed visual recipes for Compose
-- [x] Generate portable assets for Web and Compose
-- [x] Enforce renderer-neutral vocabulary boundaries in CI
-
-## Phase 4 — Initial reference component set
+## Phase 2 — Initial reference component set
 
 - [x] Button
 - [x] Input
 - [x] Switch
 - [x] Panel / Card
 - [x] Dialog
-- [x] Native Web adapter mappings
-- [x] Native Compose adapter mappings
-- [x] Functional Web reference application
-- [x] Functional Compose Desktop reference application
-- [x] Functional Compose Android reference application
-- [x] Android APK assembly in CI
-- [x] Web popup/sidebar/options host-context validation
-- [x] Web Playwright keyboard/focus/interaction validation
-- [x] Web visual-regression baseline
-- [x] Cross-platform reference scenario/parity validation
-- [x] Android representative runtime matrix
+- [x] Portable SVG asset path
+- [x] Shared neutral reference scenarios
 
-## Phase 5 — Theme implementation and proof
+## Phase 3 — Web adapter
 
-- [x] Basic theme contract and quality gate
-- [x] Modern theme implementation and validation
-- [x] Glass theme implementation and validation
-- [x] Frosted Glass implementation and validation
-- [x] Spacey theme implementation and validation
-- [x] Cyberpunk theme implementation and validation
-- [x] Palette-neutral dark/light reference proof across all six themes
-- [x] Deterministic per-theme performance budgets
-- [x] WCAG 2.2 AA integration contrast gates across all six themes
-- [x] Web compact-layout validation for all six themes
+- [x] Generate CSS variables from neutral token IR
+- [x] Generate component CSS from neutral visual recipes
+- [x] Generate TypeScript contracts
+- [x] Generate portable asset registry
+- [x] Button adapter
+- [x] Input adapter
+- [x] Switch adapter
+- [x] Panel adapter
+- [x] Dialog adapter
+- [x] Capability resolver
+- [x] Reference Web application
+- [x] Stateful reference interactions
+- [x] Popup host-context validation
+- [x] Sidebar host-context validation
+- [x] Options-page host-context validation
+- [x] Compact-width validation
+- [x] Keyboard/focus validation
+- [x] Reduced-motion validation
+- [x] Playwright Chromium interaction suite
+- [x] Read-only Chromium visual-regression baselines
+
+## Phase 4 — Compose adapter and second-adapter audit
+
+- [x] Generate Kotlin contracts
+- [x] Generate Kotlin tokens
+- [x] Generate Compose visual recipes
+- [x] Generate portable asset registry
+- [x] Button adapter
+- [x] Input adapter
+- [x] Switch adapter
+- [x] Panel adapter
+- [x] Dialog adapter
+- [x] Capability resolver
+- [x] Stateful Compose Desktop reference application
+- [x] Stateful Compose Android reference application
+- [x] Android APK build in CI
+- [x] Compose semantics/input/focus validation
+- [x] Scaling/minimum-capability validation
+- [x] Shared Web/Desktop/Android parity gate
+- [x] Renderer-neutral second-adapter architecture audit
+- [x] API 23 low-memory / large-font runtime validation
+- [x] API 35 high-density runtime validation
+
+## Phase 5 — Theme system
+
+- [x] Basic
+- [x] Modern
+- [x] Glass
+- [x] Frosted Glass
+- [x] Spacey
+- [x] Cyberpunk
+- [x] Basic deterministic performance budget
+- [x] Modern deterministic performance budget
+- [x] Glass deterministic performance budget
+- [x] Frosted Glass deterministic performance budget
+- [x] Spacey deterministic performance budget
+- [x] Cyberpunk deterministic performance budget
+- [x] WCAG 2.2 AA integration gate for Basic
+- [x] WCAG 2.2 AA integration gate for Modern
+- [x] WCAG 2.2 AA integration gate for Glass
+- [x] WCAG 2.2 AA integration gate for Frosted Glass
+- [x] WCAG 2.2 AA integration gate for Spacey
+- [x] WCAG 2.2 AA integration gate for Cyberpunk
 - [x] Web reference validation for all six themes
 - [x] Compose Desktop selection for all six themes
 - [x] Compose Android selection for all six themes
@@ -121,35 +158,96 @@ Each platform adapter maps that specification onto native primitives. The framew
 ## Phase 7 — Integration kits
 
 - [ ] Browser extension integration kit
-- [ ] Desktop integration kit
-- [ ] Android integration kit
-- [ ] Python integration kit
-- [ ] Web integration kit
+- [ ] Desktop application integration kit
+- [ ] Android application integration kit
+- [ ] Python application integration path
+- [ ] Web application integration kit
+- [ ] Shared host-context presets
 
-## Phase 8 — Hardening and release preparation
+## Phase 8 — Distribution and ecosystem readiness
 
-- [ ] Component API freeze candidate
-- [ ] Full cross-theme screenshot matrix
-- [ ] Full cross-platform interaction matrix
-- [ ] Performance profiling and optimization
-- [ ] Accessibility audit and documentation
-- [ ] Security review
-- [ ] Packaging and distribution proof
-- [ ] 0.x release candidate
+- [ ] Package publication strategy
+- [ ] Stable public API surface
+- [ ] Versioned migration policy
+- [ ] Theme authoring documentation
+- [ ] Adapter authoring documentation
+- [ ] Component authoring documentation
+- [ ] Example applications
+- [ ] Release automation
+- [ ] Security policy
+- [ ] Contributor workflow
 
-## Validation gates
+## Quality gates
 
-- [x] Schema validation
-- [x] Deterministic compilation
-- [x] Renderer-neutral boundary enforcement
-- [x] Generated adapter contracts
-- [x] Native semantics/accessibility mapping for implemented reference components
-- [x] Keyboard/focus validation for implemented interactive components
-- [x] Compact/dense layout validation
-- [x] Capability fallback validation
-- [x] WCAG contrast/target-size integration validation
-- [x] Deterministic performance budget validation
-- [x] Cross-platform reference integration
-- [x] Browser interaction regression validation
-- [x] Android build/runtime validation
-- [x] Cross-platform parity validation
+Every completed component/theme should eventually satisfy the applicable subset of these gates:
+
+- schema validation
+- deterministic compilation
+- renderer-neutral boundary checks
+- adapter contract generation
+- native semantics/accessibility
+- keyboard/focus interaction
+- compact/dense layout
+- capability fallback behavior
+- WCAG contrast/target requirements
+- deterministic performance budget
+- reference application integration
+- browser regression where applicable
+- Android build/runtime validation where applicable
+- cross-platform parity where applicable
+
+## Architecture rules
+
+1. The neutral specification remains the source of truth for component contracts, tokens, visual recipes and capability requirements.
+2. Platform adapters consume compiled neutral output; platform-specific behavior belongs in adapters, not in the specification.
+3. Theme definitions must not fork palettes. Semantic palette values remain independent from theme geometry/effects.
+4. Enhanced visual effects must declare capabilities and deterministic fallbacks.
+5. Accessibility and functional interaction behavior outrank decorative fidelity.
+6. Expensive effects are opt-in and must remain bounded by performance budgets.
+7. Generated output must remain deterministic and testable.
+8. New component/theme work is not considered complete until its applicable quality gates are green.
+
+## Platform/toolchain support matrix
+
+The initial support policy is intentionally conservative and designed around the adapters currently exercised in CI.
+
+### Web
+
+- Chromium is the first fully automated browser target.
+- Generated CSS and TypeScript contracts remain standards-based and are not intentionally Chromium-specific.
+- Firefox/WebKit automation can be added once the reference surface is stable enough that the additional matrix cost is justified.
+- Browser-extension host contexts are explicitly part of the Web adapter target surface.
+
+### Compose
+
+- Compose Desktop is a first-class reference adapter target.
+- Android is a first-class reference adapter target.
+- Android CI currently builds against the Android 17 preview SDK while representative runtime validation spans API 23 and API 35.
+- The framework does not require Material components; adapter primitives remain based on Compose Foundation/UI where practical.
+
+### Node / Java / Gradle
+
+- CI currently uses Node 24, Java 17 and Gradle 9.5.0.
+- Toolchain upgrades should be validated centrally rather than per adapter/application.
+- Generated outputs should not require application consumers to mirror the repository's development toolchain exactly unless a package explicitly documents that requirement.
+
+## Package naming and compatibility policy
+
+- Package IDs stay capability-/adapter-oriented rather than theme-oriented.
+- Themes remain data/specification assets rather than separate platform packages unless distribution constraints later justify otherwise.
+- Pre-1.0 releases may make breaking neutral-contract changes, but each such change must update generated adapters, reference applications and migration notes together.
+- 1.0 establishes the first stable neutral specification/API baseline.
+- After 1.0, breaking contract changes require a major version.
+- Additive tokens, themes and components should remain backward compatible wherever practical.
+- Adapter capability expansion must not silently change deterministic fallback behavior on platforms that do not gain the new capability.
+
+## Deferred decisions
+
+These remain intentionally open until the current component/theme foundation provides enough evidence:
+
+- exact package-registry publication layout,
+- whether WebKit/Firefox join the mandatory CI matrix before 1.0,
+- whether an additional native adapter should be implemented before 1.0,
+- whether advanced rendering engines are needed for any future theme layer,
+- whether theme-specific optional asset packs become useful,
+- exact long-term ABI compatibility promises for generated Kotlin contracts.
