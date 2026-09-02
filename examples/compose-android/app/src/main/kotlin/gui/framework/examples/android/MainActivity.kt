@@ -5,13 +5,13 @@ package gui.framework.examples.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +33,7 @@ import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTabItem
 import gui.framework.compose.GuiTabs
 import gui.framework.compose.GuiTheme
+import gui.framework.compose.GuiTooltip
 import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
@@ -43,11 +44,7 @@ import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
-
-enum class ReferenceDensity {
-    Standard,
-    Compact,
-}
+import gui.framework.generated.internal.GuiTooltipSize
 
 class MainActivity : ComponentActivity() {
     private var referenceDensity by mutableStateOf(ReferenceDensity.Standard)
@@ -77,6 +74,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+enum class ReferenceDensity {
+    Standard,
+    Compact,
+}
+
 @Composable
 fun AndroidReferenceApp(
     density: ReferenceDensity = ReferenceDensity.Standard,
@@ -89,6 +91,7 @@ fun AndroidReferenceApp(
     var deliveryChannel by remember { mutableStateOf("email") }
     var selectExpanded by remember { mutableStateOf(false) }
     var activeSection by remember { mutableStateOf("overview") }
+    var tooltipOpen by remember { mutableStateOf(false) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -100,6 +103,7 @@ fun AndroidReferenceApp(
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
     val tabsSize = if (density == ReferenceDensity.Compact) GuiTabsSize.SMALL else GuiTabsSize.MEDIUM
+    val tooltipSize = if (density == ReferenceDensity.Compact) GuiTooltipSize.SMALL else GuiTooltipSize.MEDIUM
 
     GuiPanel(
         modifier = Modifier.fillMaxSize(),
@@ -194,6 +198,19 @@ fun AndroidReferenceApp(
                     size = tabsSize,
                 ) { selectedTab ->
                     BasicText("Active section: ${selectedTab.label}")
+                }
+                GuiTooltip(
+                    open = tooltipOpen,
+                    content = "Reload the current workspace data.",
+                    onOpenChange = { tooltipOpen = it },
+                    size = tooltipSize,
+                ) { interactionSource ->
+                    GuiButton(
+                        label = "Reload workspace",
+                        onActivate = {},
+                        size = buttonSize,
+                        interactionSource = interactionSource,
+                    )
                 }
             }
             GuiButton(

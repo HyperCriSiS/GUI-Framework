@@ -19,13 +19,14 @@ assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = theme/);
 assert.match(source, /paletteId = paletteId/);
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Desktop reference must exercise ${component}`);
 }
 assert.match(source, /GuiCheckboxSize\.SMALL/);
 assert.match(source, /GuiRadioSize\.SMALL/);
 assert.match(source, /GuiSelectSize\.SMALL/);
 assert.match(source, /GuiTabsSize\.SMALL/);
+assert.match(source, /GuiTooltipSize\.SMALL/);
 assert.match(source, /includeExtendedComponents = theme == GuiThemeId\.BASIC/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
 assert.match(source, /accessibilityLabel = "Reference checkbox"/);
@@ -36,9 +37,12 @@ assert.match(source, /accessibilityLabel = "Delivery channel"/);
 assert.match(source, /accessibilityLabel = "Reference tabs"/);
 assert.match(source, /GuiTabItem\(value = "metrics", label = "Metrics", disabled = true\)/);
 assert.match(source, /onValueChange = \{ activeSection = it \}/);
+assert.match(source, /content = "Reload the current workspace data\."/);
+assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/);
+assert.match(source, /interactionSource = interactionSource/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
-console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs coverage and Phase 5 theme selection isolation.");
+console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip coverage and Phase 5 theme selection isolation.");

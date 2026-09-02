@@ -105,11 +105,9 @@ private class GuiTooltipPopupPositionProvider(
             GuiTooltipPlacement.RIGHT -> GuiTooltipPlacement.LEFT
         }
         val opposite = coordinates(oppositePlacement, anchorBounds, popupContentSize)
-        val selected = if (!fits(preferred, popupContentSize, windowSize) && fits(opposite, popupContentSize, windowSize)) {
-            opposite
-        } else {
-            preferred
-        }
+        val preferredOverflow = primaryAxisOverflow(placement, preferred, popupContentSize, windowSize)
+        val oppositeOverflow = primaryAxisOverflow(oppositePlacement, opposite, popupContentSize, windowSize)
+        val selected = if (preferredOverflow > 0 && oppositeOverflow < preferredOverflow) opposite else preferred
         val maxX = (windowSize.width - marginPx - popupContentSize.width).coerceAtLeast(marginPx)
         val maxY = (windowSize.height - marginPx - popupContentSize.height).coerceAtLeast(marginPx)
         return IntOffset(
@@ -145,11 +143,24 @@ private class GuiTooltipPopupPositionProvider(
         }
     }
 
-    private fun fits(position: IntOffset, popupContentSize: IntSize, windowSize: IntSize): Boolean =
-        position.x >= marginPx &&
-            position.y >= marginPx &&
-            position.x + popupContentSize.width <= windowSize.width - marginPx &&
-            position.y + popupContentSize.height <= windowSize.height - marginPx
+    private fun primaryAxisOverflow(
+        candidate: GuiTooltipPlacement,
+        position: IntOffset,
+        popupContentSize: IntSize,
+        windowSize: IntSize,
+    ): Int =
+        when (candidate) {
+            GuiTooltipPlacement.TOP, GuiTooltipPlacement.BOTTOM -> {
+                val before = (marginPx - position.y).coerceAtLeast(0)
+                val after = (position.y + popupContentSize.height - (windowSize.height - marginPx)).coerceAtLeast(0)
+                before + after
+            }
+            GuiTooltipPlacement.LEFT, GuiTooltipPlacement.RIGHT -> {
+                val before = (marginPx - position.x).coerceAtLeast(0)
+                val after = (position.x + popupContentSize.width - (windowSize.width - marginPx)).coerceAtLeast(0)
+                before + after
+            }
+        }
 }
 
 /**
