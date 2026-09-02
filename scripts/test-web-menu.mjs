@@ -192,13 +192,16 @@ try {
     accessibilityLabel: "Canvas menu",
     onOpenChange(open) { detachedChanges.push(open); },
   });
-  detached.popupElement.rect = { left: 0, top: 0, right: 100, bottom: 80, width: 100, height: 80 };
+  detached.popupElement.rect = { left: 0, top: 0, right: 100.03125, bottom: 80, width: 100.03125, height: 80 };
   detached.openAt(12, 18);
   assert.deepEqual(detachedChanges, [true]);
   detached.update({ open: true });
   assert.equal(detached.popupElement.dataset.guiResolvedPlacement, "context");
   assert.equal(detached.popupElement.style.left, "12px");
   assert.equal(detached.popupElement.style.top, "18px");
+  detached.openAt(318, 18);
+  assert.equal(detached.popupElement.style.left, "215.96875px", "Subpixel popup widths must clamp without rounding beyond the viewport margin");
+  assert.equal(Number.parseFloat(detached.popupElement.style.left) + 100.03125, 316);
   assert.throws(() => detached.openAt(Number.NaN, 10), /context x must be a finite number/);
   detached.destroy();
 
