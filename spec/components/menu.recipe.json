@@ -1,0 +1,117 @@
+{
+  "specVersion": "0.1.0",
+  "component": "menu",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "trigger",
+      "required": false
+    },
+    {
+      "id": "popup",
+      "required": true
+    },
+    {
+      "id": "item",
+      "required": true
+    },
+    {
+      "id": "label",
+      "required": true
+    },
+    {
+      "id": "shortcut",
+      "required": false
+    },
+    {
+      "id": "separator",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "trigger",
+      "kind": "children",
+      "required": false
+    },
+    {
+      "id": "item",
+      "kind": "children",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "open",
+      "type": "boolean",
+      "required": true,
+      "state": "expanded"
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    }
+  ],
+  "events": [
+    {
+      "id": "openChange",
+      "payload": "boolean"
+    },
+    {
+      "id": "activate",
+      "payload": "string"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed",
+    "expanded",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "menu",
+    "preferNativePrimitive": false
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

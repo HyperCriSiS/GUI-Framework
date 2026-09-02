@@ -3,11 +3,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
   readFile("examples/web-reference/select-reference.mjs", "utf8"),
+  readFile("examples/web-reference/tooltip-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -63,6 +64,9 @@ assert.match(webSelect, /size: density === "compact" \? "small" : "medium"/);
 assert.match(webSelect, /onValueChange\(nextValue\) \{/);
 assert.match(webSelect, /onQueryChange\(nextQuery\) \{/);
 assert.match(webSelect, /onExpandedChange\(nextExpanded\) \{/);
+assert.match(webTooltip, /createGuiTooltip\(/, "Web Tooltip reference must exercise createGuiTooltip");
+assert.match(webTooltip, /onOpenChange: setOpen/);
+assert.match(webTooltip, /content: "Reload the current workspace data\."/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -86,14 +90,14 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
     assert.match(
       source,
       new RegExp(`${sizeType}\\.SMALL`),
       `${name} compact reference must map ${sizeType} to its existing SMALL size`,
     );
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -110,8 +114,11 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /accessibilityLabel = "Reference tabs"/, `${name} must expose the Tabs accessibility label`);
   assert.match(source, /GuiTabItem\(value = "metrics", label = "Metrics", disabled = true\)/, `${name} must expose a disabled Tabs item`);
   assert.match(source, /onValueChange = \{ activeSection = it \}/, `${name} must expose the controlled Tabs value flow`);
+  assert.match(source, /content = "Reload the current workspace data\."/, `${name} must expose Tooltip content`);
+  assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/, `${name} must expose the controlled Tooltip open flow`);
+  assert.match(source, /interactionSource = interactionSource/, `${name} must share the Tooltip trigger interaction source`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");

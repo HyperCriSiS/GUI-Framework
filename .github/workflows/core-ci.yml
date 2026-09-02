@@ -146,6 +146,9 @@ jobs:
       - name: Test native Web Basic Tabs
         run: npm run test:web-tabs
 
+      - name: Test native Web Basic Tooltip
+        run: npm run test:web-tooltip
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
@@ -160,6 +163,12 @@ jobs:
 
       - name: Test standalone Web Tabs reference
         run: npm run test:web-tabs-reference
+
+      - name: Test standalone Web Tooltip reference
+        run: npm run test:web-tooltip-reference
+
+      - name: Test standalone Web Menu / Context Menu reference
+        run: npm run test:web-menu-reference
 
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
@@ -214,6 +223,9 @@ jobs:
 
       - name: Test native Compose Basic Tabs
         run: npm run test:kotlin-tabs
+
+      - name: Test native Compose Basic Tooltip
+        run: npm run test:kotlin-tooltip
 
       - name: Test native Compose Basic Panel
         run: npm run test:kotlin-panel

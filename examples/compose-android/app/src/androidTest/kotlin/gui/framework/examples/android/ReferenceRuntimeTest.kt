@@ -3,6 +3,7 @@
 package gui.framework.examples.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -11,7 +12,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gui.framework.generated.internal.GuiThemeId
 import org.junit.Rule
@@ -140,6 +143,21 @@ class ReferenceRuntimeTest {
             overviewTab.assertIsNotSelected()
             logsTab.assertIsSelected()
             composeRule.onNodeWithText("Active section: Logs").assertIsDisplayed()
+
+            val tooltipTrigger = composeRule.onNodeWithText("Reload workspace")
+            tooltipTrigger.performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Reload the current workspace data.").assertDoesNotExist()
+            tooltipTrigger.performSemanticsAction(SemanticsActions.RequestFocus)
+            composeRule.waitForIdle()
+            tooltipTrigger.assertIsFocused()
+            composeRule.onNodeWithText("Reload the current workspace data.").assertIsDisplayed()
+            composeRule
+                .onNodeWithText("Open dialog")
+                .performScrollTo()
+                .assertIsDisplayed()
+                .performSemanticsAction(SemanticsActions.RequestFocus)
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Reload the current workspace data.").assertDoesNotExist()
         }
 
         composeRule

@@ -31,6 +31,7 @@ import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTabItem
 import gui.framework.compose.GuiTabs
 import gui.framework.compose.GuiTheme
+import gui.framework.compose.GuiTooltip
 import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiCheckboxSize
 import gui.framework.generated.internal.GuiDialogSize
@@ -41,6 +42,7 @@ import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
+import gui.framework.generated.internal.GuiTooltipSize
 
 enum class ReferenceDensity {
     Standard,
@@ -96,6 +98,7 @@ private fun DesktopReferenceContent(
     var deliveryChannel by remember { mutableStateOf("email") }
     var selectExpanded by remember { mutableStateOf(false) }
     var activeSection by remember { mutableStateOf("overview") }
+    var tooltipOpen by remember { mutableStateOf(false) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -107,6 +110,7 @@ private fun DesktopReferenceContent(
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
     val tabsSize = if (density == ReferenceDensity.Compact) GuiTabsSize.SMALL else GuiTabsSize.MEDIUM
+    val tooltipSize = if (density == ReferenceDensity.Compact) GuiTooltipSize.SMALL else GuiTooltipSize.MEDIUM
 
     Column(
         modifier = Modifier
@@ -203,6 +207,19 @@ private fun DesktopReferenceContent(
                         size = tabsSize,
                     ) { selectedTab ->
                         BasicText("Active section: ${selectedTab.label}")
+                    }
+                    GuiTooltip(
+                        open = tooltipOpen,
+                        content = "Reload the current workspace data.",
+                        onOpenChange = { tooltipOpen = it },
+                        size = tooltipSize,
+                    ) { interactionSource ->
+                        GuiButton(
+                            label = "Reload workspace",
+                            onActivate = {},
+                            size = buttonSize,
+                            interactionSource = interactionSource,
+                        )
                     }
                 }
                 GuiButton(
