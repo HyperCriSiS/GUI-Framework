@@ -3,6 +3,7 @@
 package gui.framework.examples.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -148,6 +149,7 @@ class ReferenceRuntimeTest {
             composeRule.onNodeWithText("Reload the current workspace data.").assertDoesNotExist()
             tooltipTrigger.performSemanticsAction(SemanticsActions.RequestFocus)
             composeRule.waitForIdle()
+            tooltipTrigger.assertIsFocused()
             composeRule.onNodeWithText("Reload the current workspace data.").assertIsDisplayed()
             composeRule
                 .onNodeWithText("Open dialog")

@@ -4,8 +4,8 @@ package gui.framework.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -167,8 +168,8 @@ private class GuiTooltipPopupPositionProvider(
  * Foundation-only controlled Tooltip.
  *
  * The host renders its real semantic trigger through [trigger] and passes the supplied
- * [MutableInteractionSource] into that control. Tooltip observes the same native hover/focus
- * interactions and only requests changes through [onOpenChange]; [open] remains host-owned.
+ * [MutableInteractionSource] into that control. Tooltip observes pointer hover through that source
+ * and focus through the non-focusable trigger container; [open] remains host-owned.
  * The popup is deliberately non-focusable and non-interactive and introduces no animation.
  */
 @Composable
@@ -188,8 +189,8 @@ fun GuiTooltip(
     val selection = LocalGuiThemeSelection.current
     val source = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val focused by source.collectIsFocusedAsState()
-    var interactionInitialized by remember { mutableStateOf(false) }
+    var triggerHasFocus by remember { mutableStateOf(false) }
+    var triggerInteractionObserved by remember { mutableStateOf(false) }
 
     val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
@@ -224,23 +225,29 @@ fun GuiTooltip(
         )
     }
 
-    LaunchedEffect(hovered, focused) {
-        val requestedOpen = hovered || focused
-        if (interactionInitialized && requestedOpen != open) {
-            onOpenChange(requestedOpen)
+    LaunchedEffect(hovered, triggerHasFocus) {
+        val interactionActive = hovered || triggerHasFocus
+        if (interactionActive) {
+            triggerInteractionObserved = true
+            if (!open) onOpenChange(true)
+        } else if (triggerInteractionObserved && open) {
+            triggerInteractionObserved = false
+            onOpenChange(false)
         }
-        interactionInitialized = true
     }
 
     Box(
-        modifier = modifier.onPreviewKeyEvent { event ->
-            if (event.type == KeyEventType.KeyDown && event.key == Key.Escape && open) {
-                onOpenChange(false)
-                true
-            } else {
-                false
-            }
-        },
+        modifier = modifier
+            .onFocusChanged { triggerHasFocus = it.hasFocus }
+            .focusGroup()
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown && event.key == Key.Escape && open) {
+                    onOpenChange(false)
+                    true
+                } else {
+                    false
+                }
+            },
     ) {
         trigger(source)
 
