@@ -119,6 +119,16 @@ try {
   assert.equal(tooltip.popupElement.dataset.guiResolvedPlacement, "bottom", "Top placement flips when viewport space is insufficient");
   assert.equal(tooltip.popupElement.style.top, "34px");
 
+  tooltip.popupElement.rect = { left: 0, top: 0, right: 420, bottom: 24, width: 420, height: 24 };
+  tooltip.refreshPosition();
+  assert.equal(
+    tooltip.popupElement.dataset.guiResolvedPlacement,
+    "bottom",
+    "Cross-axis overflow must not block a valid primary-axis flip",
+  );
+  assert.equal(tooltip.popupElement.style.left, "4px", "Oversized popup is clamped after placement resolution");
+  tooltip.popupElement.rect = { left: 0, top: 0, right: 96, bottom: 24, width: 96, height: 24 };
+
   trigger.dispatch("focusin");
   trigger.dispatch("mouseleave");
   assert.deepEqual(changes, [true], "Leaving hover while focused keeps the tooltip requested open");

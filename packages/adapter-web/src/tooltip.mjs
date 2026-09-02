@@ -108,11 +108,15 @@ function coordinates(placement, triggerRect, popupWidth, popupHeight) {
   }
 }
 
-function fitsViewport(position, popupWidth, popupHeight, viewportWidth, viewportHeight) {
-  return position.left >= VIEWPORT_MARGIN_PX &&
-    position.top >= VIEWPORT_MARGIN_PX &&
-    position.left + popupWidth <= viewportWidth - VIEWPORT_MARGIN_PX &&
-    position.top + popupHeight <= viewportHeight - VIEWPORT_MARGIN_PX;
+function primaryAxisOverflow(placement, position, popupWidth, popupHeight, viewportWidth, viewportHeight) {
+  if (placement === "top" || placement === "bottom") {
+    const before = Math.max(0, VIEWPORT_MARGIN_PX - position.top);
+    const after = Math.max(0, position.top + popupHeight - (viewportHeight - VIEWPORT_MARGIN_PX));
+    return before + after;
+  }
+  const before = Math.max(0, VIEWPORT_MARGIN_PX - position.left);
+  const after = Math.max(0, position.left + popupWidth - (viewportWidth - VIEWPORT_MARGIN_PX));
+  return before + after;
 }
 
 function clamp(value, minimum, maximum) {
@@ -192,10 +196,26 @@ export function createGuiTooltip(document, initialProps = {}) {
 
     let resolvedPlacement = props.placement;
     let position = coordinates(resolvedPlacement, triggerRect, popupWidth, popupHeight);
-    if (!fitsViewport(position, popupWidth, popupHeight, viewportWidth, viewportHeight)) {
+    const preferredOverflow = primaryAxisOverflow(
+      resolvedPlacement,
+      position,
+      popupWidth,
+      popupHeight,
+      viewportWidth,
+      viewportHeight,
+    );
+    if (preferredOverflow > 0) {
       const opposite = oppositePlacement[resolvedPlacement];
       const oppositePosition = coordinates(opposite, triggerRect, popupWidth, popupHeight);
-      if (fitsViewport(oppositePosition, popupWidth, popupHeight, viewportWidth, viewportHeight)) {
+      const oppositeOverflow = primaryAxisOverflow(
+        opposite,
+        oppositePosition,
+        popupWidth,
+        popupHeight,
+        viewportWidth,
+        viewportHeight,
+      );
+      if (oppositeOverflow < preferredOverflow) {
         resolvedPlacement = opposite;
         position = oppositePosition;
       }
