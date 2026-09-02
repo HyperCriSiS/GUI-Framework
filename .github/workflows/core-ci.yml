@@ -167,6 +167,9 @@ jobs:
       - name: Test standalone Web Tooltip reference
         run: npm run test:web-tooltip-reference
 
+      - name: Test standalone Web Menu / Context Menu reference
+        run: npm run test:web-menu-reference
+
       - name: Generate Web TypeScript contracts
         run: npm run build:web-contracts
 
