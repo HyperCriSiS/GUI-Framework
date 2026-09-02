@@ -65,7 +65,7 @@ assert.match(webSelect, /onValueChange\(nextValue\) \{/);
 assert.match(webSelect, /onQueryChange\(nextQuery\) \{/);
 assert.match(webSelect, /onExpandedChange\(nextExpanded\) \{/);
 assert.match(webTooltip, /createGuiTooltip\(/, "Web Tooltip reference must exercise createGuiTooltip");
-assert.match(webTooltip, /onOpenChange\(nextOpen\) \{/);
+assert.match(webTooltip, /onOpenChange: setOpen/);
 assert.match(webTooltip, /content: "Reload the current workspace data\."/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
