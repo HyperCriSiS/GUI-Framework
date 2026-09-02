@@ -61,21 +61,17 @@ test("Basic Context Menu opens at the pointer, flips inward and Escape restores 
 
   const trigger = page.getByRole("button", { name: "Open workspace menu" });
   const popup = page.getByRole("menu", { name: "Workspace actions" });
+  const firstItem = page.getByRole("menuitem").first();
 
-  await trigger.evaluate((node) => {
-    node.style.position = "fixed";
-    node.style.right = "2px";
-    node.style.bottom = "2px";
-    node.style.zIndex = "2";
-  });
+  await trigger.click({ button: "right" });
+  await expect(popup).toBeVisible();
+  await expect(popup).toHaveAttribute("data-gui-resolved-placement", "context");
+  await expect(firstItem).toBeFocused();
+  await firstItem.press("Escape");
+  await expect(popup).toBeHidden();
+  await expect(trigger).toBeFocused();
 
-  const triggerBounds = await trigger.boundingBox();
-  expect(triggerBounds).not.toBeNull();
-  await trigger.click({
-    button: "right",
-    position: { x: triggerBounds.width - 2, y: triggerBounds.height - 2 },
-  });
-
+  await trigger.dispatchEvent("contextmenu", { clientX: 318, clientY: 718 });
   await expect(popup).toBeVisible();
   await expect(popup).toHaveAttribute("data-gui-resolved-placement", "context");
 
@@ -86,7 +82,6 @@ test("Basic Context Menu opens at the pointer, flips inward and Escape restores 
   expect(popupBounds.x + popupBounds.width).toBeLessThanOrEqual(316);
   expect(popupBounds.y + popupBounds.height).toBeLessThanOrEqual(716);
 
-  const firstItem = page.getByRole("menuitem").first();
   await expect(firstItem).toBeFocused();
   await firstItem.press("Escape");
   await expect(popup).toBeHidden();
