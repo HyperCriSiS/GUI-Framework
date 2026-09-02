@@ -71,7 +71,14 @@ test("Basic Context Menu opens at the pointer, flips inward and Escape restores 
   await expect(popup).toBeHidden();
   await expect(trigger).toBeFocused();
 
-  await trigger.dispatchEvent("contextmenu", { clientX: 318, clientY: 718 });
+  await trigger.evaluate((node) => {
+    node.dispatchEvent(new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 318,
+      clientY: 718,
+    }));
+  });
   await expect(popup).toBeVisible();
   await expect(popup).toHaveAttribute("data-gui-resolved-placement", "context");
 
