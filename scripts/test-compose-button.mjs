@@ -21,6 +21,7 @@ assert.match(source, /if \(focused && enabled\) add\("focus"\)/);
 assert.match(source, /if \(pressed && enabled\) add\("pressed"\)/);
 assert.match(source, /if \(!enabled\) add\("disabled"\)/);
 assert.match(source, /if \(loading\) add\("loading"\)/);
+assert.match(source, /\.focusable\(interactionSource = source, enabled = enabled\)/);
 assert.match(source, /\.clickable\(/);
 assert.match(source, /enabled = enabled/);
 assert.match(source, /role = Role\.Button/);

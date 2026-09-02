@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -174,6 +175,7 @@ fun GuiButton(
     contentModifier = contentModifier
         .alpha(root.opacityValue())
         .hoverable(interactionSource = source, enabled = enabled)
+        .focusable(interactionSource = source, enabled = enabled)
         .clickable(
             interactionSource = source,
             indication = null,
