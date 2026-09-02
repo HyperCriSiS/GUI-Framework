@@ -356,8 +356,8 @@ export function createGuiMenu(document, initialProps = {}) {
     const left = clamp(position.left, VIEWPORT_MARGIN_PX, viewportWidth - VIEWPORT_MARGIN_PX - popupWidth);
     const top = clamp(position.top, VIEWPORT_MARGIN_PX, viewportHeight - VIEWPORT_MARGIN_PX - popupHeight);
     popupElement.dataset.guiResolvedPlacement = position.placement;
-    popupElement.style.left = `${Math.round(left)}px`;
-    popupElement.style.top = `${Math.round(top)}px`;
+    popupElement.style.left = `${left}px`;
+    popupElement.style.top = `${top}px`;
   }
 
   function render() {
