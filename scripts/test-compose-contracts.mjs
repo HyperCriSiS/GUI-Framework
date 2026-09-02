@@ -92,6 +92,19 @@ try {
   assert.match(source, /GuiContentSlot\("trigger", "children", true\)/);
   assert.match(source, /GuiContentSlot\("content", "text", true\)/);
   assert.match(source, /GuiComponentSemantics\("tooltip", false\)/);
+  assert.match(source, /enum class GuiMenuVariant/);
+  assert.match(source, /enum class GuiMenuSize/);
+  assert.match(source, /enum class GuiMenuState/);
+  assert.match(source, /EXPANDED\("expanded"\)/);
+  assert.match(source, /data class GuiMenuProperties\(/);
+  assert.match(source, /val open: Boolean/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /GuiEventContract\("openChange", "boolean"\)/);
+  assert.match(source, /GuiEventContract\("activate", "string"\)/);
+  assert.match(source, /GuiContentSlot\("trigger", "children", false\)/);
+  assert.match(source, /GuiContentSlot\("item", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("menu", false\)/);
 
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
