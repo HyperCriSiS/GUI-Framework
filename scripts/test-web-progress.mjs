@@ -123,4 +123,6 @@ try {
   assert.throws(() => progress.update({ label: 42 }), /label must be a string/);
 
   console.log("Web Basic Progress / Spinner vertical-slice tests passed.");
+} finally {
+  await Promise.all([rm(irPath, { force: true }), rm(cssPath, { force: true })]);
 }
