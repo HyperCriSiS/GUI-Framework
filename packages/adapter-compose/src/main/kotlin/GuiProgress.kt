@@ -205,28 +205,28 @@ fun GuiProgress(
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = trackHeight),
                 ) {
-                    val trackCorner = trackRadius.toPx().coerceAtMost(size.height / 2f)
+                    val trackCorner = trackRadius.toPx().coerceAtMost(this.size.height / 2f)
                     drawRoundRect(
                         color = trackColor,
-                        size = size,
+                        size = this.size,
                         cornerRadius = CornerRadius(trackCorner, trackCorner),
                     )
 
                     val indicatorWidth: Float
                     val indicatorStart: Float
                     if (indeterminate) {
-                        indicatorWidth = size.width * 0.4f
-                        indicatorStart = size.width * (-0.4f + phase * 1.8f)
+                        indicatorWidth = this.size.width * 0.4f
+                        indicatorStart = this.size.width * (-0.4f + phase * 1.8f)
                     } else {
-                        indicatorWidth = size.width * fraction
+                        indicatorWidth = this.size.width * fraction
                         indicatorStart = 0f
                     }
                     if (indicatorWidth > 0f) {
-                        val indicatorCorner = indicatorRadius.toPx().coerceAtMost(size.height / 2f)
+                        val indicatorCorner = indicatorRadius.toPx().coerceAtMost(this.size.height / 2f)
                         drawRoundRect(
                             color = indicatorColor,
                             topLeft = Offset(indicatorStart, 0f),
-                            size = Size(indicatorWidth, size.height),
+                            size = Size(indicatorWidth, this.size.height),
                             cornerRadius = CornerRadius(indicatorCorner, indicatorCorner),
                         )
                     }
@@ -248,8 +248,8 @@ fun GuiProgress(
                     val indicatorStroke = indicatorBorder.width.toComposeDp().toPx()
                     val inset = maxOf(trackStroke, indicatorStroke) / 2f
                     val arcSize = Size(
-                        width = (size.width - inset * 2f).coerceAtLeast(0f),
-                        height = (size.height - inset * 2f).coerceAtLeast(0f),
+                        width = (this.size.width - inset * 2f).coerceAtLeast(0f),
+                        height = (this.size.height - inset * 2f).coerceAtLeast(0f),
                     )
                     val topLeft = Offset(inset, inset)
 
