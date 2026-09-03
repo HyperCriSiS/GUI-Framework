@@ -155,6 +155,11 @@ class ReferenceRuntimeTest {
             composeRule.onNodeWithContentDescription("Dismiss notification").assertIsDisplayed().performClick()
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Workspace updated").assertDoesNotExist()
+
+            composeRule.onNodeWithContentDescription("Workspace sync progress").performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Sync progress: 68%").assertIsDisplayed()
+            composeRule.onNodeWithContentDescription("Workspace sync activity").performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Syncing workspace").assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()

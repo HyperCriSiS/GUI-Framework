@@ -46,10 +46,10 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiProgressSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
   assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android compact reference must map ${sizeType} to SMALL`);
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
 assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
@@ -81,6 +81,13 @@ assert.match(source, /durationMs = 0L/);
 assert.match(source, /accessibilityLabel = "Workspace notification"/);
 assert.match(source, /onActivate = \{ lastToastAction = it \}/);
 assert.match(source, /Last notification action: \$lastToastAction/);
+assert.match(source, /value = 68\.0/);
+assert.match(source, /accessibilityLabel = "Workspace sync progress"/);
+assert.match(source, /label = "Sync progress: 68%"/);
+assert.match(source, /indeterminate = true/);
+assert.match(source, /accessibilityLabel = "Workspace sync activity"/);
+assert.match(source, /label = "Syncing workspace"/);
+assert.match(source, /variant = GuiProgressVariant\.CIRCULAR/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
@@ -136,5 +143,9 @@ assert.match(runtimeTest, /onNodeWithContentDescription\("Push"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Open dialog"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Close"\)/);
 assert.match(runtimeTest, /assertDoesNotExist\(\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace sync progress"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Sync progress: 68%"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace sync activity"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Syncing workspace"\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Menu coverage and Phase 5 theme selection isolation.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Menu coverage and Phase 5 theme selection isolation.");

@@ -26,6 +26,7 @@ import gui.framework.compose.GuiMenu
 import gui.framework.compose.GuiMenuContextOffset
 import gui.framework.compose.GuiMenuItem
 import gui.framework.compose.GuiPanel
+import gui.framework.compose.GuiProgress
 import gui.framework.compose.GuiRadio
 import gui.framework.compose.GuiRadioGroup
 import gui.framework.compose.GuiSelect
@@ -42,6 +43,8 @@ import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiPanelSize
+import gui.framework.generated.internal.GuiProgressSize
+import gui.framework.generated.internal.GuiProgressVariant
 import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
@@ -118,6 +121,7 @@ private fun DesktopReferenceContent(
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
+    val progressSize = if (density == ReferenceDensity.Compact) GuiProgressSize.SMALL else GuiProgressSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
@@ -286,6 +290,19 @@ private fun DesktopReferenceContent(
                         accessibilityLabel = "Workspace notification",
                         onActivate = { lastToastAction = it },
                         size = toastSize,
+                    )
+                    GuiProgress(
+                        value = 68.0,
+                        accessibilityLabel = "Workspace sync progress",
+                        label = "Sync progress: 68%",
+                        size = progressSize,
+                    )
+                    GuiProgress(
+                        indeterminate = true,
+                        accessibilityLabel = "Workspace sync activity",
+                        label = "Syncing workspace",
+                        variant = GuiProgressVariant.CIRCULAR,
+                        size = progressSize,
                     )
                 }
                 GuiButton(

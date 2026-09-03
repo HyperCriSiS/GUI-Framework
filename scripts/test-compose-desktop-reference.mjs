@@ -19,7 +19,7 @@ assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = theme/);
 assert.match(source, /paletteId = paletteId/);
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Desktop reference must exercise ${component}`);
 }
 assert.match(source, /GuiCheckboxSize\.SMALL/);
@@ -28,6 +28,7 @@ assert.match(source, /GuiSelectSize\.SMALL/);
 assert.match(source, /GuiTabsSize\.SMALL/);
 assert.match(source, /GuiTooltipSize\.SMALL/);
 assert.match(source, /GuiToastSize\.SMALL/);
+assert.match(source, /GuiProgressSize\.SMALL/);
 assert.match(source, /GuiMenuSize\.SMALL/);
 assert.match(source, /includeExtendedComponents = theme == GuiThemeId\.BASIC/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
@@ -59,9 +60,16 @@ assert.match(source, /durationMs = 0L/);
 assert.match(source, /accessibilityLabel = "Workspace notification"/);
 assert.match(source, /onActivate = \{ lastToastAction = it \}/);
 assert.match(source, /Last notification action: \$lastToastAction/);
+assert.match(source, /value = 68\.0/);
+assert.match(source, /accessibilityLabel = "Workspace sync progress"/);
+assert.match(source, /label = "Sync progress: 68%"/);
+assert.match(source, /indeterminate = true/);
+assert.match(source, /accessibilityLabel = "Workspace sync activity"/);
+assert.match(source, /label = "Syncing workspace"/);
+assert.match(source, /variant = GuiProgressVariant\.CIRCULAR/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 
-console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Menu coverage and Phase 5 theme selection isolation.");
+console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Menu coverage and Phase 5 theme selection isolation.");
