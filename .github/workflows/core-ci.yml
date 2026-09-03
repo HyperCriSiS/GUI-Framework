@@ -152,6 +152,9 @@ jobs:
       - name: Test native Web Basic Toast / Notification
         run: npm run test:web-toast
 
+      - name: Test native Web Basic Progress / Spinner
+        run: npm run test:web-progress
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
