@@ -123,6 +123,22 @@ try {
   assert.match(source, /GuiContentSlot\("label", "text", false\)/);
   assert.match(source, /GuiComponentSemantics\("progressbar", false\)/);
 
+  assert.match(source, /enum class GuiSliderVariant/);
+  assert.match(source, /HORIZONTAL\("horizontal"\)/);
+  assert.match(source, /VERTICAL\("vertical"\)/);
+  assert.match(source, /enum class GuiSliderSize/);
+  assert.match(source, /enum class GuiSliderState/);
+  assert.match(source, /data class GuiSliderProperties\(/);
+  assert.match(source, /val value: Double/);
+  assert.match(source, /val min: Double = 0\.0/);
+  assert.match(source, /val max: Double = 100\.0/);
+  assert.match(source, /val step: Double = 1\.0/);
+  assert.match(source, /val accessibilityLabel: String/);
+  assert.match(source, /val accessibilityValueText: String = ""/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /GuiEventContract\("valueChange", "number"\)/);
+  assert.match(source, /GuiComponentSemantics\("slider", true\)/);
+
   assert.match(source, /enum class GuiToastVariant/);
   assert.match(source, /INFO\("info"\)/);
   assert.match(source, /SUCCESS\("success"\)/);
