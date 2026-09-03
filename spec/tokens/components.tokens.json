@@ -253,6 +253,75 @@
           }
         }
       }
+    },
+    "slider": {
+      "track": {
+        "length": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 96,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 144,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 192,
+              "unit": "px"
+            }
+          }
+        },
+        "thickness": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 4,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 6,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 8,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "thumb": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 28,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 32,
+              "unit": "px"
+            }
+          }
+        }
+      }
     }
   }
 }
