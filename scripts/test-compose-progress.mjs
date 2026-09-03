@@ -39,6 +39,6 @@ assert.match(source, /GuiProgressVariant\.CIRCULAR/);
 assert.match(source, /BasicText\(/);
 assert.doesNotMatch(source, /androidx\.compose\.material/);
 assert.doesNotMatch(source, /1200|1\.2/);
-assert.doesNotMatch(source, /Color\\\.(Blue|Gray|Red|Green)/);
+assert.doesNotMatch(source, /Color\.(?:Blue|Gray|Red|Green|Black|White)|Color\(0x[0-9A-Fa-f]+\)/);
 
 console.log("Compose Basic Progress / Spinner source contract tests passed.");
