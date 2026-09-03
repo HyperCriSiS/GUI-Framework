@@ -134,46 +134,53 @@ fun AndroidReferenceApp(
                 accessibilityLabel = "Reference name",
                 size = inputSize,
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                GuiSwitch(
-                    checked = enabled,
-                    onCheckedChange = { enabled = it },
-                    accessibilityLabel = "Reference enabled",
-                    size = switchSize,
-                )
-                BasicText(if (enabled) "Enabled" else "Disabled")
-            }
+            GuiSwitch(
+                checked = enabled,
+                onCheckedChange = { enabled = it },
+                accessibilityLabel = "Reference switch",
+                size = switchSize,
+            )
             if (includeExtendedComponents) {
-                GuiCheckbox(
-                    checked = diagnosticsEnabled,
-                    onCheckedChange = { diagnosticsEnabled = it },
-                    label = "Diagnostics",
-                    accessibilityLabel = "Reference checkbox",
-                    size = checkboxSize,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GuiCheckbox(
+                        checked = diagnosticsEnabled,
+                        onCheckedChange = { diagnosticsEnabled = it },
+                        accessibilityLabel = "Reference checkbox",
+                        size = checkboxSize,
+                    )
+                    BasicText("Enable diagnostics")
+                }
                 GuiRadioGroup(groupName = "reference-review-mode") {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        GuiRadio(
-                            selected = reviewMode == "summary",
-                            onSelectedChange = {
-                                if (it) reviewMode = "summary"
-                            },
-                            label = "Summary",
-                            accessibilityLabel = "Summary review",
-                            size = radioSize,
-                        )
-                        GuiRadio(
-                            selected = reviewMode == "detailed",
-                            onSelectedChange = {
-                                if (it) reviewMode = "detailed"
-                            },
-                            label = "Detailed",
-                            accessibilityLabel = "Detailed review",
-                            size = radioSize,
-                        )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            GuiRadio(
+                                selected = reviewMode == "summary",
+                                onSelectedChange = { if (it) reviewMode = "summary" },
+                                accessibilityLabel = "Summary review",
+                                groupName = "reference-review-mode",
+                                size = radioSize,
+                            )
+                            BasicText("Summary review")
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            GuiRadio(
+                                selected = reviewMode == "detailed",
+                                onSelectedChange = { if (it) reviewMode = "detailed" },
+                                accessibilityLabel = "Detailed review",
+                                groupName = "reference-review-mode",
+                                size = radioSize,
+                            )
+                            BasicText("Detailed review")
+                        }
                     }
                 }
                 GuiSelect(
@@ -181,6 +188,7 @@ fun AndroidReferenceApp(
                     options = listOf(
                         GuiSelectOption(value = "email", label = "Email"),
                         GuiSelectOption(value = "push", label = "Push"),
+                        GuiSelectOption(value = "digest", label = "Daily digest"),
                         GuiSelectOption(value = "legacy", label = "Legacy channel", disabled = true),
                     ),
                     onValueChange = { deliveryChannel = it },
@@ -276,7 +284,6 @@ fun AndroidReferenceApp(
                 accessibilityLabel = "Dialog name",
                 size = inputSize,
             )
-            BasicText("Hello, $value")
             GuiButton(
                 label = "Close",
                 onActivate = { dialogOpen = false },
