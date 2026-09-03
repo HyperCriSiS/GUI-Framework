@@ -170,6 +170,9 @@ jobs:
       - name: Test standalone Web Tooltip reference
         run: npm run test:web-tooltip-reference
 
+      - name: Test standalone Web Toast / Notification reference
+        run: npm run test:web-toast-reference
+
       - name: Test standalone Web Menu / Context Menu reference
         run: npm run test:web-menu-reference
 
@@ -270,27 +273,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-
       - name: Compile neutral specification
         run: npm run compile:spec
-
       - name: Generate Web token output
         run: npm run build:web-tokens
-
       - name: Generate Web component output
         run: npm run build:web-components
-
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts --no-audit --no-fund @playwright/test@${PLAYWRIGHT_VERSION}
-
       - name: Install pinned Chromium
         run: npx playwright install --with-deps chromium
-
       - name: Run browser regression suite
         run: npx playwright test -c playwright.config.mjs
 
@@ -301,47 +297,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Install Android SDK packages
         run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
-
       - name: Compile neutral specification
         run: npm run compile:spec
-
       - name: Generate Kotlin contracts
         run: npm run build:kotlin-contracts
-
       - name: Generate Kotlin tokens
         run: npm run build:kotlin-tokens
-
       - name: Generate Kotlin visual recipes
         run: npm run build:kotlin-visuals
-
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
-
       - name: Compile Android reference instrumentation
         run: gradle -p examples/compose-android :app:compileDebugAndroidTestKotlin --no-daemon
-
       - name: Assemble Android reference APKs
         run: gradle -p examples/compose-android :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
 
@@ -370,49 +354,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Enable KVM acceleration
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
       - name: Install Android SDK packages
         run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
-
       - name: Compile neutral specification
         run: npm run compile:spec
-
       - name: Generate Kotlin contracts
         run: npm run build:kotlin-contracts
-
       - name: Generate Kotlin tokens
         run: npm run build:kotlin-tokens
-
       - name: Generate Kotlin visual recipes
         run: npm run build:kotlin-visuals
-
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
-
       - name: Run scaled Android reference instrumentation
         run: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
