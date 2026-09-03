@@ -20,8 +20,8 @@ try {
   const ir=JSON.parse(a);
   assert.deepEqual(ir.themes.map((theme)=>theme.id),["basic","modern","glass","frosted-glass","spacey","cyberpunk"],"The initial theme registry must remain stable");
   assert.deepEqual(ir.palettes.map((palette)=>palette.id),["reference-dark","reference-light"],"The reference palette variants must remain registered");
-  const expectedContractComponentIds=["button","checkbox","dialog","input","menu","panel","radio","select","switch","tabs","tooltip"];
-  const expectedReferenceVisualIds=["button","checkbox","dialog","input","menu","panel","radio","select","switch","tabs","tooltip"];
+  const expectedContractComponentIds=["button","checkbox","dialog","input","menu","panel","radio","select","switch","tabs","toast","tooltip"];
+  const expectedReferenceVisualIds=["button","checkbox","dialog","input","menu","panel","radio","select","switch","tabs","toast","tooltip"];
   for(const palette of ir.palettes) assert.deepEqual(Object.keys(palette.components),expectedContractComponentIds,`Palette ${palette.id} must compile the complete component contract registry`);
   const dark=ir.palettes.find((palette)=>palette.id==="reference-dark");
   const light=ir.palettes.find((palette)=>palette.id==="reference-light");
