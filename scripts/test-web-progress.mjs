@@ -20,8 +20,16 @@ class FakeStyle {
   getPropertyValue(name) { return this.values.get(name) ?? ""; }
 }
 class FakeElement {
-  constructor(tagName) {
-    this.tagName = tagName.toUpperCase(); this.dataset = {}; this.attributes = new Map(); this.children = []; this.className = ""; this.style = new FakeStyle(); this.hidden = false; this.textContent = "";
+  constructor(tagName, svg = false) {
+    this.tagName = tagName.toUpperCase(); this.dataset = {}; this.attributes = new Map(); this.children = []; this.style = new FakeStyle(); this.hidden = false; this.textContent = "";
+    let htmlClassName = "";
+    Object.defineProperty(this, "className", {
+      get: () => svg ? { baseVal: this.attributes.get("class") ?? "" } : htmlClassName,
+      set: (value) => {
+        if (svg) throw new TypeError("SVG className is not a writable string");
+        htmlClassName = String(value);
+      },
+    });
   }
   append(...children) { this.children.push(...children); }
   replaceChildren(...children) { this.children = [...children]; }
@@ -31,7 +39,7 @@ class FakeElement {
 }
 class FakeDocument {
   createElement(tagName) { return new FakeElement(tagName); }
-  createElementNS(_namespace, tagName) { return new FakeElement(tagName); }
+  createElementNS(_namespace, tagName) { return new FakeElement(tagName, true); }
 }
 
 const fakeDocument = new FakeDocument();
@@ -94,7 +102,10 @@ try {
   assert.equal(progress.element.dataset.guiSize, "large");
   assert.equal(progress.visualElement.tagName, "SVG");
   assert.equal(progress.visualElement.getAttribute("viewBox"), "0 0 100 100");
+  assert.equal(progress.visualElement.getAttribute("class"), "gui-progress__visual gui-progress__circle");
   assert.equal(progress.trackElement.tagName, "CIRCLE");
+  assert.equal(progress.trackElement.getAttribute("class"), "gui-progress__track");
+  assert.equal(progress.indicatorElement.getAttribute("class"), "gui-progress__indicator");
   assert.equal(progress.indicatorElement.getAttribute("pathLength"), "100");
   assert.equal(progress.indicatorElement.getAttribute("stroke-dasharray"), "25 75");
 

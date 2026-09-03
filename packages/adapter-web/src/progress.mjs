@@ -96,9 +96,9 @@ export function createGuiProgress(document, initialProps = {}) {
       visualElement.setAttribute("viewBox", "0 0 100 100");
       visualElement.setAttribute("aria-hidden", "true");
       visualElement.setAttribute("focusable", "false");
-      visualElement.className = "gui-progress__visual gui-progress__circle";
-      trackElement.className = "gui-progress__track";
-      indicatorElement.className = "gui-progress__indicator";
+      visualElement.setAttribute("class", "gui-progress__visual gui-progress__circle");
+      trackElement.setAttribute("class", "gui-progress__track");
+      indicatorElement.setAttribute("class", "gui-progress__indicator");
       for (const circle of [trackElement, indicatorElement]) {
         circle.setAttribute("cx", "50");
         circle.setAttribute("cy", "50");
