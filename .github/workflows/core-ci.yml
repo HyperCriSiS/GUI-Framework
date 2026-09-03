@@ -230,6 +230,9 @@ jobs:
       - name: Test native Compose Basic Tooltip
         run: npm run test:kotlin-tooltip
 
+      - name: Test native Compose Basic Toast / Notification
+        run: npm run test:kotlin-toast
+
       - name: Test native Compose Basic Menu / Context Menu
         run: npm run test:kotlin-menu
 
