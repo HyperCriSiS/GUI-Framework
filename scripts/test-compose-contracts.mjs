@@ -70,6 +70,7 @@ try {
   assert.match(source, /GuiEventContract\("expandedChange", "boolean"\)/);
   assert.match(source, /GuiContentSlot\("options", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("combobox", true\)/);
+
   assert.match(source, /enum class GuiTabsVariant/);
   assert.match(source, /enum class GuiTabsSize/);
   assert.match(source, /enum class GuiTabsState/);
@@ -82,6 +83,7 @@ try {
   assert.match(source, /GuiContentSlot\("tab", "children", true\)/);
   assert.match(source, /GuiContentSlot\("panel", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("tablist", true\)/);
+
   assert.match(source, /enum class GuiTooltipVariant/);
   assert.match(source, /enum class GuiTooltipSize/);
   assert.match(source, /enum class GuiTooltipState/);
@@ -92,6 +94,7 @@ try {
   assert.match(source, /GuiContentSlot\("trigger", "children", true\)/);
   assert.match(source, /GuiContentSlot\("content", "text", true\)/);
   assert.match(source, /GuiComponentSemantics\("tooltip", false\)/);
+
   assert.match(source, /enum class GuiMenuVariant/);
   assert.match(source, /enum class GuiMenuSize/);
   assert.match(source, /enum class GuiMenuState/);
@@ -105,6 +108,26 @@ try {
   assert.match(source, /GuiContentSlot\("trigger", "children", false\)/);
   assert.match(source, /GuiContentSlot\("item", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("menu", false\)/);
+
+  assert.match(source, /enum class GuiToastVariant/);
+  assert.match(source, /INFO\("info"\)/);
+  assert.match(source, /SUCCESS\("success"\)/);
+  assert.match(source, /WARNING\("warning"\)/);
+  assert.match(source, /ERROR\("error"\)/);
+  assert.match(source, /enum class GuiToastSize/);
+  assert.match(source, /enum class GuiToastState/);
+  assert.match(source, /data class GuiToastProperties\(/);
+  assert.match(source, /val open: Boolean/);
+  assert.match(source, /val actionValue: String = ""/);
+  assert.match(source, /val dismissible: Boolean = true/);
+  assert.match(source, /val durationMs: Double = 5000\.0/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /GuiEventContract\("openChange", "boolean"\)/);
+  assert.match(source, /GuiEventContract\("activate", "string"\)/);
+  assert.match(source, /GuiContentSlot\("title", "text", false\)/);
+  assert.match(source, /GuiContentSlot\("message", "text", true\)/);
+  assert.match(source, /GuiContentSlot\("action", "text", false\)/);
+  assert.match(source, /GuiComponentSemantics\("status", false\)/);
 
   assert.match(source, /enum class GuiDialogVariant/);
   assert.match(source, /enum class GuiDialogSize/);
