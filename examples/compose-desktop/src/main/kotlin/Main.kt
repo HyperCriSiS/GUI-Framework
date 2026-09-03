@@ -34,6 +34,7 @@ import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTabItem
 import gui.framework.compose.GuiTabs
 import gui.framework.compose.GuiTheme
+import gui.framework.compose.GuiToast
 import gui.framework.compose.GuiTooltip
 import gui.framework.generated.internal.GuiButtonSize
 import gui.framework.generated.internal.GuiCheckboxSize
@@ -46,6 +47,7 @@ import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
+import gui.framework.generated.internal.GuiToastSize
 import gui.framework.generated.internal.GuiTooltipSize
 
 enum class ReferenceDensity {
@@ -106,6 +108,8 @@ private fun DesktopReferenceContent(
     var menuOpen by remember { mutableStateOf(false) }
     var menuContextMode by remember { mutableStateOf(false) }
     var lastMenuAction by remember { mutableStateOf("none") }
+    var toastOpen by remember { mutableStateOf(false) }
+    var lastToastAction by remember { mutableStateOf("none") }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -118,6 +122,7 @@ private fun DesktopReferenceContent(
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
     val tabsSize = if (density == ReferenceDensity.Compact) GuiTabsSize.SMALL else GuiTabsSize.MEDIUM
+    val toastSize = if (density == ReferenceDensity.Compact) GuiToastSize.SMALL else GuiToastSize.MEDIUM
     val tooltipSize = if (density == ReferenceDensity.Compact) GuiTooltipSize.SMALL else GuiTooltipSize.MEDIUM
 
     Column(
@@ -140,53 +145,46 @@ private fun DesktopReferenceContent(
                     accessibilityLabel = "Reference name",
                     size = inputSize,
                 )
-                GuiSwitch(
-                    checked = enabled,
-                    onCheckedChange = { enabled = it },
-                    accessibilityLabel = "Reference switch",
-                    size = switchSize,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    GuiSwitch(
+                        checked = enabled,
+                        onCheckedChange = { enabled = it },
+                        accessibilityLabel = "Reference enabled",
+                        size = switchSize,
+                    )
+                    BasicText(if (enabled) "Enabled" else "Disabled")
+                }
                 if (includeExtendedComponents) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        GuiCheckbox(
-                            checked = diagnosticsEnabled,
-                            onCheckedChange = { diagnosticsEnabled = it },
-                            accessibilityLabel = "Reference checkbox",
-                            size = checkboxSize,
-                        )
-                        BasicText("Enable diagnostics")
-                    }
+                    GuiCheckbox(
+                        checked = diagnosticsEnabled,
+                        onCheckedChange = { diagnosticsEnabled = it },
+                        label = "Diagnostics",
+                        accessibilityLabel = "Reference checkbox",
+                        size = checkboxSize,
+                    )
                     GuiRadioGroup(groupName = "reference-review-mode") {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                GuiRadio(
-                                    selected = reviewMode == "summary",
-                                    onSelectedChange = { if (it) reviewMode = "summary" },
-                                    accessibilityLabel = "Summary review",
-                                    groupName = "reference-review-mode",
-                                    size = radioSize,
-                                )
-                                BasicText("Summary review")
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                GuiRadio(
-                                    selected = reviewMode == "detailed",
-                                    onSelectedChange = { if (it) reviewMode = "detailed" },
-                                    accessibilityLabel = "Detailed review",
-                                    groupName = "reference-review-mode",
-                                    size = radioSize,
-                                )
-                                BasicText("Detailed review")
-                            }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            GuiRadio(
+                                selected = reviewMode == "summary",
+                                onSelectedChange = {
+                                    if (it) reviewMode = "summary"
+                                },
+                                label = "Summary",
+                                accessibilityLabel = "Summary review",
+                                size = radioSize,
+                            )
+                            GuiRadio(
+                                selected = reviewMode == "detailed",
+                                onSelectedChange = {
+                                    if (it) reviewMode = "detailed"
+                                },
+                                label = "Detailed",
+                                accessibilityLabel = "Detailed review",
+                                size = radioSize,
+                            )
                         }
                     }
                     GuiSelect(
@@ -194,7 +192,6 @@ private fun DesktopReferenceContent(
                         options = listOf(
                             GuiSelectOption(value = "email", label = "Email"),
                             GuiSelectOption(value = "push", label = "Push"),
-                            GuiSelectOption(value = "digest", label = "Daily digest"),
                             GuiSelectOption(value = "legacy", label = "Legacy channel", disabled = true),
                         ),
                         onValueChange = { deliveryChannel = it },
@@ -264,6 +261,24 @@ private fun DesktopReferenceContent(
                         }
                     }
                     BasicText("Last menu action: $lastMenuAction")
+                    GuiButton(
+                        label = "Show notification",
+                        onActivate = { toastOpen = true },
+                        size = buttonSize,
+                    )
+                    BasicText("Last notification action: $lastToastAction")
+                    GuiToast(
+                        open = toastOpen,
+                        title = "Workspace updated",
+                        message = "Your changes were saved.",
+                        onOpenChange = { toastOpen = it },
+                        actionLabel = "Undo",
+                        actionValue = "undo",
+                        durationMs = 0L,
+                        accessibilityLabel = "Workspace notification",
+                        onActivate = { lastToastAction = it },
+                        size = toastSize,
+                    )
                 }
                 GuiButton(
                     label = "Open dialog",
@@ -283,6 +298,7 @@ private fun DesktopReferenceContent(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BasicText("Hello, $name")
+            BasicText("The neutral component contracts are driving this Foundation-only reference path.")
             GuiButton(
                 label = "Close",
                 onActivate = { dialogOpen = false },
