@@ -109,6 +109,20 @@ try {
   assert.match(source, /GuiContentSlot\("item", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("menu", false\)/);
 
+  assert.match(source, /enum class GuiProgressVariant/);
+  assert.match(source, /LINEAR\("linear"\)/);
+  assert.match(source, /CIRCULAR\("circular"\)/);
+  assert.match(source, /enum class GuiProgressSize/);
+  assert.match(source, /enum class GuiProgressState/);
+  assert.match(source, /data class GuiProgressProperties\(/);
+  assert.match(source, /val value: Double = 0\.0/);
+  assert.match(source, /val min: Double = 0\.0/);
+  assert.match(source, /val max: Double = 100\.0/);
+  assert.match(source, /val indeterminate: Boolean = false/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /GuiContentSlot\("label", "text", false\)/);
+  assert.match(source, /GuiComponentSemantics\("progressbar", false\)/);
+
   assert.match(source, /enum class GuiToastVariant/);
   assert.match(source, /INFO\("info"\)/);
   assert.match(source, /SUCCESS\("success"\)/);
