@@ -10,7 +10,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
@@ -272,7 +272,7 @@ fun GuiSlider(
         }
 
     Box(modifier = rootModifier) {
-        Canvas(modifier = Modifier.matchParentSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
             val thumbWidth = thumb.minWidth?.toComposeDp()?.toPx()
                 ?: error("Resolved GUI slider thumb is missing minWidth")
             val thumbHeight = thumb.minHeight?.toComposeDp()?.toPx()
