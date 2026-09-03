@@ -186,6 +186,9 @@ jobs:
       - name: Test standalone Web Progress / Spinner reference
         run: npm run test:web-progress-reference
 
+      - name: Test standalone Web Slider reference
+        run: npm run test:web-slider-reference
+
       - name: Test standalone Web Menu / Context Menu reference
         run: npm run test:web-menu-reference
 
