@@ -32,9 +32,15 @@ function kotlinType(type) {
   throw new Error(`Unsupported Kotlin property type: ${type}`);
 }
 
+function kotlinDouble(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new Error(`Invalid finite Kotlin Double default: ${value}`);
+  return Number.isInteger(number) ? `${number}.0` : number.toString();
+}
+
 function kotlinDefault(property) {
   if (Object.prototype.hasOwnProperty.call(property, "default")) {
-    if (property.type === "number") return Number(property.default).toString();
+    if (property.type === "number") return kotlinDouble(property.default);
     if (property.type === "string") return kotlinString(property.default);
     if (property.type === "boolean") return String(property.default);
   }
