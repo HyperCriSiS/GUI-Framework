@@ -316,11 +316,14 @@ jobs:
       - name: Generate Web component output
         run: npm run build:web-components
 
+      - name: Install Playwright test runner
+        run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
+
       - name: Install Chromium ${{ env.PLAYWRIGHT_VERSION }}
-        run: npx --yes playwright@${{ env.PLAYWRIGHT_VERSION }} install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run Chromium reference regression
-        run: npx --yes playwright@${{ env.PLAYWRIGHT_VERSION }} test
+        run: npx playwright test
 
   compose-android-reference:
     name: compose-android-reference
@@ -451,15 +454,6 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
-      - name: Install Android SDK packages
-        run: >-
-          sdkmanager
-          "platform-tools"
-          "platforms;${{ env.ANDROID_PLATFORM_PACKAGE }}"
-          "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
-          "emulator"
-          "system-images;android-${{ matrix.api-level }};${{ matrix.target }};${{ matrix.arch }}"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
