@@ -3,13 +3,14 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, webToast, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
   readFile("examples/web-reference/select-reference.mjs", "utf8"),
   readFile("examples/web-reference/tooltip-reference.mjs", "utf8"),
   readFile("examples/web-reference/toast-reference.mjs", "utf8"),
+  readFile("examples/web-reference/progress-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -71,6 +72,13 @@ assert.match(webToast, /message: "Your changes were saved\."/);
 assert.match(webToast, /actionLabel: "Undo"/);
 assert.match(webToast, /actionValue: "undo"/);
 assert.match(webToast, /onOpenChange: setOpen/);
+assert.match(webProgress, /createGuiProgress\(/, "Web Progress reference must exercise createGuiProgress");
+assert.match(webProgress, /accessibilityLabel: "Workspace sync progress"/);
+assert.match(webProgress, /label: "Sync progress: 68%"/);
+assert.match(webProgress, /indeterminate: true/);
+assert.match(webProgress, /accessibilityLabel: "Workspace sync activity"/);
+assert.match(webProgress, /label: "Syncing workspace"/);
+assert.match(webProgress, /variant: "circular"/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -94,10 +102,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiProgressSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
     assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -129,8 +137,15 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /actionValue = "undo"/, `${name} must expose the Toast action value`);
   assert.match(source, /durationMs = 0L/, `${name} must keep the reference Toast deterministic`);
   assert.match(source, /onActivate = \{ lastToastAction = it \}/, `${name} must expose the Toast activation flow`);
+  assert.match(source, /value = 68\.0/, `${name} must expose determinate Progress value`);
+  assert.match(source, /accessibilityLabel = "Workspace sync progress"/, `${name} must expose determinate Progress semantics`);
+  assert.match(source, /label = "Sync progress: 68%"/, `${name} must expose determinate Progress label`);
+  assert.match(source, /indeterminate = true/, `${name} must expose indeterminate Progress state`);
+  assert.match(source, /accessibilityLabel = "Workspace sync activity"/, `${name} must expose indeterminate Progress semantics`);
+  assert.match(source, /label = "Syncing workspace"/, `${name} must expose indeterminate Progress label`);
+  assert.match(source, /variant = GuiProgressVariant\.CIRCULAR/, `${name} must expose circular Progress variant`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
