@@ -252,6 +252,9 @@ jobs:
       - name: Test native Compose Basic Progress / Spinner
         run: npm run test:kotlin-progress
 
+      - name: Test native Compose Basic Slider
+        run: npm run test:kotlin-slider
+
       - name: Test native Compose Basic Menu / Context Menu
         run: npm run test:kotlin-menu
 
