@@ -1,6 +1,6 @@
 # GUI Framework Roadmap
 
-Current status: repository foundation, renderer-neutral specification, Web and Compose adapter foundations, six-theme system, and the initial extended component set through Menu / Context Menu and Toast / Notification are implemented and validated. Phase 4 is complete. Phase 5 has completed the Basic theme contract: the full reference-component set, declared sizes/states, shared functional interaction motion, reduced-motion behavior, minimum-capability low-cost guards, dense/compact validation and a deterministic performance budget are CI-gated. Modern implementation builds on Basic with palette-neutral rounded geometry and neutral DTCG drop-shadow elevation for Panel/Card and Dialog. The shadow model is mapped consistently to Web CSS and Compose, including alpha-preserving generated tokens. The same reference-dark/reference-light palettes are CI-proven across Basic and Modern without theme forks. Web exercises Modern through the same functional reference application and 320 px compact-layout path as Basic, with an exact Chromium visual-delta baseline for Modern's intended geometry/elevation changes. Basic and Modern are both covered explicitly by the WCAG 2.2 AA integration contrast gate. Compose Desktop and Android expose equivalent Modern selection paths, with Android runtime instrumentation included in the representative device matrix. Modern also has a deterministic CI-enforced structural performance budget and is runtime-confirmed on the representative API 23 low-memory/large-font and API 35 high-density Android matrix. Glass now inherits Modern's geometry/elevation while adding palette-neutral translucent Panel/Card and Dialog surfaces without blur, backdrop blur or glow. Glass has dedicated foundation and deterministic performance gates, alpha-composited WCAG 2.2 AA surface checks, the shared Web reference/palette/320 px compact path with exact Chromium translucency/no-blur assertions, validated Compose Desktop/Android selection, and the same representative Android runtime confirmation. Frosted Glass now inherits Glass as its deterministic crisp fallback. Panel/Card and Dialog expose optional backdrop blur through the existing high → standard → minimal capability taxonomy. Web resolves that capability from the compiled neutral IR and applies native 24 px backdrop blur only to those declared surfaces, with Chromium proving an exact return to crisp Glass when the capability is unavailable. Compose Desktop and Android expose Frosted Glass selection without blur emulation and therefore exercise the deterministic Glass fallback. Dedicated Frosted performance and WCAG integration gates are green, and the representative API 23 low-memory/large-font plus API 35 high-density Android runtime matrix confirms the deterministic Compose fallback path. Spacey now extends Basic with a flat, palette-neutral aerospace/instrumentation geometry: pill-shaped controls, strong semantic instrument frames and compact Panel/Dialog radii without shadow, blur, backdrop blur or glow. Dedicated Spacey structure/performance and WCAG gates are green; the shared Web reference, 320 px compact path and Chromium visual delta are green, and Compose Desktop/Android expose the same selection path with a successful Android reference build. Representative API 23 low-memory/large-font and API 35 high-density device-runtime validation now confirms the Spacey selection path. Cyberpunk now extends Basic with sharp 6 px native signal-frame geometry, semantic accent/focus borders and bounded low/medium native elevation only on Panel/Card and Dialog. Dedicated structure/performance and WCAG integration gates, palette-neutral Web output, exact Chromium dark/light palette assertions, the 320 px compact path, Compose Desktop/Android selection, cross-platform reference parity and the Android reference build are green. Representative API 23 low-memory/large-font and API 35 high-density device-runtime validation now confirms the Cyberpunk selection path. Phase 5 is complete. Phase 6 is underway. Checkbox is complete across the neutral contract, Basic visual recipe, native Web and Compose adapters, Web/Desktop/Android reference paths, WCAG target/contrast gates, Chromium compact/keyboard integration, Android reference build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Radio is complete across the neutral contract, dedicated tokens, Basic visual recipe, controlled Web adapter, native Web/Compose group semantics, Web/Desktop/Android reference paths, cross-platform reference parity, WCAG target/contrast gates, Chromium compact/keyboard integration, Android reference build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Select / ComboBox is complete across the neutral contract, Basic visual recipe, controlled Web and Compose adapters, standalone Web and Basic Compose Desktop/Android reference paths, cross-platform parity, WCAG target/contrast gates, Chromium compact/keyboard/editable integration, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Tabs is complete across the neutral contract, Basic visual recipe, controlled Web and Compose adapters, manual-activation keyboard/focus behavior, standalone Web plus Compose Desktop/Android references, cross-platform parity, WCAG target/contrast gates, Chromium compact interaction regression, Android APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Tooltip is complete across the neutral contract, Basic visual recipe, controlled Web and Foundation Compose adapters, WCAG popup contrast, Chromium hover/focus/Escape plus flip/clamp regression, Web/Desktop/Android references, cross-platform parity, Android APK build and representative API 23 low-memory/large-font plus API 35 high-density focus/runtime validation. Menu / Context Menu is complete across the neutral contract, Basic visual recipe, controlled Web and Foundation Compose adapters, native menu semantics, disabled-item skipping and roving keyboard focus, trigger-anchored plus host-supplied context placement, Web/Desktop/Android reference paths, WCAG target/contrast gates, Chromium keyboard/context/viewport regression, cross-platform parity, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Toast / Notification is complete across the neutral contract, Basic visuals, controlled Web/Foundation Compose adapters, accessible polite/assertive live-region behavior, pause/resume and persistent timing semantics, standalone Web plus Desktop/Android reference paths, cross-platform parity, Chromium runtime regression, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density runtime validation. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model.
+Current status: repository foundation, renderer-neutral specification, Web and Compose adapter foundations, six-theme system, and the initial extended component set through Menu / Context Menu, Toast / Notification and Progress / Spinner is implemented and validated. Phase 4 is complete. Phase 5 has completed the Basic theme contract: the full reference-component set, declared sizes/states, shared functional interaction motion, reduced-motion behavior, minimum-capability low-cost guards, dense/compact validation and a deterministic performance budget are CI-gated. Modern implementation builds on Basic with palette-neutral rounded geometry and neutral DTCG drop-shadow elevation for Panel/Card and Dialog. The shadow model is mapped consistently to Web CSS and Compose, including alpha-preserving generated tokens. The same reference-dark/reference-light palettes are CI-proven across Basic and Modern without theme forks. Web exercises Modern through the same functional reference application and 320 px compact-layout path as Basic, with an exact Chromium visual-delta baseline for Modern's intended geometry/elevation changes. Basic and Modern are both covered explicitly by the WCAG 2.2 AA integration contrast gate. Compose Desktop and Android expose equivalent Modern selection paths, with Android runtime instrumentation included in the representative device matrix. Modern also has a deterministic CI-enforced structural performance budget and is runtime-confirmed on the representative API 23 low-memory/large-font and API 35 high-density Android matrix. Glass now inherits Modern's geometry/elevation while adding palette-neutral translucent Panel/Card and Dialog surfaces without blur, backdrop blur or glow. Glass has dedicated foundation and deterministic performance gates, alpha-composited WCAG 2.2 AA surface checks, the shared Web reference/palette/320 px compact path with exact Chromium translucency/no-blur assertions, validated Compose Desktop/Android selection, and the same representative Android runtime confirmation. Frosted Glass now inherits Glass as its deterministic crisp fallback. Panel/Card and Dialog expose optional backdrop blur through the existing high → standard → minimal capability taxonomy. Web resolves that capability from the compiled neutral IR and applies native 24 px backdrop blur only to those declared surfaces, with Chromium proving an exact return to crisp Glass when the capability is unavailable. Compose Desktop and Android expose Frosted Glass selection without blur emulation and therefore exercise the deterministic Glass fallback. Dedicated Frosted performance and WCAG integration gates are green, and the representative API 23 low-memory/large-font plus API 35 high-density Android runtime matrix confirms the deterministic Compose fallback path. Spacey now extends Basic with a flat, palette-neutral aerospace/instrumentation geometry: pill-shaped controls, strong semantic instrument frames and compact Panel/Dialog radii without shadow, blur, backdrop blur or glow. Dedicated Spacey structure/performance and WCAG gates are green; the shared Web reference, 320 px compact path and Chromium visual delta are green, and Compose Desktop/Android expose the same selection path with a successful Android reference build. Representative API 23 low-memory/large-font and API 35 high-density device-runtime validation now confirms the Spacey selection path. Cyberpunk now extends Basic with sharp 6 px native signal-frame geometry, semantic accent/focus borders and bounded low/medium native elevation only on Panel/Card and Dialog. Dedicated structure/performance and WCAG integration gates, palette-neutral Web output, exact Chromium dark/light palette assertions, the 320 px compact path, Compose Desktop/Android selection, cross-platform reference parity and the Android reference build are green. Representative API 23 low-memory/large-font and API 35 high-density device-runtime validation now confirms the Cyberpunk selection path. Phase 5 is complete. Phase 6 is underway. Checkbox is complete across the neutral contract, Basic visual recipe, native Web and Compose adapters, Web/Desktop/Android reference paths, WCAG target/contrast gates, Chromium compact/keyboard integration, Android reference build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Radio is complete across the neutral contract, dedicated tokens, Basic visual recipe, controlled Web adapter, native Web/Compose group semantics, Web/Desktop/Android reference paths, cross-platform reference parity, WCAG target/contrast gates, Chromium compact/keyboard integration, Android reference build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Select / ComboBox is complete across the neutral contract, Basic visual recipe, controlled Web and Compose adapters, standalone Web and Basic Compose Desktop/Android reference paths, cross-platform parity, WCAG target/contrast gates, Chromium compact/keyboard/editable integration, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Tabs is complete across the neutral contract, Basic visual recipe, controlled Web and Compose adapters, manual-activation keyboard/focus behavior, standalone Web plus Compose Desktop/Android references, cross-platform parity, WCAG target/contrast gates, Chromium compact interaction regression, Android APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Tooltip is complete across the neutral contract, Basic visual recipe, controlled Web and Foundation Compose adapters, WCAG popup contrast, Chromium hover/focus/Escape plus flip/clamp regression, Web/Desktop/Android references, cross-platform parity, Android APK build and representative API 23 low-memory/large-font plus API 35 high-density focus/runtime validation. Menu / Context Menu is complete across the neutral contract, Basic visual recipe, controlled Web and Foundation Compose adapters, native menu semantics, disabled-item skipping and roving keyboard focus, trigger-anchored plus host-supplied context placement, Web/Desktop/Android reference paths, WCAG target/contrast gates, Chromium keyboard/context/viewport regression, cross-platform parity, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density device-runtime validation. Toast / Notification is complete across the neutral contract, Basic visuals, controlled Web/Foundation Compose adapters, accessible polite/assertive live-region behavior, pause/resume and persistent timing semantics, standalone Web plus Desktop/Android reference paths, cross-platform parity, Chromium runtime regression, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density runtime validation. Progress / Spinner is complete across the neutral contract, Basic visuals, native Web/Foundation Compose adapters, determinate/indeterminate linear and circular semantics, shared neutral timing, standalone Web plus Desktop/Android reference paths, cross-platform parity, Chromium Reduced Motion/runtime regression, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density runtime validation. The initial platform/toolchain support matrix, package naming rules and pre-1.0/1.0 compatibility policy are defined. Palette families/variants and semantic contrast policy are explicit and CI-gated without hard-coding a light/dark-only model.
 
 ## Goal
 
@@ -26,92 +26,64 @@ Each platform adapter maps that specification onto native primitives. The framew
 - Expensive visual effects are not allowed to become mandatory for basic usability.
 - Generated outputs must be deterministic.
 
----
-
 ## Phase 0 — Repository foundation
 
-- [x] Repository skeleton
-- [x] Restrictive copyleft licensing baseline
-- [x] License policy documentation
-- [x] Workspace/package layout
-- [x] Core CI baseline
-- [x] Line-ending policy
+- [x] License and contribution policy
+- [x] Branching and release policy
+- [x] Repository structure
+- [x] CI skeleton
+- [x] Documentation skeleton
+- [x] Local-only roadmap policy
 
 ## Phase 1 — Renderer-neutral specification
 
-- [x] DTCG-compatible primitive token source
-- [x] Semantic palette token sources
-- [x] Component token source
-- [x] Visual-effect token source
-- [x] Portable asset manifest/profile
-- [x] Framework manifest schema
-- [x] Theme schema
+- [x] DTCG-compatible token format
 - [x] Component recipe schema
-- [x] Contrast policy schema
-- [x] Renderer-neutral specification validator
-- [x] Theme inheritance
-- [x] Capability taxonomy and deterministic fallback selection
-- [x] Typed visual recipe resolution
-- [x] Deterministic compiler IR
-- [x] Reference palette family/variant model
-- [x] Renderer-neutral vocabulary boundary test
+- [x] Theme schema and inheritance
+- [x] Capability taxonomy
+- [x] Fallback recipe schema
+- [x] Motion policy model
+- [x] Accessibility metadata model
+- [x] Portable asset model
+- [x] Manifest and versioning model
+- [x] Validation tooling
 
-## Phase 2 — Initial reference component set
+## Phase 2 — Compiler and intermediate representation
 
-- [x] Button
-- [x] Input
-- [x] Switch
-- [x] Panel / Card
-- [x] Dialog
-- [x] Portable SVG asset path
-- [x] Shared neutral reference scenarios
+- [x] Parse and validate specification
+- [x] Resolve token aliases
+- [x] Resolve theme inheritance
+- [x] Resolve capability fallbacks
+- [x] Produce stable typed IR
+- [x] Emit deterministic diagnostics
+- [x] Add compiler tests and fixtures
 
-## Phase 3 — Web adapter
+## Phase 3 — Adapter foundations
 
-- [x] Generate CSS variables from neutral token IR
-- [x] Generate component CSS from neutral visual recipes
-- [x] Generate TypeScript contracts
-- [x] Generate portable asset registry
-- [x] Button adapter
-- [x] Input adapter
-- [x] Switch adapter
-- [x] Panel adapter
-- [x] Dialog adapter
-- [x] Capability resolver
-- [x] Reference Web application
-- [x] Stateful reference interactions
-- [x] Popup host-context validation
-- [x] Sidebar host-context validation
-- [x] Options-page host-context validation
-- [x] Compact-width validation
-- [x] Keyboard/focus validation
-- [x] Reduced-motion validation
-- [x] Playwright Chromium interaction suite
-- [x] Read-only Chromium visual-regression baselines
+### Web
 
-## Phase 4 — Compose adapter and second-adapter audit
+- [x] Token generation
+- [x] Component recipe generation
+- [x] Capability/fallback mapping
+- [x] Native behavior helpers
+- [x] Reference application
 
-- [x] Generate Kotlin contracts
-- [x] Generate Kotlin tokens
-- [x] Generate Compose visual recipes
-- [x] Generate portable asset registry
-- [x] Button adapter
-- [x] Input adapter
-- [x] Switch adapter
-- [x] Panel adapter
-- [x] Dialog adapter
-- [x] Capability resolver
-- [x] Stateful Compose Desktop reference application
-- [x] Stateful Compose Android reference application
-- [x] Android APK build in CI
-- [x] Compose semantics/input/focus validation
-- [x] Scaling/minimum-capability validation
-- [x] Shared Web/Desktop/Android parity gate
-- [x] Renderer-neutral second-adapter architecture audit
-- [x] API 23 low-memory / large-font runtime validation
-- [x] API 35 high-density runtime validation
+### Compose Desktop / Android
 
-## Phase 5 — Theme system
+- [x] Token generation
+- [x] Component recipe generation
+- [x] Capability/fallback mapping
+- [x] Native behavior helpers
+- [x] Reference application
+
+### Shared
+
+- [x] Cross-adapter contract tests
+- [x] Asset generation
+- [x] Accessibility metadata generation
+- [x] Performance-budget model
+
+## Phase 4 — Theme system
 
 - [x] Basic
 - [x] Modern
@@ -119,22 +91,14 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [x] Frosted Glass
 - [x] Spacey
 - [x] Cyberpunk
-- [x] Basic deterministic performance budget
-- [x] Modern deterministic performance budget
-- [x] Glass deterministic performance budget
-- [x] Frosted Glass deterministic performance budget
-- [x] Spacey deterministic performance budget
-- [x] Cyberpunk deterministic performance budget
-- [x] WCAG 2.2 AA integration gate for Basic
-- [x] WCAG 2.2 AA integration gate for Modern
-- [x] WCAG 2.2 AA integration gate for Glass
-- [x] WCAG 2.2 AA integration gate for Frosted Glass
-- [x] WCAG 2.2 AA integration gate for Spacey
-- [x] WCAG 2.2 AA integration gate for Cyberpunk
-- [x] Web reference validation for all six themes
-- [x] Compose Desktop selection for all six themes
-- [x] Compose Android selection for all six themes
-- [x] Representative Android runtime selection validation for all six themes
+
+## Phase 5 — Reference component set
+
+- [x] Button
+- [x] Input / TextField
+- [x] Switch / Toggle
+- [x] Panel / Card
+- [x] Dialog
 
 ## Phase 6 — Extended component set
 
@@ -145,7 +109,7 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [x] Tooltip <!-- neutral contract/Basic visuals, controlled Web/Foundation Compose adapters, WCAG popup contrast, Chromium hover/focus/Escape plus flip/clamp regression, Web/Desktop/Android references, cross-platform parity, Android APK build and representative API 23/API 35 focus/runtime validation are complete -->
 - [x] Menu / Context Menu <!-- neutral contract/Basic visuals, controlled Web/Foundation Compose adapters, native semantics, disabled-item skipping, roving keyboard focus, trigger/context placement, Web/Desktop/Android references, WCAG gates, Chromium context/viewport regression, cross-platform parity, Android instrumentation/APK build and representative API 23/API 35 runtime validation are complete -->
 - [x] Toast / Notification <!-- neutral contract/Basic visuals, controlled Web/Foundation Compose adapters, accessible polite/assertive live-region behavior, pause/resume and persistent timing semantics, standalone Web plus Desktop/Android reference paths, cross-platform parity, Chromium runtime regression, Android instrumentation/APK build and representative API 23 low-memory/large-font plus API 35 high-density runtime validation are complete -->
-- [ ] Progress / Spinner
+- [x] Progress / Spinner <!-- neutral contract/Basic visuals, native Web/Foundation Compose adapters, determinate/indeterminate linear+circular semantics, neutral timing, standalone Web plus Desktop/Android references, cross-platform parity, Chromium Reduced Motion/runtime regression, Android instrumentation/APK build and representative API 23/API 35 runtime validation are complete -->
 - [ ] Slider
 - [ ] Navigation primitives
 - [ ] Table / Data Grid primitives
@@ -172,94 +136,19 @@ Each platform adapter maps that specification onto native primitives. The framew
 - [ ] Theme authoring documentation
 - [ ] Adapter authoring documentation
 - [ ] Component authoring documentation
-- [ ] Example applications
-- [ ] Release automation
-- [ ] Security policy
-- [ ] Contributor workflow
-- [ ] Representative consumer fixtures that build from packaged/generated artifacts rather than repository-internal source paths
-- [ ] Public API/neutral-contract compatibility diff gate with lifecycle-appropriate migration notes
-- [ ] Minimum supported consumer toolchain/runtime verification
+- [ ] Accessibility documentation
+- [ ] Performance documentation
+- [ ] Contribution and governance documentation
 
-## Quality gates
+## Completion gates
 
-Every completed component/theme should eventually satisfy the applicable subset of these gates:
+A phase or component is only complete when every applicable gate is green:
 
-- schema validation
-- deterministic compilation
-- renderer-neutral boundary checks
-- adapter contract generation
-- native semantics/accessibility
-- keyboard/focus interaction
-- compact/dense layout
-- capability fallback behavior
-- WCAG contrast/target requirements
-- deterministic performance budget
-- reference application integration
-- browser regression where applicable
-- Android build/runtime validation where applicable
-- cross-platform parity where applicable
-- text/locale/RTL/IME robustness where applicable
-- clean consumer install/build smoke tests where applicable
-- public API/contract compatibility diff where applicable
-
-## Architecture rules
-
-1. The neutral specification remains the source of truth for component contracts, tokens, visual recipes and capability requirements.
-2. Platform adapters consume compiled neutral output; platform-specific behavior belongs in adapters, not in the specification.
-3. Theme definitions must not fork palettes. Semantic palette values remain independent from theme geometry/effects.
-4. Enhanced visual effects must declare capabilities and deterministic fallbacks.
-5. Accessibility and functional interaction behavior outrank decorative fidelity.
-6. Expensive effects are opt-in and must remain bounded by performance budgets.
-7. Generated output must remain deterministic and testable.
-8. New component/theme work is not considered complete until its applicable quality gates are green.
-
-## Platform/toolchain support matrix
-
-The initial support policy is intentionally conservative and designed around the adapters currently exercised in CI.
-
-### Web
-
-- Chromium is the first fully automated browser target.
-- Generated CSS and TypeScript contracts remain standards-based and are not intentionally Chromium-specific.
-- Firefox/WebKit automation can be added once the reference surface is stable enough that the additional matrix cost is justified.
-- Browser-extension host contexts are explicitly part of the Web adapter target surface.
-
-### Compose
-
-- Compose Desktop is a first-class reference adapter target.
-- Android is a first-class reference adapter target.
-- Android CI currently builds against the Android 17 preview SDK while representative runtime validation spans API 23 and API 35.
-- The framework does not require Material components; adapter primitives remain based on Compose Foundation/UI where practical.
-
-### Node / Java / Gradle
-
-- CI currently uses Node 24, Java 17 and Gradle 9.5.0.
-- Toolchain upgrades should be validated centrally rather than per adapter/application.
-- Generated outputs should not require application consumers to mirror the repository's development toolchain exactly unless a package explicitly documents that requirement.
-
-## Package naming and compatibility policy
-
-- Package IDs stay capability-/adapter-oriented rather than theme-oriented.
-- Themes remain data/specification assets rather than separate platform packages unless distribution constraints later justify otherwise.
-- Pre-1.0 releases may make breaking neutral-contract changes, but each such change must update generated adapters, reference applications and migration notes together.
-- 1.0 establishes the first stable neutral specification/API baseline.
-- After 1.0, breaking contract changes require a major version.
-- Additive tokens, themes and components should remain backward compatible wherever practical.
-- Adapter capability expansion must not silently change deterministic fallback behavior on platforms that do not gain the new capability.
-
-## Engineering review notes
-
-- 2026-09-01: the complete implementation was consolidated from the long-lived `feat/core-foundation` branch back into canonical `main`, restoring the repository invariant defined in `BRANCHING.md`. The merged feature branch should be deleted as repository hygiene.
-- The reusable Software-Engineering-Framework now has a dedicated Library / Framework application module. GUI-specific methodology remains project-local rather than being generalized prematurely.
-- This review deliberately did not add a GUI/design-system-specific reusable module: the existing generic architecture, accessibility, performance and compatibility assurance plus this project's concrete gates already cover those concerns without framework duplication.
-
-## Deferred decisions
-
-These remain intentionally open until the current component/theme foundation provides enough evidence:
-
-- exact package-registry publication layout,
-- whether WebKit/Firefox join the mandatory CI matrix before 1.0,
-- whether an additional native adapter should be implemented before 1.0,
-- whether advanced rendering engines are needed for any future theme layer,
-- whether theme-specific optional asset packs become useful,
-- exact long-term ABI compatibility promises for generated Kotlin contracts.
+- schema validation,
+- compiler tests,
+- adapter contract tests,
+- accessibility checks,
+- performance-budget checks,
+- reference application coverage,
+- representative runtime validation,
+- documentation/status update.
