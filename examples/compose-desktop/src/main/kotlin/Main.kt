@@ -27,6 +27,7 @@ import gui.framework.compose.GuiMenuContextOffset
 import gui.framework.compose.GuiMenuItem
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiProgress
+import gui.framework.compose.GuiSlider
 import gui.framework.compose.GuiRadio
 import gui.framework.compose.GuiRadioGroup
 import gui.framework.compose.GuiSelect
@@ -45,6 +46,7 @@ import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiProgressSize
 import gui.framework.generated.internal.GuiProgressVariant
+import gui.framework.generated.internal.GuiSliderSize
 import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
@@ -113,6 +115,7 @@ private fun DesktopReferenceContent(
     var lastMenuAction by remember { mutableStateOf("none") }
     var toastOpen by remember { mutableStateOf(false) }
     var lastToastAction by remember { mutableStateOf("none") }
+    var sliderValue by remember { mutableStateOf(40.0) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -122,6 +125,7 @@ private fun DesktopReferenceContent(
     val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
     val progressSize = if (density == ReferenceDensity.Compact) GuiProgressSize.SMALL else GuiProgressSize.MEDIUM
+    val sliderSize = if (density == ReferenceDensity.Compact) GuiSliderSize.SMALL else GuiSliderSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
@@ -304,6 +308,14 @@ private fun DesktopReferenceContent(
                         variant = GuiProgressVariant.CIRCULAR,
                         size = progressSize,
                     )
+                    GuiSlider(
+                        value = sliderValue,
+                        onValueChange = { sliderValue = it },
+                        accessibilityLabel = "Workspace zoom",
+                        accessibilityValueText = "${sliderValue.toInt()} percent",
+                        size = sliderSize,
+                    )
+                    BasicText("Workspace zoom: ${sliderValue.toInt()}%")
                 }
                 GuiButton(
                     label = "Open dialog",
