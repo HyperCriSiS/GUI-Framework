@@ -43,10 +43,7 @@ assert.match(web, /fetch\("\.\.\/\.\.\/build\/spec-ir\.json"/);
 assert.match(web, /options\.palette \?\? "reference-dark"/);
 assert.match(web, /options\.density \?\? "standard"/);
 assert.match(web, /const compact = density === "compact"/);
-assert.ok(
-  (web.match(/size: compact \? "small" :/g) ?? []).length >= 8,
-  "Web compact reference must route its reference components through the existing small size",
-);
+assert.ok((web.match(/size: compact \? "small" :/g) ?? []).length >= 8, "Web compact reference must route its reference components through the existing small size");
 for (const factory of ["createGuiButton", "createGuiInput", "createGuiSwitch", "createGuiPanel", "createGuiDialog"]) {
   assert.match(web, new RegExp(`\\b${factory}\\(`), `Web reference must exercise ${factory}`);
 }
@@ -90,14 +87,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiTooltipSize"]) {
-    assert.match(
-      source,
-      new RegExp(`${sizeType}\\.SMALL`),
-      `${name} compact reference must map ${sizeType} to its existing SMALL size`,
-    );
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+    assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -121,8 +114,16 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item`);
   assert.match(source, /onOpenChange = \{ menuOpen = it \}/, `${name} must expose the controlled Menu open flow`);
   assert.match(source, /onActivate = \{ lastMenuAction = it \}/, `${name} must expose the Menu activation flow`);
+  assert.match(source, /label = "Show notification"/, `${name} must expose the Toast open flow`);
+  assert.match(source, /title = "Workspace updated"/, `${name} must expose Toast title content`);
+  assert.match(source, /message = "Your changes were saved\."/, `${name} must expose Toast message content`);
+  assert.match(source, /onOpenChange = \{ toastOpen = it \}/, `${name} must expose the controlled Toast open flow`);
+  assert.match(source, /actionLabel = "Undo"/, `${name} must expose the Toast action label`);
+  assert.match(source, /actionValue = "undo"/, `${name} must expose the Toast action value`);
+  assert.match(source, /durationMs = 0L/, `${name} must keep the reference Toast deterministic`);
+  assert.match(source, /onActivate = \{ lastToastAction = it \}/, `${name} must expose the Toast activation flow`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
