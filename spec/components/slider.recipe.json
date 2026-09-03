@@ -1,0 +1,112 @@
+{
+  "specVersion": "0.1.0",
+  "component": "slider",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "track",
+      "required": true
+    },
+    {
+      "id": "fill",
+      "required": true
+    },
+    {
+      "id": "thumb",
+      "required": true
+    }
+  ],
+  "content": [],
+  "properties": [
+    {
+      "id": "value",
+      "type": "number",
+      "required": true
+    },
+    {
+      "id": "min",
+      "type": "number",
+      "required": false,
+      "default": 0
+    },
+    {
+      "id": "max",
+      "type": "number",
+      "required": false,
+      "default": 100
+    },
+    {
+      "id": "step",
+      "type": "number",
+      "required": false,
+      "default": 1
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "accessibilityValueText",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    }
+  ],
+  "events": [
+    {
+      "id": "valueChange",
+      "payload": "number"
+    }
+  ],
+  "variants": [
+    "horizontal",
+    "vertical"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "slider",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "track": "{semantic.color.surfaceElevated}",
+    "fill": "{semantic.color.accent}",
+    "thumb": "{semantic.color.textPrimary}",
+    "border": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}",
+    "motion": "{motion.interaction.fast}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

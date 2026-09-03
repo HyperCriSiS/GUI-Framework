@@ -117,6 +117,10 @@
       "source": "components/select.recipe.json"
     },
     {
+      "id": "slider",
+      "source": "components/slider.recipe.json"
+    },
+    {
       "id": "tabs",
       "source": "components/tabs.recipe.json"
     },
