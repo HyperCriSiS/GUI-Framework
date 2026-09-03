@@ -31,6 +31,7 @@ import gui.framework.compose.GuiProgress
 import gui.framework.compose.GuiRadio
 import gui.framework.compose.GuiRadioGroup
 import gui.framework.compose.GuiSelect
+import gui.framework.compose.GuiSlider
 import gui.framework.compose.GuiSelectOption
 import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTabItem
@@ -48,6 +49,7 @@ import gui.framework.generated.internal.GuiProgressSize
 import gui.framework.generated.internal.GuiProgressVariant
 import gui.framework.generated.internal.GuiRadioSize
 import gui.framework.generated.internal.GuiSelectSize
+import gui.framework.generated.internal.GuiSliderSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
@@ -104,6 +106,7 @@ fun AndroidReferenceApp(
     var lastMenuAction by remember { mutableStateOf("none") }
     var toastOpen by remember { mutableStateOf(false) }
     var lastToastAction by remember { mutableStateOf("none") }
+    var sliderValue by remember { mutableStateOf(40.0) }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -115,6 +118,7 @@ fun AndroidReferenceApp(
     val progressSize = if (density == ReferenceDensity.Compact) GuiProgressSize.SMALL else GuiProgressSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
     val selectSize = if (density == ReferenceDensity.Compact) GuiSelectSize.SMALL else GuiSelectSize.MEDIUM
+    val sliderSize = if (density == ReferenceDensity.Compact) GuiSliderSize.SMALL else GuiSliderSize.MEDIUM
     val switchSize = if (density == ReferenceDensity.Compact) GuiSwitchSize.SMALL else GuiSwitchSize.MEDIUM
     val tabsSize = if (density == ReferenceDensity.Compact) GuiTabsSize.SMALL else GuiTabsSize.MEDIUM
     val toastSize = if (density == ReferenceDensity.Compact) GuiToastSize.SMALL else GuiToastSize.MEDIUM
@@ -278,6 +282,14 @@ fun AndroidReferenceApp(
                     variant = GuiProgressVariant.CIRCULAR,
                     size = progressSize,
                 )
+                GuiSlider(
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
+                    accessibilityLabel = "Workspace zoom",
+                    accessibilityValueText = "${sliderValue.toInt()} percent",
+                    size = sliderSize,
+                )
+                BasicText("Workspace zoom: ${sliderValue.toInt()}%")
             }
             GuiButton(
                 label = "Open dialog",

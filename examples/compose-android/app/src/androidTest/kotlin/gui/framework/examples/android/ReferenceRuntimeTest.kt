@@ -160,6 +160,14 @@ class ReferenceRuntimeTest {
             composeRule.onNodeWithText("Sync progress: 68%").assertIsDisplayed()
             composeRule.onNodeWithContentDescription("Workspace sync activity").performScrollTo().assertIsDisplayed()
             composeRule.onNodeWithText("Syncing workspace").assertIsDisplayed()
+
+            val workspaceZoom = composeRule.onNodeWithContentDescription("Workspace zoom")
+            workspaceZoom.performScrollTo().assertIsDisplayed()
+            workspaceZoom.performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
+                setProgress(60f)
+            }
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Workspace zoom: 60%").assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()

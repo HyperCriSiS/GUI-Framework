@@ -46,10 +46,10 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiProgressSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
   assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android compact reference must map ${sizeType} to SMALL`);
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
 assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
@@ -88,6 +88,11 @@ assert.match(source, /indeterminate = true/);
 assert.match(source, /accessibilityLabel = "Workspace sync activity"/);
 assert.match(source, /label = "Syncing workspace"/);
 assert.match(source, /variant = GuiProgressVariant\.CIRCULAR/);
+assert.match(source, /var sliderValue by remember \{ mutableStateOf\(40\.0\) \}/);
+assert.match(source, /accessibilityLabel = "Workspace zoom"/);
+assert.match(source, /accessibilityValueText = "\$\{sliderValue\.toInt\(\)\} percent"/);
+assert.match(source, /onValueChange = \{ sliderValue = it \}/);
+assert.match(source, /Workspace zoom: \$\{sliderValue\.toInt\(\)\}%/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
@@ -147,5 +152,9 @@ assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace sync progres
 assert.match(runtimeTest, /onNodeWithText\("Sync progress: 68%"\)/);
 assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace sync activity"\)/);
 assert.match(runtimeTest, /onNodeWithText\("Syncing workspace"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace zoom"\)/);
+assert.match(runtimeTest, /SemanticsActions\.SetProgress/);
+assert.match(runtimeTest, /setProgress\(60f\)/);
+assert.match(runtimeTest, /onNodeWithText\("Workspace zoom: 60%"\)/);
 
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Menu coverage and Phase 5 theme selection isolation.");
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Menu coverage and Phase 5 theme selection isolation.");
