@@ -149,6 +149,9 @@ jobs:
       - name: Test native Web Basic Tooltip
         run: npm run test:web-tooltip
 
+      - name: Test native Web Basic Toast / Notification
+        run: npm run test:web-toast
+
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
@@ -409,15 +412,4 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Run scaled Android reference instrumentation
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: ${{ matrix.arch }}
-          ram-size: ${{ matrix.ram-size }}
-          heap-size: ${{ matrix.heap-size }}
-          density: ${{ matrix.density }}
-          disable-animations: true
-          disable-spellchecker: true
-          disk-size: 4G
-          script: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
+        run: bash ./scripts/run-android-runtime-check.sh ${{ matrix.font-scale }}
