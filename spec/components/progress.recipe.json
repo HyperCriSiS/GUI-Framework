@@ -15,6 +15,7 @@
     { "id": "min", "type": "number", "required": false, "default": 0 },
     { "id": "max", "type": "number", "required": false, "default": 100 },
     { "id": "indeterminate", "type": "boolean", "required": false, "default": false, "state": "indeterminate" },
+    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" },
     { "id": "accessibilityLabel", "type": "string", "required": false, "default": "" }
   ],
   "events": [],
