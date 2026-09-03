@@ -3,12 +3,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
   readFile("examples/web-reference/select-reference.mjs", "utf8"),
   readFile("examples/web-reference/tooltip-reference.mjs", "utf8"),
+  readFile("examples/web-reference/toast-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -64,6 +65,12 @@ assert.match(webSelect, /onExpandedChange\(nextExpanded\) \{/);
 assert.match(webTooltip, /createGuiTooltip\(/, "Web Tooltip reference must exercise createGuiTooltip");
 assert.match(webTooltip, /onOpenChange: setOpen/);
 assert.match(webTooltip, /content: "Reload the current workspace data\."/);
+assert.match(webToast, /createGuiToast\(/, "Web Toast reference must exercise createGuiToast");
+assert.match(webToast, /title: "Workspace updated"/);
+assert.match(webToast, /message: "Your changes were saved\."/);
+assert.match(webToast, /actionLabel: "Undo"/);
+assert.match(webToast, /actionValue: "undo"/);
+assert.match(webToast, /onOpenChange: setOpen/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
