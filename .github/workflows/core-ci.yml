@@ -486,4 +486,4 @@ jobs:
           heap-size: ${{ matrix.heap-size }}
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
-          script: bash scripts/run-android-runtime-check.sh ${{ matrix.density }} ${{ matrix.font-scale }}
+          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }} ${{ matrix.density }}
