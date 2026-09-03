@@ -176,6 +176,9 @@ jobs:
       - name: Test standalone Web Toast / Notification reference
         run: npm run test:web-toast-reference
 
+      - name: Test standalone Web Progress / Spinner reference
+        run: npm run test:web-progress-reference
+
       - name: Test standalone Web Menu / Context Menu reference
         run: npm run test:web-menu-reference
 
