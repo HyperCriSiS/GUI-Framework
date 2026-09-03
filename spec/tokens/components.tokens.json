@@ -1,1 +1,258 @@
-{"component":{"switch":{"track":{"width":{"$type":"dimension","small":{"$value":{"value":36,"unit":"px"}},"medium":{"$value":{"value":44,"unit":"px"}},"large":{"$value":{"value":52,"unit":"px"}}},"height":{"$type":"dimension","small":{"$value":{"value":24,"unit":"px"}},"medium":{"$value":{"value":28,"unit":"px"}},"large":{"$value":{"value":32,"unit":"px"}}}},"thumb":{"size":{"$type":"dimension","small":{"$value":{"value":18,"unit":"px"}},"medium":{"$value":{"value":22,"unit":"px"}},"large":{"$value":{"value":26,"unit":"px"}}}}},"checkbox":{"box":{"size":{"$type":"dimension","small":{"$value":{"value":24,"unit":"px"}},"medium":{"$value":{"value":28,"unit":"px"}},"large":{"$value":{"value":32,"unit":"px"}}}},"indicator":{"size":{"$type":"dimension","small":{"$value":{"value":10,"unit":"px"}},"medium":{"$value":{"value":14,"unit":"px"}},"large":{"$value":{"value":18,"unit":"px"}}}}},"radio":{"control":{"size":{"$type":"dimension","small":{"$value":{"value":24,"unit":"px"}},"medium":{"$value":{"value":28,"unit":"px"}},"large":{"$value":{"value":32,"unit":"px"}}}},"indicator":{"size":{"$type":"dimension","small":{"$value":{"value":8,"unit":"px"}},"medium":{"$value":{"value":10,"unit":"px"}},"large":{"$value":{"value":12,"unit":"px"}}}}},"tabs":{"indicator":{"height":{"$type":"dimension","$value":{"value":2,"unit":"px"}}}},"progress":{"linear":{"height":{"$type":"dimension","small":{"$value":{"value":4,"unit":"px"}},"medium":{"$value":{"value":6,"unit":"px"}},"large":{"$value":{"value":8,"unit":"px"}}}},"circular":{"size":{"$type":"dimension","small":{"$value":{"value":16,"unit":"px"}},"medium":{"$value":{"value":24,"unit":"px"}},"large":{"$value":{"value":32,"unit":"px"}}},"stroke":{"$type":"dimension","small":{"$value":{"value":2,"unit":"px"}},"medium":{"$value":{"value":3,"unit":"px"}},"large":{"$value":{"value":4,"unit":"px"}}}}}}}
+{
+  "component": {
+    "switch": {
+      "track": {
+        "width": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 36,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 44,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 52,
+              "unit": "px"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 28,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 32,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "thumb": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 18,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 22,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 26,
+              "unit": "px"
+            }
+          }
+        }
+      }
+    },
+    "checkbox": {
+      "box": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 28,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 32,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "indicator": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 10,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 14,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 18,
+              "unit": "px"
+            }
+          }
+        }
+      }
+    },
+    "radio": {
+      "control": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 28,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 32,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "indicator": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 8,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 10,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 12,
+              "unit": "px"
+            }
+          }
+        }
+      }
+    },
+    "tabs": {
+      "indicator": {
+        "height": {
+          "$type": "dimension",
+          "$value": {
+            "value": 2,
+            "unit": "px"
+          }
+        }
+      }
+    },
+    "progress": {
+      "linear": {
+        "height": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 4,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 6,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 8,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "circular": {
+        "size": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 16,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 32,
+              "unit": "px"
+            }
+          }
+        },
+        "stroke": {
+          "$type": "dimension",
+          "small": {
+            "$value": {
+              "value": 2,
+              "unit": "px"
+            }
+          },
+          "medium": {
+            "$value": {
+              "value": 3,
+              "unit": "px"
+            }
+          },
+          "large": {
+            "$value": {
+              "value": 4,
+              "unit": "px"
+            }
+          }
+        }
+      },
+      "indeterminate": {
+        "duration": {
+          "$type": "duration",
+          "$value": {
+            "value": 1200,
+            "unit": "ms"
+          }
+        }
+      }
+    }
+  }
+}

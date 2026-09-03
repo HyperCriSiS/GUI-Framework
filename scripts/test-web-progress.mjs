@@ -51,6 +51,7 @@ try {
   assert.match(css, /--gui-progress-indicator-color:/);
   assert.match(css, /@keyframes gui-progress-linear-indeterminate/);
   assert.match(css, /@keyframes gui-progress-circular-indeterminate/);
+  assert.match(css, /var\(--gui-component-progress-indeterminate-duration\) linear infinite/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /animation: none !important/);
   assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/, "Progress CSS must inherit cascading palette token variables");
@@ -122,6 +123,4 @@ try {
   assert.throws(() => progress.update({ label: 42 }), /label must be a string/);
 
   console.log("Web Basic Progress / Spinner vertical-slice tests passed.");
-} finally {
-  await Promise.all([rm(irPath, { force: true }), rm(cssPath, { force: true })]);
 }

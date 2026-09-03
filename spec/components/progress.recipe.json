@@ -2,26 +2,85 @@
   "specVersion": "0.1.0",
   "component": "progress",
   "anatomy": [
-    { "id": "root", "required": true },
-    { "id": "track", "required": true },
-    { "id": "indicator", "required": true },
-    { "id": "label", "required": false }
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "track",
+      "required": true
+    },
+    {
+      "id": "indicator",
+      "required": true
+    },
+    {
+      "id": "label",
+      "required": false
+    }
   ],
   "content": [
-    { "id": "label", "kind": "text", "required": false }
+    {
+      "id": "label",
+      "kind": "text",
+      "required": false
+    }
   ],
   "properties": [
-    { "id": "value", "type": "number", "required": false, "default": 0 },
-    { "id": "min", "type": "number", "required": false, "default": 0 },
-    { "id": "max", "type": "number", "required": false, "default": 100 },
-    { "id": "indeterminate", "type": "boolean", "required": false, "default": false, "state": "indeterminate" },
-    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" },
-    { "id": "accessibilityLabel", "type": "string", "required": false, "default": "" }
+    {
+      "id": "value",
+      "type": "number",
+      "required": false,
+      "default": 0
+    },
+    {
+      "id": "min",
+      "type": "number",
+      "required": false,
+      "default": 0
+    },
+    {
+      "id": "max",
+      "type": "number",
+      "required": false,
+      "default": 100
+    },
+    {
+      "id": "indeterminate",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "indeterminate"
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
   ],
   "events": [],
-  "variants": ["linear", "circular"],
-  "sizes": ["small", "medium", "large"],
-  "states": ["default", "indeterminate", "disabled"],
+  "variants": [
+    "linear",
+    "circular"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "indeterminate",
+    "disabled"
+  ],
   "semantics": {
     "role": "progressbar",
     "preferNativePrimitive": false
@@ -34,11 +93,15 @@
     "motion": "{motion.interaction.fast}",
     "linearHeight": "{component.progress.linear.height.medium}",
     "circularSize": "{component.progress.circular.size.medium}",
-    "circularStroke": "{component.progress.circular.stroke.medium}"
+    "circularStroke": "{component.progress.circular.stroke.medium}",
+    "indeterminateDuration": "{component.progress.indeterminate.duration}"
   },
   "capabilities": {
     "required": [],
     "optional": [],
-    "fallbackOrder": ["standard", "minimal"]
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
   }
 }
