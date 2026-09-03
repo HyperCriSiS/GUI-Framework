@@ -1,0 +1,127 @@
+{
+  "specVersion": "0.1.0",
+  "component": "toast",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "title",
+      "required": false
+    },
+    {
+      "id": "message",
+      "required": true
+    },
+    {
+      "id": "action",
+      "required": false
+    },
+    {
+      "id": "dismiss",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "title",
+      "kind": "text",
+      "required": false
+    },
+    {
+      "id": "message",
+      "kind": "text",
+      "required": true
+    },
+    {
+      "id": "action",
+      "kind": "text",
+      "required": false
+    }
+  ],
+  "properties": [
+    {
+      "id": "open",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "id": "actionValue",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "dismissible",
+      "type": "boolean",
+      "required": false,
+      "default": true
+    },
+    {
+      "id": "durationMs",
+      "type": "number",
+      "required": false,
+      "default": 5000
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "events": [
+    {
+      "id": "openChange",
+      "payload": "boolean"
+    },
+    {
+      "id": "activate",
+      "payload": "string"
+    }
+  ],
+  "variants": [
+    "info",
+    "success",
+    "warning",
+    "error"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed"
+  ],
+  "semantics": {
+    "role": "status",
+    "preferNativePrimitive": false
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "accent": "{semantic.color.accent}",
+    "success": "{semantic.color.success}",
+    "warning": "{semantic.color.warning}",
+    "danger": "{semantic.color.danger}",
+    "border": "{semantic.color.border}",
+    "focus": "{semantic.color.focus}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}
