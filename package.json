@@ -23,7 +23,7 @@
     "test:theme-resolution": "node scripts/test-theme-resolution.mjs",
     "test:capability-resolution": "node scripts/test-capability-resolution.mjs",
     "test:visual-resolution": "node scripts/test-visual-resolution.mjs",
-    "test:accessibility": "node scripts/test-accessibility.mjs && node scripts/test-progress-accessibility.mjs",
+    "test:accessibility": "node scripts/test-accessibility.mjs && node scripts/test-progress-accessibility.mjs && node scripts/test-slider-accessibility.mjs",
     "test:progress-accessibility": "node scripts/test-progress-accessibility.mjs",
     "build:web-tokens": "node packages/adapter-web/src/generate-css.mjs build/spec-ir.json build/web/tokens.css",
     "build:web-components": "node packages/adapter-web/src/generate-components-css.mjs build/spec-ir.json build/web/components.css",
@@ -98,7 +98,8 @@
     "test:kotlin-tooltip": "node scripts/test-compose-tooltip.mjs",
     "test:kotlin-toast": "node scripts/test-compose-toast.mjs",
     "test:kotlin-progress": "node scripts/test-compose-progress.mjs",
-    "test:kotlin-menu": "node scripts/test-compose-menu.mjs"
+    "test:kotlin-menu": "node scripts/test-compose-menu.mjs",
+    "test:slider-accessibility": "node scripts/test-slider-accessibility.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1"
