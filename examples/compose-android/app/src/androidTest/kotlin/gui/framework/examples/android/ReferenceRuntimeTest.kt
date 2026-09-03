@@ -37,57 +37,41 @@ class ReferenceRuntimeTest {
             composeRule.activity.applyReferenceDensity(ReferenceDensity.Compact)
         }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Compact reference", includeExtendedComponents = true)
     }
 
     @Test
     fun modernReferenceControlsRemainUsableAtHostScale() {
-        composeRule.activity.runOnUiThread {
-            composeRule.activity.applyReferenceTheme(GuiThemeId.MODERN)
-        }
+        composeRule.activity.runOnUiThread { composeRule.activity.applyReferenceTheme(GuiThemeId.MODERN) }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Modern reference")
     }
 
     @Test
     fun glassReferenceControlsRemainUsableAtHostScale() {
-        composeRule.activity.runOnUiThread {
-            composeRule.activity.applyReferenceTheme(GuiThemeId.GLASS)
-        }
+        composeRule.activity.runOnUiThread { composeRule.activity.applyReferenceTheme(GuiThemeId.GLASS) }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Glass reference")
     }
 
     @Test
     fun frostedGlassReferenceFallsBackAndRemainsUsableAtHostScale() {
-        composeRule.activity.runOnUiThread {
-            composeRule.activity.applyReferenceTheme(GuiThemeId.FROSTED_GLASS)
-        }
+        composeRule.activity.runOnUiThread { composeRule.activity.applyReferenceTheme(GuiThemeId.FROSTED_GLASS) }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Frosted Glass reference")
     }
 
     @Test
     fun spaceyReferenceControlsRemainUsableAtHostScale() {
-        composeRule.activity.runOnUiThread {
-            composeRule.activity.applyReferenceTheme(GuiThemeId.SPACEY)
-        }
+        composeRule.activity.runOnUiThread { composeRule.activity.applyReferenceTheme(GuiThemeId.SPACEY) }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Spacey reference")
     }
 
     @Test
     fun cyberpunkReferenceControlsRemainUsableAtHostScale() {
-        composeRule.activity.runOnUiThread {
-            composeRule.activity.applyReferenceTheme(GuiThemeId.CYBERPUNK)
-        }
+        composeRule.activity.runOnUiThread { composeRule.activity.applyReferenceTheme(GuiThemeId.CYBERPUNK) }
         composeRule.waitForIdle()
-
         exerciseReferenceControls("Cyberpunk reference")
     }
 
@@ -120,16 +104,8 @@ class ReferenceRuntimeTest {
             val deliverySelect = composeRule.onNodeWithContentDescription("Delivery channel")
             deliverySelect.assertIsDisplayed().performClick()
             composeRule.waitForIdle()
-            composeRule
-                .onNodeWithContentDescription("Legacy channel")
-                .performScrollTo()
-                .assertIsDisplayed()
-                .assertIsNotEnabled()
-            composeRule
-                .onNodeWithContentDescription("Push")
-                .performScrollTo()
-                .assertIsDisplayed()
-                .performClick()
+            composeRule.onNodeWithContentDescription("Legacy channel").performScrollTo().assertIsDisplayed().assertIsNotEnabled()
+            composeRule.onNodeWithContentDescription("Push").performScrollTo().assertIsDisplayed().performClick()
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Push").assertIsDisplayed()
 
@@ -151,41 +127,38 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             tooltipTrigger.assertIsFocused()
             composeRule.onNodeWithText("Reload the current workspace data.").assertIsDisplayed()
-            composeRule
-                .onNodeWithText("Open dialog")
-                .performScrollTo()
-                .assertIsDisplayed()
-                .performSemanticsAction(SemanticsActions.RequestFocus)
+            composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performSemanticsAction(SemanticsActions.RequestFocus)
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Reload the current workspace data.").assertDoesNotExist()
 
             val menuTrigger = composeRule.onNodeWithText("Open workspace menu")
             menuTrigger.performScrollTo().assertIsDisplayed().performClick()
             composeRule.waitForIdle()
-            composeRule
-                .onNodeWithContentDescription("Locked action")
-                .assertIsDisplayed()
-                .assertIsNotEnabled()
-            composeRule
-                .onNodeWithContentDescription("Refresh workspace")
-                .assertIsDisplayed()
-                .performClick()
+            composeRule.onNodeWithContentDescription("Locked action").assertIsDisplayed().assertIsNotEnabled()
+            composeRule.onNodeWithContentDescription("Refresh workspace").assertIsDisplayed().performClick()
             composeRule.waitForIdle()
             composeRule.onNodeWithContentDescription("Refresh workspace").assertDoesNotExist()
             composeRule.onNodeWithText("Last menu action: refresh").assertIsDisplayed()
+
+            val notificationTrigger = composeRule.onNodeWithText("Show notification")
+            notificationTrigger.performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Workspace updated").assertIsDisplayed()
+            composeRule.onNodeWithText("Your changes were saved.").assertIsDisplayed()
+            composeRule.onNodeWithContentDescription("Undo").assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Workspace updated").assertDoesNotExist()
+            composeRule.onNodeWithText("Last notification action: undo").assertIsDisplayed()
+
+            notificationTrigger.performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithContentDescription("Dismiss notification").assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Workspace updated").assertDoesNotExist()
         }
 
-        composeRule
-            .onNodeWithText("Open dialog")
-            .performScrollTo()
-            .assertIsDisplayed()
-            .performClick()
-
-        composeRule
-            .onNodeWithText("Close")
-            .assertIsDisplayed()
-            .performClick()
-
+        composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Close").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Close").assertDoesNotExist()
     }
 }
