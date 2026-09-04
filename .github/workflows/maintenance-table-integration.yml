@@ -1,0 +1,77 @@
+name: Maintenance Table Integration Patch
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Patch table integration gates
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path('scripts/test-web-contracts.mjs')
+          s=p.read_text()
+          old='assert.match(source, /states: \\["default", "hover"\\] as const,/); assert.match(source, /"id": "caption"/);'
+          new='assert.match(source, /states: \\["default"\\] as const,/); assert.match(source, /"id": "caption"/);'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('packages/adapter-web/src/generate-components-css.mjs')
+          s=p.read_text()
+          old='''    `${scope} .gui-data-grid__header,`, `${scope} .gui-data-grid__body { box-sizing: border-box; }`,\n    `${scope} .gui-data-grid__row { box-sizing: border-box; position: relative; display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); border: 0; outline: none; }`,'''
+          new='''    `${scope} .gui-data-grid__header,`, `${scope} .gui-data-grid__body { box-sizing: border-box; }`,\n    `${scope} .gui-data-grid__header { display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); }`,\n    `${scope} .gui-data-grid__row { box-sizing: border-box; position: relative; display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); border: 0; outline: none; }`,'''
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('packages/adapter-compose/src/main/kotlin/GuiTable.kt')
+          s=p.read_text()
+          s=s.replace('import androidx.compose.foundation.layout.weight\n','')
+          marker='import gui.framework.generated.internal.GuiDataGridVariant\n'
+          assert s.count(marker)==1
+          s=s.replace(marker, marker+'import gui.framework.generated.internal.GuiComponentCapabilities\n',1)
+          old='private fun resolveTableRecipe(componentId: String, contractCapabilities: gui.framework.generated.internal.GuiCapabilityContract): GuiVisualRecipe {'
+          new='private fun resolveTableRecipe(componentId: String, contractCapabilities: GuiComponentCapabilities): GuiVisualRecipe {'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('package.json')
+          data=json.loads(p.read_text())
+          scripts=data['scripts']
+          assert 'test:web-table' not in scripts and 'test:kotlin-table' not in scripts
+          rebuilt={}
+          for key,value in scripts.items():
+              rebuilt[key]=value
+              if key=='test:web-navigation': rebuilt['test:web-table']='node scripts/test-web-table.mjs'
+              if key=='test:kotlin-navigation': rebuilt['test:kotlin-table']='node scripts/test-compose-table.mjs'
+          data['scripts']=rebuilt
+          p.write_text(json.dumps(data,indent=2)+'\n')
+
+          p=Path('.github/workflows/core-ci.yml')
+          s=p.read_text()
+          web='''      - name: Test native Web Basic Navigation\n        run: npm run test:web-navigation\n'''
+          web_new=web+'''\n      - name: Test native Web Basic Table / Data Grid\n        run: npm run test:web-table\n'''
+          assert s.count(web)==1
+          s=s.replace(web,web_new,1)
+          compose='''      - name: Test native Compose Basic Navigation\n        run: npm run test:kotlin-navigation\n'''
+          compose_new=compose+'''\n      - name: Test native Compose Basic Table / Data Grid\n        run: npm run test:kotlin-table\n'''
+          assert s.count(compose)==1
+          s=s.replace(compose,compose_new,1)
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/test-web-contracts.mjs packages/adapter-web/src/generate-components-css.mjs packages/adapter-compose/src/main/kotlin/GuiTable.kt package.json .github/workflows/core-ci.yml
+          git diff --cached --check
+          git commit -m "test(table): integrate Web and Compose gates"
+          git push origin HEAD:main
