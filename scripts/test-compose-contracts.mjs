@@ -98,6 +98,33 @@ try {
   assert.match(source, /GuiContentSlot\("item", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("navigation", true\)/);
 
+  assert.match(source, /enum class GuiTableVariant/);
+  assert.match(source, /PLAIN\("plain"\)/);
+  assert.match(source, /GRIDLINED\("gridlined"\)/);
+  assert.match(source, /enum class GuiTableSize/);
+  assert.match(source, /enum class GuiTableState/);
+  assert.match(source, /data class GuiTableProperties\(/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /GuiContentSlot\("caption", "text", false\)/);
+  assert.match(source, /GuiContentSlot\("header", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("body", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("table", true\)/);
+
+  assert.match(source, /enum class GuiDataGridVariant/);
+  assert.match(source, /ROW_SELECTION\("row-selection"\)/);
+  assert.match(source, /enum class GuiDataGridSize/);
+  assert.match(source, /enum class GuiDataGridState/);
+  assert.match(source, /SELECTED\("selected"\)/);
+  assert.match(source, /data class GuiDataGridProperties\(/);
+  assert.match(source, /val value: String = ""/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /GuiEventContract\("valueChange", "string"\)/);
+  assert.match(source, /GuiEventContract\("rowActivate", "string"\)/);
+  assert.match(source, /GuiContentSlot\("header", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("body", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("grid", false\)/);
+
   assert.match(source, /enum class GuiTooltipVariant/);
   assert.match(source, /enum class GuiTooltipSize/);
   assert.match(source, /enum class GuiTooltipState/);
