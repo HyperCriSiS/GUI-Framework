@@ -46,10 +46,10 @@ assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
 assert.match(source, /ReferenceDensity\.Compact/);
 assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
   assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android compact reference must map ${sizeType} to SMALL`);
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
 assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
@@ -100,6 +100,16 @@ assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", i
 assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
+assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/);
+assert.match(source, /caption = "Project inventory"/);
+assert.match(source, /accessibilityLabel = "Project inventory table"/);
+assert.match(source, /variant = GuiTableVariant\.GRIDLINED/);
+assert.match(source, /accessibilityLabel = "Project selection grid"/);
+assert.match(source, /GuiDataGridRow\("archive",[\s\S]*accessibilityLabel = "Archive project row", disabled = true\)/);
+assert.match(source, /onValueChange = \{ tableGridValue = it \}/);
+assert.match(source, /onRowActivate = \{ lastGridActivation = it \}/);
+assert.match(source, /Selected project row: \$tableGridValue/);
+assert.match(source, /Activated project row: \$lastGridActivation/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);

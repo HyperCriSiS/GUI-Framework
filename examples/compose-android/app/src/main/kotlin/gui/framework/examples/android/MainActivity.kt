@@ -28,6 +28,12 @@ import gui.framework.compose.GuiMenu
 import gui.framework.compose.GuiMenuItem
 import gui.framework.compose.GuiNavigation
 import gui.framework.compose.GuiNavigationItem
+import gui.framework.compose.GuiDataGrid
+import gui.framework.compose.GuiDataGridColumn
+import gui.framework.compose.GuiDataGridRow
+import gui.framework.compose.GuiTable
+import gui.framework.compose.GuiTableColumn
+import gui.framework.compose.GuiTableRow
 import gui.framework.compose.GuiPanel
 import gui.framework.compose.GuiProgress
 import gui.framework.compose.GuiRadio
@@ -48,6 +54,9 @@ import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiNavigationSize
 import gui.framework.generated.internal.GuiNavigationVariant
+import gui.framework.generated.internal.GuiDataGridSize
+import gui.framework.generated.internal.GuiTableSize
+import gui.framework.generated.internal.GuiTableVariant
 import gui.framework.generated.internal.GuiPanelSize
 import gui.framework.generated.internal.GuiProgressSize
 import gui.framework.generated.internal.GuiProgressVariant
@@ -112,6 +121,8 @@ fun AndroidReferenceApp(
     var lastToastAction by remember { mutableStateOf("none") }
     var sliderValue by remember { mutableStateOf(40.0) }
     var navigationValue by remember { mutableStateOf("home") }
+    var tableGridValue by remember { mutableStateOf("atlas") }
+    var lastGridActivation by remember { mutableStateOf("none") }
     var dialogOpen by remember { mutableStateOf(false) }
 
     val buttonSize = if (density == ReferenceDensity.Compact) GuiButtonSize.SMALL else GuiButtonSize.MEDIUM
@@ -120,6 +131,8 @@ fun AndroidReferenceApp(
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val navigationSize = if (density == ReferenceDensity.Compact) GuiNavigationSize.SMALL else GuiNavigationSize.MEDIUM
+    val tableSize = if (density == ReferenceDensity.Compact) GuiTableSize.SMALL else GuiTableSize.MEDIUM
+    val dataGridSize = if (density == ReferenceDensity.Compact) GuiDataGridSize.SMALL else GuiDataGridSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
     val progressSize = if (density == ReferenceDensity.Compact) GuiProgressSize.SMALL else GuiProgressSize.MEDIUM
     val radioSize = if (density == ReferenceDensity.Compact) GuiRadioSize.SMALL else GuiRadioSize.MEDIUM
@@ -318,6 +331,45 @@ fun AndroidReferenceApp(
                     size = navigationSize,
                 )
                 BasicText("Active destination: $navigationValue")
+                val tableColumns = listOf(
+                    GuiTableColumn("Project"),
+                    GuiTableColumn("Owner"),
+                    GuiTableColumn("Status"),
+                )
+                val tableRows = listOf(
+                    GuiTableRow(listOf("Atlas", "Mira", "Ready")),
+                    GuiTableRow(listOf("Nova", "Kai", "Review")),
+                    GuiTableRow(listOf("Archive", "System", "Locked")),
+                )
+                GuiTable(
+                    columns = tableColumns,
+                    rows = tableRows,
+                    caption = "Project inventory",
+                    accessibilityLabel = "Project inventory table",
+                    variant = GuiTableVariant.GRIDLINED,
+                    size = tableSize,
+                )
+                val gridColumns = listOf(
+                    GuiDataGridColumn("Project"),
+                    GuiDataGridColumn("Owner"),
+                    GuiDataGridColumn("Status"),
+                )
+                val gridRows = listOf(
+                    GuiDataGridRow("atlas", listOf("Atlas", "Mira", "Ready"), accessibilityLabel = "Atlas project row"),
+                    GuiDataGridRow("nova", listOf("Nova", "Kai", "Review"), accessibilityLabel = "Nova project row"),
+                    GuiDataGridRow("archive", listOf("Archive", "System", "Locked"), accessibilityLabel = "Archive project row", disabled = true),
+                )
+                GuiDataGrid(
+                    columns = gridColumns,
+                    rows = gridRows,
+                    value = tableGridValue,
+                    onValueChange = { tableGridValue = it },
+                    onRowActivate = { lastGridActivation = it },
+                    accessibilityLabel = "Project selection grid",
+                    size = dataGridSize,
+                )
+                BasicText("Selected project row: $tableGridValue")
+                BasicText("Activated project row: $lastGridActivation")
             }
             GuiButton(
                 label = "Open dialog",

@@ -19,7 +19,7 @@ assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = theme/);
 assert.match(source, /paletteId = paletteId/);
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Desktop reference must exercise ${component}`);
 }
 assert.match(source, /GuiCheckboxSize\.SMALL/);
@@ -32,6 +32,8 @@ assert.match(source, /GuiProgressSize\.SMALL/);
 assert.match(source, /GuiSliderSize\.SMALL/);
 assert.match(source, /GuiMenuSize\.SMALL/);
 assert.match(source, /GuiNavigationSize\.SMALL/);
+assert.match(source, /GuiTableSize\.SMALL/);
+assert.match(source, /GuiDataGridSize\.SMALL/);
 assert.match(source, /includeExtendedComponents = theme == GuiThemeId\.BASIC/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
 assert.match(source, /accessibilityLabel = "Reference checkbox"/);
@@ -81,6 +83,16 @@ assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", i
 assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
+assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/);
+assert.match(source, /caption = "Project inventory"/);
+assert.match(source, /accessibilityLabel = "Project inventory table"/);
+assert.match(source, /variant = GuiTableVariant\.GRIDLINED/);
+assert.match(source, /accessibilityLabel = "Project selection grid"/);
+assert.match(source, /GuiDataGridRow\("archive",[\s\S]*accessibilityLabel = "Archive project row", disabled = true\)/);
+assert.match(source, /onValueChange = \{ tableGridValue = it \}/);
+assert.match(source, /onRowActivate = \{ lastGridActivation = it \}/);
+assert.match(source, /Selected project row: \$tableGridValue/);
+assert.match(source, /Activated project row: \$lastGridActivation/);
 assert.match(source, /GuiSelectOption\(value = "legacy", label = "Legacy channel", disabled = true\)/);
 assert.match(source, /mutableStateOf/);
 assert.match(source, /onDismissRequest = \{ dialogOpen = false \}/);
