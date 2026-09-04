@@ -150,6 +150,9 @@ jobs:
       - name: Test native Web Basic Tabs
         run: npm run test:web-tabs
 
+      - name: Test native Web Basic Navigation
+        run: npm run test:web-navigation
+
       - name: Test native Web Basic Tooltip
         run: npm run test:web-tooltip
 
