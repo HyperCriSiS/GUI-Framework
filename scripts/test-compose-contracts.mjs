@@ -1,19 +1,22 @@
-import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import { compileSpec } from "../packages/core/src/compile-spec.mjs";
-import { generateComposeContracts } from "../packages/adapter-compose/src/generate-types.mjs";
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-const tempDir = await mkdtemp(path.join(os.tmpdir(), "gui-framework-compose-contracts-"));
-const irPath = path.join(tempDir, "framework.ir.json");
-const kotlinPath = path.join(tempDir, "GuiGeneratedContracts.kt");
+import assert from "node:assert/strict";
+import { readFile, rm } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+
+const irPath = "build/spec-ir-compose-contract-test.json";
+const kotlinPath = "build/compose/GuiContracts-test.kt";
+
+function run(args, label) {
+  const result = spawnSync(process.execPath, args, { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${label} failed:\n${result.stdout}\n${result.stderr}`);
+}
 
 try {
-  await compileSpec({ rootDir: process.cwd(), outFile: irPath });
-  await generateComposeContracts({ rootDir: process.cwd(), irPath, outFile: kotlinPath });
-  const source = await readFile(kotlinPath, "utf8");
+  run(["packages/compiler/src/index.mjs", "--output", irPath], "Specification compiler");
+  run(["packages/adapter-compose/src/generate-contracts.mjs", irPath, kotlinPath], "Compose contract generator");
 
+  const source = await readFile(kotlinPath, "utf8");
   assert.match(source, /enum class GuiRegisteredThemeId/);
   assert.match(source, /BASIC\("basic"\)/);
   assert.match(source, /MODERN\("modern"\)/);
