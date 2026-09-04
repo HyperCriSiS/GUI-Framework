@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, webTable, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
@@ -13,6 +13,7 @@ const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, we
   readFile("examples/web-reference/progress-reference.mjs", "utf8"),
   readFile("examples/web-reference/slider-reference.mjs", "utf8"),
   readFile("examples/web-reference/navigation-reference.mjs", "utf8"),
+  readFile("examples/web-reference/table-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -24,6 +25,16 @@ assert.deepEqual(scenario.components, ["button", "input", "switch", "panel", "di
 assert.deepEqual(scenario.densityProfiles, {
   standard: { usesComponentDefaults: true },
   compact: { componentSize: "small", minimumViewportWidth: 320 },
+});
+assert.deepEqual(scenario.phase6StructuredData, {
+  columns: ["Project", "Owner", "Status"],
+  rows: [
+    { value: "atlas", cells: ["Atlas", "Mira", "Ready"], disabled: false },
+    { value: "nova", cells: ["Nova", "Kai", "Review"], disabled: false },
+    { value: "archive", cells: ["Archive", "System", "Locked"], disabled: true },
+  ],
+  initialValue: "atlas",
+  disabledValue: "archive",
 });
 assert.deepEqual(scenario.flows.map(({ id }) => id), [
   "edit-primary-input",
@@ -99,6 +110,15 @@ assert.match(webNavigation, /navigation\.update\(\{ value \}\)/);
 assert.match(webNavigation, /vertical\.update\(\{ value \}\)/);
 assert.match(webNavigation, /onValueChange: setValue/);
 assert.match(webNavigation, /variant: "vertical"/);
+assert.match(webTable, /createGuiTable\(/, "Web Table reference must exercise createGuiTable");
+assert.match(webTable, /createGuiDataGrid\(/, "Web Table reference must exercise createGuiDataGrid");
+assert.match(webTable, /caption: "Project inventory"/);
+assert.match(webTable, /accessibilityLabel: "Project inventory table"/);
+assert.match(webTable, /accessibilityLabel: "Project selection grid"/);
+assert.match(webTable, /let value = "atlas"/);
+assert.match(webTable, /value: "archive"[\s\S]*disabled: true/);
+assert.match(webTable, /grid\.update\(\{ value \}\)/);
+assert.match(webTable, /grid\.update\(\{ disabled \}\)/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -122,10 +142,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
     assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -174,8 +194,16 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive destination", disabled = true\)/, `${name} must expose a disabled Navigation destination`);
   assert.match(source, /onValueChange = \{ navigationValue = it \}/, `${name} must expose the controlled Navigation value flow`);
   assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/, `${name} must expose the vertical Navigation variant`);
+  assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/, `${name} must expose the shared Data Grid initial value`);
+  assert.match(source, /caption = "Project inventory"/, `${name} must expose the shared Table caption`);
+  assert.match(source, /accessibilityLabel = "Project inventory table"/, `${name} must expose Table semantics`);
+  assert.match(source, /variant = GuiTableVariant\.GRIDLINED/, `${name} must exercise the gridlined passive Table variant`);
+  assert.match(source, /accessibilityLabel = "Project selection grid"/, `${name} must expose Data Grid semantics`);
+  assert.match(source, /GuiDataGridRow\("archive",[\s\S]*disabled = true\)/, `${name} must expose the shared disabled Archive row`);
+  assert.match(source, /onValueChange = \{ tableGridValue = it \}/, `${name} must expose controlled Data Grid selection`);
+  assert.match(source, /onRowActivate = \{ lastGridActivation = it \}/, `${name} must expose Data Grid activation`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");

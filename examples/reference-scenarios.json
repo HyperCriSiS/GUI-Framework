@@ -57,5 +57,43 @@
       "componentSize": "small",
       "minimumViewportWidth": 320
     }
+  },
+  "phase6StructuredData": {
+    "columns": [
+      "Project",
+      "Owner",
+      "Status"
+    ],
+    "rows": [
+      {
+        "value": "atlas",
+        "cells": [
+          "Atlas",
+          "Mira",
+          "Ready"
+        ],
+        "disabled": false
+      },
+      {
+        "value": "nova",
+        "cells": [
+          "Nova",
+          "Kai",
+          "Review"
+        ],
+        "disabled": false
+      },
+      {
+        "value": "archive",
+        "cells": [
+          "Archive",
+          "System",
+          "Locked"
+        ],
+        "disabled": true
+      }
+    ],
+    "initialValue": "atlas",
+    "disabledValue": "archive"
   }
 }

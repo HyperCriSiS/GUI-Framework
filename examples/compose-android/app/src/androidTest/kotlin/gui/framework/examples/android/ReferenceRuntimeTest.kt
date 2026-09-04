@@ -190,6 +190,25 @@ class ReferenceRuntimeTest {
             settingsDestinations[1].performScrollTo().assertIsDisplayed().performClick()
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Active destination: settings").assertIsDisplayed()
+
+            composeRule.onNodeWithContentDescription("Project inventory table")
+                .performScrollTo()
+                .assertIsDisplayed()
+            composeRule.onNodeWithContentDescription("Project selection grid")
+                .performScrollTo()
+                .assertIsDisplayed()
+
+            val atlasRow = composeRule.onNodeWithContentDescription("Atlas project row")
+            val novaRow = composeRule.onNodeWithContentDescription("Nova project row")
+            val archiveRow = composeRule.onNodeWithContentDescription("Archive project row")
+            atlasRow.performScrollTo().assertIsDisplayed().assertIsSelected()
+            novaRow.assertIsDisplayed().assertIsNotSelected()
+            archiveRow.assertIsDisplayed().assertIsNotEnabled()
+            novaRow.performClick()
+            composeRule.waitForIdle()
+            atlasRow.assertIsNotSelected()
+            novaRow.assertIsSelected()
+            composeRule.onNodeWithText("Selected project row: nova").assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
