@@ -2,12 +2,14 @@
 
 package gui.framework.examples.android
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -168,6 +170,26 @@ class ReferenceRuntimeTest {
             }
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Workspace zoom: 60%").assertIsDisplayed()
+
+            composeRule.onNodeWithContentDescription("Workspace navigation").performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithContentDescription("Workspace navigation rail").performScrollTo().assertIsDisplayed()
+
+            val archiveDestinations = composeRule.onAllNodesWithContentDescription("Archive destination")
+            archiveDestinations.assertCountEquals(2)
+            archiveDestinations[0].assertIsNotEnabled()
+            archiveDestinations[1].assertIsNotEnabled()
+
+            val searchDestinations = composeRule.onAllNodesWithContentDescription("Search destination")
+            searchDestinations.assertCountEquals(2)
+            searchDestinations[0].performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Active destination: search").assertIsDisplayed()
+
+            val settingsDestinations = composeRule.onAllNodesWithContentDescription("Settings destination")
+            settingsDestinations.assertCountEquals(2)
+            settingsDestinations[1].performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Active destination: settings").assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
