@@ -105,6 +105,22 @@ function statePartSelector(rootSelector, componentId, state, partId) {
     if (["icon", "label", "indicator"].includes(partId)) return `${interactiveSelector} .gui-navigation__${kebabPart(partId)}`;
     return partSelector(stateSelector(rootSelector, state), componentId, partId);
   }
+  if (componentId === "data-grid") {
+    if (state === "disabled") return partSelector(`${rootSelector}:where([aria-disabled="true"])`, componentId, partId);
+    if (["hover", "focus", "pressed", "selected"].includes(state)) {
+      const rowSelector = partSelector(rootSelector, componentId, "row");
+      const interactiveSelector = state === "selected"
+        ? `${rowSelector}:where([aria-selected="true"])`
+        : state === "hover"
+          ? `${rowSelector}:where(:hover:not([aria-disabled="true"]))`
+          : state === "focus"
+            ? `${rowSelector}:where(:focus-visible:not([aria-disabled="true"]))`
+            : `${rowSelector}:where(:active:not([aria-disabled="true"]))`;
+      if (partId === "row") return interactiveSelector;
+      if (partId === "selectionIndicator") return `${interactiveSelector} .gui-data-grid__selection-indicator`;
+      if (partId === "cell") return `${interactiveSelector} .gui-data-grid__cell`;
+    }
+  }
   if (componentId !== "tabs") return partSelector(stateSelector(rootSelector, state), componentId, partId);
   const tabSelector = partSelector(rootSelector, componentId, "tab");
   const interactiveSelector = state === "selected"
@@ -203,6 +219,17 @@ function emitFoundation(lines, themeIds) {
     `${scope} .gui-navigation:where([data-gui-variant="horizontal"]) .gui-navigation__item { flex-direction: column; }`, `${scope} .gui-navigation:where([data-gui-variant="vertical"]) .gui-navigation__item { inline-size: 100%; justify-content: flex-start; }`, `${scope} .gui-navigation__item:disabled { cursor: default; }`, "",
     `${scope} .gui-navigation__icon,`, `${scope} .gui-navigation__label,`, `${scope} .gui-navigation__indicator { pointer-events: none; }`, `${scope} .gui-navigation__icon[hidden],`, `${scope} .gui-navigation__label[hidden] { display: none; }`, "",
     `${scope} .gui-navigation__indicator { visibility: hidden; }`, `${scope} .gui-navigation:where([data-gui-variant="horizontal"]) .gui-navigation__indicator { inline-size: 100%; }`, `${scope} .gui-navigation:where([data-gui-variant="vertical"]) .gui-navigation__indicator { position: absolute; inset-block: 0; inset-inline-start: 0; min-inline-size: var(--gui-component-navigation-indicator-thickness); min-block-size: 0 !important; block-size: 100%; }`, `${scope} .gui-navigation__item[aria-current="page"] .gui-navigation__indicator { visibility: visible; }`, "",
+    `${scope} .gui-table { box-sizing: border-box; inline-size: 100%; border-collapse: separate; border-spacing: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,
+    `${scope} .gui-table__caption { box-sizing: border-box; caption-side: top; text-align: start; }`,
+    `${scope} .gui-table__header,`, `${scope} .gui-table__body,`, `${scope} .gui-table__row,`, `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { box-sizing: border-box; }`,
+    `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { border-style: solid; border-width: 0; text-align: start; vertical-align: middle; overflow-wrap: anywhere; }`, "",
+    `${scope} .gui-data-grid { box-sizing: border-box; inline-size: 100%; border-style: solid; border-width: 0; }`,
+    `${scope} .gui-data-grid__header,`, `${scope} .gui-data-grid__body { box-sizing: border-box; }`,
+    `${scope} .gui-data-grid__row { box-sizing: border-box; position: relative; display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); border: 0; outline: none; }`,
+    `${scope} .gui-data-grid__column-header,`, `${scope} .gui-data-grid__cell { box-sizing: border-box; min-inline-size: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,
+    `${scope} .gui-data-grid__selection-indicator { position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: var(--gui-component-data-grid-selection-indicator-width); visibility: hidden; pointer-events: none; }`,
+    `${scope} .gui-data-grid__row[aria-selected="true"] .gui-data-grid__selection-indicator { visibility: visible; }`,
+    `${scope} .gui-data-grid__row[aria-disabled="true"] { cursor: default; }`, "",
     `${scope} .gui-tooltip { box-sizing: border-box; pointer-events: none; }`, `${scope} .gui-tooltip__popup {`, "  box-sizing: border-box;", "  position: fixed;", "  max-inline-size: calc(100vw - 8px);", "  border-style: solid;", "  border-width: 0;", "  overflow-wrap: anywhere;", "  pointer-events: none;", "}", "",
     `${scope} .gui-tooltip__popup[hidden] { display: none; }`, `${scope} .gui-tooltip__content { display: block; }`, "",
     `${scope} .gui-menu { box-sizing: border-box; pointer-events: none; }`, `${scope} .gui-menu__popup {`, "  box-sizing: border-box;", "  position: fixed;", "  max-inline-size: calc(100vw - 8px);", "  max-block-size: calc(100vh - 8px);", "  overflow: auto;", "  border-style: solid;", "  border-width: 0;", "  outline: none;", "  pointer-events: auto;", "}", "",
@@ -242,8 +269,15 @@ function generate(ir) {
       emitVisual(lines, `[data-gui-theme="${theme.id}"]`, componentId, component, visual, `${theme.id}.${componentId}`);
     }
   }
+  const scope = `:where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")})`;
+  lines.push(
+    `${scope} .gui-table:where([data-gui-variant="plain"]) .gui-table__header-cell { border-width: 0; border-block-end-width: var(--gui-border-width-standard); }`,
+    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__header-cell,`, `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__cell { border-width: 0; }`,
+    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__header-cell:not(:first-child),`, `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__cell:not(:first-child) { border-inline-start-width: var(--gui-border-width-standard); }`,
+    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__body .gui-table__cell { border-block-start-width: var(--gui-border-width-standard); }`, ""
+  );
   lines.push("@keyframes gui-progress-linear-indeterminate {", "  from { transform: translateX(-100%); }", "  to { transform: translateX(350%); }", "}", "", "@keyframes gui-progress-circular-indeterminate {", "  from { transform: rotate(-90deg); }", "  to { transform: rotate(270deg); }", "}", "");
-  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-toast,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-slider,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress__indicator {`, "    animation: none !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="linear"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: translateX(75%);", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="circular"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: rotate(-90deg);", "  }", "}", "");
+  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid__row,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-toast,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-slider,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress__indicator {`, "    animation: none !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="linear"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: translateX(75%);", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="circular"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: rotate(-90deg);", "  }", "}", "");
   return `${lines.join("\n")}\n`;
 }
 
