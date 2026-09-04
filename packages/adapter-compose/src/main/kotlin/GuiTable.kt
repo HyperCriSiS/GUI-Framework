@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -63,6 +62,7 @@ import gui.framework.generated.internal.GuiDataGridContract
 import gui.framework.generated.internal.GuiDataGridSize
 import gui.framework.generated.internal.GuiDataGridState
 import gui.framework.generated.internal.GuiDataGridVariant
+import gui.framework.generated.internal.GuiComponentCapabilities
 import gui.framework.generated.internal.GuiTableContract
 import gui.framework.generated.internal.GuiTableSize
 import gui.framework.generated.internal.GuiTableState
@@ -182,7 +182,7 @@ private fun Modifier.applyTableBox(style: GuiVisualPartStyle): Modifier {
     return result.alpha(style.tableOpacity())
 }
 
-private fun resolveTableRecipe(componentId: String, contractCapabilities: gui.framework.generated.internal.GuiCapabilityContract): GuiVisualRecipe {
+private fun resolveTableRecipe(componentId: String, contractCapabilities: GuiComponentCapabilities): GuiVisualRecipe {
     val selection = LocalGuiThemeSelection.current
     val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,

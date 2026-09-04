@@ -225,6 +225,7 @@ function emitFoundation(lines, themeIds) {
     `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { border-style: solid; border-width: 0; text-align: start; vertical-align: middle; overflow-wrap: anywhere; }`, "",
     `${scope} .gui-data-grid { box-sizing: border-box; inline-size: 100%; border-style: solid; border-width: 0; }`,
     `${scope} .gui-data-grid__header,`, `${scope} .gui-data-grid__body { box-sizing: border-box; }`,
+    `${scope} .gui-data-grid__header { display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); }`,
     `${scope} .gui-data-grid__row { box-sizing: border-box; position: relative; display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); border: 0; outline: none; }`,
     `${scope} .gui-data-grid__column-header,`, `${scope} .gui-data-grid__cell { box-sizing: border-box; min-inline-size: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,
     `${scope} .gui-data-grid__selection-indicator { position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: var(--gui-component-data-grid-selection-indicator-width); visibility: hidden; pointer-events: none; }`,
