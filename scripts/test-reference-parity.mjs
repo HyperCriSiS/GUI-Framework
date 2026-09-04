@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
@@ -12,6 +12,7 @@ const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, we
   readFile("examples/web-reference/toast-reference.mjs", "utf8"),
   readFile("examples/web-reference/progress-reference.mjs", "utf8"),
   readFile("examples/web-reference/slider-reference.mjs", "utf8"),
+  readFile("examples/web-reference/navigation-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
 ]);
@@ -87,6 +88,14 @@ assert.match(webSlider, /accessibilityValueText: "40 percent"/);
 assert.match(webSlider, /density === "compact" \? "small" : "medium"/);
 assert.match(webSlider, /onValueChange\(nextValue\) \{/);
 assert.match(webSlider, /variant: "vertical"/);
+assert.match(webNavigation, /createGuiNavigation\(/, "Web Navigation reference must exercise createGuiNavigation");
+assert.match(webNavigation, /let value = "home"/);
+assert.match(webNavigation, /accessibilityLabel: "Workspace navigation"/);
+assert.match(webNavigation, /accessibilityLabel: "Workspace navigation rail"/);
+assert.match(webNavigation, /value: "archive", label: "Archive", icon: "□", accessibilityLabel: "Archive destination", disabled: true/);
+assert.match(webNavigation, /density === "compact" \? "small" : "medium"/);
+assert.match(webNavigation, /onValueChange\(nextValue\) \{/);
+assert.match(webNavigation, /variant: "vertical"/);
 assert.match(web, /onValueChange\(nextValue\)/);
 assert.match(web, /onCheckedChange\(nextChecked\)/);
 assert.match(web, /state\.dialogOpen = true;[\s\S]*dialog\.update\(\{ open: true \}\)/);
@@ -110,10 +119,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
     assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -156,8 +165,14 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /accessibilityLabel = "Workspace zoom"/, `${name} must expose Slider semantics`);
   assert.match(source, /accessibilityValueText = "\$\{sliderValue\.toInt\(\)\} percent"/, `${name} must expose Slider value text`);
   assert.match(source, /onValueChange = \{ sliderValue = it \}/, `${name} must expose the controlled Slider value flow`);
+  assert.match(source, /var navigationValue by remember \{ mutableStateOf\("home"\) \}/, `${name} must expose the shared Navigation initial value`);
+  assert.match(source, /accessibilityLabel = "Workspace navigation"/, `${name} must expose horizontal Navigation semantics`);
+  assert.match(source, /accessibilityLabel = "Workspace navigation rail"/, `${name} must expose vertical Navigation semantics`);
+  assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive destination", disabled = true\)/, `${name} must expose a disabled Navigation destination`);
+  assert.match(source, /onValueChange = \{ navigationValue = it \}/, `${name} must expose the controlled Navigation value flow`);
+  assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/, `${name} must expose the vertical Navigation variant`);
 }
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
