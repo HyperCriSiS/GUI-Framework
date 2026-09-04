@@ -17,8 +17,8 @@ test("Basic Navigation reference keeps controlled horizontal and vertical select
   await page.goto(`${referencePath}?density=compact`);
 
   const root = page.locator("#gui-navigation-reference-root");
-  const horizontal = page.getByRole("navigation", { name: "Workspace navigation" });
-  const vertical = page.getByRole("navigation", { name: "Workspace navigation rail" });
+  const horizontal = page.getByRole("navigation", { name: "Workspace navigation", exact: true });
+  const vertical = page.getByRole("navigation", { name: "Workspace navigation rail", exact: true });
 
   await expect(root).toHaveAttribute("data-gui-theme", "basic");
   await expect(root).toHaveAttribute("data-gui-density", "compact");
