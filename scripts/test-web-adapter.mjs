@@ -19,6 +19,7 @@ try {
   const css = await readFile(cssPath, "utf8");
   assert.match(css, /:root \{/);
   assert.match(css, /--gui-spacing-md: 12px;/);
+  assert.match(css, /--gui-component-navigation-indicator-thickness: 2px;/);
   assert.match(css, /--gui-motion-duration-fast: 120ms;/);
   assert.match(css, /--gui-motion-easing-standard: cubic-bezier\(0\.2, 0, 0, 1\);/);
   assert.match(css, /--gui-motion-interaction-fast: 120ms cubic-bezier\(0\.2, 0, 0, 1\) 0ms;/);
