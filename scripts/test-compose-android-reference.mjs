@@ -163,5 +163,17 @@ assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace zoom"\)/);
 assert.match(runtimeTest, /SemanticsActions\.SetProgress/);
 assert.match(runtimeTest, /setProgress\(60f\)/);
 assert.match(runtimeTest, /onNodeWithText\("Workspace zoom: 60%"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace navigation"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Workspace navigation rail"\)/);
+assert.match(runtimeTest, /onAllNodesWithContentDescription\("Archive destination"\)/);
+assert.match(runtimeTest, /archiveDestinations\.assertCountEquals\(2\)/);
+assert.match(runtimeTest, /archiveDestinations\[0\]\.assertIsNotEnabled\(\)/);
+assert.match(runtimeTest, /archiveDestinations\[1\]\.assertIsNotEnabled\(\)/);
+assert.match(runtimeTest, /onAllNodesWithContentDescription\("Search destination"\)/);
+assert.match(runtimeTest, /searchDestinations\[0\][\s\S]*performClick\(\)/);
+assert.match(runtimeTest, /onNodeWithText\("Active destination: search"\)/);
+assert.match(runtimeTest, /onAllNodesWithContentDescription\("Settings destination"\)/);
+assert.match(runtimeTest, /settingsDestinations\[1\][\s\S]*performClick\(\)/);
+assert.match(runtimeTest, /onNodeWithText\("Active destination: settings"\)/);
 
 console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu coverage and Phase 5 theme selection isolation.");
