@@ -1,0 +1,46 @@
+{
+  "specVersion": "0.1.0",
+  "component": "data-grid",
+  "anatomy": [
+    { "id": "root", "required": true },
+    { "id": "header", "required": true },
+    { "id": "body", "required": true },
+    { "id": "row", "required": true },
+    { "id": "columnHeader", "required": true },
+    { "id": "cell", "required": true },
+    { "id": "selectionIndicator", "required": false }
+  ],
+  "content": [
+    { "id": "header", "kind": "children", "required": true },
+    { "id": "body", "kind": "children", "required": true }
+  ],
+  "properties": [
+    { "id": "value", "type": "string", "required": false, "default": "" },
+    { "id": "accessibilityLabel", "type": "string", "required": false, "default": "" },
+    { "id": "disabled", "type": "boolean", "required": false, "default": false, "state": "disabled" }
+  ],
+  "events": [
+    { "id": "valueChange", "payload": "string" },
+    { "id": "rowActivate", "payload": "string" }
+  ],
+  "variants": ["row-selection"],
+  "sizes": ["small", "medium", "large"],
+  "states": ["default", "hover", "focus", "pressed", "selected", "disabled"],
+  "semantics": { "role": "grid", "preferNativePrimitive": false },
+  "tokenBindings": {
+    "surface": "{semantic.color.surface}",
+    "surfaceElevated": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "selected": "{semantic.color.accent}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": ["advancedBlendModes", "shaderEffects"],
+    "fallbackOrder": ["standard", "minimal"]
+  }
+}

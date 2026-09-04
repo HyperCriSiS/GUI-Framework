@@ -1,0 +1,39 @@
+{
+  "specVersion": "0.1.0",
+  "component": "table",
+  "anatomy": [
+    { "id": "root", "required": true },
+    { "id": "caption", "required": false },
+    { "id": "header", "required": true },
+    { "id": "body", "required": true },
+    { "id": "row", "required": true },
+    { "id": "headerCell", "required": true },
+    { "id": "cell", "required": true }
+  ],
+  "content": [
+    { "id": "caption", "kind": "text", "required": false },
+    { "id": "header", "kind": "children", "required": true },
+    { "id": "body", "kind": "children", "required": true }
+  ],
+  "properties": [
+    { "id": "accessibilityLabel", "type": "string", "required": false, "default": "" }
+  ],
+  "events": [],
+  "variants": ["plain", "gridlined"],
+  "sizes": ["small", "medium", "large"],
+  "states": ["default", "hover"],
+  "semantics": { "role": "table", "preferNativePrimitive": true },
+  "tokenBindings": {
+    "surface": "{semantic.color.surface}",
+    "surfaceElevated": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": ["advancedBlendModes", "shaderEffects"],
+    "fallbackOrder": ["standard", "minimal"]
+  }
+}
