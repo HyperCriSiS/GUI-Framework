@@ -153,6 +153,9 @@ jobs:
       - name: Test native Web Basic Navigation
         run: npm run test:web-navigation
 
+      - name: Test native Web Basic Table / Data Grid
+        run: npm run test:web-table
+
       - name: Test native Web Basic Tooltip
         run: npm run test:web-tooltip
 
@@ -251,6 +254,9 @@ jobs:
 
       - name: Test native Compose Basic Navigation
         run: npm run test:kotlin-navigation
+
+      - name: Test native Compose Basic Table / Data Grid
+        run: npm run test:kotlin-table
 
       - name: Test native Compose Basic Tooltip
         run: npm run test:kotlin-tooltip
