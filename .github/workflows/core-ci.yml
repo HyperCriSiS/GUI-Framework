@@ -249,6 +249,9 @@ jobs:
       - name: Test native Compose Basic Tabs
         run: npm run test:kotlin-tabs
 
+      - name: Test native Compose Basic Navigation
+        run: npm run test:kotlin-navigation
+
       - name: Test native Compose Basic Tooltip
         run: npm run test:kotlin-tooltip
 
