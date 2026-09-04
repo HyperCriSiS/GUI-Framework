@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.CollectionInfo
@@ -89,35 +90,54 @@ data class GuiDataGridColumn(val label: String) {
 data class GuiDataGridRow(
     val value: String,
     val cells: List<String>,
-    val accessibilityLabel: String = "",
     val disabled: Boolean = false,
 ) {
     init { require(value.isNotBlank()) { "GUI data-grid row value must not be blank" } }
 }
 
-private fun GuiVisualPartStyle.tableOpacity(): Float {
-    val value = opacity?.toComposeUnitlessFloat() ?: 1f
-    require(value in 0f..1f) { "GUI opacity must be in the range 0..1" }
-    return value
+private fun String?.tableNumber(defaultValue: Float): Float = this?.toFloatOrNull() ?: defaultValue
+
+private fun GuiVisualPartStyle.tableOpacity(): Float = opacity?.toComposeUnitlessFloat() ?: 1f
+
+private fun GuiVisualPartStyle.tablePaddingHorizontal(): Dp = padding?.horizontal?.toComposeDp() ?: 0.dp
+
+private fun GuiVisualPartStyle.tablePaddingVertical(): Dp = padding?.vertical?.toComposeDp() ?: 0.dp
+
+private fun GuiVisualPartStyle.tableTextStyle(
+    fallbackColor: Color = Color.Unspecified,
+    fallbackSize: TextUnit = TextUnit.Unspecified,
+    bold: Boolean = false,
+): TextStyle = TextStyle(
+    color = textColor?.toComposeColor() ?: fallbackColor,
+    fontSize = typography?.size?.toComposeSp() ?: fallbackSize,
+    lineHeight = typography?.lineHeight?.toComposeSp() ?: TextUnit.Unspecified,
+    fontWeight = if (bold) FontWeight.SemiBold else FontWeight.Normal,
+)
+
+private fun GuiVisualPartStyle.tableCellModifier(): Modifier {
+    var modifier = Modifier
+        .defaultMinSize(
+            minWidth = minWidth?.toComposeDp() ?: 0.dp,
+            minHeight = minHeight?.toComposeDp() ?: 0.dp,
+        )
+        .padding(
+            horizontal = tablePaddingHorizontal(),
+            vertical = tablePaddingVertical(),
+        )
+    fill?.let { modifier = modifier.background(it.toComposeColor()) }
+    border?.let { modifier = modifier.tableCellBorder(it) }
+    return modifier.alpha(tableOpacity())
 }
 
-private fun GuiVisualPartStyle.tableTextStyle(fallbackColor: Color): TextStyle {
-    val sizeToken = fontSize
-    val composeFontSize = sizeToken?.toComposeSp() ?: TextUnit.Unspecified
-    val lineHeightMultiplier = lineHeight?.toComposeUnitlessFloat()
-    val composeLineHeight = if (sizeToken != null && lineHeightMultiplier != null) {
-        (sizeToken.value * lineHeightMultiplier).toFloat().sp
-    } else {
-        TextUnit.Unspecified
-    }
-    val weight = fontWeight?.value?.roundToInt()?.also {
-        require(it in 1..1000) { "GUI font weight must be in the range 1..1000" }
-    }
-    return TextStyle(
-        color = foreground?.toComposeColor() ?: fallbackColor,
-        fontSize = composeFontSize,
-        fontWeight = weight?.let(::FontWeight),
-        lineHeight = composeLineHeight,
+private fun Modifier.tableCellBorder(border: gui.framework.generated.internal.GuiVisualBorder): Modifier = drawWithContent {
+    drawContent()
+    val width = border.width.toComposeDp().toPx()
+    if (width <= 0f) return@drawWithContent
+    drawLine(
+        color = border.color.toComposeColor(),
+        start = Offset(0f, size.height - width / 2f),
+        end = Offset(size.width, size.height - width / 2f),
+        strokeWidth = width,
     )
 }
 
@@ -126,27 +146,25 @@ private fun Modifier.guiTableOutline(style: GuiVisualPartStyle, radius: Dp): Mod
     return drawWithContent {
         drawContent()
         val width = outline.width.toComposeDp().toPx()
-        val offset = outline.offset.toComposeDp().toPx()
         if (width <= 0f) return@drawWithContent
-        val extra = offset + width / 2f
-        val corner = radius.toPx() + extra
+        val inset = width / 2f
         drawRoundRect(
             color = outline.color.toComposeColor(),
-            topLeft = Offset(-extra, -extra),
-            size = Size(size.width + extra * 2f, size.height + extra * 2f),
-            cornerRadius = CornerRadius(corner, corner),
+            topLeft = Offset(inset, inset),
+            size = Size((size.width - width).coerceAtLeast(0f), (size.height - width).coerceAtLeast(0f)),
+            cornerRadius = CornerRadius(radius.toPx()),
             style = Stroke(width = width),
         )
     }
 }
 
-private fun Modifier.guiTableInteriorLines(
-    style: GuiVisualPartStyle,
+private fun Modifier.guiTableEdgeBorder(
+    border: gui.framework.generated.internal.GuiVisualBorder?,
     drawStart: Boolean = false,
     drawTop: Boolean = false,
     drawBottom: Boolean = false,
 ): Modifier {
-    val border = style.border ?: return this
+    if (border == null) return this
     if (!drawStart && !drawTop && !drawBottom) return this
     return drawWithContent {
         drawContent()
@@ -182,6 +200,7 @@ private fun Modifier.applyTableBox(style: GuiVisualPartStyle): Modifier {
     return result.alpha(style.tableOpacity())
 }
 
+@Composable
 private fun resolveTableRecipe(componentId: String, contractCapabilities: GuiComponentCapabilities): GuiVisualRecipe {
     val selection = LocalGuiThemeSelection.current
     val baseRecipe = GuiVisualRegistry.component(
@@ -213,134 +232,199 @@ fun GuiTable(
 ) {
     require(columns.isNotEmpty()) { "GUI table requires at least one column" }
     require(rows.all { it.cells.size == columns.size }) { "GUI table row cell count must match column count" }
+
     val recipe = resolveTableRecipe("table", GuiTableContract.capabilities)
     val resolved = resolveGuiVisualRecipe(
         recipe = recipe,
         variant = variant.wireValue,
         size = size.wireValue,
-        activeStates = emptySet(),
-        statePriority = GuiTableState.entries.map { it.wireValue },
+        state = GuiTableState.DEFAULT.wireValue,
     )
     val root = resolved["root"] ?: error("Resolved GUI table visual is missing required root part")
-    val captionStyle = resolved["caption"] ?: error("Resolved GUI table visual is missing caption part")
-    val header = resolved["header"] ?: error("Resolved GUI table visual is missing required header part")
-    val headerCell = resolved["headerCell"] ?: error("Resolved GUI table visual is missing required headerCell part")
-    val cell = resolved["cell"] ?: error("Resolved GUI table visual is missing required cell part")
-    val rootColor = root.foreground?.toComposeColor() ?: Color.Unspecified
+    val captionStyle = resolved["caption"] ?: error("Resolved GUI table visual is missing required caption part")
+    val headerStyle = resolved["header"] ?: error("Resolved GUI table visual is missing required header part")
+    val rowStyle = resolved["row"] ?: error("Resolved GUI table visual is missing required row part")
+    val cellStyle = resolved["cell"] ?: error("Resolved GUI table visual is missing required cell part")
 
-    var rootModifier = modifier
-        .fillMaxWidth()
-        .semantics {
-            collectionInfo = CollectionInfo(rowCount = rows.size + 1, columnCount = columns.size)
-            if (accessibilityLabel.isNotBlank()) contentDescription = accessibilityLabel
-        }
-        .applyTableBox(root)
-
-    Column(modifier = rootModifier) {
+    Column(
+        modifier = modifier
+            .applyTableBox(root)
+            .semantics {
+                collectionInfo = CollectionInfo(rowCount = rows.size + 1, columnCount = columns.size)
+                if (accessibilityLabel.isNotBlank()) contentDescription = accessibilityLabel
+            },
+    ) {
         if (caption.isNotBlank()) {
             BasicText(
                 text = caption,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = captionStyle.paddingHorizontal?.toComposeDp() ?: 0.dp,
-                        vertical = captionStyle.paddingVertical?.toComposeDp() ?: 0.dp,
+                        horizontal = captionStyle.tablePaddingHorizontal(),
+                        vertical = captionStyle.tablePaddingVertical(),
                     ),
-                style = captionStyle.tableTextStyle(rootColor),
+                style = captionStyle.tableTextStyle(bold = true),
             )
         }
-        Row(modifier = Modifier.fillMaxWidth().applyTableBox(header)) {
+        Row(modifier = Modifier.fillMaxWidth().applyTableBox(headerStyle)) {
             columns.forEachIndexed { columnIndex, column ->
-                var cellModifier = Modifier
-                    .weight(1f)
-                    .defaultMinSize(minHeight = headerCell.minHeight?.toComposeDp() ?: 0.dp)
-                    .semantics {
-                        heading()
-                        collectionItemInfo = CollectionItemInfo(
-                            rowIndex = 0,
-                            rowSpan = 1,
-                            columnIndex = columnIndex,
-                            columnSpan = 1,
-                        )
-                    }
-                    .guiTableInteriorLines(
-                        style = headerCell,
-                        drawStart = variant == GuiTableVariant.GRIDLINED && columnIndex > 0,
-                        drawBottom = variant == GuiTableVariant.PLAIN,
-                    )
-                    .padding(
-                        horizontal = headerCell.paddingHorizontal?.toComposeDp() ?: 0.dp,
-                        vertical = headerCell.paddingVertical?.toComposeDp() ?: 0.dp,
-                    )
-                headerCell.fill?.let { cellModifier = cellModifier.background(it.toComposeColor()) }
-                BasicText(column.label, modifier = cellModifier, style = headerCell.tableTextStyle(rootColor))
-            }
-        }
-        rows.forEachIndexed { rowIndex, row ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                row.cells.forEachIndexed { columnIndex, value ->
-                    var cellModifier = Modifier
+                BasicText(
+                    text = column.label,
+                    modifier = Modifier
                         .weight(1f)
-                        .defaultMinSize(minHeight = cell.minHeight?.toComposeDp() ?: 0.dp)
+                        .tableCellModifier()
                         .semantics {
+                            heading()
                             collectionItemInfo = CollectionItemInfo(
-                                rowIndex = rowIndex + 1,
+                                rowIndex = 0,
                                 rowSpan = 1,
                                 columnIndex = columnIndex,
                                 columnSpan = 1,
                             )
-                        }
-                        .guiTableInteriorLines(
-                            style = cell,
-                            drawStart = variant == GuiTableVariant.GRIDLINED && columnIndex > 0,
-                            drawTop = variant == GuiTableVariant.GRIDLINED,
-                        )
-                        .padding(
-                            horizontal = cell.paddingHorizontal?.toComposeDp() ?: 0.dp,
-                            vertical = cell.paddingVertical?.toComposeDp() ?: 0.dp,
-                        )
-                    cell.fill?.let { cellModifier = cellModifier.background(it.toComposeColor()) }
-                    BasicText(value, modifier = cellModifier, style = cell.tableTextStyle(rootColor))
+                        },
+                    style = headerStyle.tableTextStyle(bold = true),
+                )
+            }
+        }
+        rows.forEachIndexed { rowIndex, row ->
+            Row(modifier = Modifier.fillMaxWidth().applyTableBox(rowStyle)) {
+                row.cells.forEachIndexed { columnIndex, cell ->
+                    BasicText(
+                        text = cell,
+                        modifier = Modifier
+                            .weight(1f)
+                            .tableCellModifier()
+                            .semantics {
+                                collectionItemInfo = CollectionItemInfo(
+                                    rowIndex = rowIndex + 1,
+                                    rowSpan = 1,
+                                    columnIndex = columnIndex,
+                                    columnSpan = 1,
+                                )
+                            },
+                        style = cellStyle.tableTextStyle(),
+                    )
                 }
             }
         }
     }
 }
 
+/**
+ * Foundation-only row-selection Data Grid. Selection is controlled by [value] and [onValueChange].
+ * One row is tabbable at a time and arrow/home/end keys move focus between enabled rows.
+ */
 @Composable
-private fun GuiDataGridRowContent(
+fun GuiDataGrid(
+    columns: List<GuiDataGridColumn>,
+    rows: List<GuiDataGridRow>,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    accessibilityLabel: String = "",
+    disabled: Boolean = false,
+    variant: GuiDataGridVariant = GuiDataGridVariant.STANDARD,
+    size: GuiDataGridSize = GuiDataGridSize.MEDIUM,
+    onRowActivate: (String) -> Unit = {},
+) {
+    require(columns.isNotEmpty()) { "GUI data-grid requires at least one column" }
+    require(rows.isNotEmpty()) { "GUI data-grid requires at least one row" }
+    require(rows.all { it.cells.size == columns.size }) { "GUI data-grid row cell count must match column count" }
+    require(rows.map { it.value }.toSet().size == rows.size) { "GUI data-grid row values must be unique" }
+
+    val recipe = resolveTableRecipe("data-grid", GuiDataGridContract.capabilities)
+    val rootRecipe = resolveGuiVisualRecipe(recipe, variant.wireValue, size.wireValue, GuiDataGridState.DEFAULT.wireValue)
+    val rootStyle = rootRecipe["root"] ?: error("Resolved GUI data-grid visual is missing required root part")
+    val headerStyle = rootRecipe["header"] ?: error("Resolved GUI data-grid visual is missing required header part")
+    val focusRequesters = remember(rows.map { it.value }) { rows.associate { it.value to FocusRequester() } }
+    val enabledRows = rows.filterNot { disabled || it.disabled }
+
+    fun moveFocus(currentValue: String, delta: Int) {
+        val index = enabledRows.indexOfFirst { it.value == currentValue }
+        if (index < 0 || enabledRows.isEmpty()) return
+        val target = when (delta) {
+            Int.MIN_VALUE -> 0
+            Int.MAX_VALUE -> enabledRows.lastIndex
+            else -> (index + delta).coerceIn(0, enabledRows.lastIndex)
+        }
+        focusRequesters[enabledRows[target].value]?.requestFocus()
+    }
+
+    Column(
+        modifier = modifier
+            .applyTableBox(rootStyle)
+            .semantics {
+                collectionInfo = CollectionInfo(rowCount = rows.size + 1, columnCount = columns.size)
+                if (accessibilityLabel.isNotBlank()) contentDescription = accessibilityLabel
+                if (disabled) disabled()
+            },
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().applyTableBox(headerStyle)) {
+            columns.forEachIndexed { columnIndex, column ->
+                BasicText(
+                    text = column.label,
+                    modifier = Modifier
+                        .weight(1f)
+                        .tableCellModifier()
+                        .semantics {
+                            heading()
+                            collectionItemInfo = CollectionItemInfo(0, 1, columnIndex, 1)
+                        },
+                    style = headerStyle.tableTextStyle(bold = true),
+                )
+            }
+        }
+        rows.forEachIndexed { rowIndex, row ->
+            key(row.value) {
+                GuiDataGridRowView(
+                    row = row,
+                    rowIndex = rowIndex,
+                    columnCount = columns.size,
+                    selectedValue = value,
+                    globallyDisabled = disabled,
+                    recipe = recipe,
+                    variant = variant,
+                    size = size,
+                    requester = focusRequesters.getValue(row.value),
+                    onValueChange = onValueChange,
+                    onRowActivate = onRowActivate,
+                    onMoveFocus = ::moveFocus,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GuiDataGridRowView(
     row: GuiDataGridRow,
     rowIndex: Int,
     columnCount: Int,
     selectedValue: String,
     globallyDisabled: Boolean,
+    recipe: GuiVisualRecipe,
     variant: GuiDataGridVariant,
     size: GuiDataGridSize,
-    recipe: GuiVisualRecipe,
     requester: FocusRequester,
-    onMoveFocus: (String, Int?) -> Unit,
     onValueChange: (String) -> Unit,
     onRowActivate: (String) -> Unit,
+    onMoveFocus: (String, Int) -> Unit,
 ) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val focused by source.collectIsFocusedAsState()
     val pressed by source.collectIsPressedAsState()
     val enabled = !globallyDisabled && !row.disabled
-    val isSelected = enabled && row.value == selectedValue
-    val resolved = resolveGuiVisualRecipe(
-        recipe = recipe,
-        variant = variant.wireValue,
-        size = size.wireValue,
-        activeStates = buildSet {
-            if (hovered && enabled) add("hover")
-            if (focused && enabled) add("focus")
-            if (pressed && enabled) add("pressed")
-            if (isSelected) add("selected")
-            if (!enabled) add("disabled")
-        },
-        statePriority = GuiDataGridState.entries.map { it.wireValue },
-    )
+    val isSelected = row.value == selectedValue
+    val state = when {
+        !enabled -> GuiDataGridState.DISABLED
+        pressed -> GuiDataGridState.PRESSED
+        focused -> GuiDataGridState.FOCUS
+        hovered -> GuiDataGridState.HOVER
+        isSelected -> GuiDataGridState.SELECTED
+        else -> GuiDataGridState.DEFAULT
+    }
+    val resolved = resolveGuiVisualRecipe(recipe, variant.wireValue, size.wireValue, state.wireValue)
     val rowStyle = resolved["row"] ?: error("Resolved GUI data-grid visual is missing required row part")
     val cellStyle = resolved["cell"] ?: error("Resolved GUI data-grid visual is missing required cell part")
     val indicator = resolved["selectionIndicator"] ?: error("Resolved GUI data-grid visual is missing selectionIndicator part")
@@ -388,138 +472,20 @@ private fun GuiDataGridRowContent(
                 columnSpan = columnCount,
             )
             selected = isSelected
-            if (row.accessibilityLabel.isNotBlank()) contentDescription = row.accessibilityLabel
             if (!enabled) disabled()
         }
-        .padding(
-            horizontal = rowStyle.paddingHorizontal?.toComposeDp() ?: 0.dp,
-            vertical = rowStyle.paddingVertical?.toComposeDp() ?: 0.dp,
-        )
 
     Row(modifier = rowModifier) {
-        row.cells.forEach { value ->
-            var cellModifier = Modifier
-                .weight(1f)
-                .padding(
-                    horizontal = cellStyle.paddingHorizontal?.toComposeDp() ?: 0.dp,
-                    vertical = cellStyle.paddingVertical?.toComposeDp() ?: 0.dp,
-                )
-            cellStyle.fill?.let { cellModifier = cellModifier.background(it.toComposeColor()) }
+        row.cells.forEach { cell ->
             BasicText(
-                text = value,
-                modifier = cellModifier,
-                style = cellStyle.tableTextStyle(root.foreground?.toComposeColor() ?: Color.Unspecified),
-            )
-        }
-    }
-}
-
-/**
- * Foundation-only controlled row-selection Data Grid. Arrow/Home/End keys move focus without
- * mutating selection; Space requests selection and Enter/double-click emits row activation.
- */
-@Composable
-fun GuiDataGrid(
-    value: String,
-    columns: List<GuiDataGridColumn>,
-    rows: List<GuiDataGridRow>,
-    onValueChange: (String) -> Unit,
-    onRowActivate: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    accessibilityLabel: String = "",
-    variant: GuiDataGridVariant = GuiDataGridVariant.ROW_SELECTION,
-    size: GuiDataGridSize = GuiDataGridSize.MEDIUM,
-    disabled: Boolean = false,
-) {
-    require(columns.isNotEmpty()) { "GUI data-grid requires at least one column" }
-    require(rows.all { it.cells.size == columns.size }) { "GUI data-grid row cell count must match column count" }
-    require(rows.map { it.value }.toSet().size == rows.size) { "GUI data-grid row values must be unique" }
-
-    val recipe = resolveTableRecipe("data-grid", GuiDataGridContract.capabilities)
-    val rootResolved = resolveGuiVisualRecipe(
-        recipe = recipe,
-        variant = variant.wireValue,
-        size = size.wireValue,
-        activeStates = if (disabled) setOf("disabled") else emptySet(),
-        statePriority = GuiDataGridState.entries.map { it.wireValue },
-    )
-    val root = rootResolved["root"] ?: error("Resolved GUI data-grid visual is missing required root part")
-    val header = rootResolved["header"] ?: error("Resolved GUI data-grid visual is missing required header part")
-    val columnHeader = rootResolved["columnHeader"] ?: error("Resolved GUI data-grid visual is missing required columnHeader part")
-    val rootRadius = root.radius?.toComposeDp() ?: 0.dp
-    val rootShape = RoundedCornerShape(rootRadius)
-    val enabledRows = rows.filterNot { disabled || it.disabled }
-    val requesters = remember(rows.map { it.value }) { rows.associate { it.value to FocusRequester() } }
-
-    fun moveFocus(current: String, directive: Int?) {
-        if (enabledRows.isEmpty()) return
-        val index = enabledRows.indexOfFirst { it.value == current }.coerceAtLeast(0)
-        val target = when (directive) {
-            Int.MIN_VALUE -> enabledRows.first()
-            Int.MAX_VALUE -> enabledRows.last()
-            1 -> enabledRows[(index + 1).coerceAtMost(enabledRows.lastIndex)]
-            -1 -> enabledRows[(index - 1).coerceAtLeast(0)]
-            else -> enabledRows[index]
-        }
-        requesters[target.value]?.requestFocus()
-    }
-
-    var rootModifier = modifier
-        .fillMaxWidth()
-        .semantics {
-            collectionInfo = CollectionInfo(rowCount = rows.size + 1, columnCount = columns.size)
-            if (accessibilityLabel.isNotBlank()) contentDescription = accessibilityLabel
-            if (disabled) disabled()
-        }
-        .then(if (rootRadius > 0.dp) Modifier.clip(rootShape) else Modifier)
-        .alpha(root.tableOpacity())
-    root.fill?.let { rootModifier = rootModifier.background(it.toComposeColor(), rootShape) }
-    root.border?.let { rootModifier = rootModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), rootShape) }
-
-    Column(modifier = rootModifier) {
-        Row(modifier = Modifier.fillMaxWidth().applyTableBox(header)) {
-            columns.forEachIndexed { columnIndex, column ->
-                var headerModifier = Modifier
+                text = cell,
+                modifier = Modifier
                     .weight(1f)
-                    .defaultMinSize(minHeight = columnHeader.minHeight?.toComposeDp() ?: 0.dp)
-                    .semantics {
-                        heading()
-                        collectionItemInfo = CollectionItemInfo(
-                            rowIndex = 0,
-                            rowSpan = 1,
-                            columnIndex = columnIndex,
-                            columnSpan = 1,
-                        )
-                    }
-                    .padding(
-                        horizontal = columnHeader.paddingHorizontal?.toComposeDp() ?: 0.dp,
-                        vertical = columnHeader.paddingVertical?.toComposeDp() ?: 0.dp,
-                    )
-                columnHeader.fill?.let { headerModifier = headerModifier.background(it.toComposeColor()) }
-                BasicText(
-                    column.label,
-                    modifier = headerModifier,
-                    style = columnHeader.tableTextStyle(root.foreground?.toComposeColor() ?: Color.Unspecified),
-                )
-            }
-        }
-        rows.forEachIndexed { rowIndex, row ->
-            key(row.value) {
-                GuiDataGridRowContent(
-                    row = row,
-                    rowIndex = rowIndex,
-                    columnCount = columns.size,
-                    selectedValue = value,
-                    globallyDisabled = disabled,
-                    variant = variant,
-                    size = size,
-                    recipe = recipe,
-                    requester = requesters.getValue(row.value),
-                    onMoveFocus = ::moveFocus,
-                    onValueChange = onValueChange,
-                    onRowActivate = onRowActivate,
-                )
-            }
+                    .tableCellModifier(),
+                style = cellStyle.tableTextStyle(
+                    fallbackColor = root.textColor?.toComposeColor() ?: Color.Unspecified,
+                ),
+            )
         }
     }
 }
