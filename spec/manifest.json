@@ -105,6 +105,10 @@
       "source": "components/menu.recipe.json"
     },
     {
+      "id": "navigation",
+      "source": "components/navigation.recipe.json"
+    },
+    {
       "id": "toast",
       "source": "components/toast.recipe.json"
     },

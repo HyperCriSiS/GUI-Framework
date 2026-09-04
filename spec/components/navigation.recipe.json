@@ -1,0 +1,104 @@
+{
+  "specVersion": "0.1.0",
+  "component": "navigation",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "list",
+      "required": true
+    },
+    {
+      "id": "item",
+      "required": true
+    },
+    {
+      "id": "icon",
+      "required": false
+    },
+    {
+      "id": "label",
+      "required": false
+    },
+    {
+      "id": "indicator",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "item",
+      "kind": "children",
+      "required": true
+    }
+  ],
+  "properties": [
+    {
+      "id": "value",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    }
+  ],
+  "events": [
+    {
+      "id": "valueChange",
+      "payload": "string"
+    }
+  ],
+  "variants": [
+    "horizontal",
+    "vertical"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed",
+    "selected",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "navigation",
+    "preferNativePrimitive": true
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "selected": "{semantic.color.accent}",
+    "border": "{semantic.color.border}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}
