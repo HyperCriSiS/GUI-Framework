@@ -1,0 +1,123 @@
+name: Maintenance Table Compose Reference
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Integrate Table and Data Grid references
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path('examples/compose-desktop/src/main/kotlin/Main.kt'),
+              Path('examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt'),
+          ]
+          for p in files:
+              s = p.read_text()
+              nav_import = 'import gui.framework.compose.GuiNavigationItem\n'
+              assert s.count(nav_import) == 1
+              s = s.replace(nav_import, nav_import + '''import gui.framework.compose.GuiDataGrid\nimport gui.framework.compose.GuiDataGridColumn\nimport gui.framework.compose.GuiDataGridRow\nimport gui.framework.compose.GuiTable\nimport gui.framework.compose.GuiTableColumn\nimport gui.framework.compose.GuiTableRow\n''', 1)
+              generated = 'import gui.framework.generated.internal.GuiNavigationVariant\n'
+              assert s.count(generated) == 1
+              s = s.replace(generated, generated + '''import gui.framework.generated.internal.GuiDataGridSize\nimport gui.framework.generated.internal.GuiTableSize\nimport gui.framework.generated.internal.GuiTableVariant\n''', 1)
+              state = '    var navigationValue by remember { mutableStateOf("home") }\n'
+              assert s.count(state) == 1
+              s = s.replace(state, state + '''    var tableGridValue by remember { mutableStateOf("atlas") }\n    var lastGridActivation by remember { mutableStateOf("none") }\n''', 1)
+              size = '    val navigationSize = if (density == ReferenceDensity.Compact) GuiNavigationSize.SMALL else GuiNavigationSize.MEDIUM\n'
+              assert s.count(size) == 1
+              s = s.replace(size, size + '''    val tableSize = if (density == ReferenceDensity.Compact) GuiTableSize.SMALL else GuiTableSize.MEDIUM\n    val dataGridSize = if (density == ReferenceDensity.Compact) GuiDataGridSize.SMALL else GuiDataGridSize.MEDIUM\n''', 1)
+              marker = '                    BasicText("Active destination: $navigationValue")\n' if 'compose-desktop' in str(p) else '                BasicText("Active destination: $navigationValue")\n'
+              assert s.count(marker) == 1
+              indent = '                    ' if 'compose-desktop' in str(p) else '                '
+              block = f'''{indent}BasicText("Active destination: $navigationValue")
+{indent}val tableColumns = listOf(
+{indent}    GuiTableColumn("Project"),
+{indent}    GuiTableColumn("Owner"),
+{indent}    GuiTableColumn("Status"),
+{indent})
+{indent}val tableRows = listOf(
+{indent}    GuiTableRow(listOf("Atlas", "Mira", "Ready")),
+{indent}    GuiTableRow(listOf("Nova", "Kai", "Review")),
+{indent}    GuiTableRow(listOf("Archive", "System", "Locked")),
+{indent})
+{indent}GuiTable(
+{indent}    columns = tableColumns,
+{indent}    rows = tableRows,
+{indent}    caption = "Project inventory",
+{indent}    accessibilityLabel = "Project inventory table",
+{indent}    variant = GuiTableVariant.GRIDLINED,
+{indent}    size = tableSize,
+{indent})
+{indent}val gridColumns = listOf(
+{indent}    GuiDataGridColumn("Project"),
+{indent}    GuiDataGridColumn("Owner"),
+{indent}    GuiDataGridColumn("Status"),
+{indent})
+{indent}val gridRows = listOf(
+{indent}    GuiDataGridRow("atlas", listOf("Atlas", "Mira", "Ready"), accessibilityLabel = "Atlas project row"),
+{indent}    GuiDataGridRow("nova", listOf("Nova", "Kai", "Review"), accessibilityLabel = "Nova project row"),
+{indent}    GuiDataGridRow("archive", listOf("Archive", "System", "Locked"), accessibilityLabel = "Archive project row", disabled = true),
+{indent})
+{indent}GuiDataGrid(
+{indent}    columns = gridColumns,
+{indent}    rows = gridRows,
+{indent}    value = tableGridValue,
+{indent}    onValueChange = {{ tableGridValue = it }},
+{indent}    onRowActivate = {{ lastGridActivation = it }},
+{indent}    accessibilityLabel = "Project selection grid",
+{indent}    size = dataGridSize,
+{indent})
+{indent}BasicText("Selected project row: $tableGridValue")
+{indent}BasicText("Activated project row: $lastGridActivation")
+'''
+              s = s.replace(marker, block, 1)
+              p.write_text(s)
+
+          for path in ['scripts/test-compose-desktop-reference.mjs', 'scripts/test-compose-android-reference.mjs']:
+              p = Path(path)
+              s = p.read_text()
+              s = s.replace('"GuiNavigation", "GuiMenu"', '"GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu"', 1)
+              if 'android' in path:
+                  s = s.replace('"GuiNavigationSize", "GuiPanelSize"', '"GuiNavigationSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize"', 1)
+              else:
+                  marker = 'assert.match(source, /GuiNavigationSize\\.SMALL/);\n'
+                  assert s.count(marker) == 1
+                  s = s.replace(marker, marker + 'assert.match(source, /GuiTableSize\\.SMALL/);\nassert.match(source, /GuiDataGridSize\\.SMALL/);\n', 1)
+              marker = 'assert.match(source, /Active destination: \\$navigationValue/);\n'
+              assert s.count(marker) == 1
+              additions = '''assert.match(source, /var tableGridValue by remember \\{ mutableStateOf\\("atlas"\\) \\}/);
+assert.match(source, /caption = "Project inventory"/);
+assert.match(source, /accessibilityLabel = "Project inventory table"/);
+assert.match(source, /variant = GuiTableVariant\\.GRIDLINED/);
+assert.match(source, /accessibilityLabel = "Project selection grid"/);
+assert.match(source, /GuiDataGridRow\\("archive",[\\s\\S]*accessibilityLabel = "Archive project row", disabled = true\\)/);
+assert.match(source, /onValueChange = \\{ tableGridValue = it \\}/);
+assert.match(source, /onRowActivate = \\{ lastGridActivation = it \\}/);
+assert.match(source, /Selected project row: \\$tableGridValue/);
+assert.match(source, /Activated project row: \\$lastGridActivation/);
+'''
+              s = s.replace(marker, marker + additions, 1)
+              p.write_text(s)
+          PY
+          node scripts/test-compose-desktop-reference.mjs
+          node scripts/test-compose-android-reference.mjs
+          git diff --check
+      - name: Commit reference integration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/compose-desktop/src/main/kotlin/Main.kt examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt scripts/test-compose-desktop-reference.mjs scripts/test-compose-android-reference.mjs
+          git commit -m "feat(table): integrate Compose references"
+          git push origin HEAD:main
