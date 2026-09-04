@@ -1,0 +1,79 @@
+name: Maintenance Table Generator Patch
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Patch table registries and generators
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path('scripts/test-spec.mjs')
+          s=p.read_text()
+          old='const expectedReferenceVisualIds=["button","checkbox","dialog","input","menu","navigation","panel","progress","radio","select","slider","switch","tabs","toast","tooltip"];'
+          new='const expectedReferenceVisualIds=["button","checkbox","data-grid","dialog","input","menu","navigation","panel","progress","radio","select","slider","switch","table","tabs","toast","tooltip"];'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('scripts/test-web-adapter.mjs')
+          s=p.read_text()
+          old='  assert.match(css, /--gui-component-navigation-indicator-thickness: 2px;/);\n'
+          new=old+'  assert.match(css, /--gui-component-data-grid-selection-indicator-width: 2px;/);\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('scripts/test-compose-tokens.mjs')
+          s=p.read_text()
+          old='  assert.match(source, /"spacing\\.md" to GuiDimensionValue\\(12\\.0, "px"\\)/);\n'
+          new=old+'  assert.match(source, /"component\\.dataGrid\\.selectionIndicator\\.width" to GuiDimensionValue\\(2\\.0, "px"\\)/);\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+
+          theme_path=Path('spec/themes/basic.theme.json')
+          theme=json.loads(theme_path.read_text())
+          plain=theme['components']['table']['variants']['plain']['base']
+          assert 'header' in plain and 'headerCell' not in plain
+          plain['headerCell']=plain.pop('header')
+          theme_path.write_text(json.dumps(theme,separators=(',',':'))+'\n')
+
+          p=Path('packages/adapter-web/src/generate-components-css.mjs')
+          s=p.read_text()
+          marker='''  if (componentId !== "tabs") return partSelector(stateSelector(rootSelector, state), componentId, partId);'''
+          insert='''  if (componentId === "data-grid") {\n    if (state === "disabled") return partSelector(`${rootSelector}:where([aria-disabled="true"])`, componentId, partId);\n    if (["hover", "focus", "pressed", "selected"].includes(state)) {\n      const rowSelector = partSelector(rootSelector, componentId, "row");\n      const interactiveSelector = state === "selected"\n        ? `${rowSelector}:where([aria-selected="true"])`\n        : state === "hover"\n          ? `${rowSelector}:where(:hover:not([aria-disabled="true"]))`\n          : state === "focus"\n            ? `${rowSelector}:where(:focus-visible:not([aria-disabled="true"]))`\n            : `${rowSelector}:where(:active:not([aria-disabled="true"]))`;\n      if (partId === "row") return interactiveSelector;\n      if (partId === "selectionIndicator") return `${interactiveSelector} .gui-data-grid__selection-indicator`;\n      if (partId === "cell") return `${interactiveSelector} .gui-data-grid__cell`;\n    }\n  }\n'''+marker
+          assert s.count(marker)==1
+          s=s.replace(marker,insert,1)
+
+          nav_end='''    `${scope} .gui-navigation__indicator { visibility: hidden; }`, `${scope} .gui-navigation:where([data-gui-variant="horizontal"]) .gui-navigation__indicator { inline-size: 100%; }`, `${scope} .gui-navigation:where([data-gui-variant="vertical"]) .gui-navigation__indicator { position: absolute; inset-block: 0; inset-inline-start: 0; min-inline-size: var(--gui-component-navigation-indicator-thickness); min-block-size: 0 !important; block-size: 100%; }`, `${scope} .gui-navigation__item[aria-current="page"] .gui-navigation__indicator { visibility: visible; }`, "",'''
+          table_foundation=nav_end+'''\n    `${scope} .gui-table { box-sizing: border-box; inline-size: 100%; border-collapse: separate; border-spacing: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,\n    `${scope} .gui-table__caption { box-sizing: border-box; caption-side: top; text-align: start; }`,\n    `${scope} .gui-table__header,`, `${scope} .gui-table__body,`, `${scope} .gui-table__row,`, `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { box-sizing: border-box; }`,\n    `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { border-style: solid; border-width: 0; text-align: start; vertical-align: middle; overflow-wrap: anywhere; }`, "",\n    `${scope} .gui-data-grid { box-sizing: border-box; inline-size: 100%; border-style: solid; border-width: 0; }`,\n    `${scope} .gui-data-grid__header,`, `${scope} .gui-data-grid__body { box-sizing: border-box; }`,\n    `${scope} .gui-data-grid__row { box-sizing: border-box; position: relative; display: grid; grid-template-columns: repeat(var(--gui-data-grid-column-count, 1), minmax(0, 1fr)); border: 0; outline: none; }`,\n    `${scope} .gui-data-grid__column-header,`, `${scope} .gui-data-grid__cell { box-sizing: border-box; min-inline-size: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,\n    `${scope} .gui-data-grid__selection-indicator { position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: var(--gui-component-data-grid-selection-indicator-width); visibility: hidden; pointer-events: none; }`,\n    `${scope} .gui-data-grid__row[aria-selected="true"] .gui-data-grid__selection-indicator { visibility: visible; }`,\n    `${scope} .gui-data-grid__row[aria-disabled="true"] { cursor: default; }`, "",'''
+          assert s.count(nav_end)==1
+          s=s.replace(nav_end,table_foundation,1)
+
+          loop_end='''  }\n  lines.push("@keyframes gui-progress-linear-indeterminate {", "  from { transform: translateX(-100%); }", "  to { transform: translateX(350%); }", "}", "", "@keyframes gui-progress-circular-indeterminate {", "  from { transform: rotate(-90deg); }", "  to { transform: rotate(270deg); }", "}", "");'''
+          structural='''  }\n  const scope = `:where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")})`;\n  lines.push(\n    `${scope} .gui-table:where([data-gui-variant="plain"]) .gui-table__header-cell { border-width: 0; border-block-end-width: var(--gui-border-width-standard); }`,\n    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__header-cell,`, `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__cell { border-width: 0; }`,\n    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__header-cell:not(:first-child),`, `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__cell:not(:first-child) { border-inline-start-width: var(--gui-border-width-standard); }`,\n    `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__body .gui-table__cell { border-block-start-width: var(--gui-border-width-standard); }`, ""\n  );\n  lines.push("@keyframes gui-progress-linear-indeterminate {", "  from { transform: translateX(-100%); }", "  to { transform: translateX(350%); }", "}", "", "@keyframes gui-progress-circular-indeterminate {", "  from { transform: rotate(-90deg); }", "  to { transform: rotate(270deg); }", "}", "");'''
+          assert s.count(loop_end)==1
+          s=s.replace(loop_end,structural,1)
+
+          old='''`  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`'''
+          new='''`  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid__row,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`'''
+          assert s.count(old)==1
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/test-spec.mjs scripts/test-web-adapter.mjs scripts/test-compose-tokens.mjs spec/themes/basic.theme.json packages/adapter-web/src/generate-components-css.mjs
+          git diff --cached --check
+          git commit -m "feat(table): gate and generate table visuals"
+          git push origin HEAD:main
