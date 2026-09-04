@@ -29,7 +29,7 @@ export function mountNavigationReference(document, root, options = {}) {
   if (!densities.has(density)) throw new Error(`Unknown Navigation reference density: ${density}`);
   const componentSize = density === "compact" ? "small" : "medium";
 
-  let value = "overview";
+  let value = "home";
   let disabled = false;
 
   root.replaceChildren();
@@ -53,36 +53,37 @@ export function mountNavigationReference(document, root, options = {}) {
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
 
+  function setValue(nextValue) {
+    value = nextValue;
+    navigation.update({ value });
+    vertical.update({ value });
+    renderStatus();
+  }
+
   const navigation = createGuiNavigation(document, {
     value,
-    accessibilityLabel: "Workspace sections",
+    accessibilityLabel: "Workspace navigation",
     size: componentSize,
-    onValueChange(nextValue) {
-      value = nextValue;
-      navigation.update({ value });
-      renderStatus();
-    },
+    onValueChange: setValue,
   });
 
-  const items = [
-    createGuiNavigationItem(document, { value: "overview", label: "Overview", icon: "◫" }),
-    createGuiNavigationItem(document, { value: "activity", label: "Activity", icon: "↗" }),
-    createGuiNavigationItem(document, { value: "settings", label: "Settings", icon: "⚙" }),
-    createGuiNavigationItem(document, { value: "archive", label: "Archive", icon: "□", disabled: true }),
+  const itemProps = [
+    { value: "home", label: "Home", icon: "⌂", accessibilityLabel: "Home destination" },
+    { value: "search", label: "Search", icon: "⌕", accessibilityLabel: "Search destination" },
+    { value: "archive", label: "Archive", icon: "□", accessibilityLabel: "Archive destination", disabled: true },
+    { value: "settings", label: "Settings", icon: "⚙", accessibilityLabel: "Settings destination" },
   ];
+  const items = itemProps.map((props) => createGuiNavigationItem(document, props));
   appendItems(navigation, items);
 
   const vertical = createGuiNavigation(document, {
-    value: "library",
-    accessibilityLabel: "Library sections",
+    value,
+    accessibilityLabel: "Workspace navigation rail",
     variant: "vertical",
     size: componentSize,
+    onValueChange: setValue,
   });
-  const verticalItems = [
-    createGuiNavigationItem(document, { value: "library", label: "Library" }),
-    createGuiNavigationItem(document, { value: "favorites", label: "Favorites" }),
-    createGuiNavigationItem(document, { value: "history", label: "History" }),
-  ];
+  const verticalItems = itemProps.map((props) => createGuiNavigationItem(document, props));
   appendItems(vertical, verticalItems);
 
   const toggleDisabledButton = createGuiButton(document, {
@@ -92,19 +93,18 @@ export function mountNavigationReference(document, root, options = {}) {
     onActivate() {
       disabled = !disabled;
       navigation.update({ disabled });
+      vertical.update({ disabled });
       toggleDisabledButton.update({ label: disabled ? "Enable navigation" : "Disable navigation" });
       renderStatus();
     },
   });
 
   const resetButton = createGuiButton(document, {
-    label: "Select overview",
+    label: "Select home",
     variant: "secondary",
     size: componentSize,
     onActivate() {
-      value = "overview";
-      navigation.update({ value });
-      renderStatus();
+      setValue("home");
     },
   });
 
@@ -118,7 +118,7 @@ export function mountNavigationReference(document, root, options = {}) {
     navigation.element,
     element(document, "p", "gui-reference__hint", "Horizontal controlled navigation · Archive is disabled"),
     vertical.element,
-    element(document, "p", "gui-reference__hint", "Vertical navigation primitive"),
+    element(document, "p", "gui-reference__hint", "Vertical controlled navigation · shared selection state"),
     controls,
     status,
   );
