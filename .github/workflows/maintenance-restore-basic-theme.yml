@@ -1,0 +1,34 @@
+name: Maintenance Restore Basic Theme
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore validated Basic theme and remove empty Form Layout node
+        run: |
+          git show d5b086253e3e401d3cf6215f30d638205e949cac:spec/themes/basic.theme.json > spec/themes/basic.theme.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('spec/themes/basic.theme.json')
+          d = json.loads(p.read_text())
+          d['components']['form-layout']['base'].pop('control', None)
+          p.write_text(json.dumps(d, indent=2) + '\n')
+          PY
+          npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/theme.schema.json -d spec/themes/basic.theme.json
+          npm run compile:spec
+          npm run test:basic-theme
+          npm run test:basic-performance
+      - name: Commit restore
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add spec/themes/basic.theme.json
+          git commit -m 'fix(form-layout): restore validated Basic theme'
+          git push origin HEAD:main
