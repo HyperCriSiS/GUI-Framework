@@ -215,7 +215,7 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/, `${name} must expose the controlled Tooltip open flow`);
   assert.match(source, /interactionSource = interactionSource/, `${name} must share the Tooltip trigger interaction source`);
   assert.match(source, /accessibilityLabel = "Workspace actions"/, `${name} must expose the Menu accessibility label`);
-  assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item`);
+  assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", accessibilityLabel = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item with explicit accessibility text`);
   assert.match(source, /onOpenChange = \{ menuOpen = it \}/, `${name} must expose the controlled Menu open flow`);
   assert.match(source, /onActivate = \{ lastMenuAction = it \}/, `${name} must expose the Menu activation flow`);
   assert.match(source, /label = "Show notification"/, `${name} must expose the Toast open flow`);
