@@ -205,8 +205,16 @@ private fun GuiFormGrid(
 
         val naturalHeight = if (hasPlaced) (y - gapPx).coerceAtLeast(0) else 0
         val naturalWidth = if (bounded) width else measured.maxOfOrNull { it.placeable.width } ?: 0
-        val layoutWidth = constraints.constrainWidth(naturalWidth)
-        val layoutHeight = constraints.constrainHeight(naturalHeight)
+        val layoutWidth = if (constraints.hasBoundedWidth) {
+            naturalWidth.coerceIn(constraints.minWidth, constraints.maxWidth)
+        } else {
+            naturalWidth.coerceAtLeast(constraints.minWidth)
+        }
+        val layoutHeight = if (constraints.hasBoundedHeight) {
+            naturalHeight.coerceIn(constraints.minHeight, constraints.maxHeight)
+        } else {
+            naturalHeight.coerceAtLeast(constraints.minHeight)
+        }
         layout(layoutWidth, layoutHeight) {
             measured.forEach { child -> child.placeable.placeRelative(child.x, child.y) }
         }
