@@ -1,0 +1,141 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package gui.framework.compose
+
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import gui.framework.compose.internal.resolveGuiCapabilityRecipe
+import gui.framework.compose.internal.resolveGuiVisualRecipe
+import gui.framework.compose.internal.toComposeColor
+import gui.framework.compose.internal.toComposeDp
+import gui.framework.generated.internal.GuiScrollContainerContract
+import gui.framework.generated.internal.GuiScrollContainerSize
+import gui.framework.generated.internal.GuiScrollContainerState
+import gui.framework.generated.internal.GuiScrollContainerVariant
+import gui.framework.generated.internal.GuiVisualOutline
+import gui.framework.generated.internal.GuiVisualRegistry
+
+private fun Modifier.guiScrollFocusOutline(
+    outline: GuiVisualOutline?,
+    radius: androidx.compose.ui.unit.Dp,
+): Modifier {
+    if (outline == null) return this
+    return drawWithContent {
+        drawContent()
+        val width = outline.width.toComposeDp().toPx()
+        val offset = outline.offset.toComposeDp().toPx()
+        if (width <= 0f) return@drawWithContent
+        val extra = offset + width / 2f
+        val corner = radius.toPx() + extra
+        drawRoundRect(
+            color = outline.color.toComposeColor(),
+            topLeft = Offset(-extra, -extra),
+            size = Size(size.width + extra * 2f, size.height + extra * 2f),
+            cornerRadius = CornerRadius(corner, corner),
+            style = Stroke(width = width),
+        )
+    }
+}
+
+/**
+ * Foundation-only scroll viewport driven by the neutral Scroll Container recipe.
+ *
+ * Scroll position is not hidden in the adapter: callers may pass and retain the exact
+ * [ScrollState] instances used for each axis. The default states are only a convenience
+ * for simple call sites. No virtualization, data ownership, or scroll animation is added.
+ */
+@Composable
+fun GuiScrollContainer(
+    modifier: Modifier = Modifier,
+    variant: GuiScrollContainerVariant = GuiScrollContainerVariant.VERTICAL,
+    size: GuiScrollContainerSize = GuiScrollContainerSize.MEDIUM,
+    accessibilityLabel: String = "",
+    keyboardFocusable: Boolean = true,
+    verticalScrollState: ScrollState = rememberScrollState(),
+    horizontalScrollState: ScrollState = rememberScrollState(),
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val selection = LocalGuiThemeSelection.current
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val focused by source.collectIsFocusedAsState()
+
+    val baseRecipe = GuiVisualRegistry.component(
+        paletteId = selection.paletteId,
+        themeId = selection.theme.wireValue,
+        componentId = "scroll-container",
+    ) ?: error(
+        "No Compose visual recipe for scroll-container with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
+    val recipe = resolveGuiCapabilityRecipe(
+        capabilities = GuiScrollContainerContract.capabilities,
+        recipe = baseRecipe,
+        availableCapabilities = LocalGuiAvailableCapabilities.current,
+        componentId = "scroll-container",
+    )
+    val activeStates = buildSet {
+        if (focused && keyboardFocusable) add("focus")
+    }
+    val resolved = resolveGuiVisualRecipe(
+        recipe = recipe,
+        variant = variant.wireValue,
+        size = size.wireValue,
+        activeStates = activeStates,
+        statePriority = GuiScrollContainerState.entries.map { it.wireValue },
+    )
+    val root = resolved["root"]
+        ?: error("Resolved GUI scroll-container visual is missing required root part")
+    val contentStyle = resolved["content"]
+        ?: error("Resolved GUI scroll-container visual is missing required content part")
+    val radius = root.radius?.toComposeDp() ?: 0.dp
+
+    var viewportModifier = modifier
+        .guiScrollFocusOutline(root.outline, radius)
+        .focusable(
+            interactionSource = source,
+            enabled = keyboardFocusable,
+        )
+        .semantics {
+            isTraversalGroup = true
+            if (accessibilityLabel.isNotBlank()) contentDescription = accessibilityLabel
+        }
+
+    viewportModifier = when (variant) {
+        GuiScrollContainerVariant.VERTICAL -> viewportModifier.verticalScroll(verticalScrollState)
+        GuiScrollContainerVariant.HORIZONTAL -> viewportModifier.horizontalScroll(horizontalScrollState)
+        GuiScrollContainerVariant.BOTH -> viewportModifier
+            .verticalScroll(verticalScrollState)
+            .horizontalScroll(horizontalScrollState)
+    }
+
+    Box(modifier = viewportModifier) {
+        Box(
+            modifier = Modifier.padding(
+                horizontal = contentStyle.paddingHorizontal?.toComposeDp() ?: 0.dp,
+                vertical = contentStyle.paddingVertical?.toComposeDp() ?: 0.dp,
+            ),
+            content = content,
+        )
+    }
+}
