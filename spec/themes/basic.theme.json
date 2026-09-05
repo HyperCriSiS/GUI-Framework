@@ -1084,6 +1084,49 @@
         }
       }
     },
+    "scroll-container": {
+      "base": {
+        "root": {
+          "foreground": "{semantic.color.textPrimary}",
+          "transition": "{motion.interaction.fast}"
+        },
+        "content": {
+          "paddingHorizontal": "{spacing.md}",
+          "paddingVertical": "{spacing.md}"
+        }
+      },
+      "sizes": {
+        "small": {
+          "content": {
+            "paddingHorizontal": "{spacing.sm}",
+            "paddingVertical": "{spacing.sm}"
+          }
+        },
+        "medium": {
+          "content": {
+            "paddingHorizontal": "{spacing.md}",
+            "paddingVertical": "{spacing.md}"
+          }
+        },
+        "large": {
+          "content": {
+            "paddingHorizontal": "{spacing.lg}",
+            "paddingVertical": "{spacing.lg}"
+          }
+        }
+      },
+      "states": {
+        "focus": {
+          "root": {
+            "outline": {
+              "color": "{semantic.color.focus}",
+              "width": "{focus.ring.width}",
+              "offset": "{focus.ring.offset}"
+            }
+          }
+        }
+      }
+    },
     "select": {
       "base": {
         "root": {
