@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import assert from "node:assert/strict";
+import { readFile, rm } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { createGuiTree, createGuiTreeItem } from "../packages/adapter-web/src/tree.mjs";
+
+const irPath = "build/spec-ir-tree-test.json";
+const cssPath = "build/web/components-tree-test.css";
+function run(args, label) {
+  const result = spawnSync(process.execPath, args, { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${label} failed:\n${result.stdout}\n${result.stderr}`);
+}
+run(["packages/compiler/src/index.mjs", "--output", irPath], "Specification compiler");
+run(["packages/adapter-web/src/generate-components-css.mjs", irPath, cssPath], "Web component CSS generator");
+const css = await readFile(cssPath, "utf8");
+assert.match(css, /\.gui-tree \{/);
+assert.match(css, /\.gui-tree__node \{ outline: none; \}/);
+assert.match(css, /\.gui-tree__group\[hidden\] \{ display: none; \}/);
+assert.match(css, /\.gui-tree__node:where\(\[aria-selected="true"\]\) > \.gui-tree__item/);
+assert.match(css, /\.gui-tree__node:where\(\[aria-expanded="true"\]\) > \.gui-tree__item > \.gui-tree__disclosure/);
+assert.match(css, /\.gui-tree__node:where\(:focus-visible:not\(\[aria-disabled="true"\]\)\) > \.gui-tree__item/);
+assert.match(css, /\.gui-tree__node:where\(\[aria-disabled="true"\]\) > \.gui-tree__item/);
+assert.doesNotMatch(css, /\.gui-tree__node:where\(\[aria-selected="true"\]\) \.gui-tree__item/, "Selected parent styling must not bleed into descendant rows");
+assert.doesNotMatch(css, /data-gui-palette|reference-dark|reference-light/);
+assert.doesNotMatch(css, /\{[A-Za-z0-9_.-]+\}/);
 
 class FakeElement {
   constructor(document, tagName) {
@@ -156,4 +178,6 @@ assert.equal(atlas.element.getAttribute("aria-disabled"), "true");
 assert.equal(settings.element.tabIndex, -1);
 
 tree.destroy();
-console.log("Native Web Tree / Hierarchy adapter tests passed.");
+await rm(irPath, { force: true });
+await rm(cssPath, { force: true });
+console.log("Native Web Tree / Hierarchy adapter and generated CSS tests passed.");

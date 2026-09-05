@@ -105,6 +105,21 @@ function statePartSelector(rootSelector, componentId, state, partId) {
     if (["icon", "label", "indicator"].includes(partId)) return `${interactiveSelector} .gui-navigation__${kebabPart(partId)}`;
     return partSelector(stateSelector(rootSelector, state), componentId, partId);
   }
+  if (componentId === "tree") {
+    const nodeSelector = partSelector(rootSelector, componentId, "node");
+    let itemSelector = null;
+    if (state === "selected") itemSelector = `${nodeSelector}:where([aria-selected="true"]) > .gui-tree__item`;
+    else if (state === "expanded") itemSelector = `${nodeSelector}:where([aria-expanded="true"]) > .gui-tree__item`;
+    else if (state === "disabled") itemSelector = `${nodeSelector}:where([aria-disabled="true"]) > .gui-tree__item`;
+    else if (state === "hover") itemSelector = `${nodeSelector}:where(:not([aria-disabled="true"])) > .gui-tree__item:hover`;
+    else if (state === "focus") itemSelector = `${nodeSelector}:where(:focus-visible:not([aria-disabled="true"])) > .gui-tree__item`;
+    else if (state === "pressed") itemSelector = `${nodeSelector}:where(:not([aria-disabled="true"])) > .gui-tree__item:active`;
+    if (itemSelector !== null) {
+      if (partId === "item") return itemSelector;
+      if (["disclosure", "icon", "label"].includes(partId)) return `${itemSelector} > .gui-tree__${kebabPart(partId)}`;
+    }
+    return partSelector(stateSelector(rootSelector, state), componentId, partId);
+  }
   if (componentId === "data-grid") {
     if (state === "disabled") return partSelector(`${rootSelector}:where([aria-disabled="true"])`, componentId, partId);
     if (["hover", "focus", "pressed", "selected"].includes(state)) {
@@ -219,6 +234,16 @@ function emitFoundation(lines, themeIds) {
     `${scope} .gui-navigation:where([data-gui-variant="horizontal"]) .gui-navigation__item { flex-direction: column; }`, `${scope} .gui-navigation:where([data-gui-variant="vertical"]) .gui-navigation__item { inline-size: 100%; justify-content: flex-start; }`, `${scope} .gui-navigation__item:disabled { cursor: default; }`, "",
     `${scope} .gui-navigation__icon,`, `${scope} .gui-navigation__label,`, `${scope} .gui-navigation__indicator { pointer-events: none; }`, `${scope} .gui-navigation__icon[hidden],`, `${scope} .gui-navigation__label[hidden] { display: none; }`, "",
     `${scope} .gui-navigation__indicator { visibility: hidden; }`, `${scope} .gui-navigation:where([data-gui-variant="horizontal"]) .gui-navigation__indicator { inline-size: 100%; }`, `${scope} .gui-navigation:where([data-gui-variant="vertical"]) .gui-navigation__indicator { position: absolute; inset-block: 0; inset-inline-start: 0; min-inline-size: var(--gui-component-navigation-indicator-thickness); min-block-size: 0 !important; block-size: 100%; }`, `${scope} .gui-navigation__item[aria-current="page"] .gui-navigation__indicator { visibility: visible; }`, "",
+    `${scope} .gui-tree { box-sizing: border-box; inline-size: 100%; border-style: solid; border-width: 0; outline: none; }`,
+    `${scope} .gui-tree__node,`, `${scope} .gui-tree__item,`, `${scope} .gui-tree__disclosure,`, `${scope} .gui-tree__icon,`, `${scope} .gui-tree__label,`, `${scope} .gui-tree__group { box-sizing: border-box; }`,
+    `${scope} .gui-tree__node { outline: none; }`,
+    `${scope} .gui-tree__item { display: flex; align-items: center; min-inline-size: 0; border: 0; cursor: pointer; user-select: none; }`,
+    `${scope} .gui-tree__node[aria-disabled="true"] > .gui-tree__item { cursor: default; }`,
+    `${scope} .gui-tree__disclosure { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; cursor: pointer; }`,
+    `${scope} .gui-tree__node[aria-disabled="true"] > .gui-tree__item > .gui-tree__disclosure { cursor: default; }`,
+    `${scope} .gui-tree__icon { flex: 0 0 auto; pointer-events: none; }`, `${scope} .gui-tree__icon[hidden],`, `${scope} .gui-tree__label[hidden] { display: none; }`,
+    `${scope} .gui-tree__label { min-inline-size: 0; overflow-wrap: anywhere; pointer-events: none; }`,
+    `${scope} .gui-tree__group { min-inline-size: 0; }`, `${scope} .gui-tree__group[hidden] { display: none; }`, "",
     `${scope} .gui-table { box-sizing: border-box; inline-size: 100%; border-collapse: separate; border-spacing: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,
     `${scope} .gui-table__caption { box-sizing: border-box; caption-side: top; text-align: start; }`,
     `${scope} .gui-table__header,`, `${scope} .gui-table__body,`, `${scope} .gui-table__row,`, `${scope} .gui-table__header-cell,`, `${scope} .gui-table__cell { box-sizing: border-box; }`,
@@ -278,7 +303,7 @@ function generate(ir) {
     `${scope} .gui-table:where([data-gui-variant="gridlined"]) .gui-table__body .gui-table__cell { border-block-start-width: var(--gui-border-width-standard); }`, ""
   );
   lines.push("@keyframes gui-progress-linear-indeterminate {", "  from { transform: translateX(-100%); }", "  to { transform: translateX(350%); }", "}", "", "@keyframes gui-progress-circular-indeterminate {", "  from { transform: rotate(-90deg); }", "  to { transform: rotate(270deg); }", "}", "");
-  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid__row,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-toast,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-slider,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress__indicator {`, "    animation: none !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="linear"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: translateX(75%);", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="circular"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: rotate(-90deg);", "  }", "}", "");
+  lines.push("@media (prefers-reduced-motion: reduce) {", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-button,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-checkbox,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-input,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-select,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tabs,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-navigation,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tree,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-data-grid__row,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-menu,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-toast,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-slider,`, `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-switch {`, "    transition-duration: 0ms !important;", "    transition-delay: 0ms !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress__indicator {`, "    animation: none !important;", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="linear"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: translateX(75%);", "  }", `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-progress:where([data-gui-variant="circular"]):where([data-gui-state~="indeterminate"]) .gui-progress__indicator {`, "    transform: rotate(-90deg);", "  }", "}", "");
   return `${lines.join("\n")}\n`;
 }
 
