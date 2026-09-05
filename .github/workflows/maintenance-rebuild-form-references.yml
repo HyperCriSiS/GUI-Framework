@@ -48,6 +48,9 @@ jobs:
       - name: Validate cross-platform reference parity
         run: node scripts/test-reference-parity.mjs
 
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
       - name: Generate Kotlin contracts
         run: npm run build:kotlin-contracts
 
