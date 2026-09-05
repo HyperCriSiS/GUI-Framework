@@ -14,6 +14,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      - name: Align Tree functional interaction contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/maintenance-tree-basic-visual.py')
+          source = path.read_text()
+          old = '            "paddingVertical": "{spacing.xs}",\n            "border": {"color": "{semantic.color.border}", "width": "{border.width.standard}"},\n'
+          new = '            "paddingVertical": "{spacing.xs}",\n            "border": {"color": "{semantic.color.border}", "width": "{border.width.standard}"},\n            "transition": "{motion.interaction.fast}",\n'
+          if old not in source:
+              raise RuntimeError('Tree root visual anchor missing')
+          path.write_text(source.replace(old, new, 1))
+          PY
       - name: Apply deterministic Tree Basic visual patch
         run: python scripts/maintenance-tree-basic-visual.py
       - name: Validate Tree Basic visual contract
