@@ -1,0 +1,120 @@
+{
+  "specVersion": "0.1.0",
+  "component": "tree",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "item",
+      "required": true
+    },
+    {
+      "id": "disclosure",
+      "required": false
+    },
+    {
+      "id": "icon",
+      "required": false
+    },
+    {
+      "id": "label",
+      "required": true
+    },
+    {
+      "id": "group",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "item",
+      "kind": "children",
+      "required": true
+    },
+    {
+      "id": "group",
+      "kind": "children",
+      "required": false
+    }
+  ],
+  "properties": [
+    {
+      "id": "value",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "state": "disabled"
+    }
+  ],
+  "events": [
+    {
+      "id": "valueChange",
+      "payload": "string"
+    },
+    {
+      "id": "expandedChange",
+      "payload": "string"
+    },
+    {
+      "id": "nodeActivate",
+      "payload": "string"
+    }
+  ],
+  "variants": [
+    "standard"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "hover",
+    "focus",
+    "pressed",
+    "selected",
+    "expanded",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "tree",
+    "preferNativePrimitive": false
+  },
+  "tokenBindings": {
+    "surface": "{semantic.color.surface}",
+    "surfaceElevated": "{semantic.color.surfaceElevated}",
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "selected": "{semantic.color.accent}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}

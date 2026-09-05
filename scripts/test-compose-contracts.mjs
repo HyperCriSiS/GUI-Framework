@@ -125,6 +125,23 @@ try {
   assert.match(source, /GuiContentSlot\("body", "children", true\)/);
   assert.match(source, /GuiComponentSemantics\("grid", false\)/);
 
+  assert.match(source, /enum class GuiTreeVariant/);
+  assert.match(source, /STANDARD\(\"standard\"\)/);
+  assert.match(source, /enum class GuiTreeSize/);
+  assert.match(source, /enum class GuiTreeState/);
+  assert.match(source, /SELECTED\(\"selected\"\)/);
+  assert.match(source, /EXPANDED\(\"expanded\"\)/);
+  assert.match(source, /data class GuiTreeProperties\(/);
+  assert.match(source, /val value: String = \"\"/);
+  assert.match(source, /val accessibilityLabel: String = \"\"/);
+  assert.match(source, /val disabled: Boolean = false/);
+  assert.match(source, /GuiEventContract\(\"valueChange\", \"string\"\)/);
+  assert.match(source, /GuiEventContract\(\"expandedChange\", \"string\"\)/);
+  assert.match(source, /GuiEventContract\(\"nodeActivate\", \"string\"\)/);
+  assert.match(source, /GuiContentSlot\(\"item\", \"children\", true\)/);
+  assert.match(source, /GuiContentSlot\(\"group\", \"children\", false\)/);
+  assert.match(source, /GuiComponentSemantics\(\"tree\", false\)/);
+
   assert.match(source, /enum class GuiTooltipVariant/);
   assert.match(source, /enum class GuiTooltipSize/);
   assert.match(source, /enum class GuiTooltipState/);
