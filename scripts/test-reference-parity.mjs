@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, webTable, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, webTree, webTable, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
@@ -13,6 +13,7 @@ const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, we
   readFile("examples/web-reference/progress-reference.mjs", "utf8"),
   readFile("examples/web-reference/slider-reference.mjs", "utf8"),
   readFile("examples/web-reference/navigation-reference.mjs", "utf8"),
+  readFile("examples/web-reference/tree-reference.mjs", "utf8"),
   readFile("examples/web-reference/table-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
@@ -34,6 +35,22 @@ assert.deepEqual(scenario.phase6StructuredData, {
     { value: "archive", cells: ["Archive", "System", "Locked"], disabled: true },
   ],
   initialValue: "atlas",
+  disabledValue: "archive",
+});
+assert.deepEqual(scenario.phase6Hierarchy, {
+  initialValue: "workspace",
+  nodes: [
+    {
+      value: "workspace",
+      label: "Workspace",
+      expanded: true,
+      children: [
+        { value: "atlas", label: "Atlas", disabled: false },
+        { value: "archive", label: "Archive", disabled: true },
+      ],
+    },
+    { value: "settings", label: "Settings", disabled: false },
+  ],
   disabledValue: "archive",
 });
 assert.deepEqual(scenario.flows.map(({ id }) => id), [
@@ -110,6 +127,14 @@ assert.match(webNavigation, /navigation\.update\(\{ value \}\)/);
 assert.match(webNavigation, /vertical\.update\(\{ value \}\)/);
 assert.match(webNavigation, /onValueChange: setValue/);
 assert.match(webNavigation, /variant: "vertical"/);
+assert.match(webTree, /createGuiTree\(/, "Web Tree reference must exercise createGuiTree");
+assert.match(webTree, /let value = "workspace"/);
+assert.match(webTree, /let workspaceExpanded = true/);
+assert.match(webTree, /accessibilityLabel: "Project hierarchy tree"/);
+assert.match(webTree, /value: "archive"[\s\S]*disabled: true/);
+assert.match(webTree, /onValueChange: setValue/);
+assert.match(webTree, /onExpandedChange: toggleExpanded/);
+assert.match(webTree, /workspace\.update\(\{ expanded: workspaceExpanded \}\)/);
 assert.match(webTable, /createGuiTable\(/, "Web Table reference must exercise createGuiTable");
 assert.match(webTable, /createGuiDataGrid\(/, "Web Table reference must exercise createGuiDataGrid");
 assert.match(webTable, /caption: "Project inventory"/);
@@ -142,10 +167,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTreeSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
     assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTree", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -194,6 +219,13 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive destination", disabled = true\)/, `${name} must expose a disabled Navigation destination`);
   assert.match(source, /onValueChange = \{ navigationValue = it \}/, `${name} must expose the controlled Navigation value flow`);
   assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/, `${name} must expose the vertical Navigation variant`);
+  assert.match(source, /var treeValue by remember \{ mutableStateOf\("workspace"\) \}/, `${name} must expose the shared Tree initial value`);
+  assert.match(source, /var workspaceExpanded by remember \{ mutableStateOf\(true\) \}/, `${name} must expose the shared Tree expansion state`);
+  assert.match(source, /accessibilityLabel = "Project hierarchy tree"/, `${name} must expose Tree semantics`);
+  assert.match(source, /GuiTreeItem\(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive node", disabled = true\)/, `${name} must expose the shared disabled Tree node`);
+  assert.match(source, /onValueChange = \{ treeValue = it \}/, `${name} must expose controlled Tree selection`);
+  assert.match(source, /onExpandedChange = \{ if \(it == "workspace"\) workspaceExpanded = !workspaceExpanded \}/, `${name} must expose controlled Tree expansion`);
+  assert.match(source, /onNodeActivate = \{ lastTreeActivation = it \}/, `${name} must expose Tree activation`);
   assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/, `${name} must expose the shared Data Grid initial value`);
   assert.match(source, /caption = "Project inventory"/, `${name} must expose the shared Table caption`);
   assert.match(source, /accessibilityLabel = "Project inventory table"/, `${name} must expose Table semantics`);

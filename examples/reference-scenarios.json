@@ -95,5 +95,33 @@
     ],
     "initialValue": "atlas",
     "disabledValue": "archive"
+  },
+  "phase6Hierarchy": {
+    "initialValue": "workspace",
+    "nodes": [
+      {
+        "value": "workspace",
+        "label": "Workspace",
+        "expanded": true,
+        "children": [
+          {
+            "value": "atlas",
+            "label": "Atlas",
+            "disabled": false
+          },
+          {
+            "value": "archive",
+            "label": "Archive",
+            "disabled": true
+          }
+        ]
+      },
+      {
+        "value": "settings",
+        "label": "Settings",
+        "disabled": false
+      }
+    ],
+    "disabledValue": "archive"
   }
 }

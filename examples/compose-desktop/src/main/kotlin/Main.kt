@@ -27,6 +27,8 @@ import gui.framework.compose.GuiMenuContextOffset
 import gui.framework.compose.GuiMenuItem
 import gui.framework.compose.GuiNavigation
 import gui.framework.compose.GuiNavigationItem
+import gui.framework.compose.GuiTree
+import gui.framework.compose.GuiTreeItem
 import gui.framework.compose.GuiDataGrid
 import gui.framework.compose.GuiDataGridColumn
 import gui.framework.compose.GuiDataGridRow
@@ -53,6 +55,7 @@ import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiNavigationSize
 import gui.framework.generated.internal.GuiNavigationVariant
+import gui.framework.generated.internal.GuiTreeSize
 import gui.framework.generated.internal.GuiDataGridSize
 import gui.framework.generated.internal.GuiTableSize
 import gui.framework.generated.internal.GuiTableVariant
@@ -130,6 +133,9 @@ private fun DesktopReferenceContent(
     var lastToastAction by remember { mutableStateOf("none") }
     var sliderValue by remember { mutableStateOf(40.0) }
     var navigationValue by remember { mutableStateOf("home") }
+    var treeValue by remember { mutableStateOf("workspace") }
+    var workspaceExpanded by remember { mutableStateOf(true) }
+    var lastTreeActivation by remember { mutableStateOf("none") }
     var tableGridValue by remember { mutableStateOf("atlas") }
     var lastGridActivation by remember { mutableStateOf("none") }
     var dialogOpen by remember { mutableStateOf(false) }
@@ -140,6 +146,7 @@ private fun DesktopReferenceContent(
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val navigationSize = if (density == ReferenceDensity.Compact) GuiNavigationSize.SMALL else GuiNavigationSize.MEDIUM
+    val treeSize = if (density == ReferenceDensity.Compact) GuiTreeSize.SMALL else GuiTreeSize.MEDIUM
     val tableSize = if (density == ReferenceDensity.Compact) GuiTableSize.SMALL else GuiTableSize.MEDIUM
     val dataGridSize = if (density == ReferenceDensity.Compact) GuiDataGridSize.SMALL else GuiDataGridSize.MEDIUM
     val panelSize = if (density == ReferenceDensity.Compact) GuiPanelSize.SMALL else GuiPanelSize.MEDIUM
@@ -357,6 +364,33 @@ private fun DesktopReferenceContent(
                         size = navigationSize,
                     )
                     BasicText("Active destination: $navigationValue")
+                    val treeItems = listOf(
+                        GuiTreeItem(
+                            value = "workspace",
+                            label = "Workspace",
+                            icon = "◇",
+                            accessibilityLabel = "Workspace node",
+                            expanded = workspaceExpanded,
+                            branch = true,
+                            children = listOf(
+                                GuiTreeItem(value = "atlas", label = "Atlas", icon = "◈", accessibilityLabel = "Atlas node"),
+                                GuiTreeItem(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive node", disabled = true),
+                            ),
+                        ),
+                        GuiTreeItem(value = "settings", label = "Settings", icon = "⚙", accessibilityLabel = "Settings node"),
+                    )
+                    GuiTree(
+                        value = treeValue,
+                        items = treeItems,
+                        onValueChange = { treeValue = it },
+                        onExpandedChange = { if (it == "workspace") workspaceExpanded = !workspaceExpanded },
+                        onNodeActivate = { lastTreeActivation = it },
+                        accessibilityLabel = "Project hierarchy tree",
+                        size = treeSize,
+                    )
+                    BasicText("Selected tree node: $treeValue")
+                    BasicText("Workspace branch: ${if (workspaceExpanded) "expanded" else "collapsed"}")
+                    BasicText("Activated tree node: $lastTreeActivation")
                     val tableColumns = listOf(
                         GuiTableColumn("Project"),
                         GuiTableColumn("Owner"),

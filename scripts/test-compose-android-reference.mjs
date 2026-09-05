@@ -186,4 +186,17 @@ assert.match(runtimeTest, /onAllNodesWithContentDescription\("Settings destinati
 assert.match(runtimeTest, /settingsDestinations\[1\][\s\S]*performClick\(\)/);
 assert.match(runtimeTest, /onNodeWithText\("Active destination: settings"\)/);
 
+assert.match(source, /GuiTreeSize\.SMALL/);
+assert.match(source, /var treeValue by remember \{ mutableStateOf\("workspace"\) \}/);
+assert.match(source, /var workspaceExpanded by remember \{ mutableStateOf\(true\) \}/);
+assert.match(source, /var lastTreeActivation by remember \{ mutableStateOf\("none"\) \}/);
+assert.match(source, /GuiTreeItem\(value = "atlas", label = "Atlas", icon = "◈", accessibilityLabel = "Atlas node"\)/);
+assert.match(source, /GuiTreeItem\(value = "archive", label = "Archive", icon = "□", accessibilityLabel = "Archive node", disabled = true\)/);
+assert.match(source, /accessibilityLabel = "Project hierarchy tree"/);
+assert.match(source, /onValueChange = \{ treeValue = it \}/);
+assert.match(source, /onExpandedChange = \{ if \(it == "workspace"\) workspaceExpanded = !workspaceExpanded \}/);
+assert.match(source, /onNodeActivate = \{ lastTreeActivation = it \}/);
+assert.match(source, /Selected tree node: \$treeValue/);
+assert.match(source, /Workspace branch: \$\{if \(workspaceExpanded\) "expanded" else "collapsed"\}/);
+assert.match(source, /Activated tree node: \$lastTreeActivation/);
 console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu coverage and Phase 5 theme selection isolation.");
