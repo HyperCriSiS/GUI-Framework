@@ -22,6 +22,8 @@ try {
   assert.match(source, /data class GuiShadowValue\(/);
   assert.match(source, /"spacing\.md" to GuiDimensionValue\(12\.0, "px"\)/);
   assert.match(source, /"component\.dataGrid\.selectionIndicator\.width" to GuiDimensionValue\(2\.0, "px"\)/);
+  assert.match(source, /"component\.tree\.indent\.step\.medium" to GuiDimensionValue\(20\.0, "px"\)/);
+  assert.match(source, /"component\.tree\.disclosure\.size\.medium" to GuiDimensionValue\(18\.0, "px"\)/);
   assert.match(source, /"motion\.duration\.fast" to GuiDurationValue\(120\.0, "ms"\)/);
   assert.match(source, /GuiTransitionValue\(duration = GuiDurationValue\(120\.0, "ms"\), delay = GuiDurationValue\(0\.0, "ms"\), timingFunction = GuiCubicBezierValue\(0\.2, 0\.0, 0\.0, 1\.0\)\)/);
   assert.match(source, /"reference-dark" to mapOf\(/);
