@@ -22,46 +22,58 @@ jobs:
 
           package = Path('package.json')
           text = package.read_text()
-          text = text.replace(
-              '  "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n  "test:web-table":',
-              '  "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n  "test:web-scroll-container": "node scripts/test-web-scroll-container.mjs",\n  "test:web-table":',
-          )
-          text = text.replace(
-              '  "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n  "test:web-table-reference":',
-              '  "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n  "test:web-scroll-container-reference": "node scripts/test-web-scroll-container-reference.mjs",\n  "test:web-table-reference":',
-          )
-          text = text.replace(
-              '  "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n  "test:kotlin-table":',
-              '  "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n  "test:kotlin-scroll-container": "node scripts/test-compose-scroll-container.mjs",\n  "test:kotlin-table":',
-          )
-          text = text.replace(
-              'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-table',
-              'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-scroll-container && npm run test:web-table',
-          )
-          text = text.replace(
-              'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-table-reference',
-              'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-scroll-container-reference && npm run test:web-table-reference',
-          )
-          text = text.replace(
-              'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-table',
-              'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-scroll-container && npm run test:kotlin-table',
-          )
+          replacements = [
+              (
+                  '    "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n    "test:web-table":',
+                  '    "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n    "test:web-scroll-container": "node scripts/test-web-scroll-container.mjs",\n    "test:web-table":',
+              ),
+              (
+                  '    "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n    "test:web-table-reference":',
+                  '    "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n    "test:web-scroll-container-reference": "node scripts/test-web-scroll-container-reference.mjs",\n    "test:web-table-reference":',
+              ),
+              (
+                  '    "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n    "test:kotlin-table":',
+                  '    "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n    "test:kotlin-scroll-container": "node scripts/test-compose-scroll-container.mjs",\n    "test:kotlin-table":',
+              ),
+              (
+                  'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-table',
+                  'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-scroll-container && npm run test:web-table',
+              ),
+              (
+                  'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-table-reference',
+                  'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-scroll-container-reference && npm run test:web-table-reference',
+              ),
+              (
+                  'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-table',
+                  'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-scroll-container && npm run test:kotlin-table',
+              ),
+          ]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'package.json anchor not found: {old[:80]!r}')
+              text = text.replace(old, new, 1)
           package.write_text(text)
 
           workflow = Path('.github/workflows/core-ci.yml')
           text = workflow.read_text()
-          text = text.replace(
-              '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Table / Data Grid',
-              '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Scroll Container\n        run: npm run test:web-scroll-container\n\n      - name: Test native Web Basic Table / Data Grid',
-          )
-          text = text.replace(
-              '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
-              '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Scroll Container reference\n        run: npm run test:web-scroll-container-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
-          )
-          text = text.replace(
-              '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Table / Data Grid',
-              '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Scroll Container\n        run: npm run test:kotlin-scroll-container\n\n      - name: Test native Compose Basic Table / Data Grid',
-          )
+          replacements = [
+              (
+                  '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Table / Data Grid',
+                  '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Scroll Container\n        run: npm run test:web-scroll-container\n\n      - name: Test native Web Basic Table / Data Grid',
+              ),
+              (
+                  '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
+                  '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Scroll Container reference\n        run: npm run test:web-scroll-container-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
+              ),
+              (
+                  '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Table / Data Grid',
+                  '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Scroll Container\n        run: npm run test:kotlin-scroll-container\n\n      - name: Test native Compose Basic Table / Data Grid',
+              ),
+          ]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'core-ci.yml anchor not found: {old[:80]!r}')
+              text = text.replace(old, new, 1)
           workflow.write_text(text)
           PY
       - name: Validate permanent gates
