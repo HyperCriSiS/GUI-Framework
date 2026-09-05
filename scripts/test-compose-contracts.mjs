@@ -142,6 +142,25 @@ try {
   assert.match(source, /GuiContentSlot\(\"group\", \"children\", false\)/);
   assert.match(source, /GuiComponentSemantics\(\"tree\", false\)/);
 
+  assert.match(source, /enum class GuiFormLayoutVariant/);
+  assert.match(source, /STACKED\("stacked"\)/);
+  assert.match(source, /INLINE\("inline"\)/);
+  assert.match(source, /enum class GuiFormLayoutSize/);
+  assert.match(source, /enum class GuiFormLayoutState/);
+  assert.match(source, /ERROR\("error"\)/);
+  assert.match(source, /DISABLED\("disabled"\)/);
+  assert.match(source, /data class GuiFormLayoutProperties\(/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /val columns: Double = 1\.0/);
+  assert.match(source, /GuiContentSlot\("section", "children", false\)/);
+  assert.match(source, /GuiContentSlot\("field", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("label", "text", false\)/);
+  assert.match(source, /GuiContentSlot\("control", "children", true\)/);
+  assert.match(source, /GuiContentSlot\("description", "text", false\)/);
+  assert.match(source, /GuiContentSlot\("error", "text", false\)/);
+  assert.match(source, /GuiContentSlot\("actions", "children", false\)/);
+  assert.match(source, /GuiComponentSemantics\("group", false\)/);
+
   assert.match(source, /enum class GuiTooltipVariant/);
   assert.match(source, /enum class GuiTooltipSize/);
   assert.match(source, /enum class GuiTooltipState/);

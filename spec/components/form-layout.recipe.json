@@ -1,0 +1,128 @@
+{
+  "specVersion": "0.1.0",
+  "component": "form-layout",
+  "anatomy": [
+    {
+      "id": "root",
+      "required": true
+    },
+    {
+      "id": "section",
+      "required": false
+    },
+    {
+      "id": "field",
+      "required": true
+    },
+    {
+      "id": "label",
+      "required": false
+    },
+    {
+      "id": "control",
+      "required": true
+    },
+    {
+      "id": "description",
+      "required": false
+    },
+    {
+      "id": "error",
+      "required": false
+    },
+    {
+      "id": "actions",
+      "required": false
+    }
+  ],
+  "content": [
+    {
+      "id": "section",
+      "kind": "children",
+      "required": false
+    },
+    {
+      "id": "field",
+      "kind": "children",
+      "required": true
+    },
+    {
+      "id": "label",
+      "kind": "text",
+      "required": false
+    },
+    {
+      "id": "control",
+      "kind": "children",
+      "required": true
+    },
+    {
+      "id": "description",
+      "kind": "text",
+      "required": false
+    },
+    {
+      "id": "error",
+      "kind": "text",
+      "required": false
+    },
+    {
+      "id": "actions",
+      "kind": "children",
+      "required": false
+    }
+  ],
+  "properties": [
+    {
+      "id": "accessibilityLabel",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "columns",
+      "type": "number",
+      "required": false,
+      "default": 1
+    }
+  ],
+  "events": [],
+  "variants": [
+    "stacked",
+    "inline"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "states": [
+    "default",
+    "error",
+    "disabled"
+  ],
+  "semantics": {
+    "role": "group",
+    "preferNativePrimitive": false
+  },
+  "tokenBindings": {
+    "text": "{semantic.color.textPrimary}",
+    "textMuted": "{semantic.color.textSecondary}",
+    "danger": "{semantic.color.danger}",
+    "border": "{semantic.color.border}",
+    "borderStrong": "{semantic.color.borderStrong}",
+    "focus": "{semantic.color.focus}",
+    "disabledOpacity": "{opacity.disabled}"
+  },
+  "capabilities": {
+    "required": [],
+    "optional": [
+      "advancedBlendModes",
+      "shaderEffects"
+    ],
+    "fallbackOrder": [
+      "standard",
+      "minimal"
+    ]
+  }
+}
