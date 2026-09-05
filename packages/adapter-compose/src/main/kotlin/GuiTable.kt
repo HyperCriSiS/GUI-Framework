@@ -94,7 +94,6 @@ private class GuiDataGridClickTracker {
     fun register(
         value: String,
         nowNanos: Long,
-        minIntervalMillis: Long,
         timeoutMillis: Long,
     ): Boolean {
         val elapsedMillis = if (lastClickNanos == 0L) {
@@ -103,7 +102,7 @@ private class GuiDataGridClickTracker {
             (nowNanos - lastClickNanos) / 1_000_000L
         }
         val isDoubleClick = lastValue == value &&
-            elapsedMillis >= minIntervalMillis &&
+            elapsedMillis > 0L &&
             elapsedMillis <= timeoutMillis
 
         if (isDoubleClick) {
@@ -491,7 +490,6 @@ fun GuiDataGrid(
         val activate = clickTracker.register(
             value = rowValue,
             nowNanos = System.nanoTime(),
-            minIntervalMillis = viewConfiguration.doubleTapMinTimeMillis,
             timeoutMillis = viewConfiguration.doubleTapTimeoutMillis,
         )
         if (activate) {
