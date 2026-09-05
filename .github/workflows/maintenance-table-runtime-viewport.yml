@@ -1,0 +1,29 @@
+name: Maintenance Table Runtime Viewport
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply deterministic Table runtime viewport patch
+        run: python scripts/maintenance-table-runtime-viewport.py
+      - name: Verify runtime source remains explicit
+        run: |
+          grep -F 'novaSelectionStatus.performScrollTo()' examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt
+          grep -F 'atlasRow.performTouchInput { doubleClick() }' examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt
+          grep -F 'atlasActivationStatus.assertIsDisplayed()' examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt
+      - name: Commit product changes and remove maintenance helpers
+        run: |
+          rm scripts/maintenance-table-runtime-viewport.py
+          rm .github/workflows/maintenance-table-runtime-viewport.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "test(table): scroll runtime status into view [android-ci] [device-ci]"
+          git push
