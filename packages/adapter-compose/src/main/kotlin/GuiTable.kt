@@ -4,7 +4,7 @@ package gui.framework.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,6 +38,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.collectionInfo
@@ -84,6 +85,36 @@ data class GuiTableRow(val cells: List<String>)
 /** Interactive row-selection grid column metadata. */
 data class GuiDataGridColumn(val label: String) {
     init { require(label.isNotBlank()) { "GUI data-grid column label must not be blank" } }
+}
+
+private class GuiDataGridClickTracker {
+    private var lastValue: String? = null
+    private var lastClickNanos: Long = 0L
+
+    fun register(
+        value: String,
+        nowNanos: Long,
+        minIntervalMillis: Long,
+        timeoutMillis: Long,
+    ): Boolean {
+        val elapsedMillis = if (lastClickNanos == 0L) {
+            Long.MAX_VALUE
+        } else {
+            (nowNanos - lastClickNanos) / 1_000_000L
+        }
+        val isDoubleClick = lastValue == value &&
+            elapsedMillis >= minIntervalMillis &&
+            elapsedMillis <= timeoutMillis
+
+        if (isDoubleClick) {
+            lastValue = null
+            lastClickNanos = 0L
+        } else {
+            lastValue = value
+            lastClickNanos = nowNanos
+        }
+        return isDoubleClick
+    }
 }
 
 /** One controlled Data Grid row. */
@@ -321,6 +352,7 @@ private fun GuiDataGridRowContent(
     recipe: GuiVisualRecipe,
     requester: FocusRequester,
     onMoveFocus: (String, Int?) -> Unit,
+    onClick: (String) -> Unit,
     onValueChange: (String) -> Unit,
     onRowActivate: (String) -> Unit,
 ) {
@@ -361,12 +393,11 @@ private fun GuiDataGridRowContent(
         .guiGridSelectionIndicator(indicator, isSelected)
         .guiTableOutline(rowStyle, radius)
         .hoverable(source, enabled = enabled)
-        .combinedClickable(
+        .clickable(
             interactionSource = source,
             indication = null,
             enabled = enabled,
-            onClick = { if (!isSelected) onValueChange(row.value) },
-            onDoubleClick = { onRowActivate(row.value) },
+            onClick = { onClick(row.value) },
         )
         .focusable(enabled = enabled, interactionSource = source)
         .focusRequester(requester)
@@ -418,7 +449,8 @@ private fun GuiDataGridRowContent(
 
 /**
  * Foundation-only controlled row-selection Data Grid. Arrow/Home/End keys move focus without
- * mutating selection; Space requests selection and Enter/double-click emits row activation.
+ * mutating selection; Space requests selection, Enter activates directly, and a consecutive
+ * second click within the platform double-click window activates without delaying first-click selection.
  */
 @Composable
 fun GuiDataGrid(
@@ -452,6 +484,22 @@ fun GuiDataGrid(
     val rootShape = RoundedCornerShape(rootRadius)
     val enabledRows = rows.filterNot { disabled || it.disabled }
     val requesters = remember(rows.map { it.value }) { rows.associate { it.value to FocusRequester() } }
+    val clickTracker = remember { GuiDataGridClickTracker() }
+    val viewConfiguration = LocalViewConfiguration.current
+
+    fun handleRowClick(rowValue: String) {
+        val activate = clickTracker.register(
+            value = rowValue,
+            nowNanos = System.nanoTime(),
+            minIntervalMillis = viewConfiguration.doubleTapMinTimeMillis,
+            timeoutMillis = viewConfiguration.doubleTapTimeoutMillis,
+        )
+        if (activate) {
+            onRowActivate(rowValue)
+        } else if (rowValue != value) {
+            onValueChange(rowValue)
+        }
+    }
 
     fun moveFocus(current: String, directive: Int?) {
         if (enabledRows.isEmpty()) return
@@ -518,6 +566,7 @@ fun GuiDataGrid(
                     recipe = recipe,
                     requester = requesters.getValue(row.value),
                     onMoveFocus = ::moveFocus,
+                    onClick = ::handleRowClick,
                     onValueChange = onValueChange,
                     onRowActivate = onRowActivate,
                 )

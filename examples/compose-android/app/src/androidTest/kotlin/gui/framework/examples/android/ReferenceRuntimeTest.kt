@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gui.framework.generated.internal.GuiThemeId
@@ -209,6 +211,13 @@ class ReferenceRuntimeTest {
             atlasRow.assertIsNotSelected()
             novaRow.assertIsSelected()
             composeRule.onNodeWithText("Selected project row: nova").assertIsDisplayed()
+
+            atlasRow.performTouchInput { doubleClick() }
+            composeRule.waitForIdle()
+            atlasRow.assertIsSelected()
+            novaRow.assertIsNotSelected()
+            composeRule.onNodeWithText("Selected project row: atlas").assertIsDisplayed()
+            composeRule.onNodeWithText("Activated project row: atlas").assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
