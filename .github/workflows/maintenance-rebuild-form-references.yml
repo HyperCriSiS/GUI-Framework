@@ -48,6 +48,18 @@ jobs:
       - name: Validate cross-platform reference parity
         run: node scripts/test-reference-parity.mjs
 
+      - name: Generate Kotlin contracts
+        run: npm run build:kotlin-contracts
+
+      - name: Generate Kotlin tokens
+        run: npm run build:kotlin-tokens
+
+      - name: Generate Kotlin visual recipes
+        run: npm run build:kotlin-visuals
+
+      - name: Generate Kotlin assets
+        run: npm run build:kotlin-assets
+
       - name: Compile generated Kotlin and Compose references
         run: mvn -q -f packages/adapter-compose/pom.xml compile
 
