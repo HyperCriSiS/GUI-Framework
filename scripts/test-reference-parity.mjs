@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, webTree, webTable, desktop, android] = await Promise.all([
+const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, webSlider, webNavigation, webTree, webFormLayout, webTable, desktop, android] = await Promise.all([
   readFile("examples/reference-scenarios.json", "utf8").then(JSON.parse),
   readFile("spec/manifest.json", "utf8").then(JSON.parse),
   readFile("examples/web-reference/app.mjs", "utf8"),
@@ -14,6 +14,7 @@ const [scenario, manifest, web, webSelect, webTooltip, webToast, webProgress, we
   readFile("examples/web-reference/slider-reference.mjs", "utf8"),
   readFile("examples/web-reference/navigation-reference.mjs", "utf8"),
   readFile("examples/web-reference/tree-reference.mjs", "utf8"),
+  readFile("examples/web-reference/form-layout-reference.mjs", "utf8"),
   readFile("examples/web-reference/table-reference.mjs", "utf8"),
   readFile("examples/compose-desktop/src/main/kotlin/Main.kt", "utf8"),
   readFile("examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt", "utf8"),
@@ -52,6 +53,17 @@ assert.deepEqual(scenario.phase6Hierarchy, {
     { value: "settings", label: "Settings", disabled: false },
   ],
   disabledValue: "archive",
+});
+assert.deepEqual(scenario.phase6FormLayout, {
+  columns: 2,
+  initialVariant: "inline",
+  compactColumns: 1,
+  fields: [
+    { id: "email", label: "Email", initialValue: "jan@example.com", disabled: false, error: false },
+    { id: "recovery", label: "Recovery code", initialValue: "12", disabled: false, error: true },
+    { id: "token", label: "API token", initialValue: "sk-local-reference", disabled: true, error: false },
+  ],
+  validRecoveryValue: "ABC123",
 });
 assert.deepEqual(scenario.flows.map(({ id }) => id), [
   "edit-primary-input",
@@ -135,6 +147,18 @@ assert.match(webTree, /value: "archive"[\s\S]*disabled: true/);
 assert.match(webTree, /onValueChange: setValue/);
 assert.match(webTree, /onExpandedChange: toggleExpanded/);
 assert.match(webTree, /workspace\.update\(\{ expanded: workspaceExpanded \}\)/);
+assert.match(webFormLayout, /createGuiFormLayout\(/, "Web Form Layout reference must exercise createGuiFormLayout");
+assert.match(webFormLayout, /accessibilityLabel: "Account settings form layout"/);
+assert.match(webFormLayout, /columns: 2/);
+assert.match(webFormLayout, /let variant = "inline"/);
+assert.match(webFormLayout, /let emailValue = "jan@example\.com"/);
+assert.match(webFormLayout, /let recoveryValue = "12"/);
+assert.match(webFormLayout, /label: "Recovery code"/);
+assert.match(webFormLayout, /error: "Recovery code must contain 6 characters\."/);
+assert.match(webFormLayout, /label: "API token"[\s\S]*disabled: true/);
+assert.match(webFormLayout, /label: "Save settings"/);
+assert.match(webFormLayout, /label: "Use stacked layout"/);
+assert.match(webFormLayout, /root\.dataset\.guiDensity = density/);
 assert.match(webTable, /createGuiTable\(/, "Web Table reference must exercise createGuiTable");
 assert.match(webTable, /createGuiDataGrid\(/, "Web Table reference must exercise createGuiDataGrid");
 assert.match(webTable, /caption: "Project inventory"/);
@@ -167,10 +191,10 @@ assert.match(android, /paletteId = "reference-dark"/);
 
 for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", android]]) {
   assert.match(source, /ReferenceDensity\.Compact/);
-  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTreeSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTreeSize", "GuiFormLayoutSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
     assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `${name} compact reference must map ${sizeType} to its existing SMALL size`);
   }
-  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTree", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+  for (const component of ["GuiButton", "GuiCheckbox", "GuiInput", "GuiRadio", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTree", "GuiFormLayout", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
     assert.match(source, new RegExp(`\\b${component}\\(`), `${name} reference must exercise ${component}`);
   }
   assert.match(source, /onValueChange = \{ [a-zA-Z]+ = it \}/, `${name} must expose the input edit flow`);
@@ -226,6 +250,17 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /onValueChange = \{ treeValue = it \}/, `${name} must expose controlled Tree selection`);
   assert.match(source, /onExpandedChange = \{ if \(it == "workspace"\) workspaceExpanded = !workspaceExpanded \}/, `${name} must expose controlled Tree expansion`);
   assert.match(source, /onNodeActivate = \{ lastTreeActivation = it \}/, `${name} must expose Tree activation`);
+  assert.match(source, /var formEmail by remember \{ mutableStateOf\("jan@example\.com"\) \}/, `${name} must expose the shared Form Layout email value`);
+  assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/, `${name} must expose the shared Form Layout recovery value`);
+  assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/, `${name} must expose the shared Form Layout variant`);
+  assert.match(source, /accessibilityLabel = "Account settings form layout"/, `${name} must expose Form Layout semantics`);
+  assert.match(source, /columns = 2/, `${name} must request the shared two-column Form Layout`);
+  assert.match(source, /accessibilityLabel = "Form email"/, `${name} must expose the Form Layout email control`);
+  assert.match(source, /accessibilityLabel = "Form recovery code"/, `${name} must expose the Form Layout recovery control`);
+  assert.match(source, /Recovery code must contain 6 characters\./, `${name} must expose the shared recovery error`);
+  assert.match(source, /accessibilityLabel = "Form API token"[\s\S]*disabled = true/, `${name} must expose the shared disabled token field`);
+  assert.match(source, /label = "Save settings"/, `${name} must expose the shared Form Layout action`);
+  assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue} · email: \$formEmail/, `${name} must expose the shared Form Layout status`);
   assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/, `${name} must expose the shared Data Grid initial value`);
   assert.match(source, /caption = "Project inventory"/, `${name} must expose the shared Table caption`);
   assert.match(source, /accessibilityLabel = "Project inventory table"/, `${name} must expose Table semantics`);
@@ -238,4 +273,4 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");

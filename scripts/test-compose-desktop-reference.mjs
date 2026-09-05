@@ -19,7 +19,7 @@ assert.match(source, /paletteId: String = "reference-dark"/);
 assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = theme/);
 assert.match(source, /paletteId = paletteId/);
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiFormLayout", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Desktop reference must exercise ${component}`);
 }
 assert.match(source, /GuiCheckboxSize\.SMALL/);
@@ -32,6 +32,7 @@ assert.match(source, /GuiProgressSize\.SMALL/);
 assert.match(source, /GuiSliderSize\.SMALL/);
 assert.match(source, /GuiMenuSize\.SMALL/);
 assert.match(source, /GuiNavigationSize\.SMALL/);
+assert.match(source, /GuiFormLayoutSize\.SMALL/);
 assert.match(source, /GuiTableSize\.SMALL/);
 assert.match(source, /GuiDataGridSize\.SMALL/);
 assert.match(source, /includeExtendedComponents = theme == GuiThemeId\.BASIC/);
@@ -83,6 +84,20 @@ assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", i
 assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
+assert.match(source, /var formEmail by remember \{ mutableStateOf\("jan@example\.com"\) \}/);
+assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/);
+assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/);
+assert.match(source, /var formSaveCount by remember \{ mutableStateOf\(0\) \}/);
+assert.match(source, /columns = 2/);
+assert.match(source, /accessibilityLabel = "Account settings form layout"/);
+assert.match(source, /accessibilityLabel = "Form email"/);
+assert.match(source, /accessibilityLabel = "Form recovery code"/);
+assert.match(source, /Recovery code must contain 6 characters\./);
+assert.match(source, /accessibilityLabel = "Form API token"/);
+assert.match(source, /label = "Save settings"/);
+assert.match(source, /"Use stacked layout" else "Use inline layout"/);
+assert.match(source, /label = "Reset recovery code"/);
+assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue} · email: \$formEmail/);
 assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/);
 assert.match(source, /caption = "Project inventory"/);
 assert.match(source, /accessibilityLabel = "Project inventory table"/);
@@ -111,4 +126,4 @@ assert.match(source, /onNodeActivate = \{ lastTreeActivation = it \}/);
 assert.match(source, /Selected tree node: \$treeValue/);
 assert.match(source, /Workspace branch: \$\{if \(workspaceExpanded\) "expanded" else "collapsed"\}/);
 assert.match(source, /Activated tree node: \$lastTreeActivation/);
-console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu coverage and Phase 5 theme selection isolation.");
+console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Menu coverage and Phase 5 theme selection isolation.");

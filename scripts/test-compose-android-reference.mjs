@@ -39,20 +39,22 @@ assert.match(manifest, /android:name="\.MainActivity"/);
 assert.match(manifest, /android:exported="true"/);
 assert.match(manifest, /android\.intent\.action\.MAIN/);
 assert.match(source, /class MainActivity : ComponentActivity\(\)/);
+assert.match(source, /private var referenceDensity by mutableStateOf\(ReferenceDensity\.Standard\)/);
+assert.match(source, /private var referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
+assert.match(source, /fun applyReferenceDensity\(density: ReferenceDensity\)/);
+assert.match(source, /fun applyReferenceTheme\(theme: GuiThemeId\)/);
 assert.match(source, /setContent \{/);
-assert.match(source, /referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
-assert.match(source, /applyReferenceTheme\(theme: GuiThemeId\)/);
+assert.match(source, /GuiTheme\(/);
 assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
-assert.match(source, /ReferenceDensity\.Compact/);
-assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
-for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
-  assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android compact reference must map ${sizeType} to SMALL`);
+assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
+for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiFormLayoutSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
+  assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android reference must map compact density to ${sizeType}.SMALL`);
 }
-for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
+for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiFormLayout", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
-assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
+assert.match(source, /includeExtendedComponents: Boolean = true/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
 assert.match(source, /accessibilityLabel = "Reference checkbox"/);
 assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/);
@@ -66,7 +68,7 @@ assert.match(source, /content = "Reload the current workspace data\."/);
 assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/);
 assert.match(source, /interactionSource = interactionSource/);
 assert.match(source, /accessibilityLabel = "Workspace actions"/);
-assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/);
+assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", accessibilityLabel = "Locked action", disabled = true\)/);
 assert.match(source, /onOpenChange = \{ menuOpen = it \}/);
 assert.match(source, /onActivate = \{ lastMenuAction = it \}/);
 assert.match(source, /label = "Open workspace menu"/);
@@ -100,6 +102,19 @@ assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", i
 assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
+assert.match(source, /var formEmail by remember \{ mutableStateOf\("jan@example\.com"\) \}/);
+assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/);
+assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/);
+assert.match(source, /var formSaveCount by remember \{ mutableStateOf\(0\) \}/);
+assert.match(source, /accessibilityLabel = "Account settings form layout"/);
+assert.match(source, /accessibilityLabel = "Form email"/);
+assert.match(source, /accessibilityLabel = "Form recovery code"/);
+assert.match(source, /Recovery code must contain 6 characters\./);
+assert.match(source, /accessibilityLabel = "Form API token"/);
+assert.match(source, /label = "Save settings"/);
+assert.match(source, /"Use stacked layout" else "Use inline layout"/);
+assert.match(source, /label = "Reset recovery code"/);
+assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue} · email: \$formEmail/);
 assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/);
 assert.match(source, /caption = "Project inventory"/);
 assert.match(source, /accessibilityLabel = "Project inventory table"/);
@@ -208,4 +223,14 @@ assert.match(runtimeTest, /performSemanticsAction\(SemanticsActions\.Collapse\)/
 assert.match(runtimeTest, /performSemanticsAction\(SemanticsActions\.Expand\)/);
 assert.match(runtimeTest, /Selected tree node: atlas/);
 assert.match(runtimeTest, /Activated tree node: settings/);
-console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Menu coverage and Phase 5 theme selection isolation.");
+assert.match(runtimeTest, /onNodeWithContentDescription\("Account settings form layout"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Form email"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Form recovery code"\)/);
+assert.match(runtimeTest, /performTextReplacement\("ABC123"\)/);
+assert.match(runtimeTest, /Recovery code must contain 6 characters\./);
+assert.match(runtimeTest, /onNodeWithContentDescription\("Form API token"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Use stacked layout"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Use inline layout"\)/);
+assert.match(runtimeTest, /onNodeWithText\("Save settings"\)/);
+assert.match(runtimeTest, /Saved: 1 · variant: stacked · email: forms@example\.com/);
+console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Menu coverage and Phase 5 theme selection isolation.");

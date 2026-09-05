@@ -123,5 +123,34 @@
       }
     ],
     "disabledValue": "archive"
+  },
+  "phase6FormLayout": {
+    "columns": 2,
+    "initialVariant": "inline",
+    "compactColumns": 1,
+    "fields": [
+      {
+        "id": "email",
+        "label": "Email",
+        "initialValue": "jan@example.com",
+        "disabled": false,
+        "error": false
+      },
+      {
+        "id": "recovery",
+        "label": "Recovery code",
+        "initialValue": "12",
+        "disabled": false,
+        "error": true
+      },
+      {
+        "id": "token",
+        "label": "API token",
+        "initialValue": "sk-local-reference",
+        "disabled": true,
+        "error": false
+      }
+    ],
+    "validRecoveryValue": "ABC123"
   }
 }
