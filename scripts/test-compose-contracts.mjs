@@ -27,6 +27,8 @@ try {
   assert.match(source, /enum class GuiThemeId/);
   assert.match(source, /enum class GuiComponentId/);
 
+  assert.match(source, /SCROLL_CONTAINER\("scroll-container"\)/);
+
   assert.match(source, /enum class GuiButtonVariant/);
   assert.match(source, /PRIMARY\("primary"\)/);
   assert.match(source, /data class GuiButtonProperties\(/);
@@ -160,6 +162,19 @@ try {
   assert.match(source, /GuiContentSlot\("error", "text", false\)/);
   assert.match(source, /GuiContentSlot\("actions", "children", false\)/);
   assert.match(source, /GuiComponentSemantics\("group", false\)/);
+
+  assert.match(source, /enum class GuiScrollContainerVariant/);
+  assert.match(source, /VERTICAL\("vertical"\)/);
+  assert.match(source, /HORIZONTAL\("horizontal"\)/);
+  assert.match(source, /BOTH\("both"\)/);
+  assert.match(source, /enum class GuiScrollContainerSize/);
+  assert.match(source, /enum class GuiScrollContainerState/);
+  assert.match(source, /FOCUS\("focus"\)/);
+  assert.match(source, /data class GuiScrollContainerProperties\(/);
+  assert.match(source, /val accessibilityLabel: String = ""/);
+  assert.match(source, /val keyboardFocusable: Boolean = true/);
+  assert.match(source, /GuiContentSlot\("content", "children", true\)/);
+  assert.match(source, /GuiComponentSemantics\("scroll-container", true\)/);
 
   assert.match(source, /enum class GuiTooltipVariant/);
   assert.match(source, /enum class GuiTooltipSize/);

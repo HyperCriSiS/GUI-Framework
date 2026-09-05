@@ -1,0 +1,22 @@
+{
+  "specVersion": "0.1.0",
+  "component": "scroll-container",
+  "anatomy": [
+    { "id": "root", "required": true },
+    { "id": "content", "required": true }
+  ],
+  "content": [
+    { "id": "content", "kind": "children", "required": true }
+  ],
+  "properties": [
+    { "id": "accessibilityLabel", "type": "string", "required": false, "default": "" },
+    { "id": "keyboardFocusable", "type": "boolean", "required": false, "default": true }
+  ],
+  "events": [],
+  "variants": ["vertical", "horizontal", "both"],
+  "sizes": ["small", "medium", "large"],
+  "states": ["default", "focus"],
+  "semantics": { "role": "scroll-container", "preferNativePrimitive": true },
+  "tokenBindings": { "focus": "{semantic.color.focus}" },
+  "capabilities": { "required": [], "optional": [], "fallbackOrder": ["standard", "minimal"] }
+}
