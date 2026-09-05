@@ -1,0 +1,83 @@
+name: Maintenance Scroll Gates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Register permanent Scroll Container gates
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          package = Path('package.json')
+          text = package.read_text()
+          text = text.replace(
+              '  "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n  "test:web-table":',
+              '  "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n  "test:web-scroll-container": "node scripts/test-web-scroll-container.mjs",\n  "test:web-table":',
+          )
+          text = text.replace(
+              '  "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n  "test:web-table-reference":',
+              '  "test:web-form-layout-reference": "node scripts/test-web-form-layout-reference.mjs",\n  "test:web-scroll-container-reference": "node scripts/test-web-scroll-container-reference.mjs",\n  "test:web-table-reference":',
+          )
+          text = text.replace(
+              '  "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n  "test:kotlin-table":',
+              '  "test:kotlin-form-layout": "node scripts/test-compose-form-layout.mjs",\n  "test:kotlin-scroll-container": "node scripts/test-compose-scroll-container.mjs",\n  "test:kotlin-table":',
+          )
+          text = text.replace(
+              'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-table',
+              'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-scroll-container && npm run test:web-table',
+          )
+          text = text.replace(
+              'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-table-reference',
+              'npm run test:web-tree-reference && npm run test:web-form-layout-reference && npm run test:web-scroll-container-reference && npm run test:web-table-reference',
+          )
+          text = text.replace(
+              'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-table',
+              'npm run test:kotlin-tree && npm run test:kotlin-form-layout && npm run test:kotlin-scroll-container && npm run test:kotlin-table',
+          )
+          package.write_text(text)
+
+          workflow = Path('.github/workflows/core-ci.yml')
+          text = workflow.read_text()
+          text = text.replace(
+              '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Table / Data Grid',
+              '      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n      - name: Test native Web Basic Scroll Container\n        run: npm run test:web-scroll-container\n\n      - name: Test native Web Basic Table / Data Grid',
+          )
+          text = text.replace(
+              '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
+              '      - name: Test standalone Web Form Layout reference\n        run: npm run test:web-form-layout-reference\n\n      - name: Test standalone Web Scroll Container reference\n        run: npm run test:web-scroll-container-reference\n\n      - name: Test standalone Web Table / Data Grid reference',
+          )
+          text = text.replace(
+              '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Table / Data Grid',
+              '      - name: Test native Compose Basic Form Layout\n        run: npm run test:kotlin-form-layout\n\n      - name: Test native Compose Basic Scroll Container\n        run: npm run test:kotlin-scroll-container\n\n      - name: Test native Compose Basic Table / Data Grid',
+          )
+          workflow.write_text(text)
+          PY
+      - name: Validate permanent gates
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
+          npm run test:web-scroll-container
+          npm run test:web-scroll-container-reference
+          npm run test:kotlin-scroll-container
+          grep -q 'Test native Web Basic Scroll Container' .github/workflows/core-ci.yml
+          grep -q 'Test standalone Web Scroll Container reference' .github/workflows/core-ci.yml
+          grep -q 'Test native Compose Basic Scroll Container' .github/workflows/core-ci.yml
+      - name: Commit permanent Scroll Container gates
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json .github/workflows/core-ci.yml
+          git commit -m "test(scroll-container): register permanent adapter and reference gates"
+          git push origin HEAD:main
