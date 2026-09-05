@@ -8,16 +8,16 @@ def dimension(value):
 
 
 def replace_string_array(source, name, add_value):
-    pattern = rf'(const {re.escape(name)}=\[)(.*?)(\];)'
-    match = re.search(pattern, source)
+    pattern = rf'const\s+{re.escape(name)}\s*=\s*\[(.*?)\]\s*;'
+    match = re.search(pattern, source, re.S)
     if not match:
         raise RuntimeError(f"missing array anchor: {name}")
-    values = re.findall(r'"([^"]+)"', match.group(2))
+    values = re.findall(r'"([^"]+)"', match.group(1))
     if add_value not in values:
         values.append(add_value)
     values.sort()
-    body = ",".join(json.dumps(value) for value in values)
-    return source[:match.start()] + match.group(1) + body + match.group(3) + source[match.end():]
+    replacement = f'const {name} = [' + ", ".join(json.dumps(value) for value in values) + '];'
+    return source[:match.start()] + replacement + source[match.end():]
 
 
 def leaf_count(value):
@@ -147,33 +147,31 @@ for budget in budgets["themes"].values():
 budgets_path.write_text(json.dumps(budgets, separators=(",", ":")) + "\n")
 
 basic_test = Path("scripts/test-basic-theme.mjs")
-source = basic_test.read_text()
-source = replace_string_array(source, "referenceComponentIds", "tree")
+source = replace_string_array(basic_test.read_text(), "referenceComponentIds", "tree")
 basic_test.write_text(source)
 
 spec_test = Path("scripts/test-spec.mjs")
-source = spec_test.read_text()
-source = replace_string_array(source, "expectedReferenceVisualIds", "tree")
+source = replace_string_array(spec_test.read_text(), "expectedReferenceVisualIds", "tree")
 spec_test.write_text(source)
 
 web_test = Path("scripts/test-web-adapter.mjs")
 source = web_test.read_text()
-anchor = '  assert.match(css, /--gui-component-data-grid-selection-indicator-width: 2px;/);\n'
-if anchor not in source:
-    raise RuntimeError("Web token gate anchor missing")
-addition = '  assert.match(css, /--gui-component-tree-indent-step-medium: 20px;/);\n  assert.match(css, /--gui-component-tree-disclosure-size-medium: 18px;/);\n'
 if "--gui-component-tree-indent-step-medium" not in source:
-    source = source.replace(anchor, anchor + addition, 1)
+    match = re.search(r'(?m)^(\s*assert\.match\(css, /--gui-component-data-grid-selection-indicator-width: 2px;/\);\s*)$', source)
+    if not match:
+        raise RuntimeError("Web token gate anchor missing")
+    addition = '\n  assert.match(css, /--gui-component-tree-indent-step-medium: 20px;/);\n  assert.match(css, /--gui-component-tree-disclosure-size-medium: 18px;/);'
+    source = source[:match.end()] + addition + source[match.end():]
 web_test.write_text(source)
 
 compose_test = Path("scripts/test-compose-tokens.mjs")
 source = compose_test.read_text()
-anchor = '  assert.match(source, /"component\\.dataGrid\\.selectionIndicator\\.width" to GuiDimensionValue\\(2\\.0, "px"\\)/);\n'
-if anchor not in source:
-    raise RuntimeError("Compose token gate anchor missing")
-addition = '  assert.match(source, /"component\\.tree\\.indent\\.step\\.medium" to GuiDimensionValue\\(20\\.0, "px"\\)/);\n  assert.match(source, /"component\\.tree\\.disclosure\\.size\\.medium" to GuiDimensionValue\\(18\\.0, "px"\\)/);\n'
 if "component\\.tree\\.indent" not in source:
-    source = source.replace(anchor, anchor + addition, 1)
+    match = re.search(r'(?m)^(\s*assert\.match\(source, /"component\\\.dataGrid\\\.selectionIndicator\\\.width" to GuiDimensionValue\\\(2\\\.0, "px"\\\)/\);\s*)$', source)
+    if not match:
+        raise RuntimeError("Compose token gate anchor missing")
+    addition = '\n  assert.match(source, /"component\\.tree\\.indent\\.step\\.medium" to GuiDimensionValue\\(20\\.0, "px"\\)/);\n  assert.match(source, /"component\\.tree\\.disclosure\\.size\\.medium" to GuiDimensionValue\\(18\\.0, "px"\\)/);'
+    source = source[:match.end()] + addition + source[match.end():]
 compose_test.write_text(source)
 
 print(f"Tree Basic visual leaf budget increment: {increment}")
