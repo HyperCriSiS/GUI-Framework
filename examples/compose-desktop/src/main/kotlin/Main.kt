@@ -207,25 +207,36 @@ private fun DesktopReferenceContent(
                             accessibilityLabel = "Reference checkbox",
                             size = checkboxSize,
                         )
-                        BasicText("Diagnostics")
+                        BasicText("Enable diagnostics")
                     }
                     GuiRadioGroup(groupName = "reference-review-mode") {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            GuiRadio(
-                                checked = reviewMode == "summary",
-                                onCheckedChange = { if (it) reviewMode = "summary" },
-                                accessibilityLabel = "Summary review",
-                                size = radioSize,
-                            )
-                            GuiRadio(
-                                checked = reviewMode == "detailed",
-                                onCheckedChange = { if (it) reviewMode = "detailed" },
-                                accessibilityLabel = "Detailed review",
-                                size = radioSize,
-                            )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                GuiRadio(
+                                    selected = reviewMode == "summary",
+                                    onSelectedChange = { if (it) reviewMode = "summary" },
+                                    accessibilityLabel = "Summary review",
+                                    groupName = "reference-review-mode",
+                                    size = radioSize,
+                                )
+                                BasicText("Summary review")
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                GuiRadio(
+                                    selected = reviewMode == "detailed",
+                                    onSelectedChange = { if (it) reviewMode = "detailed" },
+                                    accessibilityLabel = "Detailed review",
+                                    groupName = "reference-review-mode",
+                                    size = radioSize,
+                                )
+                                BasicText("Detailed review")
+                            }
                         }
                     }
                     GuiSelect(
@@ -233,17 +244,18 @@ private fun DesktopReferenceContent(
                         options = listOf(
                             GuiSelectOption(value = "email", label = "Email"),
                             GuiSelectOption(value = "push", label = "Push"),
+                            GuiSelectOption(value = "digest", label = "Daily digest"),
                             GuiSelectOption(value = "legacy", label = "Legacy channel", disabled = true),
                         ),
-                        expanded = selectExpanded,
                         onValueChange = { deliveryChannel = it },
+                        expanded = selectExpanded,
                         onExpandedChange = { selectExpanded = it },
                         accessibilityLabel = "Delivery channel",
                         size = selectSize,
                     )
                     GuiTabs(
                         value = activeSection,
-                        items = listOf(
+                        tabs = listOf(
                             GuiTabItem(value = "overview", label = "Overview"),
                             GuiTabItem(value = "metrics", label = "Metrics", disabled = true),
                             GuiTabItem(value = "logs", label = "Logs"),
@@ -251,62 +263,75 @@ private fun DesktopReferenceContent(
                         onValueChange = { activeSection = it },
                         accessibilityLabel = "Reference tabs",
                         size = tabsSize,
-                    )
-                    BasicText("Active section: ${activeSection.replaceFirstChar { it.uppercase() }}")
-                    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    ) { selectedTab ->
+                        BasicText("Active section: ${selectedTab.label}")
+                    }
                     GuiTooltip(
                         open = tooltipOpen,
                         content = "Reload the current workspace data.",
                         onOpenChange = { tooltipOpen = it },
-                        interactionSource = interactionSource,
                         size = tooltipSize,
-                    ) {
+                    ) { interactionSource ->
                         GuiButton(
                             label = "Reload workspace",
                             onActivate = {},
-                            interactionSource = interactionSource,
                             size = buttonSize,
+                            interactionSource = interactionSource,
                         )
                     }
-                    GuiButton(
-                        label = if (menuContextMode) "Open workspace menu" else "Open context menu",
-                        onActivate = {
-                            menuContextMode = !menuContextMode
-                            menuOpen = true
-                        },
-                        size = buttonSize,
-                    )
                     GuiMenu(
                         open = menuOpen,
                         items = listOf(
-                            GuiMenuItem(value = "refresh", label = "Refresh workspace", accessibilityLabel = "Refresh workspace"),
-                            GuiMenuItem(value = "locked", label = "Locked action", accessibilityLabel = "Locked action", disabled = true),
+                            GuiMenuItem(value = "refresh", label = "Refresh workspace", shortcut = "Ctrl+R"),
+                            GuiMenuItem(value = "locked", label = "Locked action", disabled = true),
+                            GuiMenuItem(value = "settings", label = "Workspace settings"),
                         ),
                         onOpenChange = { menuOpen = it },
                         onActivate = { lastMenuAction = it },
                         accessibilityLabel = "Workspace actions",
-                        contextOffset = GuiMenuContextOffset(x = 32, y = 32),
                         size = menuSize,
-                    )
+                        contextOffset = if (menuContextMode) GuiMenuContextOffset(x = 32, y = 32) else null,
+                    ) { interactionSource ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            GuiButton(
+                                label = "Open workspace menu",
+                                onActivate = {
+                                    menuContextMode = false
+                                    menuOpen = true
+                                },
+                                size = buttonSize,
+                                interactionSource = interactionSource,
+                            )
+                            GuiButton(
+                                label = "Open context menu",
+                                onActivate = {
+                                    menuContextMode = true
+                                    menuOpen = true
+                                },
+                                size = buttonSize,
+                                interactionSource = interactionSource,
+                            )
+                        }
+                    }
                     BasicText("Last menu action: $lastMenuAction")
                     GuiButton(
                         label = "Show notification",
                         onActivate = { toastOpen = true },
                         size = buttonSize,
                     )
+                    BasicText("Last notification action: $lastToastAction")
                     GuiToast(
                         open = toastOpen,
                         title = "Workspace updated",
                         message = "Your changes were saved.",
+                        onOpenChange = { toastOpen = it },
                         actionLabel = "Undo",
                         actionValue = "undo",
-                        accessibilityLabel = "Workspace notification",
                         durationMs = 0L,
-                        onOpenChange = { toastOpen = it },
+                        accessibilityLabel = "Workspace notification",
                         onActivate = { lastToastAction = it },
                         size = toastSize,
                     )
-                    BasicText("Last notification action: $lastToastAction")
                     GuiProgress(
                         value = 68.0,
                         accessibilityLabel = "Workspace sync progress",
@@ -446,7 +471,9 @@ private fun DesktopReferenceContent(
                                 size = buttonSize,
                             )
                         }
-                        BasicText("Saved: $formSaveCount · variant: ${formVariant.wireValue} · email: $formEmail")
+                        GuiFormLayoutSection {
+                            BasicText("Saved: $formSaveCount · variant: ${formVariant.wireValue} · email: $formEmail")
+                        }
                     }
                     val tableColumns = listOf(
                         GuiTableColumn("Project"),
@@ -505,12 +532,7 @@ private fun DesktopReferenceContent(
         size = dialogSize,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GuiInput(
-                value = name,
-                onValueChange = { name = it },
-                accessibilityLabel = "Dialog name",
-                size = inputSize,
-            )
+            BasicText("Hello, $name")
             GuiButton(
                 label = "Close",
                 onActivate = { dialogOpen = false },

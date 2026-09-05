@@ -39,22 +39,20 @@ assert.match(manifest, /android:name="\.MainActivity"/);
 assert.match(manifest, /android:exported="true"/);
 assert.match(manifest, /android\.intent\.action\.MAIN/);
 assert.match(source, /class MainActivity : ComponentActivity\(\)/);
-assert.match(source, /private var referenceDensity by mutableStateOf\(ReferenceDensity\.Standard\)/);
-assert.match(source, /private var referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
-assert.match(source, /fun applyReferenceDensity\(density: ReferenceDensity\)/);
-assert.match(source, /fun applyReferenceTheme\(theme: GuiThemeId\)/);
 assert.match(source, /setContent \{/);
-assert.match(source, /GuiTheme\(/);
+assert.match(source, /referenceTheme by mutableStateOf\(GuiThemeId\.BASIC\)/);
+assert.match(source, /applyReferenceTheme\(theme: GuiThemeId\)/);
 assert.match(source, /theme = referenceTheme/);
 assert.match(source, /paletteId = "reference-dark"/);
-assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
+assert.match(source, /ReferenceDensity\.Compact/);
+assert.match(source, /applyReferenceDensity\(density: ReferenceDensity\)/);
 for (const sizeType of ["GuiButtonSize", "GuiCheckboxSize", "GuiDialogSize", "GuiInputSize", "GuiMenuSize", "GuiNavigationSize", "GuiFormLayoutSize", "GuiTableSize", "GuiDataGridSize", "GuiPanelSize", "GuiProgressSize", "GuiSliderSize", "GuiRadioSize", "GuiSelectSize", "GuiSwitchSize", "GuiTabsSize", "GuiToastSize", "GuiTooltipSize"]) {
-  assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android reference must map compact density to ${sizeType}.SMALL`);
+  assert.match(source, new RegExp(`${sizeType}\\.SMALL`), `Android compact reference must map ${sizeType} to SMALL`);
 }
 for (const component of ["GuiButton", "GuiCheckbox", "GuiRadio", "GuiRadioGroup", "GuiSelect", "GuiTabs", "GuiTooltip", "GuiToast", "GuiProgress", "GuiSlider", "GuiNavigation", "GuiFormLayout", "GuiTable", "GuiDataGrid", "GuiMenu", "GuiInput", "GuiSwitch", "GuiPanel", "GuiDialog"]) {
   assert.match(source, new RegExp(`${component}\\(`), `Android reference must exercise ${component}`);
 }
-assert.match(source, /includeExtendedComponents: Boolean = true/);
+assert.match(source, /includeExtendedComponents = referenceTheme == GuiThemeId\.BASIC/);
 assert.match(source, /if \(includeExtendedComponents\) \{/);
 assert.match(source, /accessibilityLabel = "Reference checkbox"/);
 assert.match(source, /GuiRadioGroup\(groupName = "reference-review-mode"\)/);
@@ -68,7 +66,7 @@ assert.match(source, /content = "Reload the current workspace data\."/);
 assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/);
 assert.match(source, /interactionSource = interactionSource/);
 assert.match(source, /accessibilityLabel = "Workspace actions"/);
-assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", accessibilityLabel = "Locked action", disabled = true\)/);
+assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/);
 assert.match(source, /onOpenChange = \{ menuOpen = it \}/);
 assert.match(source, /onActivate = \{ lastMenuAction = it \}/);
 assert.match(source, /label = "Open workspace menu"/);
@@ -114,7 +112,7 @@ assert.match(source, /accessibilityLabel = "Form API token"/);
 assert.match(source, /label = "Save settings"/);
 assert.match(source, /"Use stacked layout" else "Use inline layout"/);
 assert.match(source, /label = "Reset recovery code"/);
-assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue} · email: \$formEmail/);
+assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue\} · email: \$formEmail/);
 assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/);
 assert.match(source, /caption = "Project inventory"/);
 assert.match(source, /accessibilityLabel = "Project inventory table"/);

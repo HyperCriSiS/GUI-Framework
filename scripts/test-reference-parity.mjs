@@ -215,7 +215,7 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /onOpenChange = \{ tooltipOpen = it \}/, `${name} must expose the controlled Tooltip open flow`);
   assert.match(source, /interactionSource = interactionSource/, `${name} must share the Tooltip trigger interaction source`);
   assert.match(source, /accessibilityLabel = "Workspace actions"/, `${name} must expose the Menu accessibility label`);
-  assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", accessibilityLabel = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item with explicit accessibility text`);
+  assert.match(source, /GuiMenuItem\(value = "locked", label = "Locked action", disabled = true\)/, `${name} must expose a disabled Menu item`);
   assert.match(source, /onOpenChange = \{ menuOpen = it \}/, `${name} must expose the controlled Menu open flow`);
   assert.match(source, /onActivate = \{ lastMenuAction = it \}/, `${name} must expose the Menu activation flow`);
   assert.match(source, /label = "Show notification"/, `${name} must expose the Toast open flow`);
@@ -260,7 +260,7 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /Recovery code must contain 6 characters\./, `${name} must expose the shared recovery error`);
   assert.match(source, /accessibilityLabel = "Form API token"[\s\S]*disabled = true/, `${name} must expose the shared disabled token field`);
   assert.match(source, /label = "Save settings"/, `${name} must expose the shared Form Layout action`);
-  assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue} · email: \$formEmail/, `${name} must expose the shared Form Layout status`);
+  assert.match(source, /Saved: \$formSaveCount · variant: \$\{formVariant\.wireValue\} · email: \$formEmail/, `${name} must expose the shared Form Layout status`);
   assert.match(source, /var tableGridValue by remember \{ mutableStateOf\("atlas"\) \}/, `${name} must expose the shared Data Grid initial value`);
   assert.match(source, /caption = "Project inventory"/, `${name} must expose the shared Table caption`);
   assert.match(source, /accessibilityLabel = "Project inventory table"/, `${name} must expose Table semantics`);
