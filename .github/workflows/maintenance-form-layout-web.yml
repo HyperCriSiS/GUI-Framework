@@ -1,0 +1,52 @@
+name: Maintenance Form Layout Web
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Patch Form Layout CSS selectors and structure
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('packages/adapter-web/src/generate-components-css.mjs')
+          text = p.read_text()
+          state_anchor = '''  if (componentId === "data-grid") {\n'''
+          state_block = '''  if (componentId === "form-layout" && ["error", "disabled"].includes(state)) {\n    const fieldSelector = `${partSelector(rootSelector, componentId, "field")}:where([data-gui-state~="${state}"])`;\n    if (partId === "field") return fieldSelector;\n    if (["label", "control", "description", "error"].includes(partId)) return `${fieldSelector} > .gui-form-layout__${kebabPart(partId)}`;\n    return partSelector(stateSelector(rootSelector, state), componentId, partId);\n  }\n'''
+          if text.count(state_anchor) != 1:
+              raise RuntimeError(f'expected one data-grid state anchor, got {text.count(state_anchor)}')
+          text = text.replace(state_anchor, state_block + state_anchor, 1)
+          foundation_anchor = '''    `${scope} .gui-table { box-sizing: border-box; inline-size: 100%; border-collapse: separate; border-spacing: 0; border-style: solid; border-width: 0; overflow-wrap: anywhere; }`,\n'''
+          foundation_block = '''    `${scope} .gui-form-layout { box-sizing: border-box; display: grid; inline-size: 100%; min-inline-size: 0; grid-template-columns: repeat(var(--gui-form-layout-columns, 1), minmax(0, 1fr)); }`,\n    `${scope} .gui-form-layout__section { box-sizing: border-box; display: grid; grid-column: 1 / -1; min-inline-size: 0; grid-template-columns: repeat(var(--gui-form-layout-columns, 1), minmax(0, 1fr)); }`,\n    `${scope} .gui-form-layout__field { box-sizing: border-box; display: grid; min-inline-size: 0; grid-template-columns: minmax(0, 1fr); }`,\n    `${scope} .gui-form-layout__label,`, `${scope} .gui-form-layout__control,`, `${scope} .gui-form-layout__description,`, `${scope} .gui-form-layout__error,`, `${scope} .gui-form-layout__actions { box-sizing: border-box; min-inline-size: 0; }`,\n    `${scope} .gui-form-layout__label[hidden],`, `${scope} .gui-form-layout__description[hidden],`, `${scope} .gui-form-layout__error[hidden] { display: none; }`,\n    `${scope} .gui-form-layout__control > * { max-inline-size: 100%; }`,\n    `${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__field { grid-template-columns: minmax(min-content, max-content) minmax(0, 1fr); align-items: start; }`,\n    `${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__control,`, `${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__description,`, `${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__error { grid-column: 2; }`,\n    `${scope} .gui-form-layout__actions { display: flex; flex-wrap: wrap; grid-column: 1 / -1; }`, "",\n    "@media (max-width: 480px) {",\n    `  ${scope} .gui-form-layout,`, `  ${scope} .gui-form-layout__section { grid-template-columns: minmax(0, 1fr); }`,\n    `  ${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__field { grid-template-columns: minmax(0, 1fr); }`,\n    `  ${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__control,`, `  ${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__description,`, `  ${scope} .gui-form-layout:where([data-gui-variant="inline"]) .gui-form-layout__error { grid-column: 1; }`,\n    "}", "",\n'''
+          if text.count(foundation_anchor) != 1:
+              raise RuntimeError(f'expected one table foundation anchor, got {text.count(foundation_anchor)}')
+          text = text.replace(foundation_anchor, foundation_block + foundation_anchor, 1)
+          motion_anchor = '''`  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-tree,`,'''
+          motion_replacement = motion_anchor + ''' `  :where(${availableThemeIds.map((id) => `[data-gui-theme="${id}"]`).join(", ")}) .gui-form-layout,`,'''
+          if text.count(motion_anchor) != 1:
+              raise RuntimeError(f'expected one reduced-motion Tree anchor, got {text.count(motion_anchor)}')
+          text = text.replace(motion_anchor, motion_replacement, 1)
+          p.write_text(text)
+          PY
+          node --check packages/adapter-web/src/generate-components-css.mjs
+      - name: Validate native Web Form Layout
+        run: |
+          node scripts/test-web-form-layout.mjs
+          npm run test:web-adapter
+      - name: Commit validated generator integration
+        run: |
+          git rm -f .github/workflows/maintenance-form-layout-web.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/adapter-web/src/generate-components-css.mjs
+          git commit -m "feat(form-layout): integrate native Web layout CSS"
+          git push
