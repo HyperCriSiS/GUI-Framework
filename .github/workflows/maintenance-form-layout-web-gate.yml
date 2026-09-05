@@ -1,0 +1,45 @@
+name: Maintenance Form Layout Web Gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Register permanent Web Form Layout gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('package.json')
+          text = p.read_text()
+          script_anchor = '    "test:web-tree": "node scripts/test-web-tree.mjs",\n'
+          script_new = script_anchor + '    "test:web-form-layout": "node scripts/test-web-form-layout.mjs",\n'
+          if text.count(script_anchor) != 1:
+              raise RuntimeError(f'expected one Web Tree script anchor, got {text.count(script_anchor)}')
+          text = text.replace(script_anchor, script_new, 1)
+          check_anchor = 'npm run test:web-tree && npm run test:web-table'
+          check_new = 'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-table'
+          if text.count(check_anchor) != 1:
+              raise RuntimeError(f'expected one Web check anchor, got {text.count(check_anchor)}')
+          p.write_text(text.replace(check_anchor, check_new, 1))
+          PY
+      - name: Validate permanent gate
+        run: |
+          npm run test:web-form-layout
+          npm run check
+      - name: Commit package gate
+        run: |
+          git rm -f .github/workflows/maintenance-form-layout-web-gate.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "test(form-layout): gate native Web layout adapter"
+          git push
