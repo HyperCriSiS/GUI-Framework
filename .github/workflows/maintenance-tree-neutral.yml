@@ -1,0 +1,35 @@
+name: Maintenance Tree Neutral Contract
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Apply deterministic Tree neutral contract patch
+        run: python scripts/maintenance-tree-neutral.py
+      - name: Validate Tree neutral contract
+        run: |
+          npm run validate:spec
+          npm run compile:spec
+          node scripts/test-spec.mjs
+          node scripts/test-web-contracts.mjs
+          node scripts/test-compose-contracts.mjs
+      - name: Commit product changes and remove maintenance helpers
+        run: |
+          rm scripts/maintenance-tree-neutral.py
+          rm .github/workflows/maintenance-tree-neutral.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(tree): register neutral hierarchy contract"
+          git push
