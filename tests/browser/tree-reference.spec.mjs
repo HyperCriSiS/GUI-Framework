@@ -36,7 +36,7 @@ test("Basic Tree reference preserves controlled hierarchy semantics at compact w
   await expect(page.getByText("Selected node: workspace · activated: none · workspace expanded · tree enabled", { exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
-  await workspace.locator(".gui-tree__disclosure").click();
+  await workspace.locator(":scope > .gui-tree__item > .gui-tree__disclosure").click();
   await expect(workspace).toHaveAttribute("aria-expanded", "false");
   await expect(atlas).toBeHidden();
   await expect(page.getByText("Selected node: workspace · activated: none · workspace collapsed · tree enabled", { exact: true })).toBeVisible();
