@@ -62,14 +62,25 @@ function setIds(element, name, ids) {
 function ensureControlId(control, requestedId) {
   const existing = control.getAttribute("id")?.trim() ?? "";
   if (requestedId) {
-    control.setAttribute("id", requestedId);
-    return { id: requestedId, generated: existing === "", previous: existing };
+    if (existing !== requestedId) control.setAttribute("id", requestedId);
+    return { id: requestedId, owned: existing !== requestedId, previous: existing };
   }
-  if (existing) return { id: existing, generated: false, previous: existing };
+  if (existing) return { id: existing, owned: false, previous: existing };
   generatedFieldId += 1;
   const id = `gui-form-control-${generatedFieldId}`;
   control.setAttribute("id", id);
-  return { id, generated: true, previous: "" };
+  return { id, owned: true, previous: "" };
+}
+
+function restoreOwnedAttribute(element, name, ownedState) {
+  if (!ownedState.owned) return;
+  if (element.getAttribute(name) !== ownedState.applied) {
+    ownedState.owned = false;
+    return;
+  }
+  if (ownedState.previous === null) element.removeAttribute(name);
+  else element.setAttribute(name, ownedState.previous);
+  ownedState.owned = false;
 }
 
 export function createGuiFormLayout(document, initialProps = {}) {
@@ -133,9 +144,6 @@ export function createGuiFormField(document, initialProps = {}) {
 
   let props = normalizeFieldProps(initialProps);
   const control = props.control;
-  const originalId = control.getAttribute("id");
-  const originalDescribedBy = control.getAttribute("aria-describedby");
-  const originalInvalid = control.getAttribute("aria-invalid");
   const idInfo = ensureControlId(control, props.id);
   const baseId = idInfo.id;
   const descriptionId = `${baseId}__description`;
@@ -146,7 +154,42 @@ export function createGuiFormField(document, initialProps = {}) {
   controlElement.append(control);
   element.append(labelElement, controlElement, descriptionElement, errorElement);
 
-  const externalDescriptionIds = splitIds(originalDescribedBy).filter((id) => id !== descriptionId && id !== errorId);
+  const describedByOwnership = new Map([
+    [descriptionId, false],
+    [errorId, false],
+  ]);
+  const invalidOwnership = { owned: false, previous: null, applied: "true" };
+
+  function syncDescribedById(id, desired) {
+    const ids = splitIds(control.getAttribute("aria-describedby"));
+    const present = ids.includes(id);
+    const owned = describedByOwnership.get(id) === true;
+    if (desired) {
+      if (!present) {
+        setIds(control, "aria-describedby", [...ids, id]);
+        describedByOwnership.set(id, true);
+      }
+      return;
+    }
+    if (owned) {
+      if (present) setIds(control, "aria-describedby", ids.filter((candidate) => candidate !== id));
+      describedByOwnership.set(id, false);
+    }
+  }
+
+  function syncInvalid(desired) {
+    if (desired) {
+      if (!invalidOwnership.owned && control.getAttribute("aria-invalid") !== "true") {
+        invalidOwnership.previous = control.getAttribute("aria-invalid");
+        control.setAttribute("aria-invalid", "true");
+        invalidOwnership.owned = true;
+      } else if (invalidOwnership.owned && control.getAttribute("aria-invalid") !== "true") {
+        invalidOwnership.owned = false;
+      }
+      return;
+    }
+    restoreOwnedAttribute(control, "aria-invalid", invalidOwnership);
+  }
 
   function render() {
     const states = [];
@@ -163,14 +206,9 @@ export function createGuiFormField(document, initialProps = {}) {
     errorElement.textContent = props.error;
     errorElement.hidden = props.error === "";
 
-    setIds(control, "aria-describedby", [
-      ...externalDescriptionIds,
-      props.description ? descriptionId : "",
-      props.error ? errorId : "",
-    ]);
-    if (props.error) control.setAttribute("aria-invalid", "true");
-    else if (originalInvalid === null) control.removeAttribute("aria-invalid");
-    else control.setAttribute("aria-invalid", originalInvalid);
+    syncDescribedById(descriptionId, Boolean(props.description));
+    syncDescribedById(errorId, Boolean(props.error));
+    syncInvalid(Boolean(props.error));
   }
   render();
 
@@ -192,12 +230,13 @@ export function createGuiFormField(document, initialProps = {}) {
       render();
     },
     destroy() {
-      if (originalId === null) control.removeAttribute("id");
-      else control.setAttribute("id", originalId);
-      if (originalDescribedBy === null) control.removeAttribute("aria-describedby");
-      else control.setAttribute("aria-describedby", originalDescribedBy);
-      if (originalInvalid === null) control.removeAttribute("aria-invalid");
-      else control.setAttribute("aria-invalid", originalInvalid);
+      syncDescribedById(descriptionId, false);
+      syncDescribedById(errorId, false);
+      syncInvalid(false);
+      if (idInfo.owned && control.getAttribute("id") === baseId) {
+        if (idInfo.previous) control.setAttribute("id", idInfo.previous);
+        else control.removeAttribute("id");
+      }
     },
   };
 }

@@ -109,6 +109,39 @@ assert.equal(preidentified.getAttribute("aria-invalid"), "grammar");
 second.destroy();
 assert.equal(preidentified.getAttribute("id"), "country");
 
+const hostOwned = document.createElement("input");
+hostOwned.setAttribute("aria-invalid", "true");
+hostOwned.setAttribute("aria-describedby", "host-help");
+const third = createGuiFormField(document, {
+  control: hostOwned,
+  label: "Recovery code",
+  description: "Six characters",
+  error: "Required",
+});
+const thirdDescriptionId = third.descriptionElement.getAttribute("id");
+const thirdErrorId = third.errorElement.getAttribute("id");
+assert.equal(hostOwned.getAttribute("aria-invalid"), "true");
+assert.equal(hostOwned.getAttribute("aria-describedby"), `host-help ${thirdDescriptionId} ${thirdErrorId}`);
+// The host changes its own semantics while Form Layout is mounted.
+hostOwned.removeAttribute("aria-invalid");
+hostOwned.setAttribute("aria-describedby", `dynamic-host-help ${thirdDescriptionId} ${thirdErrorId}`);
+third.update({ error: "", description: "" });
+assert.equal(hostOwned.getAttribute("aria-invalid"), null, "Form Layout must not restore stale host invalid state");
+assert.equal(hostOwned.getAttribute("aria-describedby"), "dynamic-host-help", "Form Layout removes only IDs it contributed");
+hostOwned.setAttribute("id", "host-reassigned-id");
+third.destroy();
+assert.equal(hostOwned.getAttribute("id"), "host-reassigned-id", "destroy must preserve a host-reassigned id");
+assert.equal(hostOwned.getAttribute("aria-describedby"), "dynamic-host-help");
+assert.equal(hostOwned.getAttribute("aria-invalid"), null);
+
+const grammarOwned = document.createElement("input");
+grammarOwned.setAttribute("aria-invalid", "grammar");
+const fourth = createGuiFormField(document, { control: grammarOwned, label: "Alias", error: "Invalid alias" });
+assert.equal(grammarOwned.getAttribute("aria-invalid"), "true");
+fourth.update({ error: "" });
+assert.equal(grammarOwned.getAttribute("aria-invalid"), "grammar", "Form Layout restores only the value it actually replaced");
+fourth.destroy();
+
 assert.equal(createGuiFormLayoutSection(document).element.className, "gui-form-layout__section");
 assert.equal(createGuiFormActions(document).element.className, "gui-form-layout__actions");
 
