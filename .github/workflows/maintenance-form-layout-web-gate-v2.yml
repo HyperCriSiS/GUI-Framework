@@ -1,0 +1,68 @@
+name: Maintenance Form Layout Web Gate V2
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Register package and Core CI gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path('package.json')
+          data = json.loads(p.read_text())
+          scripts = data['scripts']
+          if 'test:web-form-layout' not in scripts:
+              ordered = {}
+              for key, value in scripts.items():
+                  ordered[key] = value
+                  if key == 'test:web-tree':
+                      ordered['test:web-form-layout'] = 'node scripts/test-web-form-layout.mjs'
+              if 'test:web-form-layout' not in ordered:
+                  raise RuntimeError('test:web-tree package anchor missing')
+              data['scripts'] = ordered
+          check = data['scripts']['check']
+          anchor = 'npm run test:web-tree && npm run test:web-table'
+          replacement = 'npm run test:web-tree && npm run test:web-form-layout && npm run test:web-table'
+          if replacement not in check:
+              if check.count(anchor) != 1:
+                  raise RuntimeError(f'expected one package check anchor, got {check.count(anchor)}')
+              data['scripts']['check'] = check.replace(anchor, replacement, 1)
+          p.write_text(json.dumps(data, indent=2) + '\n')
+
+          p = Path('.github/workflows/core-ci.yml')
+          text = p.read_text()
+          web_anchor = '''      - name: Test native Web Basic Tree / Hierarchy\n        run: npm run test:web-tree\n\n'''
+          web_step = web_anchor + '''      - name: Test native Web Basic Form Layout\n        run: npm run test:web-form-layout\n\n'''
+          if 'Test native Web Basic Form Layout' not in text:
+              if text.count(web_anchor) != 1:
+                  raise RuntimeError(f'expected one Web Tree workflow anchor, got {text.count(web_anchor)}')
+              text = text.replace(web_anchor, web_step, 1)
+
+          compose_anchor = '''      - name: Test native Compose Basic Navigation\n        run: npm run test:kotlin-navigation\n\n'''
+          compose_tree = compose_anchor + '''      - name: Test native Compose Basic Tree / Hierarchy\n        run: npm run test:kotlin-tree\n\n'''
+          if 'Test native Compose Basic Tree / Hierarchy' not in text:
+              if text.count(compose_anchor) != 1:
+                  raise RuntimeError(f'expected one Compose Navigation workflow anchor, got {text.count(compose_anchor)}')
+              text = text.replace(compose_anchor, compose_tree, 1)
+          p.write_text(text)
+          PY
+      - name: Validate permanent Web gate
+        run: |
+          npm run test:web-form-layout
+          npm run check
+      - name: Commit permanent gates
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json .github/workflows/core-ci.yml
+          git commit -m 'test(form-layout): gate native Web layout'
+          git push origin HEAD:main
