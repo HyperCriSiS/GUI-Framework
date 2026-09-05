@@ -198,6 +198,18 @@ jobs:
       - name: Test standalone Web Slider reference
         run: npm run test:web-slider-reference
 
+      - name: Test standalone Web Navigation reference
+        run: npm run test:web-navigation-reference
+
+      - name: Test standalone Web Tree / Hierarchy reference
+        run: npm run test:web-tree-reference
+
+      - name: Test standalone Web Form Layout reference
+        run: npm run test:web-form-layout-reference
+
+      - name: Test standalone Web Table / Data Grid reference
+        run: npm run test:web-table-reference
+
       - name: Test standalone Web Menu / Context Menu reference
         run: npm run test:web-menu-reference
 
@@ -260,6 +272,9 @@ jobs:
 
       - name: Test native Compose Basic Tree / Hierarchy
         run: npm run test:kotlin-tree
+
+      - name: Test native Compose Basic Form Layout
+        run: npm run test:kotlin-form-layout
 
       - name: Test native Compose Basic Table / Data Grid
         run: npm run test:kotlin-table
