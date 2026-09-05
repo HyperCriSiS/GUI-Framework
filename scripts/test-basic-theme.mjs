@@ -9,7 +9,7 @@ const basicEntry = manifest.themes.find((theme) => theme.id === "basic");
 assert.ok(basicEntry, "The Basic theme must remain registered");
 const basic = JSON.parse(await readFile(join("spec", basicEntry.source), "utf8"));
 assert.equal(basic.theme, "basic");
-const referenceComponentIds = ["button", "checkbox", "data-grid", "dialog", "input", "menu", "navigation", "panel", "progress", "radio", "select", "slider", "switch", "table", "tabs", "toast", "tooltip", "tree"];
+const referenceComponentIds = ["button", "checkbox", "data-grid", "dialog", "form-layout", "input", "menu", "navigation", "panel", "progress", "radio", "select", "slider", "switch", "table", "tabs", "toast", "tooltip", "tree"];
 const componentEntries = manifest.components.filter((entry) => referenceComponentIds.includes(entry.id)).sort((left, right) => left.id.localeCompare(right.id));
 const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(visualComponentIds,referenceComponentIds,"Basic quality gate must cover the completed reference visual set including Phase 6 additions");
