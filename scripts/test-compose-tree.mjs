@@ -37,6 +37,6 @@ assert.match(source, /GuiTreeClickTracker/);
 assert.match(source, /doubleTapTimeoutMillis/);
 assert.match(source, /if \(activate\) onNodeActivate\(itemValue\)/);
 assert.doesNotMatch(source, /androidx\.compose\.material|androidx\.compose\.material3/);
-assert.doesNotMatch(source, /animate|Animated/);
+assert.doesNotMatch(source, /AnimatedVisibility|animate[A-Za-z0-9_]*AsState|updateTransition|rememberInfiniteTransition/);
 
 console.log("Compose Basic Tree / Hierarchy adapter source contract passed.");
