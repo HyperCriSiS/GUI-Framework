@@ -153,6 +153,9 @@ jobs:
       - name: Test native Web Basic Tree / Hierarchy
         run: npm run test:web-tree
 
+      - name: Test native Web Basic Form Layout
+        run: npm run test:web-form-layout
+
       - name: Test native Web Basic Table / Data Grid
         run: npm run test:web-table
 
@@ -254,6 +257,9 @@ jobs:
 
       - name: Test native Compose Basic Navigation
         run: npm run test:kotlin-navigation
+
+      - name: Test native Compose Basic Tree / Hierarchy
+        run: npm run test:kotlin-tree
 
       - name: Test native Compose Basic Table / Data Grid
         run: npm run test:kotlin-table
