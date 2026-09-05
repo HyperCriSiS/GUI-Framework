@@ -1,0 +1,62 @@
+name: Maintenance Form Layout Visual V2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Apply Basic Form Layout visual
+        run: python scripts/maintenance-form-layout-visual.py
+      - name: Scale aggregate visual budgets by exact new component cost
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          p = Path('spec/quality/performance-budgets.json')
+          data = json.loads(p.read_text())
+          expected = {
+              'basic': 647,
+              'modern': 649,
+              'glass': 649,
+              'frosted-glass': 653,
+              'spacey': 647,
+              'cyberpunk': 649,
+          }
+          for theme, old in expected.items():
+              actual = data['themes'][theme]['maxResolvedVisualLeaves']
+              if actual != old:
+                  raise RuntimeError(f'{theme} aggregate budget changed unexpectedly: {actual} != {old}')
+              data['themes'][theme]['maxResolvedVisualLeaves'] = old + 38
+          p.write_text(json.dumps(data, separators=(',', ':')) + '\n')
+          PY
+      - name: Validate Basic visual and all inherited performance budgets
+        run: |
+          npm run validate:dtcg
+          npm run compile:spec
+          npm run test:spec
+          npm run test:basic-theme
+          npm run test:basic-performance
+          npm run test:modern-performance
+          npm run test:glass-performance
+          npm run test:frosted-performance
+          npm run test:spacey-performance
+          npm run test:cyberpunk-performance
+          npm run build:web-components
+          npm run test:web-adapter
+      - name: Commit validated product changes
+        run: |
+          git rm -f scripts/maintenance-form-layout-visual.py .github/workflows/maintenance-form-layout-visual.yml .github/workflows/maintenance-form-layout-visual-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add spec/themes/basic.theme.json spec/quality/performance-budgets.json scripts/test-spec.mjs scripts/test-basic-theme.mjs
+          git commit -m "feat(form-layout): add Basic layout visuals"
+          git push
