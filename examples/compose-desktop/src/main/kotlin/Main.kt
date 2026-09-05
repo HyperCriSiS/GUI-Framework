@@ -2,10 +2,13 @@
 
 package gui.framework.examples.desktop
 
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ import gui.framework.compose.GuiFormActions
 import gui.framework.compose.GuiFormField
 import gui.framework.compose.GuiFormLayout
 import gui.framework.compose.GuiFormLayoutSection
+import gui.framework.compose.GuiScrollContainer
 import gui.framework.compose.GuiMenu
 import gui.framework.compose.GuiMenuContextOffset
 import gui.framework.compose.GuiMenuItem
@@ -58,6 +62,8 @@ import gui.framework.generated.internal.GuiDialogSize
 import gui.framework.generated.internal.GuiInputSize
 import gui.framework.generated.internal.GuiFormLayoutSize
 import gui.framework.generated.internal.GuiFormLayoutVariant
+import gui.framework.generated.internal.GuiScrollContainerSize
+import gui.framework.generated.internal.GuiScrollContainerVariant
 import gui.framework.generated.internal.GuiMenuSize
 import gui.framework.generated.internal.GuiNavigationSize
 import gui.framework.generated.internal.GuiNavigationVariant
@@ -146,6 +152,7 @@ private fun DesktopReferenceContent(
     var formRecovery by remember { mutableStateOf("12") }
     var formVariant by remember { mutableStateOf(GuiFormLayoutVariant.INLINE) }
     var formSaveCount by remember { mutableStateOf(0) }
+    val activityScrollState = rememberScrollState()
     var tableGridValue by remember { mutableStateOf("atlas") }
     var lastGridActivation by remember { mutableStateOf("none") }
     var dialogOpen by remember { mutableStateOf(false) }
@@ -155,6 +162,7 @@ private fun DesktopReferenceContent(
     val dialogSize = if (density == ReferenceDensity.Compact) GuiDialogSize.SMALL else GuiDialogSize.MEDIUM
     val inputSize = if (density == ReferenceDensity.Compact) GuiInputSize.SMALL else GuiInputSize.MEDIUM
     val formLayoutSize = if (density == ReferenceDensity.Compact) GuiFormLayoutSize.SMALL else GuiFormLayoutSize.MEDIUM
+    val scrollContainerSize = if (density == ReferenceDensity.Compact) GuiScrollContainerSize.SMALL else GuiScrollContainerSize.MEDIUM
     val menuSize = if (density == ReferenceDensity.Compact) GuiMenuSize.SMALL else GuiMenuSize.MEDIUM
     val navigationSize = if (density == ReferenceDensity.Compact) GuiNavigationSize.SMALL else GuiNavigationSize.MEDIUM
     val treeSize = if (density == ReferenceDensity.Compact) GuiTreeSize.SMALL else GuiTreeSize.MEDIUM
@@ -475,7 +483,36 @@ private fun DesktopReferenceContent(
                             BasicText("Saved: $formSaveCount · variant: ${formVariant.wireValue} · email: $formEmail")
                         }
                     }
-                    val tableColumns = listOf(
+                    val activityItems = listOf(
+                    "Activity event 01",
+                    "Activity event 02",
+                    "Activity event 03",
+                    "Activity event 04",
+                    "Activity event 05",
+                    "Activity event 06",
+                    "Activity event 07",
+                    "Activity event 08",
+                    "Activity event 09",
+                    "Activity event 10",
+                    "Activity event 11",
+                    "Activity event 12",
+                )
+                GuiScrollContainer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (density == ReferenceDensity.Compact) 144.dp else 176.dp),
+                    variant = GuiScrollContainerVariant.VERTICAL,
+                    size = scrollContainerSize,
+                    accessibilityLabel = "Activity log viewport",
+                    keyboardFocusable = true,
+                    verticalScrollState = activityScrollState,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        activityItems.forEach { BasicText(it) }
+                    }
+                }
+                BasicText("Scroll offset: ${activityScrollState.value}")
+                val tableColumns = listOf(
                         GuiTableColumn("Project"),
                         GuiTableColumn("Owner"),
                         GuiTableColumn("Status"),

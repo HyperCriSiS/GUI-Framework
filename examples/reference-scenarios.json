@@ -152,5 +152,26 @@
       }
     ],
     "validRecoveryValue": "ABC123"
+  },
+  "phase6ScrollContainer": {
+    "variant": "vertical",
+    "accessibilityLabel": "Activity log viewport",
+    "keyboardFocusable": true,
+    "items": [
+      "Activity event 01",
+      "Activity event 02",
+      "Activity event 03",
+      "Activity event 04",
+      "Activity event 05",
+      "Activity event 06",
+      "Activity event 07",
+      "Activity event 08",
+      "Activity event 09",
+      "Activity event 10",
+      "Activity event 11",
+      "Activity event 12"
+    ],
+    "targetItem": "Activity event 12",
+    "hostOwnsOffset": true
   }
 }

@@ -260,6 +260,16 @@ class ReferenceRuntimeTest {
                 .performScrollTo()
                 .assertIsDisplayed()
 
+            val activityViewport = composeRule.onNodeWithContentDescription("Activity log viewport")
+            activityViewport.performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Scroll offset: 0").performScrollTo().assertIsDisplayed()
+            activityViewport.performSemanticsAction(SemanticsActions.ScrollBy) { scrollBy ->
+                scrollBy(0f, 500f)
+            }
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("Scroll offset: 0").assertDoesNotExist()
+            composeRule.onNodeWithText("Activity event 12").assertIsDisplayed()
+
             composeRule.onNodeWithContentDescription("Project inventory table")
                 .performScrollTo()
                 .assertIsDisplayed()

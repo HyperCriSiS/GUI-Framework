@@ -273,4 +273,29 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
 
 assert.deepEqual(Object.keys(scenario.platformExtensions).sort(), ["composeAndroid", "composeDesktop", "web"]);
 
-console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
+const webScrollContainer = await readFile("examples/web-reference/scroll-container-reference.mjs", "utf8");
+assert.deepEqual(scenario.phase6ScrollContainer, {
+  variant: "vertical",
+  accessibilityLabel: "Activity log viewport",
+  keyboardFocusable: true,
+  items: Array.from({ length: 12 }, (_, index) => `Activity event ${String(index + 1).padStart(2, "0")}`),
+  targetItem: "Activity event 12",
+  hostOwnsOffset: true,
+});
+assert.match(webScrollContainer, /createGuiScrollContainer/);
+assert.match(webScrollContainer, /accessibilityLabel: "Activity log viewport"/);
+assert.match(webScrollContainer, /variant: "vertical"/);
+assert.match(webScrollContainer, /viewport\.update\(\{ keyboardFocusable \}\)/);
+assert.match(webScrollContainer, /viewport\.element\.scrollTop/);
+for (const [name, source] of [["Desktop", desktop], ["Android", android]]) {
+  assert.match(source, /GuiScrollContainerSize\.SMALL/, `${name} compact reference must map Scroll Container to SMALL`);
+  assert.match(source, /val activityScrollState = rememberScrollState\(\)/, `${name} must expose caller-owned ScrollState`);
+  assert.match(source, /GuiScrollContainer\(/, `${name} must exercise GuiScrollContainer`);
+  assert.match(source, /variant = GuiScrollContainerVariant\.VERTICAL/, `${name} must expose vertical Scroll Container parity`);
+  assert.match(source, /accessibilityLabel = "Activity log viewport"/, `${name} must expose Scroll Container semantics`);
+  assert.match(source, /keyboardFocusable = true/, `${name} must expose keyboard focusability`);
+  assert.match(source, /verticalScrollState = activityScrollState/, `${name} must pass host-owned scroll state`);
+  assert.match(source, /Activity event 12/, `${name} must expose the shared terminal activity item`);
+  assert.match(source, /Scroll offset: \$\{activityScrollState\.value\}/, `${name} must surface host-owned offset`);
+}
+console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Scroll Container/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");
