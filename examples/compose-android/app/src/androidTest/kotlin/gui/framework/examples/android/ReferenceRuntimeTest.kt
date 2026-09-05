@@ -210,14 +210,21 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             atlasRow.assertIsNotSelected()
             novaRow.assertIsSelected()
-            composeRule.onNodeWithText("Selected project row: nova").assertIsDisplayed()
+            val novaSelectionStatus = composeRule.onNodeWithText("Selected project row: nova")
+            novaSelectionStatus.performScrollTo()
+            novaSelectionStatus.assertIsDisplayed()
 
+            atlasRow.performScrollTo()
             atlasRow.performTouchInput { doubleClick() }
             composeRule.waitForIdle()
             atlasRow.assertIsSelected()
             novaRow.assertIsNotSelected()
-            composeRule.onNodeWithText("Selected project row: atlas").assertIsDisplayed()
-            composeRule.onNodeWithText("Activated project row: atlas").assertIsDisplayed()
+            val atlasSelectionStatus = composeRule.onNodeWithText("Selected project row: atlas")
+            atlasSelectionStatus.performScrollTo()
+            atlasSelectionStatus.assertIsDisplayed()
+            val atlasActivationStatus = composeRule.onNodeWithText("Activated project row: atlas")
+            atlasActivationStatus.performScrollTo()
+            atlasActivationStatus.assertIsDisplayed()
         }
 
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
