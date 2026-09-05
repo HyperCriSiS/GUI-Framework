@@ -1,0 +1,25 @@
+name: Maintenance Tree Runtime
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Apply Tree Android runtime patch
+        run: python scripts/maintenance-tree-runtime.py
+      - name: Validate Android runtime source contract
+        run: node scripts/test-compose-android-reference.mjs
+      - name: Commit product changes and remove maintenance helpers
+        run: |
+          git rm scripts/maintenance-tree-runtime.py .github/workflows/maintenance-tree-runtime.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt scripts/test-compose-android-reference.mjs
+          git commit -m "test(tree): exercise Android hierarchy runtime [android-ci] [device-ci] [browser-ci]"
+          git push
