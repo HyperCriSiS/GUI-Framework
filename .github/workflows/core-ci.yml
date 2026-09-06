@@ -123,6 +123,12 @@ jobs:
       - name: Generate Web component output
         run: npm run build:web-components
 
+      - name: Build browser extension integration bundle
+        run: npm run build:browser-extension-integration
+
+      - name: Test browser extension integration kit
+        run: npm run test:browser-extension-integration
+
       - name: Test Web capability fallback generation
         run: npm run test:web-capabilities
 
