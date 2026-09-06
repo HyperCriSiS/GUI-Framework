@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { analyzeThemeAvailability } from "../../compiler/src/theme-availability.mjs";
 
@@ -106,6 +106,55 @@ function verifyRegistry(ir) {
   return ids;
 }
 
+function contractTypeNames(ir) {
+  const componentIds = Object.keys(ir.palettes?.[0]?.components ?? {}).sort();
+  const names = [
+    "GuiRegisteredThemeId",
+    "GuiThemeId",
+    "GuiComponentId",
+    "GuiContentSlot",
+    "GuiEventContract",
+    "GuiComponentSemantics",
+    "GuiComponentCapabilities",
+  ];
+  for (const id of componentIds) {
+    const name = pascalCase(id);
+    names.push(
+      `Gui${name}Variant`,
+      `Gui${name}Size`,
+      `Gui${name}State`,
+      `Gui${name}Properties`,
+      `Gui${name}Contract`,
+    );
+  }
+  return names;
+}
+
+function generateCompatibilityAliases(ir) {
+  const lines = [
+    "// Generated compatibility aliases for the pre-stable contract namespace.",
+    "// Do not edit directly. New consumer code must import gui.framework.generated.api.",
+    "@file:Suppress(\"unused\")",
+    "",
+    "package gui.framework.generated.internal",
+    "",
+  ];
+  for (const name of contractTypeNames(ir)) {
+    lines.push(`typealias ${name} = gui.framework.generated.api.${name}`);
+  }
+  lines.push("");
+  return `${lines.join("\n")}\n`;
+}
+
+function defaultAliasPath(outputPath) {
+  const resolvedOutput = resolve(outputPath);
+  const fileName = basename(resolvedOutput);
+  const aliasName = fileName.startsWith("GuiContracts")
+    ? fileName.replace(/^GuiContracts/, "GuiContractAliases")
+    : "GuiContractAliases.kt";
+  return join(dirname(resolvedOutput), aliasName);
+}
+
 function generate(ir) {
   const { registeredThemeIds, availableThemeIds } = analyzeThemeAvailability(ir);
   if (availableThemeIds.length === 0) throw new Error("Compiled IR contains no fully visualized themes");
@@ -116,7 +165,7 @@ function generate(ir) {
     "// Do not edit directly.",
     "@file:Suppress(\"MemberVisibilityCanBePrivate\")",
     "",
-    "package gui.framework.generated.internal",
+    "package gui.framework.generated.api",
     ""
   ];
 
@@ -171,9 +220,20 @@ function generate(ir) {
   return `${lines.join("\n")}\n`;
 }
 
-const [inputPath = "build/spec-ir.json", outputPath = "build/compose/GuiContracts.kt"] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const inputPath = args[0] ?? "build/spec-ir.json";
+const outputPath = args[1] ?? "build/compose/GuiContracts.kt";
+// The normal build emits compatibility aliases. Custom one-off generator calls remain
+// single-output unless they explicitly request an alias path as the third argument.
+const aliasOutputPath = args[2] ?? (args.length < 2 ? defaultAliasPath(outputPath) : null);
 const ir = JSON.parse(await readFile(resolve(inputPath), "utf8"));
 const source = generate(ir);
 await mkdir(dirname(resolve(outputPath)), { recursive: true });
 await writeFile(resolve(outputPath), source, "utf8");
+if (aliasOutputPath) {
+  const aliases = generateCompatibilityAliases(ir);
+  await mkdir(dirname(resolve(aliasOutputPath)), { recursive: true });
+  await writeFile(resolve(aliasOutputPath), aliases, "utf8");
+}
 console.log(`Generated Kotlin contracts at ${outputPath}`);
+if (aliasOutputPath) console.log(`Generated Kotlin compatibility aliases at ${aliasOutputPath}`);

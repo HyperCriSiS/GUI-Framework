@@ -3,15 +3,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 import { resolveThemeDefinitions } from "./theme-resolution.mjs";
 import { validatePaletteRegistry } from "./palette-model.mjs";
 import {
   compileVisualRecipe,
   mergeCompiledVisualRecipes,
 } from "./visual-resolution.mjs";
-
-const specRoot = resolve("spec");
-const manifestPath = join(specRoot, "manifest.json");
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -159,25 +157,27 @@ function compileThemeVisuals(theme, themeEntriesById, tokenUniverse) {
   };
 }
 
-async function compile() {
+export async function compileSpecification({ specRoot = "spec" } = {}) {
+  const resolvedSpecRoot = resolve(specRoot);
+  const manifestPath = join(resolvedSpecRoot, "manifest.json");
   const manifest = await readJson(manifestPath);
 
   const primitiveMaps = [];
   for (const source of manifest.tokenSources) {
-    const path = join(specRoot, source.source);
+    const path = join(resolvedSpecRoot, source.source);
     primitiveMaps.push(collectTokens(await readJson(path), source.source));
   }
   const primitives = mergeTokenMaps(...primitiveMaps);
 
   const components = [];
   for (const componentEntry of manifest.components) {
-    const recipe = await readJson(join(specRoot, componentEntry.source));
+    const recipe = await readJson(join(resolvedSpecRoot, componentEntry.source));
     components.push({ id: componentEntry.id, source: componentEntry.source, recipe });
   }
 
   const themeEntries = [];
   for (const themeEntry of manifest.themes) {
-    const definition = await readJson(join(specRoot, themeEntry.source));
+    const definition = await readJson(join(resolvedSpecRoot, themeEntry.source));
     themeEntries.push({
       id: themeEntry.id,
       name: themeEntry.name,
@@ -192,7 +192,7 @@ async function compile() {
 
   const palettes = [];
   for (const paletteEntry of manifest.palettes) {
-    const paletteTokens = collectTokens(await readJson(join(specRoot, paletteEntry.source)), paletteEntry.source);
+    const paletteTokens = collectTokens(await readJson(join(resolvedSpecRoot, paletteEntry.source)), paletteEntry.source);
     const tokenUniverse = mergeTokenMaps(primitives, paletteTokens);
 
     const compiledComponents = {};
@@ -252,9 +252,36 @@ async function compile() {
   });
 }
 
-const outputArgIndex = process.argv.indexOf("--output");
-const outputPath = resolve(outputArgIndex >= 0 ? process.argv[outputArgIndex + 1] : "build/spec-ir.json");
-const ir = await compile();
-await mkdir(dirname(outputPath), { recursive: true });
-await writeFile(outputPath, `${JSON.stringify(ir, null, 2)}\n`, "utf8");
-console.log(`Compiled GUI Framework specification ${ir.specVersion} to ${outputPath}`);
+export async function compileSpecificationToFile({ specRoot = "spec", outputPath = "build/spec-ir.json" } = {}) {
+  const resolvedOutputPath = resolve(outputPath);
+  const ir = await compileSpecification({ specRoot });
+  await mkdir(dirname(resolvedOutputPath), { recursive: true });
+  await writeFile(resolvedOutputPath, `${JSON.stringify(ir, null, 2)}\n`, "utf8");
+  return { ir, outputPath: resolvedOutputPath };
+}
+
+function parseLegacyCliArgs(argv) {
+  const outputIndex = argv.indexOf("--output");
+  if (outputIndex >= 0 && !argv[outputIndex + 1]) {
+    throw new Error("--output requires a path");
+  }
+  const specRootIndex = argv.indexOf("--spec-root");
+  if (specRootIndex >= 0 && !argv[specRootIndex + 1]) {
+    throw new Error("--spec-root requires a path");
+  }
+  return {
+    outputPath: outputIndex >= 0 ? argv[outputIndex + 1] : "build/spec-ir.json",
+    specRoot: specRootIndex >= 0 ? argv[specRootIndex + 1] : "spec",
+  };
+}
+
+function isDirectExecution() {
+  const entry = process.argv[1];
+  return typeof entry === "string" && import.meta.url === pathToFileURL(resolve(entry)).href;
+}
+
+if (isDirectExecution()) {
+  const options = parseLegacyCliArgs(process.argv.slice(2));
+  const { ir, outputPath } = await compileSpecificationToFile(options);
+  console.log(`Compiled GUI Framework specification ${ir.specVersion} to ${outputPath}`);
+}
