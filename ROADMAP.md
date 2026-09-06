@@ -100,14 +100,14 @@ The framework is intended to remain renderer-neutral at the semantic and theme-s
 
 - [x] Browser extension integration kit <!-- packaged JS/CSS/assets, MV3 consuming reference, default-CSP-safe runtime, permanent source/build gates, and real Chromium extension regression validated on main -->
 - [x] Desktop application integration kit <!-- thin GuiDesktopHost context, explicit capabilities, compiled consuming reference, permanent source/compile gates, and green main CI -->
-- [ ] Android application integration kit
-- [ ] Python application integration path
-- [ ] Web application integration kit
-- [ ] Shared host-context presets
+- [x] Android application integration kit <!-- explicit GuiAndroidHost context, consuming Compose Activity, permanent source-contract validation, Android/instrumentation compile and APK build, plus green API 23/API 35 runtime validation -->
+- [x] Python application integration path <!-- zero-dependency toolkit-neutral bridge over compiled spec IR, explicit host/capability resolution, real consuming reference, dedicated compiled-IR gate, and green main Core CI -->
+- [x] Web application integration kit <!-- reversible DOM host boundary, explicit capabilities and IR-backed fallback resolution, consuming native Web reference, focused source gate, and green Chromium runtime regression on main -->
+- [x] Shared host-context presets <!-- canonical capability presets with JS/Python/Kotlin parity bindings, safe portable baseline, explicit effect declarations, path-filtered parity CI, and green Kotlin/Core compilation on main -->
 
 ## Phase 8 — Distribution and ecosystem readiness
 
-- [ ] Package publication strategy
+- [x] Package publication strategy <!-- unified release train, machine-readable npm/Maven/PyPI/GitHub artifact plan, explicit-approval-only publication, registry coordinates locked until API/migration gates, AGPL/supply-chain requirements, and dedicated contract CI -->
 - [ ] Stable public API surface
 - [ ] Versioned migration policy
 - [ ] Theme authoring documentation
