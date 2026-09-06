@@ -13,6 +13,12 @@ This directory documents the supported authoring and integration contracts of GU
 - `docs/guides/ACCESSIBILITY.md` — semantics, keyboard/focus, target size, contrast and reduced-motion obligations.
 - `docs/guides/PERFORMANCE.md` — budgets, capability fallbacks and representative runtime evidence.
 
+## Distribution and pre-release hardening
+
+- `DISTRIBUTION.md` — unified release train, publication lock and local artifact staging rules.
+- `distribution/artifacts.json` — canonical artifact families and deliberately unbound registry coordinates.
+- `distribution/packaging.json` — Phase 9 package roots and local ecosystem staging strategies used before publication.
+
 ## Compatibility and project process
 
 - `COMPATIBILITY.md` — current support matrix, runtime floors and artifact-role compatibility.
