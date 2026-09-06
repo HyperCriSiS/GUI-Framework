@@ -37,6 +37,7 @@ android {
     // The reference app deliberately compiles the exact adapter and generated contracts used elsewhere.
     sourceSets.named("main") {
         kotlin.directories += "../../../packages/adapter-compose/src/main/kotlin"
+        kotlin.directories += "../../../packages/integration-android/src/main/kotlin"
         kotlin.directories += "../../../build/compose"
     }
 }
