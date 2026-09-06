@@ -79,6 +79,14 @@ def main() -> None:
     assert unsupported.supported is False
     assert unsupported.missing_required == ("shaderEffects",)
 
+    for scalar in ("backdropBlur", b"backdropBlur"):
+        try:
+            select_capability_fallback({}, scalar)
+        except TypeError:
+            pass
+        else:
+            raise AssertionError("scalar capability strings must be rejected")
+
     context = GuiPythonHostContext(
         theme_id="frosted-glass",
         palette_id="reference-dark",
@@ -103,6 +111,18 @@ def main() -> None:
         ).resolve_component("button")
         assert loaded.capability_selection.supported is True
         assert loaded.effective_visual["base"]["root"]["fill"]["value"] == "#202020"
+
+        try:
+            GuiPythonHost.from_file(
+                path,
+                theme_id="basic",
+                palette_id="reference-dark",
+                available_capabilities="nativeButton",
+            )
+        except TypeError:
+            pass
+        else:
+            raise AssertionError("GuiPythonHost.from_file must reject scalar capability strings")
 
     for bad in ("", "   "):
         try:
