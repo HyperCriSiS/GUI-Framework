@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": 1,
+  "versioning": {
+    "scheme": "semver",
+    "releaseTrain": "unified",
+    "pre1Behavior": "public API compatibility rules apply before 1.0; 0.x does not waive migration requirements"
+  },
+  "compatibilityDimensions": [
+    "source",
+    "binary",
+    "behavior"
+  ],
+  "changeClasses": {
+    "patch": {
+      "apiSnapshotChange": false,
+      "allowed": [
+        "bug fix preserving documented public behavior",
+        "performance improvement preserving public behavior",
+        "documentation or internal implementation change"
+      ]
+    },
+    "minor": {
+      "apiSnapshotChange": "additive-only",
+      "allowed": [
+        "new public symbol or new public package entrypoint",
+        "new optional property or parameter with a backwards-compatible default",
+        "new standalone component or capability that does not change existing contracts"
+      ],
+      "requiresMigrationNoteWhenSourceImpactExists": true
+    },
+    "major": {
+      "apiSnapshotChange": "breaking",
+      "includes": [
+        "public symbol removal or rename",
+        "public package or module relocation",
+        "public signature or type incompatibility",
+        "required property or parameter addition",
+        "public enum value removal or semantic repurposing",
+        "behavior change that invalidates documented consumer assumptions",
+        "artifact coordinate or release-train incompatibility"
+      ]
+    }
+  },
+  "generatedContracts": {
+    "publicPackage": "gui.framework.generated.api",
+    "internalPackage": "gui.framework.generated.internal",
+    "additiveTypeOrMember": "minor unless source/binary compatibility analysis escalates it",
+    "enumValueAddition": "minor-with-source-impact",
+    "enumValueRemovalOrRename": "major",
+    "compatibilityAliases": "transitional and non-public; removal still requires a recorded migration when repository-supported consumers depend on them"
+  },
+  "deprecation": {
+    "requiredBeforePublicRemoval": true,
+    "minimumReleasedMinorVersions": 1,
+    "removalBoundary": "next-major-or-later",
+    "mustDocumentReplacement": true,
+    "securityExceptionRequiresWaiver": true
+  },
+  "migrationRecord": {
+    "directory": "migrations",
+    "filePattern": "v<from>-to-v<to>.md",
+    "requiredFor": [
+      "major",
+      "minor-with-source-impact",
+      "security-compatibility-waiver"
+    ],
+    "requiredSections": [
+      "Summary",
+      "Affected public surface",
+      "Compatibility impact",
+      "Migration steps",
+      "Validation"
+    ]
+  },
+  "releaseGate": {
+    "publicApiSnapshot": "api/public-api.json",
+    "publicationPlan": "distribution/artifacts.json",
+    "publicationMustRemainExplicitApprovalOnly": true,
+    "automaticRegistryPublication": false
+  }
+}
