@@ -19,7 +19,7 @@ They are necessary but not sufficient to publish. The lock remains in force unti
 
 ## Artifact families
 
-The canonical machine-readable list is `distribution/artifacts.json`.
+The canonical machine-readable list is `distribution/artifacts.json`. The local pre-release packaging map is `distribution/packaging.json`; it binds every promised artifact to an explicit source/package root and ecosystem staging strategy without assigning a public registry coordinate.
 
 - **GitHub Release:** canonical specification sources/schemas and release metadata.
 - **npm:** core contracts, specification compiler, Web adapter, Browser Extension integration, Web Application integration, and JavaScript host-context binding.
@@ -27,6 +27,14 @@ The canonical machine-readable list is `distribution/artifacts.json`.
 - **PyPI:** toolkit-neutral Python integration and Python host-context binding.
 
 The current `@gui-framework/*` names are logical monorepo identifiers, not proof that a public npm scope has been reserved. Public registry coordinates are intentionally `null` in the distribution manifest until ownership is verified.
+
+## Pre-release artifact hardening
+
+Before registry coordinates are bound, Phase 9 builds ecosystem-native **local development artifacts** under `build/release-staging/`. These artifacts use the unified development version, carry license metadata, and are consumed from local tarballs/JARs/wheels rather than from a registry.
+
+This dry-run layer has two purposes: prove that package boundaries are genuinely self-contained, and catch release-only defects such as monorepo-deep imports, source-only entry points, missing generated output, incomplete package metadata, or cross-artifact dependency mistakes. Passing these gates does not authorize publication and does not change the publication lock.
+
+For npm, the staging gate compiles `@gui-framework/core` to ESM plus declarations, stages all six npm artifact families as private development packages, packs them to local tarballs, installs those tarballs into a clean consumer, and imports every canonical package entry point. Maven, PyPI, specification archive, checksum, reproducibility, and release-candidate dry-run gates are tracked separately in `ROADMAP.md`.
 
 ## What gets published
 
