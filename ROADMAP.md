@@ -98,8 +98,8 @@ The framework is intended to remain renderer-neutral at the semantic and theme-s
 
 ## Phase 7 — Integration kits
 
-- [ ] Browser extension integration kit
-- [ ] Desktop application integration kit
+- [x] Browser extension integration kit <!-- packaged JS/CSS/assets, MV3 consuming reference, default-CSP-safe runtime, permanent source/build gates, and real Chromium extension regression validated on main -->
+- [x] Desktop application integration kit <!-- thin GuiDesktopHost context, explicit capabilities, compiled consuming reference, permanent source/compile gates, and green main CI -->
 - [ ] Android application integration kit
 - [ ] Python application integration path
 - [ ] Web application integration kit
