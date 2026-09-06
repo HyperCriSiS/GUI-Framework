@@ -25,6 +25,10 @@ def _normalize_identifier(value: str, name: str) -> str:
 
 
 def _normalize_capabilities(values: Iterable[str]) -> frozenset[str]:
+    if isinstance(values, (str, bytes)):
+        raise TypeError(
+            "available_capabilities must be an iterable of capability identifiers, not a string"
+        )
     capabilities = frozenset(values)
     if any(not isinstance(value, str) or not value.strip() for value in capabilities):
         raise ValueError("available_capabilities must contain non-empty strings")
