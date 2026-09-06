@@ -117,6 +117,17 @@ The framework is intended to remain renderer-neutral at the semantic and theme-s
 - [x] Performance documentation <!-- machine-readable budget workflow, host-rendering/fallback/virtualization rules, representative runtime guidance, CI-cost discipline, and all six theme performance gates documented -->
 - [x] Contribution and governance documentation <!-- contribution gates, public-contract/security discipline, decision hierarchy, maintainer/release responsibilities, explicit release approval separation, and documentation-contract coverage -->
 
+## Phase 9 — Pre-release artifact hardening
+
+- [x] Machine-readable artifact packaging contract <!-- all 13 distribution artifacts map 1:1 to explicit package roots and ecosystem staging strategies while registry coordinates remain unbound and publication remains locked -->
+- [x] npm staged-package build / pack / install smoke <!-- Core emits consumable ESM + declarations, six private development tarballs include AGPL metadata/license, Web Application staging removes monorepo-deep imports, and a clean Node consumer imports all public package entry points -->
+- [ ] Maven local artifact build / consumer smoke
+- [ ] Python sdist / wheel build / install smoke
+- [ ] Specification-source release archive smoke
+- [ ] Cross-ecosystem staging manifest and checksums
+- [ ] Reproducible staging validation
+- [ ] Manual release-candidate dry-run workflow with no publication credentials or registry writes
+
 ## Completion gates
 
 A phase or component is only complete when every applicable gate is green:
