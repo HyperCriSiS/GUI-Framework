@@ -15,7 +15,9 @@ Only the package/module entry points listed in `api/public-api.json` are public.
 
 ## Kotlin / Compose
 
-`gui.framework.compose` and `gui.framework.generated.api` form the Compose consumer API. Spec-derived contract enums/data/contracts are generated into `gui.framework.generated.api`. Rendering recipes, visual registries, token mappings and related generated machinery remain in `gui.framework.generated.internal` and are not API. The contract generator also emits compatibility-only `typealias` bridges in the former internal contract namespace so current source consumers are not broken by the namespace stabilization; those aliases are transitional compatibility shims, not a public entry point.
+`gui.framework.compose` and `gui.framework.generated.api` form the Compose consumer API. Spec-derived contract enums/data/contracts are generated into `gui.framework.generated.api`. Rendering recipes, visual registries, token mappings and related generated machinery remain in `gui.framework.generated.internal` and are not API.
+
+The contract generator also emits compatibility-only `typealias` bridges in the former internal contract namespace. They preserve source compatibility for existing consumers during namespace stabilization, but are transitional shims and are not a public entry point. New code must import contract types from `gui.framework.generated.api`.
 
 Desktop and Android host contracts are public under `gui.framework.integration.desktop` and `gui.framework.integration.android`. Shared host-context Kotlin presets are public under `gui.framework.integration.hostcontext`.
 
