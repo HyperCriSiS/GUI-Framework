@@ -15,13 +15,13 @@ GUI Framework is licensed under AGPL-3.0-or-later. By contributing, you agree th
 - Keep commits scoped and explain architectural trade-offs for nontrivial changes.
 - Add or update the smallest permanent fast gate that detects the regression/class of change.
 - Trigger expensive browser/emulator runtime gates only when the behavior under change needs them or when a completion gate requires them.
-- Do not weaken validation, accessibility, performance, or compatibility contracts merely to make CI green.
+- Do not weaken validation, accessibility, performance, packaging, or compatibility contracts merely to make CI green.
 
 ## Required validation
 
-`npm run check` is the aggregate baseline. Apply additional completion gates from `ROADMAP.md` as relevant: schema validation, compiler tests, adapter contracts, accessibility, performance budgets, reference coverage, representative runtime validation, generated-output compilation/typechecking, and cross-platform parity.
+`npm run check` is the aggregate source/runtime baseline. Apply additional completion gates from `ROADMAP.md` as relevant: schema validation, compiler tests, adapter contracts, accessibility, performance budgets, reference coverage, representative runtime validation, generated-output compilation/typechecking, and cross-platform parity.
 
-Changes to public API or migration policy must also pass their dedicated path-filtered workflows. Interactive Web/Android changes may require Chromium and/or emulator gates.
+Changes to public API or migration policy must also pass their dedicated path-filtered workflows. Interactive Web/Android changes may require Chromium and/or emulator gates. Changes to distribution/package boundaries must pass the artifact packaging contract and the relevant ecosystem-local pack/consumer smoke; these gates never authorize publication.
 
 ## Authoring references
 
