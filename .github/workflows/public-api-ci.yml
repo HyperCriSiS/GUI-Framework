@@ -1,0 +1,60 @@
+name: Public API Contract CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "api/**"
+      - "PUBLIC_API.md"
+      - "package.json"
+      - "packages/core/**"
+      - "packages/compiler/**"
+      - "packages/adapter-web/**"
+      - "packages/adapter-compose/src/generate-contracts.mjs"
+      - "packages/adapter-compose/src/main/kotlin/**"
+      - "packages/integration-browser-extension/**"
+      - "packages/integration-web-application/**"
+      - "packages/integration-host-context/**"
+      - "packages/integration-python/**"
+      - "packages/integration-android/src/main/kotlin/**"
+      - "packages/integration-desktop/src/main/kotlin/**"
+      - "examples/compose-android/**"
+      - "examples/compose-desktop/**"
+      - "examples/compose-desktop-integration/**"
+      - "scripts/test-public-api.mjs"
+  pull_request:
+    paths:
+      - "api/**"
+      - "PUBLIC_API.md"
+      - "package.json"
+      - "packages/core/**"
+      - "packages/compiler/**"
+      - "packages/adapter-web/**"
+      - "packages/adapter-compose/src/generate-contracts.mjs"
+      - "packages/adapter-compose/src/main/kotlin/**"
+      - "packages/integration-browser-extension/**"
+      - "packages/integration-web-application/**"
+      - "packages/integration-host-context/**"
+      - "packages/integration-python/**"
+      - "packages/integration-android/src/main/kotlin/**"
+      - "packages/integration-desktop/src/main/kotlin/**"
+      - "examples/compose-android/**"
+      - "examples/compose-desktop/**"
+      - "examples/compose-desktop-integration/**"
+      - "scripts/test-public-api.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Test stable public API surface
+        run: node scripts/test-public-api.mjs

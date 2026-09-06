@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "status": "stable-boundary",
+  "publicationState": "locked",
+  "javascript": [
+    {
+      "artifact": "core-js",
+      "package": "@gui-framework/core",
+      "entrypoint": ".",
+      "exports": [
+        "AccessibilityMetadata",
+        "BaseComponentProps",
+        "BorderTokens",
+        "ButtonProps",
+        "ButtonVariant",
+        "CapabilityName",
+        "CapabilityRequirement",
+        "ColorTokens",
+        "ComponentState",
+        "ControlTokens",
+        "DEFAULT_COMPONENT_STATE",
+        "DesignTokens",
+        "DialogProps",
+        "EffectTokens",
+        "GuiSize",
+        "GuiTheme",
+        "InputProps",
+        "InputType",
+        "InteractionState",
+        "MotionDurations",
+        "MotionEasings",
+        "MotionPreference",
+        "MotionTokens",
+        "PanelProps",
+        "RadiusTokens",
+        "RenderQuality",
+        "RendererCapabilities",
+        "SemanticRole",
+        "SpacingTokens",
+        "SwitchProps",
+        "ThemeVisualVariant",
+        "TypographyTokens",
+        "resolveMotionDuration",
+        "supportsCapabilities"
+      ]
+    },
+    {
+      "artifact": "spec-compiler-js",
+      "package": "@gui-framework/spec-compiler",
+      "entrypoint": ".",
+      "exports": [
+        "compileSpecification",
+        "compileSpecificationToFile"
+      ]
+    },
+    {
+      "artifact": "web-adapter-js",
+      "package": "@gui-framework/web-adapter",
+      "entrypoint": ".",
+      "exports": [
+        "applyWebCapabilityFallback",
+        "configureWebCapabilityFallback",
+        "configureWebComponentCapabilities",
+        "createGuiButton",
+        "createGuiCheckbox",
+        "createGuiDataGrid",
+        "createGuiDataGridCell",
+        "createGuiDataGridColumnHeader",
+        "createGuiDataGridRow",
+        "createGuiDialog",
+        "createGuiFormActions",
+        "createGuiFormField",
+        "createGuiFormLayout",
+        "createGuiFormLayoutSection",
+        "createGuiInput",
+        "createGuiMenu",
+        "createGuiMenuItem",
+        "createGuiMenuSeparator",
+        "createGuiNavigation",
+        "createGuiNavigationItem",
+        "createGuiPanel",
+        "createGuiProgress",
+        "createGuiRadio",
+        "createGuiScrollContainer",
+        "createGuiSelect",
+        "createGuiSelectOption",
+        "createGuiSlider",
+        "createGuiSwitch",
+        "createGuiTab",
+        "createGuiTable",
+        "createGuiTableCell",
+        "createGuiTableHeaderCell",
+        "createGuiTableRow",
+        "createGuiTabs",
+        "createGuiToast",
+        "createGuiTooltip",
+        "createGuiTree",
+        "createGuiTreeItem",
+        "detectWebCapabilities",
+        "getWebComponentCapabilityProfile",
+        "selectWebCapabilityFallback"
+      ]
+    },
+    {
+      "artifact": "browser-extension-integration-js",
+      "package": "@gui-framework/browser-extension-integration",
+      "entrypoint": ".",
+      "exports": [
+        "BROWSER_EXTENSION_SURFACES",
+        "DEFAULT_BROWSER_EXTENSION_STYLESHEET_PATHS",
+        "createBrowserExtensionGuiHost",
+        "installBrowserExtensionStyles",
+        "resolveBrowserExtensionAssetUrl"
+      ]
+    },
+    {
+      "artifact": "web-application-integration-js",
+      "package": "@gui-framework/web-application-integration",
+      "entrypoint": ".",
+      "exports": [
+        "WEB_APPLICATION_SURFACES",
+        "createWebApplicationGuiHost"
+      ]
+    },
+    {
+      "artifact": "host-context-js",
+      "package": "@gui-framework/host-context",
+      "entrypoint": ".",
+      "exports": [
+        "GUI_HOST_CONTEXT_PRESETS",
+        "getGuiHostContextPreset",
+        "resolveGuiHostCapabilities"
+      ]
+    }
+  ],
+  "kotlin": [
+    {
+      "artifact": "compose-adapter-jvm",
+      "publicPackages": [
+        "gui.framework.compose",
+        "gui.framework.generated.api"
+      ],
+      "internalPackages": [
+        "gui.framework.generated.internal"
+      ]
+    },
+    {
+      "artifact": "desktop-integration-jvm",
+      "publicPackages": [
+        "gui.framework.integration.desktop"
+      ]
+    },
+    {
+      "artifact": "android-integration-jvm",
+      "publicPackages": [
+        "gui.framework.integration.android"
+      ]
+    },
+    {
+      "artifact": "host-context-jvm",
+      "publicPackages": [
+        "gui.framework.integration.hostcontext"
+      ]
+    }
+  ],
+  "python": [
+    {
+      "artifact": "python-integration",
+      "module": "gui_framework_integration",
+      "exports": [
+        "CapabilitySelection",
+        "GuiPythonHost",
+        "GuiPythonHostContext",
+        "GuiPythonSurface",
+        "ResolvedPythonComponent",
+        "load_compiled_spec",
+        "select_capability_fallback"
+      ]
+    },
+    {
+      "artifact": "host-context-python",
+      "module": "gui_framework_host_context_presets",
+      "exports": [
+        "GUI_HOST_CONTEXT_PRESETS",
+        "get_gui_host_context_preset",
+        "resolve_gui_host_capabilities"
+      ]
+    }
+  ],
+  "rules": [
+    "Only listed package/module entrypoints are public; repository deep imports are internal.",
+    "Generated Kotlin contract types are public only under gui.framework.generated.api.",
+    "Generated Kotlin visual/token/registry types under gui.framework.generated.internal are implementation details.",
+    "Adding a public symbol is compatible; removing or changing a public symbol requires the versioned migration policy.",
+    "Publication remains locked until the migration-policy roadmap gate is complete."
+  ]
+}
