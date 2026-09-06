@@ -1,0 +1,9 @@
+[project]
+name = "gui-framework-integration"
+version = "0.0.0"
+description = "Internal toolkit-neutral Python integration path for GUI Framework compiled IR"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0-or-later" }
+
+[tool.setuptools]
+packages = ["gui_framework_integration"]
