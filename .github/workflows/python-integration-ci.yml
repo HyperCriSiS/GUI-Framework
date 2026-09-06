@@ -1,0 +1,47 @@
+name: Python Integration CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/integration-python/**"
+      - "examples/python-integration/**"
+      - "scripts/test-python-integration.py"
+      - ".github/workflows/python-integration-ci.yml"
+  pull_request:
+    paths:
+      - "packages/integration-python/**"
+      - "examples/python-integration/**"
+      - "scripts/test-python-integration.py"
+      - ".github/workflows/python-integration-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-integration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compiled-ir-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Compile neutral specification
+        run: npm run compile:spec
+
+      - name: Show Python runtime
+        run: python3 --version
+
+      - name: Test Python integration path
+        run: python3 scripts/test-python-integration.py
