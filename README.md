@@ -23,11 +23,11 @@ Primary roles:
 - **Skia:** optional advanced rendering and shader effects where supported and worthwhile.
 - **Capability fallbacks:** themes must remain usable when advanced effects are unavailable or intentionally disabled.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [COMPATIBILITY.md](COMPATIBILITY.md) for the support/versioning policy, and [ROADMAP.md](ROADMAP.md) for implementation status and milestones.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [PUBLIC_API.md](PUBLIC_API.md) for the stable consumer boundary, [MIGRATION_POLICY.md](MIGRATION_POLICY.md) for compatibility/versioning rules, [docs/README.md](docs/README.md) for authoring and quality guides, and [ROADMAP.md](ROADMAP.md) for implementation status.
 
 ## Status
 
-Foundation phase. The initial Web and Compose reference-component set is implemented, and the Web reference application has interaction and visual-regression coverage. Public APIs remain experimental before 1.0; compatibility rules are documented in [COMPATIBILITY.md](COMPATIBILITY.md).
+The component/theme foundations, six initial theme families, extended component set, Web/Compose references, and Phase 7 integration kits are implemented. A stable consumer boundary and versioned migration policy are defined before 1.0. Registry publication remains locked and requires explicit release approval; see [DISTRIBUTION.md](DISTRIBUTION.md).
 
 ## License
 
