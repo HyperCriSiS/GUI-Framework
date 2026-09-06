@@ -1,0 +1,210 @@
+name: Maintenance IME Web
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch Web editable controls and add IME gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('packages/adapter-web/src/input.mjs')
+          s = path.read_text()
+          s = s.replace(
+            '  let props = normalizeProps(initialProps);\n\n  function render() {',
+            '  let props = normalizeProps(initialProps);\n  let composing = false;\n  let lastInputValue = props.value;\n\n  function render() {'
+          )
+          s = s.replace(
+            '    element.value = props.value;\n',
+            '    if (!composing) element.value = props.value;\n'
+          )
+          s = s.replace(
+            '''  function valueChange(event) {\n    if (props.disabled || props.readOnly) return;\n    props.onValueChange?.(event.currentTarget.value);\n  }\n\n  element.addEventListener("input", valueChange);''',
+            '''  function valueChange(event) {\n    if (props.disabled || props.readOnly) return;\n    if (event.isComposing === true) composing = true;\n    lastInputValue = event.currentTarget.value;\n    props.onValueChange?.(lastInputValue);\n  }\n\n  function compositionStart() {\n    if (props.disabled || props.readOnly) return;\n    composing = true;\n  }\n\n  function compositionEnd(event) {\n    if (props.disabled || props.readOnly) {\n      composing = false;\n      return;\n    }\n    composing = false;\n    const committedValue = event.currentTarget.value;\n    queueMicrotask(() => {\n      if (props.disabled || props.readOnly || composing) return;\n      if (element.value !== committedValue || lastInputValue === committedValue) return;\n      lastInputValue = committedValue;\n      props.onValueChange?.(committedValue);\n    });\n  }\n\n  element.addEventListener("compositionstart", compositionStart);\n  element.addEventListener("compositionend", compositionEnd);\n  element.addEventListener("input", valueChange);'''
+          )
+          s = s.replace(
+            '''    destroy() {\n      element.removeEventListener("input", valueChange);\n    },''',
+            '''    destroy() {\n      element.removeEventListener("compositionstart", compositionStart);\n      element.removeEventListener("compositionend", compositionEnd);\n      element.removeEventListener("input", valueChange);\n    },'''
+          )
+          path.write_text(s)
+
+          path = Path('packages/adapter-web/src/select.mjs')
+          s = path.read_text()
+          s = s.replace(
+            '  let props = normalizeProps(initialProps);\n  let activeIndex = -1;',
+            '  let props = normalizeProps(initialProps);\n  let activeIndex = -1;\n  let composing = false;\n  let lastInputQuery = props.query;'
+          )
+          s = s.replace(
+            '    element.value = props.editable ? props.query : props.value;\n',
+            '    if (!props.editable || !composing) element.value = props.editable ? props.query : props.value;\n'
+          )
+          s = s.replace(
+            '''  function input(event) {\n    if (props.disabled || !props.editable) return;\n    props.onQueryChange?.(event.currentTarget.value);\n    if (!props.expanded) props.onExpandedChange?.(true);\n  }\n\n  function click() {''',
+            '''  function input(event) {\n    if (props.disabled || !props.editable) return;\n    if (event.isComposing === true) composing = true;\n    lastInputQuery = event.currentTarget.value;\n    props.onQueryChange?.(lastInputQuery);\n    if (!props.expanded) props.onExpandedChange?.(true);\n  }\n\n  function compositionStart() {\n    if (props.disabled || !props.editable) return;\n    composing = true;\n  }\n\n  function compositionEnd(event) {\n    if (props.disabled || !props.editable) {\n      composing = false;\n      return;\n    }\n    composing = false;\n    const committedQuery = event.currentTarget.value;\n    queueMicrotask(() => {\n      if (props.disabled || !props.editable || composing) return;\n      if (element.value !== committedQuery || lastInputQuery === committedQuery) return;\n      lastInputQuery = committedQuery;\n      props.onQueryChange?.(committedQuery);\n      if (!props.expanded) props.onExpandedChange?.(true);\n    });\n  }\n\n  function click() {'''
+          )
+          s = s.replace(
+            '''  function keydown(event) {\n    if (props.disabled) return;\n    if (event.key === "ArrowDown" || event.key === "ArrowUp") {''',
+            '''  function keydown(event) {\n    if (props.disabled) return;\n    if (props.editable && (composing || event.isComposing === true || event.keyCode === 229)) return;\n    if (event.key === "ArrowDown" || event.key === "ArrowUp") {'''
+          )
+          s = s.replace(
+            '''  element.addEventListener("input", input);\n  element.addEventListener("click", click);''',
+            '''  element.addEventListener("compositionstart", compositionStart);\n  element.addEventListener("compositionend", compositionEnd);\n  element.addEventListener("input", input);\n  element.addEventListener("click", click);'''
+          )
+          s = s.replace(
+            '''    destroy() {\n      element.removeEventListener("input", input);\n      element.removeEventListener("click", click);''',
+            '''    destroy() {\n      element.removeEventListener("compositionstart", compositionStart);\n      element.removeEventListener("compositionend", compositionEnd);\n      element.removeEventListener("input", input);\n      element.removeEventListener("click", click);'''
+          )
+          path.write_text(s)
+
+          Path('scripts/test-web-ime-composition.mjs').write_text(r'''// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import assert from "node:assert/strict";
+import { createGuiInput } from "../packages/adapter-web/src/input.mjs";
+import { createGuiSelect, createGuiSelectOption } from "../packages/adapter-web/src/select.mjs";
+
+class FakeElement {
+  constructor(tagName) {
+    this.tagName = tagName.toUpperCase();
+    this.dataset = {};
+    this.attributes = new Map();
+    this.listeners = new Map();
+    this.children = [];
+    this.parentNode = null;
+    this.disabled = false;
+    this.readOnly = false;
+    this.hidden = false;
+    this.value = "";
+    this.placeholder = "";
+    this.className = "";
+    this.type = "";
+    this.id = "";
+  }
+  setAttribute(name, value) { this.attributes.set(name, String(value)); }
+  removeAttribute(name) { this.attributes.delete(name); }
+  getAttribute(name) { return this.attributes.get(name) ?? null; }
+  addEventListener(type, listener) { this.listeners.set(type, listener); }
+  removeEventListener(type, listener) { if (this.listeners.get(type) === listener) this.listeners.delete(type); }
+  appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
+  dispatch(type, init = {}) {
+    let prevented = false;
+    const event = {
+      type,
+      currentTarget: this,
+      target: this,
+      key: init.key,
+      keyCode: init.keyCode ?? 0,
+      isComposing: init.isComposing ?? false,
+      preventDefault() { prevented = true; },
+    };
+    this.listeners.get(type)?.(event);
+    return { prevented };
+  }
+}
+
+const fakeDocument = { createElement: (tagName) => new FakeElement(tagName) };
+
+const inputChanges = [];
+const input = createGuiInput(fakeDocument, {
+  value: "seed",
+  onValueChange: (value) => inputChanges.push(value),
+});
+input.element.dispatch("compositionstart");
+input.element.value = "に";
+input.element.dispatch("input", { isComposing: true });
+input.update({ value: "seed" });
+assert.equal(input.element.value, "に", "stale controlled input render must not overwrite active IME preedit");
+input.element.value = "日本";
+input.element.dispatch("input", { isComposing: true });
+input.update({ value: "に" });
+assert.equal(input.element.value, "日本", "later preedit must survive controlled updates during composition");
+input.element.dispatch("compositionend");
+await Promise.resolve();
+assert.deepEqual(inputChanges, ["に", "日本"], "compositionend fallback must not duplicate an already observed final preedit value");
+input.update({ value: "日本" });
+assert.equal(input.element.value, "日本");
+input.element.dispatch("compositionstart");
+input.element.value = "日本語";
+input.element.dispatch("compositionend");
+await Promise.resolve();
+assert.deepEqual(inputChanges, ["に", "日本", "日本語"], "compositionend must emit committed text when a browser omits the final input event");
+input.update({ value: "server-reset" });
+assert.equal(input.element.value, "server-reset", "controlled reconciliation must resume after composition ends");
+input.destroy();
+assert.equal(input.element.listeners.has("compositionstart"), false);
+assert.equal(input.element.listeners.has("compositionend"), false);
+
+const queryChanges = [];
+const valueChanges = [];
+const expandedChanges = [];
+const select = createGuiSelect(fakeDocument, {
+  value: "",
+  query: "seed",
+  editable: true,
+  expanded: true,
+  onQueryChange: (value) => queryChanges.push(value),
+  onValueChange: (value) => valueChanges.push(value),
+  onExpandedChange: (value) => expandedChanges.push(value),
+});
+const option = createGuiSelectOption(fakeDocument, { value: "jp", label: "日本語" });
+select.popupElement.appendChild(option.element);
+select.refreshOptions();
+select.element.dispatch("compositionstart");
+select.element.value = "か";
+select.element.dispatch("input", { isComposing: true });
+select.update({ query: "seed" });
+assert.equal(select.element.value, "か", "editable combobox preedit must survive stale controlled query renders");
+const enterDuringComposition = select.element.dispatch("keydown", { key: "Enter", isComposing: true, keyCode: 229 });
+assert.equal(enterDuringComposition.prevented, false, "IME Enter must not be consumed by combobox navigation");
+assert.deepEqual(valueChanges, [], "IME Enter must not commit an option");
+const arrowDuringComposition = select.element.dispatch("keydown", { key: "ArrowDown", isComposing: true, keyCode: 229 });
+assert.equal(arrowDuringComposition.prevented, false, "IME arrow keys must remain available to the candidate UI");
+select.element.value = "かな";
+select.element.dispatch("input", { isComposing: true });
+select.update({ query: "か" });
+assert.equal(select.element.value, "かな");
+select.element.dispatch("compositionend");
+await Promise.resolve();
+assert.deepEqual(queryChanges, ["か", "かな"]);
+select.update({ query: "かな" });
+const processKey = select.element.dispatch("keydown", { key: "Enter", keyCode: 229 });
+assert.equal(processKey.prevented, false, "legacy IME process key 229 must not be consumed even if isComposing is unavailable");
+assert.deepEqual(valueChanges, []);
+const enterAfterComposition = select.element.dispatch("keydown", { key: "Enter" });
+assert.equal(enterAfterComposition.prevented, true, "normal Enter handling must resume after composition");
+assert.deepEqual(valueChanges, ["jp"]);
+assert.deepEqual(expandedChanges, [false]);
+select.destroy();
+assert.equal(select.element.listeners.has("compositionstart"), false);
+assert.equal(select.element.listeners.has("compositionend"), false);
+
+console.log("Web IME composition robustness tests passed.");
+''')
+          PY
+      - name: Validate source syntax
+        run: |
+          node --check packages/adapter-web/src/input.mjs
+          node --check packages/adapter-web/src/select.mjs
+          node --check scripts/test-web-ime-composition.mjs
+      - name: Run existing Web editable-control gates
+        run: |
+          node scripts/test-web-input.mjs
+          node scripts/test-web-select.mjs
+      - name: Run Web IME composition gate
+        run: node scripts/test-web-ime-composition.mjs
+      - name: Commit validated Web IME slice
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/adapter-web/src/input.mjs packages/adapter-web/src/select.mjs scripts/test-web-ime-composition.mjs
+          git commit -m "fix(ime): preserve Web composition sessions" 
+          git push
