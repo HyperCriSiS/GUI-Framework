@@ -108,14 +108,14 @@ The framework is intended to remain renderer-neutral at the semantic and theme-s
 ## Phase 8 — Distribution and ecosystem readiness
 
 - [x] Package publication strategy <!-- unified release train, machine-readable npm/Maven/PyPI/GitHub artifact plan, explicit-approval-only publication, registry coordinates locked until API/migration gates, AGPL/supply-chain requirements, and dedicated contract CI -->
-- [ ] Stable public API surface
-- [ ] Versioned migration policy
-- [ ] Theme authoring documentation
-- [ ] Adapter authoring documentation
-- [ ] Component authoring documentation
-- [ ] Accessibility documentation
-- [ ] Performance documentation
-- [ ] Contribution and governance documentation
+- [x] Stable public API surface <!-- canonical package entry points, exact cross-language API snapshot, side-effect-free compiler library/CLI split, public Compose contract namespace with compatibility aliases, and dedicated Public API Contract CI are complete -->
+- [x] Versioned migration policy <!-- unified SemVer policy across source/binary/behavior compatibility, deprecation window, generated-contract rules, migration records, security waiver path, and dedicated migration-policy CI are complete -->
+- [x] Theme authoring documentation <!-- schema-backed theme/palette/inheritance/capability workflow, real validation commands, fallback/performance/accessibility completion rules, and documentation-contract coverage -->
+- [x] Adapter authoring documentation <!-- compiled-IR boundary, host-platform ownership, capability/unit/rendering rules, explicit public-entry-point guidance, and validation/runtime completion workflow -->
+- [x] Component authoring documentation <!-- all schema-required recipe fields, semantics/state/token/capability rules, end-to-end Web/Compose workflow, public-API/migration discipline, and documentation-contract coverage -->
+- [x] Accessibility documentation <!-- neutral semantics, keyboard/focus/target/contrast/text/reduced-motion requirements, native-platform guidance, concrete validation commands, and review checklist -->
+- [x] Performance documentation <!-- machine-readable budget workflow, host-rendering/fallback/virtualization rules, representative runtime guidance, CI-cost discipline, and all six theme performance gates documented -->
+- [x] Contribution and governance documentation <!-- contribution gates, public-contract/security discipline, decision hierarchy, maintainer/release responsibilities, explicit release approval separation, and documentation-contract coverage -->
 
 ## Completion gates
 
