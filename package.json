@@ -122,6 +122,9 @@
     "build:core-release": "npx --yes --package=typescript@6.0.2 tsc -p packages/core/tsconfig.build.json",
     "stage:npm-artifacts": "node scripts/stage-npm-artifacts.mjs",
     "test:npm-artifacts": "node scripts/test-npm-artifacts.mjs",
-    "check:npm-artifacts": "npm run test:artifact-packaging && npm run build:core-release && npm run stage:npm-artifacts && npm run test:npm-artifacts"
+    "check:npm-artifacts": "npm run test:artifact-packaging && npm run build:core-release && npm run stage:npm-artifacts && npm run test:npm-artifacts",
+    "stage:maven-artifacts": "node scripts/stage-maven-artifacts.mjs",
+    "test:maven-artifacts": "node scripts/test-maven-artifacts.mjs",
+    "check:maven-artifacts": "npm run test:artifact-packaging && npm run compile:spec && npm run build:kotlin-contracts && npm run build:kotlin-tokens && npm run build:kotlin-visuals && npm run build:kotlin-assets && npm run stage:maven-artifacts && npm run test:maven-artifacts"
   }
 }
