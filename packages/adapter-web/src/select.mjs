@@ -142,6 +142,8 @@ export function createGuiSelect(document, initialProps = {}) {
 
   let props = normalizeProps(initialProps);
   let activeIndex = -1;
+  let composing = false;
+  let lastInputQuery = props.query;
 
   function enabledOptions() {
     return optionChildren(popupElement).filter((option) => !optionDisabled(option));
@@ -181,7 +183,7 @@ export function createGuiSelect(document, initialProps = {}) {
     element.dataset.guiSize = props.size;
     element.dataset.guiEditable = props.editable ? "true" : "false";
     element.dataset.guiState = props.expanded ? "expanded" : "";
-    element.value = props.editable ? props.query : props.value;
+    if (!props.editable || !composing) element.value = props.editable ? props.query : props.value;
     element.placeholder = props.placeholder;
     element.disabled = props.disabled;
     element.readOnly = !props.editable;
@@ -224,8 +226,31 @@ export function createGuiSelect(document, initialProps = {}) {
 
   function input(event) {
     if (props.disabled || !props.editable) return;
-    props.onQueryChange?.(event.currentTarget.value);
+    if (event.isComposing === true) composing = true;
+    lastInputQuery = event.currentTarget.value;
+    props.onQueryChange?.(lastInputQuery);
     if (!props.expanded) props.onExpandedChange?.(true);
+  }
+
+  function compositionStart() {
+    if (props.disabled || !props.editable) return;
+    composing = true;
+  }
+
+  function compositionEnd(event) {
+    if (props.disabled || !props.editable) {
+      composing = false;
+      return;
+    }
+    composing = false;
+    const committedQuery = event.currentTarget.value;
+    queueMicrotask(() => {
+      if (props.disabled || !props.editable || composing) return;
+      if (element.value !== committedQuery || lastInputQuery === committedQuery) return;
+      lastInputQuery = committedQuery;
+      props.onQueryChange?.(committedQuery);
+      if (!props.expanded) props.onExpandedChange?.(true);
+    });
   }
 
   function click() {
@@ -235,6 +260,7 @@ export function createGuiSelect(document, initialProps = {}) {
 
   function keydown(event) {
     if (props.disabled) return;
+    if (props.editable && (composing || event.isComposing === true || event.keyCode === 229)) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault?.();
       if (!props.expanded) requestExpanded(true);
@@ -262,6 +288,8 @@ export function createGuiSelect(document, initialProps = {}) {
     commitOption(closestOption(event.target, popupElement));
   }
 
+  element.addEventListener("compositionstart", compositionStart);
+  element.addEventListener("compositionend", compositionEnd);
   element.addEventListener("input", input);
   element.addEventListener("click", click);
   element.addEventListener("keydown", keydown);
@@ -279,6 +307,8 @@ export function createGuiSelect(document, initialProps = {}) {
       syncOptions();
     },
     destroy() {
+      element.removeEventListener("compositionstart", compositionStart);
+      element.removeEventListener("compositionend", compositionEnd);
       element.removeEventListener("input", input);
       element.removeEventListener("click", click);
       element.removeEventListener("keydown", keydown);

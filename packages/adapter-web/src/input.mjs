@@ -52,13 +52,15 @@ export function createGuiInput(document, initialProps = {}) {
   element.className = "gui-input";
 
   let props = normalizeProps(initialProps);
+  let composing = false;
+  let lastInputValue = props.value;
 
   function render() {
     element.dataset.guiComponent = "input";
     element.dataset.guiVariant = props.variant;
     element.dataset.guiSize = props.size;
     element.dataset.guiError = props.error ? "true" : "false";
-    element.value = props.value;
+    if (!composing) element.value = props.value;
     element.placeholder = props.placeholder;
     element.disabled = props.disabled;
     element.readOnly = props.readOnly;
@@ -71,9 +73,33 @@ export function createGuiInput(document, initialProps = {}) {
 
   function valueChange(event) {
     if (props.disabled || props.readOnly) return;
-    props.onValueChange?.(event.currentTarget.value);
+    if (event.isComposing === true) composing = true;
+    lastInputValue = event.currentTarget.value;
+    props.onValueChange?.(lastInputValue);
   }
 
+  function compositionStart() {
+    if (props.disabled || props.readOnly) return;
+    composing = true;
+  }
+
+  function compositionEnd(event) {
+    if (props.disabled || props.readOnly) {
+      composing = false;
+      return;
+    }
+    composing = false;
+    const committedValue = event.currentTarget.value;
+    queueMicrotask(() => {
+      if (props.disabled || props.readOnly || composing) return;
+      if (element.value !== committedValue || lastInputValue === committedValue) return;
+      lastInputValue = committedValue;
+      props.onValueChange?.(committedValue);
+    });
+  }
+
+  element.addEventListener("compositionstart", compositionStart);
+  element.addEventListener("compositionend", compositionEnd);
   element.addEventListener("input", valueChange);
   render();
 
@@ -84,6 +110,8 @@ export function createGuiInput(document, initialProps = {}) {
       render();
     },
     destroy() {
+      element.removeEventListener("compositionstart", compositionStart);
+      element.removeEventListener("compositionend", compositionEnd);
       element.removeEventListener("input", valueChange);
     },
   };
