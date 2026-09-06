@@ -97,6 +97,7 @@ function pom({ artifactId, name, dependencies = "", sourceDirs, compose = false 
         <compose.version>${composeVersion}</compose.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>1980-01-01T00:00:00Z</project.build.outputTimestamp>
+        <kotlin.compiler.daemon>false</kotlin.compiler.daemon>
     </properties>${repositoriesXml}
     <dependencies>
         <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-stdlib</artifactId><version>\${kotlin.version}</version></dependency>${dependencies}
@@ -184,7 +185,7 @@ fs.writeFileSync(path.join(consumerDir, "pom.xml"), `<?xml version="1.0" encodin
     <groupId>gui.framework.local.smoke</groupId>
     <artifactId>artifact-consumer</artifactId>
     <version>0.0.0</version>
-    <properties><kotlin.version>${kotlinVersion}</kotlin.version><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding></properties>
+    <properties><kotlin.version>${kotlinVersion}</kotlin.version><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding><kotlin.compiler.daemon>false</kotlin.compiler.daemon></properties>
     ${repositoriesXml}
     <dependencies>
         <dependency><groupId>${localGroup}</groupId><artifactId>gui-framework-compose-adapter</artifactId><version>${version}</version></dependency>
