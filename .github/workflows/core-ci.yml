@@ -159,6 +159,9 @@ jobs:
       - name: Test native Web Basic Scroll Container
         run: npm run test:web-scroll-container
 
+      - name: Test cross-component Web text / locale robustness
+        run: npm run test:text-locale-robustness
+
       - name: Test native Web Basic Table / Data Grid
         run: npm run test:web-table
 
@@ -212,6 +215,9 @@ jobs:
 
       - name: Test standalone Web Scroll Container reference
         run: npm run test:web-scroll-container-reference
+
+      - name: Test standalone Web text / locale reference
+        run: npm run test:web-text-locale-reference
 
       - name: Test standalone Web Table / Data Grid reference
         run: npm run test:web-table-reference
@@ -284,6 +290,9 @@ jobs:
 
       - name: Test native Compose Basic Scroll Container
         run: npm run test:kotlin-scroll-container
+
+      - name: Test Compose text / locale robustness
+        run: npm run test:kotlin-text-locale
 
       - name: Test native Compose Basic Table / Data Grid
         run: npm run test:kotlin-table
