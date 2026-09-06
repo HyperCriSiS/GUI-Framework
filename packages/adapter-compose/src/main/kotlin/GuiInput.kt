@@ -35,8 +35,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,6 +103,10 @@ private fun GuiVisualPartStyle.inputTextStyle(fallback: GuiVisualPartStyle? = nu
     )
 }
 
+/**
+ * Native single-line Compose text input driven by the neutral GUI input recipe.
+ * It intentionally uses Foundation rather than Material so theme behavior remains framework-owned.
+ */
 @Composable
 fun GuiInput(
     value: String,
@@ -138,13 +142,16 @@ fun GuiInput(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "input",
-    ) ?: error("No Compose visual recipe for input with theme ${selection.theme.wireValue} and palette ${selection.paletteId}")
+    ) ?: error(
+        "No Compose visual recipe for input with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
+    )
     val recipe = resolveGuiCapabilityRecipe(
         capabilities = GuiInputContract.capabilities,
         recipe = baseRecipe,
         availableCapabilities = LocalGuiAvailableCapabilities.current,
         componentId = "input",
     )
+
     val activeStates = buildSet {
         if (hovered && enabled) add("hover")
         if (focused && enabled) add("focus")
@@ -162,18 +169,34 @@ fun GuiInput(
     val placeholderStyle = resolved["placeholder"] ?: GuiVisualPartStyle()
     val radius = root.radius?.toComposeDp() ?: 0.dp
     val shape = RoundedCornerShape(radius)
-    var fieldModifier = Modifier.defaultMinSize(
-        minWidth = root.minWidth?.toComposeDp() ?: 0.dp,
-        minHeight = root.minHeight?.toComposeDp() ?: 0.dp,
-    ).clip(shape)
+
+    var fieldModifier = Modifier
+        .defaultMinSize(
+            minWidth = root.minWidth?.toComposeDp() ?: 0.dp,
+            minHeight = root.minHeight?.toComposeDp() ?: 0.dp,
+        )
+        .clip(shape)
+
     root.fill?.let { fieldModifier = fieldModifier.background(it.toComposeColor(), shape) }
-    root.border?.let { fieldModifier = fieldModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), shape) }
-    if (accessibilityLabel.isNotBlank()) fieldModifier = fieldModifier.semantics { contentDescription = accessibilityLabel }
-    fieldModifier = fieldModifier.alpha(root.inputOpacity()).hoverable(interactionSource = source, enabled = enabled).padding(
-        horizontal = root.paddingHorizontal?.toComposeDp() ?: 0.dp,
-        vertical = root.paddingVertical?.toComposeDp() ?: 0.dp,
-    )
-    Box(modifier = modifier.guiInputFocusOutline(root.outline, radius), propagateMinConstraints = true) {
+    root.border?.let {
+        fieldModifier = fieldModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), shape)
+    }
+    if (accessibilityLabel.isNotBlank()) {
+        fieldModifier = fieldModifier.semantics { contentDescription = accessibilityLabel }
+    }
+
+    fieldModifier = fieldModifier
+        .alpha(root.inputOpacity())
+        .hoverable(interactionSource = source, enabled = enabled)
+        .padding(
+            horizontal = root.paddingHorizontal?.toComposeDp() ?: 0.dp,
+            vertical = root.paddingVertical?.toComposeDp() ?: 0.dp,
+        )
+
+    Box(
+        modifier = modifier.guiInputFocusOutline(root.outline, radius),
+        propagateMinConstraints = true,
+    ) {
         BasicTextField(
             value = fieldValue,
             onValueChange = { nextValue ->
@@ -189,7 +212,9 @@ fun GuiInput(
             cursorBrush = SolidColor(root.outline?.color?.toComposeColor() ?: root.foreground?.toComposeColor() ?: Color.Unspecified),
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterStart) {
-                    if (fieldValue.text.isEmpty() && placeholder.isNotEmpty()) BasicText(text = placeholder, style = placeholderStyle.inputTextStyle(root))
+                    if (fieldValue.text.isEmpty() && placeholder.isNotEmpty()) {
+                        BasicText(text = placeholder, style = placeholderStyle.inputTextStyle(root))
+                    }
                     innerTextField()
                 }
             },
