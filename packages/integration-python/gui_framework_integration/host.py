@@ -40,7 +40,7 @@ class GuiPythonHostContext:
     theme_id: str
     palette_id: str
     surface: GuiPythonSurface = GuiPythonSurface.APPLICATION
-    available_capabilities: frozenset[str] = frozenset()
+    available_capabilities: Iterable[str] = frozenset()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "theme_id", _normalize_identifier(self.theme_id, "theme_id"))
@@ -147,7 +147,7 @@ class GuiPythonHost:
                 theme_id=theme_id,
                 palette_id=palette_id,
                 surface=surface,
-                available_capabilities=frozenset(available_capabilities),
+                available_capabilities=available_capabilities,
             ),
         )
 
