@@ -330,6 +330,9 @@ jobs:
       - name: Test Compose scaling and minimum-capability behavior
         run: npm run test:kotlin-scaling
 
+      - name: Test Compose Desktop integration kit
+        run: npm run test:desktop-integration
+
       - name: Test Compose Desktop reference application
         run: npm run test:kotlin-desktop-reference
 
