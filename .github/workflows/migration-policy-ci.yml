@@ -1,0 +1,36 @@
+name: Migration Policy CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "api/migration-policy.json"
+      - "api/public-api.json"
+      - "MIGRATION_POLICY.md"
+      - "migrations/**"
+      - "distribution/artifacts.json"
+      - "scripts/test-migration-policy.mjs"
+  pull_request:
+    paths:
+      - "api/migration-policy.json"
+      - "api/public-api.json"
+      - "MIGRATION_POLICY.md"
+      - "migrations/**"
+      - "distribution/artifacts.json"
+      - "scripts/test-migration-policy.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Validate versioned migration policy
+        run: node scripts/test-migration-policy.mjs
