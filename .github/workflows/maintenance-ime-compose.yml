@@ -1,0 +1,126 @@
+name: Maintenance IME Compose
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Patch Compose editable controls and add source gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('packages/adapter-compose/src/main/kotlin/GuiInput.kt')
+          s = p.read_text()
+          s = s.replace(
+            'import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.remember\n',
+            'import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.SideEffect\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\n'
+          )
+          s = s.replace(
+            'import androidx.compose.ui.text.TextStyle\n',
+            'import androidx.compose.ui.text.TextRange\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.input.TextFieldValue\n'
+          )
+          s = s.replace(
+            '    val enabled = !disabled\n\n    val baseRecipe =',
+            '''    val enabled = !disabled\n    var editingValue by remember {\n        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))\n    }\n    val fieldValue = if (editingValue.composition != null || editingValue.text == value) {\n        editingValue\n    } else {\n        TextFieldValue(text = value, selection = TextRange(value.length))\n    }\n    SideEffect {\n        if (editingValue.composition == null && editingValue != fieldValue) editingValue = fieldValue\n    }\n\n    val baseRecipe ='''
+          )
+          s = s.replace(
+            '''        BasicTextField(\n            value = value,\n            onValueChange = onValueChange,''',
+            '''        BasicTextField(\n            value = fieldValue,\n            onValueChange = { nextValue ->\n                editingValue = nextValue\n                if (nextValue.text != value) onValueChange(nextValue.text)\n            },'''
+          )
+          s = s.replace(
+            '                    if (value.isEmpty() && placeholder.isNotEmpty()) {',
+            '                    if (fieldValue.text.isEmpty() && placeholder.isNotEmpty()) {'
+          )
+          p.write_text(s)
+
+          p = Path('packages/adapter-compose/src/main/kotlin/GuiSelect.kt')
+          s = p.read_text()
+          s = s.replace(
+            'import androidx.compose.runtime.Composable\n',
+            'import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.SideEffect\n'
+          )
+          s = s.replace(
+            'import androidx.compose.ui.text.TextStyle\n',
+            'import androidx.compose.ui.text.TextRange\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.input.TextFieldValue\n'
+          )
+          s = s.replace(
+            '''    val selectedLabel = options.firstOrNull { it.value == value }?.label ?: value\n    val fieldValue = if (editable) query else selectedLabel\n    val density = LocalDensity.current''',
+            '''    val selectedLabel = options.firstOrNull { it.value == value }?.label ?: value\n    var editingValue by remember {\n        mutableStateOf(TextFieldValue(text = query, selection = TextRange(query.length)))\n    }\n    val editableFieldValue = if (editingValue.composition != null || editingValue.text == query) {\n        editingValue\n    } else {\n        TextFieldValue(text = query, selection = TextRange(query.length))\n    }\n    SideEffect {\n        if (editingValue.composition == null && editingValue != editableFieldValue) editingValue = editableFieldValue\n    }\n    val fieldValue = if (editable) editableFieldValue.text else selectedLabel\n    val density = LocalDensity.current'''
+          )
+          s = s.replace(
+            '''        .onPreviewKeyEvent { event ->\n            if (!enabled || event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false\n            when (event.key) {''',
+            '''        .onPreviewKeyEvent { event ->\n            if (!enabled || event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false\n            if (editable && editableFieldValue.composition != null) return@onPreviewKeyEvent false\n            when (event.key) {'''
+          )
+          s = s.replace(
+            '''                BasicTextField(\n                    value = fieldValue,\n                    onValueChange = {\n                        if (enabled) {\n                            onQueryChange(it)\n                            if (!expanded) onExpandedChange(true)\n                        }\n                    },''',
+            '''                BasicTextField(\n                    value = editableFieldValue,\n                    onValueChange = { nextValue ->\n                        editingValue = nextValue\n                        if (enabled && nextValue.text != query) {\n                            onQueryChange(nextValue.text)\n                            if (!expanded) onExpandedChange(true)\n                        }\n                    },'''
+          )
+          p.write_text(s)
+
+          Path('scripts/test-compose-ime-composition.mjs').write_text(r'''// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const input = await readFile("packages/adapter-compose/src/main/kotlin/GuiInput.kt", "utf8");
+const select = await readFile("packages/adapter-compose/src/main/kotlin/GuiSelect.kt", "utf8");
+
+for (const [name, source, external] of [
+  ["GuiInput", input, "value"],
+  ["GuiSelect", select, "query"],
+]) {
+  assert.match(source, /TextFieldValue/, `${name} must use TextFieldValue so the IME composition range is retained`);
+  assert.match(source, /TextRange/, `${name} must restore a valid caret when reconciling an external String`);
+  assert.match(source, /editingValue\.composition != null/, `${name} must prefer active preedit state over stale host text`);
+  assert.match(source, new RegExp(`editingValue\\.text == ${external}`), `${name} must reconcile against its controlled external String`);
+  assert.match(source, /editingValue = nextValue/, `${name} must retain the complete TextFieldValue returned by Foundation`);
+}
+
+assert.match(input, /value = fieldValue,/);
+assert.match(input, /if \(nextValue\.text != value\) onValueChange\(nextValue\.text\)/);
+assert.match(input, /fieldValue\.text\.isEmpty\(\)/, "Input placeholder visibility must follow the IME-aware field text");
+assert.doesNotMatch(input, /BasicTextField\(\s*value = value,/s, "Input must not fall back to the String BasicTextField overload");
+
+assert.match(select, /value = editableFieldValue,/);
+assert.match(select, /if \(editable && editableFieldValue\.composition != null\) return@onPreviewKeyEvent false/, "Editable ComboBox must not consume candidate-navigation keys during IME composition");
+assert.match(select, /onQueryChange\(nextValue\.text\)/);
+assert.doesNotMatch(select, /BasicTextField\(\s*value = fieldValue,/s, "Editable Select must not use the String BasicTextField overload");
+
+console.log("Compose IME composition source contract tests passed.");
+''')
+          PY
+      - name: Validate source gate
+        run: node scripts/test-compose-ime-composition.mjs
+      - name: Generate Kotlin framework outputs
+        run: |
+          npm run compile:spec
+          npm run build:kotlin-contracts
+          npm run build:kotlin-tokens
+          npm run build:kotlin-visuals
+          npm run build:kotlin-assets
+      - name: Run existing Compose editable-control gates
+        run: |
+          npm run test:kotlin-input
+          npm run test:kotlin-select
+      - name: Compile real Foundation Compose adapter
+        run: npm run compile:kotlin-contracts
+      - name: Commit validated Compose IME slice
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/adapter-compose/src/main/kotlin/GuiInput.kt packages/adapter-compose/src/main/kotlin/GuiSelect.kt scripts/test-compose-ime-composition.mjs
+          git commit -m "fix(ime): preserve Compose composition metadata"
+          git push
