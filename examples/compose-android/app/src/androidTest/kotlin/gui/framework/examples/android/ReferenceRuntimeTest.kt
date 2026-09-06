@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gui.framework.generated.internal.GuiThemeId
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -269,6 +270,27 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Scroll offset: 0").assertDoesNotExist()
             composeRule.onNodeWithText("Activity event 12").assertIsDisplayed()
+
+            composeRule.onNodeWithText("إعدادات مساحة العمل المشتركة المتقدمة مع صلاحيات متعددة وسياق طويل لاختبار الالتفاف دون فقدان الوضوح")
+                .performScrollTo()
+                .assertIsDisplayed()
+            composeRule.onNodeWithText("https://example.invalid/workspaces/atlas/permissions/this-is-a-deliberately-unbroken-locale-robustness-token-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+                .performScrollTo()
+                .assertIsDisplayed()
+            composeRule.onNodeWithContentDescription("RTL Unicode mixed-direction input")
+                .performScrollTo()
+                .assertIsDisplayed()
+            val rtlStartMarker = composeRule.onNodeWithText("RTL start marker")
+            val rtlEndMarker = composeRule.onNodeWithText("RTL end marker")
+            rtlStartMarker.performScrollTo().assertIsDisplayed()
+            rtlEndMarker.assertIsDisplayed()
+            composeRule.waitForIdle()
+            val rtlStartBounds = rtlStartMarker.fetchSemanticsNode().boundsInRoot
+            val rtlEndBounds = rtlEndMarker.fetchSemanticsNode().boundsInRoot
+            assertTrue(
+                "LocalLayoutDirection.Rtl must place the first Row child to the physical right of the following child",
+                rtlStartBounds.left > rtlEndBounds.left,
+            )
 
             composeRule.onNodeWithContentDescription("Project inventory table")
                 .performScrollTo()

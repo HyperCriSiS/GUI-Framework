@@ -15,12 +15,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import gui.framework.compose.GuiButton
 import gui.framework.compose.GuiCheckbox
@@ -82,6 +85,11 @@ import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
 import gui.framework.generated.internal.GuiToastSize
 import gui.framework.generated.internal.GuiTooltipSize
+
+private const val localeLongText = "إعدادات مساحة العمل المشتركة المتقدمة مع صلاحيات متعددة وسياق طويل لاختبار الالتفاف دون فقدان الوضوح"
+private const val localeUnbrokenText = "https://example.invalid/workspaces/atlas/permissions/this-is-a-deliberately-unbroken-locale-robustness-token-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+private const val localeUnicodeText = "Café é · 東京 · 🧑🏽‍💻 · 👨‍👩‍👧‍👦 · مرحبًا · שלום"
+private const val localeMixedBidiText = "Project Atlas 42 — مشروع أطلس — פרויקט אטלס — ID-ABC-12345"
 
 class MainActivity : ComponentActivity() {
     private var referenceDensity by mutableStateOf(ReferenceDensity.Standard)
@@ -485,6 +493,44 @@ fun AndroidReferenceApp(
                     }
                 }
                 BasicText("Scroll offset: ${activityScrollState.value}")
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        BasicText(localeLongText)
+                        BasicText(localeMixedBidiText)
+                        BasicText(localeUnicodeText)
+                        GuiButton(
+                            label = localeUnbrokenText,
+                            onActivate = {},
+                            modifier = Modifier.fillMaxWidth(),
+                            size = buttonSize,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            GuiButton(
+                                label = "RTL start marker",
+                                onActivate = {},
+                                size = buttonSize,
+                            )
+                            GuiButton(
+                                label = "RTL end marker",
+                                onActivate = {},
+                                size = buttonSize,
+                            )
+                        }
+                        GuiInput(
+                            value = "$localeUnicodeText · $localeMixedBidiText",
+                            onValueChange = {},
+                            accessibilityLabel = "RTL Unicode mixed-direction input",
+                            modifier = Modifier.fillMaxWidth(),
+                            size = inputSize,
+                        )
+                    }
+                }
                 val tableColumns = listOf(
                     GuiTableColumn("Project"),
                     GuiTableColumn("Owner"),
