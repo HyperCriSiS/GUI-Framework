@@ -103,10 +103,6 @@ private fun GuiVisualPartStyle.inputTextStyle(fallback: GuiVisualPartStyle? = nu
     )
 }
 
-/**
- * Native single-line Compose text input driven by the neutral GUI input recipe.
- * It intentionally uses Foundation rather than Material so theme behavior remains framework-owned.
- */
 @Composable
 fun GuiInput(
     value: String,
@@ -126,35 +122,29 @@ fun GuiInput(
     val hovered by source.collectIsHoveredAsState()
     val focused by source.collectIsFocusedAsState()
     val enabled = !disabled
-    var textFieldValue by remember { mutableStateOf(TextFieldValue(text = value)) }
-
-    // Keep the IME-owned composition/selection state while the host echoes normal edits
-    // through the controlled String API. Only a genuinely external text replacement resets
-    // the composition, because carrying an old composing range into different text is invalid.
+    var editingValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+    val fieldValue = if (editingValue.composition != null || editingValue.text == value) {
+        editingValue
+    } else {
+        TextFieldValue(text = value, selection = TextRange(value.length))
+    }
     SideEffect {
-        if (textFieldValue.text != value) {
-            textFieldValue = TextFieldValue(
-                text = value,
-                selection = TextRange(value.length),
-                composition = null,
-            )
-        }
+        if (editingValue.composition == null && editingValue != fieldValue) editingValue = fieldValue
     }
 
     val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
         themeId = selection.theme.wireValue,
         componentId = "input",
-    ) ?: error(
-        "No Compose visual recipe for input with theme ${selection.theme.wireValue} and palette ${selection.paletteId}",
-    )
+    ) ?: error("No Compose visual recipe for input with theme ${selection.theme.wireValue} and palette ${selection.paletteId}")
     val recipe = resolveGuiCapabilityRecipe(
         capabilities = GuiInputContract.capabilities,
         recipe = baseRecipe,
         availableCapabilities = LocalGuiAvailableCapabilities.current,
         componentId = "input",
     )
-
     val activeStates = buildSet {
         if (hovered && enabled) add("hover")
         if (focused && enabled) add("focus")
@@ -172,38 +162,22 @@ fun GuiInput(
     val placeholderStyle = resolved["placeholder"] ?: GuiVisualPartStyle()
     val radius = root.radius?.toComposeDp() ?: 0.dp
     val shape = RoundedCornerShape(radius)
-
-    var fieldModifier = Modifier
-        .defaultMinSize(
-            minWidth = root.minWidth?.toComposeDp() ?: 0.dp,
-            minHeight = root.minHeight?.toComposeDp() ?: 0.dp,
-        )
-        .clip(shape)
-
+    var fieldModifier = Modifier.defaultMinSize(
+        minWidth = root.minWidth?.toComposeDp() ?: 0.dp,
+        minHeight = root.minHeight?.toComposeDp() ?: 0.dp,
+    ).clip(shape)
     root.fill?.let { fieldModifier = fieldModifier.background(it.toComposeColor(), shape) }
-    root.border?.let {
-        fieldModifier = fieldModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), shape)
-    }
-    if (accessibilityLabel.isNotBlank()) {
-        fieldModifier = fieldModifier.semantics { contentDescription = accessibilityLabel }
-    }
-
-    fieldModifier = fieldModifier
-        .alpha(root.inputOpacity())
-        .hoverable(interactionSource = source, enabled = enabled)
-        .padding(
-            horizontal = root.paddingHorizontal?.toComposeDp() ?: 0.dp,
-            vertical = root.paddingVertical?.toComposeDp() ?: 0.dp,
-        )
-
-    Box(
-        modifier = modifier.guiInputFocusOutline(root.outline, radius),
-        propagateMinConstraints = true,
-    ) {
+    root.border?.let { fieldModifier = fieldModifier.border(it.width.toComposeDp(), it.color.toComposeColor(), shape) }
+    if (accessibilityLabel.isNotBlank()) fieldModifier = fieldModifier.semantics { contentDescription = accessibilityLabel }
+    fieldModifier = fieldModifier.alpha(root.inputOpacity()).hoverable(interactionSource = source, enabled = enabled).padding(
+        horizontal = root.paddingHorizontal?.toComposeDp() ?: 0.dp,
+        vertical = root.paddingVertical?.toComposeDp() ?: 0.dp,
+    )
+    Box(modifier = modifier.guiInputFocusOutline(root.outline, radius), propagateMinConstraints = true) {
         BasicTextField(
-            value = textFieldValue,
+            value = fieldValue,
             onValueChange = { nextValue ->
-                textFieldValue = nextValue
+                editingValue = nextValue
                 if (nextValue.text != value) onValueChange(nextValue.text)
             },
             modifier = fieldModifier,
@@ -215,9 +189,7 @@ fun GuiInput(
             cursorBrush = SolidColor(root.outline?.color?.toComposeColor() ?: root.foreground?.toComposeColor() ?: Color.Unspecified),
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterStart) {
-                    if (value.isEmpty() && placeholder.isNotEmpty()) {
-                        BasicText(text = placeholder, style = placeholderStyle.inputTextStyle(root))
-                    }
+                    if (fieldValue.text.isEmpty() && placeholder.isNotEmpty()) BasicText(text = placeholder, style = placeholderStyle.inputTextStyle(root))
                     innerTextField()
                 }
             },
