@@ -1,5 +1,10 @@
 {
-  "name": "@gui-framework/web-application-integration-internal",
+  "name": "@gui-framework/web-application-integration",
   "private": true,
-  "version": "0.0.0-development"
+  "version": "0.0.0-development",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "sideEffects": false
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@gui-framework/web-adapter",
+  "name": "@gui-framework/host-context",
   "private": true,
   "version": "0.0.0-development",
   "type": "module",

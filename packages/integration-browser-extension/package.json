@@ -1,6 +1,10 @@
 {
-  "name": "@gui-framework/browser-extension-integration-internal",
+  "name": "@gui-framework/browser-extension-integration",
   "private": true,
   "version": "0.0.0-development",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "sideEffects": false
 }
