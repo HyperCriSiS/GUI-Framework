@@ -1,0 +1,43 @@
+name: Maintenance IME Web Select Gate
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Extend Web Select gate with IME regressions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/test-web-select.mjs')
+          s = p.read_text()
+          s = s.replace(
+            '''  input(value) { this.value = value; this.listeners.get("input")?.({ type: "input", currentTarget: this, target: this }); }\n  keydown(key) {\n    let prevented = false;\n    this.listeners.get("keydown")?.({ type: "keydown", key, currentTarget: this, target: this, preventDefault() { prevented = true; } });\n    return prevented;\n  }''',
+            '''  input(value, { isComposing = false } = {}) { this.value = value; this.listeners.get("input")?.({ type: "input", currentTarget: this, target: this, isComposing }); }\n  compositionStart() { this.listeners.get("compositionstart")?.({ type: "compositionstart", currentTarget: this, target: this }); }\n  compositionEnd(value = this.value) { this.value = value; this.listeners.get("compositionend")?.({ type: "compositionend", currentTarget: this, target: this }); }\n  keydown(key, { isComposing = false, keyCode = 0 } = {}) {\n    let prevented = false;\n    this.listeners.get("keydown")?.({ type: "keydown", key, keyCode, isComposing, currentTarget: this, target: this, preventDefault() { prevented = true; } });\n    return prevented;\n  }'''
+          )
+          marker = '  disabled.destroy(); modern.destroy(); basic.destroy(); select.destroy();\n'
+          regression = '''  const imeQueries = [];\n  const imeValues = [];\n  const imeExpanded = [];\n  const imeSelect = createGuiSelect(fakeDocument, {\n    value: "",\n    query: "seed",\n    editable: true,\n    expanded: true,\n    onQueryChange(value) { imeQueries.push(value); },\n    onValueChange(value) { imeValues.push(value); },\n    onExpandedChange(value) { imeExpanded.push(value); },\n  });\n  const imeOption = createGuiSelectOption(fakeDocument, { value: "jp", label: "日本語" });\n  imeSelect.popupElement.append(imeOption.element);\n  imeSelect.refreshOptions();\n  imeSelect.element.compositionStart();\n  imeSelect.element.input("か", { isComposing: true });\n  imeSelect.update({ query: "seed" });\n  assert.equal(imeSelect.element.value, "か", "Controlled query echoes must not overwrite active IME preedit");\n  assert.equal(imeSelect.element.keydown("Enter", { isComposing: true, keyCode: 229 }), false, "IME Enter must not be consumed by ComboBox navigation");\n  assert.equal(imeSelect.element.keydown("ArrowDown", { isComposing: true, keyCode: 229 }), false, "IME candidate arrows must remain available to the platform");\n  assert.deepEqual(imeValues, [], "IME candidate interaction must not commit an option");\n  imeSelect.element.input("かな", { isComposing: true });\n  imeSelect.update({ query: "か" });\n  assert.equal(imeSelect.element.value, "かな");\n  imeSelect.element.compositionEnd("かな");\n  await Promise.resolve();\n  assert.deepEqual(imeQueries, ["か", "かな"], "compositionend must not duplicate a final query already emitted by input");\n  imeSelect.update({ query: "かな" });\n  assert.equal(imeSelect.element.keydown("Enter", { keyCode: 229 }), false, "Legacy IME process key 229 must not be treated as option commit");\n  assert.deepEqual(imeValues, []);\n  assert.equal(imeSelect.element.keydown("Enter"), true, "Normal Enter handling must resume after composition");\n  assert.deepEqual(imeValues, ["jp"]);\n  assert.deepEqual(imeExpanded, [false]);\n  imeSelect.element.compositionStart();\n  imeSelect.element.value = "北京";\n  imeSelect.element.compositionEnd("北京");\n  await Promise.resolve();\n  assert.deepEqual(imeQueries, ["か", "かな", "北京"], "compositionend must recover the committed query when a browser omits the final input event");\n  imeOption.destroy();\n  imeSelect.destroy();\n  assert.equal(imeSelect.element.listeners.has("compositionstart"), false);\n  assert.equal(imeSelect.element.listeners.has("compositionend"), false);\n\n'''
+          if regression not in s:
+              s = s.replace(marker, regression + marker)
+          p.write_text(s)
+          PY
+      - name: Run permanent Web Select gate
+        run: |
+          node --check scripts/test-web-select.mjs
+          node scripts/test-web-select.mjs
+      - name: Commit permanent Web ComboBox IME gate
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/test-web-select.mjs
+          git commit -m "test(ime): gate Web ComboBox composition"
+          git pull --rebase origin main
+          git push
