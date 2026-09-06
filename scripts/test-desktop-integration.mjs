@@ -35,7 +35,8 @@ assert.match(reference, /surface = GuiDesktopSurface\.APPLICATION/);
 assert.match(reference, /availableCapabilities = emptySet\(\)/);
 assert.match(reference, /LocalGuiDesktopHostContext\.current\.surface == GuiDesktopSurface\.APPLICATION/);
 assert.match(reference, /GuiButton\(/);
-assert.match(reference, /accessibilityLabel = "Desktop integration action"/);
+assert.match(reference, /onActivate = onAction/);
+assert.doesNotMatch(reference, /accessibilityLabel/);
 assert.match(pom, /\.\.\/integration-desktop\/src\/main\/kotlin/);
 assert.match(pom, /\.\.\/\.\.\/examples\/compose-desktop-integration\/src\/main\/kotlin/);
 
