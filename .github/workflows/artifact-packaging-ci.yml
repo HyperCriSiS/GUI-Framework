@@ -19,6 +19,8 @@ on:
       - 'scripts/test-npm-artifacts.mjs'
       - 'scripts/stage-maven-artifacts.mjs'
       - 'scripts/test-maven-artifacts.mjs'
+      - 'scripts/stage-python-artifacts.py'
+      - 'scripts/test-python-artifacts.py'
       - 'package.json'
       - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
@@ -41,6 +43,8 @@ on:
       - 'scripts/test-npm-artifacts.mjs'
       - 'scripts/stage-maven-artifacts.mjs'
       - 'scripts/test-maven-artifacts.mjs'
+      - 'scripts/stage-python-artifacts.py'
+      - 'scripts/test-python-artifacts.py'
       - 'package.json'
       - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
@@ -58,6 +62,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -69,3 +76,7 @@ jobs:
         run: npm run check:npm-artifacts
       - name: Build and consume staged Maven artifacts
         run: npm run check:maven-artifacts
+      - name: Install Python staging build tools
+        run: python -m pip install --disable-pip-version-check build==1.2.2.post1 setuptools==80.9.0 wheel==0.45.1
+      - name: Build and consume staged Python artifacts
+        run: npm run check:python-artifacts
