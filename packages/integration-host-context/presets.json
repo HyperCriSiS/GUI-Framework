@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "presets": [
+    {
+      "id": "portable",
+      "availableCapabilities": []
+    },
+    {
+      "id": "blend-effects",
+      "availableCapabilities": ["advancedBlendModes"]
+    },
+    {
+      "id": "backdrop-effects",
+      "availableCapabilities": ["backdropBlur"]
+    },
+    {
+      "id": "rich-effects",
+      "availableCapabilities": ["advancedBlendModes", "backdropBlur"]
+    }
+  ]
+}
