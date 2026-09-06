@@ -10,6 +10,8 @@ assert.equal(plan.releaseTrain.versionSource, "git-tag");
 assert.equal(plan.releaseTrain.publicationTrigger, "explicit-approval-only");
 assert.equal(plan.publicationLock.state, "locked");
 assert.equal(plan.publicationLock.registryCoordinates, "unbound");
+assert.equal(plan.publicationLock.requiresNamespaceOwnershipVerification, true);
+assert.equal(plan.publicationLock.requiresExplicitReleaseApproval, true);
 assert.deepEqual(plan.publicationLock.requiresRoadmapGates, [
   "stable-public-api-surface",
   "versioned-migration-policy",
@@ -46,7 +48,7 @@ for (const path of npmDevelopmentManifests) {
 
 const pythonProject = await readFile("packages/integration-python/pyproject.toml", "utf8");
 assert.match(pythonProject, /version\s*=\s*"0\.0\.0"/);
-assert.match(pythonProject, /AGPL-3\.0-or-later/);
+assert.match(pythonProject, /AGPL-3.0-or-later/);
 
 const license = await readFile("LICENSE", "utf8");
 assert.match(license, /GNU AFFERO GENERAL PUBLIC LICENSE/);
