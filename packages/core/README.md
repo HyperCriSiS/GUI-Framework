@@ -1,16 +1,7 @@
-# Core
+# @gui-framework/core
 
-The core package contains platform-neutral contracts shared by GUI Framework renderers.
+Renderer-neutral TypeScript contracts and small runtime helpers shared by GUI Framework consumers.
 
-It intentionally has no dependency on DOM APIs, Compose, Rive, Skia or another rendering runtime.
+The repository source remains TypeScript. Phase 9 release staging compiles this package to ESM JavaScript plus `.d.ts` declarations before `npm pack`; consumers of a staged or future published artifact do not execute TypeScript source directly.
 
-Current foundation contracts cover:
-
-- component properties;
-- semantic interaction state;
-- design and motion tokens;
-- renderer capabilities and quality levels;
-- accessibility metadata;
-- theme definitions.
-
-The first web renderer and Basic theme will exercise these contracts before the API is considered stable.
+The canonical public entry point is the package root (`@gui-framework/core`). Deep imports are not part of the stable public API. Registry publication remains locked until an explicit release approval.
