@@ -16,6 +16,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import base64
 
           path = Path('packages/adapter-web/src/input.mjs')
           s = path.read_text()
@@ -65,129 +66,7 @@ jobs:
           )
           path.write_text(s)
 
-          Path('scripts/test-web-ime-composition.mjs').write_text(r'''// SPDX-License-Identifier: AGPL-3.0-or-later
-
-import assert from "node:assert/strict";
-import { createGuiInput } from "../packages/adapter-web/src/input.mjs";
-import { createGuiSelect, createGuiSelectOption } from "../packages/adapter-web/src/select.mjs";
-
-class FakeElement {
-  constructor(tagName) {
-    this.tagName = tagName.toUpperCase();
-    this.dataset = {};
-    this.attributes = new Map();
-    this.listeners = new Map();
-    this.children = [];
-    this.parentNode = null;
-    this.disabled = false;
-    this.readOnly = false;
-    this.hidden = false;
-    this.value = "";
-    this.placeholder = "";
-    this.className = "";
-    this.type = "";
-    this.id = "";
-  }
-  setAttribute(name, value) { this.attributes.set(name, String(value)); }
-  removeAttribute(name) { this.attributes.delete(name); }
-  getAttribute(name) { return this.attributes.get(name) ?? null; }
-  addEventListener(type, listener) { this.listeners.set(type, listener); }
-  removeEventListener(type, listener) { if (this.listeners.get(type) === listener) this.listeners.delete(type); }
-  appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
-  dispatch(type, init = {}) {
-    let prevented = false;
-    const event = {
-      type,
-      currentTarget: this,
-      target: this,
-      key: init.key,
-      keyCode: init.keyCode ?? 0,
-      isComposing: init.isComposing ?? false,
-      preventDefault() { prevented = true; },
-    };
-    this.listeners.get(type)?.(event);
-    return { prevented };
-  }
-}
-
-const fakeDocument = { createElement: (tagName) => new FakeElement(tagName) };
-
-const inputChanges = [];
-const input = createGuiInput(fakeDocument, {
-  value: "seed",
-  onValueChange: (value) => inputChanges.push(value),
-});
-input.element.dispatch("compositionstart");
-input.element.value = "に";
-input.element.dispatch("input", { isComposing: true });
-input.update({ value: "seed" });
-assert.equal(input.element.value, "に", "stale controlled input render must not overwrite active IME preedit");
-input.element.value = "日本";
-input.element.dispatch("input", { isComposing: true });
-input.update({ value: "に" });
-assert.equal(input.element.value, "日本", "later preedit must survive controlled updates during composition");
-input.element.dispatch("compositionend");
-await Promise.resolve();
-assert.deepEqual(inputChanges, ["に", "日本"], "compositionend fallback must not duplicate an already observed final preedit value");
-input.update({ value: "日本" });
-assert.equal(input.element.value, "日本");
-input.element.dispatch("compositionstart");
-input.element.value = "日本語";
-input.element.dispatch("compositionend");
-await Promise.resolve();
-assert.deepEqual(inputChanges, ["に", "日本", "日本語"], "compositionend must emit committed text when a browser omits the final input event");
-input.update({ value: "server-reset" });
-assert.equal(input.element.value, "server-reset", "controlled reconciliation must resume after composition ends");
-input.destroy();
-assert.equal(input.element.listeners.has("compositionstart"), false);
-assert.equal(input.element.listeners.has("compositionend"), false);
-
-const queryChanges = [];
-const valueChanges = [];
-const expandedChanges = [];
-const select = createGuiSelect(fakeDocument, {
-  value: "",
-  query: "seed",
-  editable: true,
-  expanded: true,
-  onQueryChange: (value) => queryChanges.push(value),
-  onValueChange: (value) => valueChanges.push(value),
-  onExpandedChange: (value) => expandedChanges.push(value),
-});
-const option = createGuiSelectOption(fakeDocument, { value: "jp", label: "日本語" });
-select.popupElement.appendChild(option.element);
-select.refreshOptions();
-select.element.dispatch("compositionstart");
-select.element.value = "か";
-select.element.dispatch("input", { isComposing: true });
-select.update({ query: "seed" });
-assert.equal(select.element.value, "か", "editable combobox preedit must survive stale controlled query renders");
-const enterDuringComposition = select.element.dispatch("keydown", { key: "Enter", isComposing: true, keyCode: 229 });
-assert.equal(enterDuringComposition.prevented, false, "IME Enter must not be consumed by combobox navigation");
-assert.deepEqual(valueChanges, [], "IME Enter must not commit an option");
-const arrowDuringComposition = select.element.dispatch("keydown", { key: "ArrowDown", isComposing: true, keyCode: 229 });
-assert.equal(arrowDuringComposition.prevented, false, "IME arrow keys must remain available to the candidate UI");
-select.element.value = "かな";
-select.element.dispatch("input", { isComposing: true });
-select.update({ query: "か" });
-assert.equal(select.element.value, "かな");
-select.element.dispatch("compositionend");
-await Promise.resolve();
-assert.deepEqual(queryChanges, ["か", "かな"]);
-select.update({ query: "かな" });
-const processKey = select.element.dispatch("keydown", { key: "Enter", keyCode: 229 });
-assert.equal(processKey.prevented, false, "legacy IME process key 229 must not be consumed even if isComposing is unavailable");
-assert.deepEqual(valueChanges, []);
-const enterAfterComposition = select.element.dispatch("keydown", { key: "Enter" });
-assert.equal(enterAfterComposition.prevented, true, "normal Enter handling must resume after composition");
-assert.deepEqual(valueChanges, ["jp"]);
-assert.deepEqual(expandedChanges, [false]);
-select.destroy();
-assert.equal(select.element.listeners.has("compositionstart"), false);
-assert.equal(select.element.listeners.has("compositionend"), false);
-
-console.log("Web IME composition robustness tests passed.");
-''')
+          Path('scripts/test-web-ime-composition.mjs').write_bytes(base64.b64decode('Ly8gU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IEFHUEwtMy4wLW9yLWxhdGVyCgppbXBvcnQgYXNzZXJ0IGZyb20gIm5vZGU6YXNzZXJ0L3N0cmljdCI7CmltcG9ydCB7IGNyZWF0ZUd1aUlucHV0IH0gZnJvbSAiLi4vcGFja2FnZXMvYWRhcHRlci13ZWIvc3JjL2lucHV0Lm1qcyI7CmltcG9ydCB7IGNyZWF0ZUd1aVNlbGVjdCwgY3JlYXRlR3VpU2VsZWN0T3B0aW9uIH0gZnJvbSAiLi4vcGFja2FnZXMvYWRhcHRlci13ZWIvc3JjL3NlbGVjdC5tanMiOwoKY2xhc3MgRmFrZUVsZW1lbnQgewogIGNvbnN0cnVjdG9yKHRhZ05hbWUpIHsKICAgIHRoaXMudGFnTmFtZSA9IHRhZ05hbWUudG9VcHBlckNhc2UoKTsKICAgIHRoaXMuZGF0YXNldCA9IHt9OwogICAgdGhpcy5hdHRyaWJ1dGVzID0gbmV3IE1hcCgpOwogICAgdGhpcy5saXN0ZW5lcnMgPSBuZXcgTWFwKCk7CiAgICB0aGlzLmNoaWxkcmVuID0gW107CiAgICB0aGlzLnBhcmVudE5vZGUgPSBudWxsOwogICAgdGhpcy5kaXNhYmxlZCA9IGZhbHNlOwogICAgdGhpcy5yZWFkT25seSA9IGZhbHNlOwogICAgdGhpcy5oaWRkZW4gPSBmYWxzZTsKICAgIHRoaXMudmFsdWUgPSAiIjsKICAgIHRoaXMucGxhY2Vob2xkZXIgPSAiIjsKICAgIHRoaXMuY2xhc3NOYW1lID0gIiI7CiAgICB0aGlzLnR5cGUgPSAiIjsKICAgIHRoaXMuaWQgPSAiIjsKICB9CiAgc2V0QXR0cmlidXRlKG5hbWUsIHZhbHVlKSB7IHRoaXMuYXR0cmlidXRlcy5zZXQobmFtZSwgU3RyaW5nKHZhbHVlKSk7IH0KICByZW1vdmVBdHRyaWJ1dGUobmFtZSkgeyB0aGlzLmF0dHJpYnV0ZXMuZGVsZXRlKG5hbWUpOyB9CiAgZ2V0QXR0cmlidXRlKG5hbWUpIHsgcmV0dXJuIHRoaXMuYXR0cmlidXRlcy5nZXQobmFtZSkgPz8gbnVsbDsgfQogIGFkZEV2ZW50TGlzdGVuZXIodHlwZSwgbGlzdGVuZXIpIHsgdGhpcy5saXN0ZW5lcnMuc2V0KHR5cGUsIGxpc3RlbmVyKTsgfQogIHJlbW92ZUV2ZW50TGlzdGVuZXIodHlwZSwgbGlzdGVuZXIpIHsgaWYgKHRoaXMubGlzdGVuZXJzLmdldCh0eXBlKSA9PT0gbGlzdGVuZXIpIHRoaXMubGlzdGVuZXJzLmRlbGV0ZSh0eXBlKTsgfQogIGFwcGVuZENoaWxkKGNoaWxkKSB7IGNoaWxkLnBhcmVudE5vZGUgPSB0aGlzOyB0aGlzLmNoaWxkcmVuLnB1c2goY2hpbGQpOyByZXR1cm4gY2hpbGQ7IH0KICBkaXNwYXRjaCh0eXBlLCBpbml0ID0ge30pIHsKICAgIGxldCBwcmV2ZW50ZWQgPSBmYWxzZTsKICAgIGNvbnN0IGV2ZW50ID0gewogICAgICB0eXBlLAogICAgICBjdXJyZW50VGFyZ2V0OiB0aGlzLAogICAgICB0YXJnZXQ6IHRoaXMsCiAgICAgIGtleTogaW5pdC5rZXksCiAgICAgIGtleUNvZGU6IGluaXQua2V5Q29kZSA/PyAwLAogICAgICBpc0NvbXBvc2luZzogaW5pdC5pc0NvbXBvc2luZyA/PyBmYWxzZSwKICAgICAgcHJldmVudERlZmF1bHQoKSB7IHByZXZlbnRlZCA9IHRydWU7IH0sCiAgICB9OwogICAgdGhpcy5saXN0ZW5lcnMuZ2V0KHR5cGUpPy4oZXZlbnQpOwogICAgcmV0dXJuIHsgcHJldmVudGVkIH07CiAgfQp9Cgpjb25zdCBmYWtlRG9jdW1lbnQgPSB7IGNyZWF0ZUVsZW1lbnQ6ICh0YWdOYW1lKSA9PiBuZXcgRmFrZUVsZW1lbnQodGFnTmFtZSkgfTsKCmNvbnN0IGlucHV0Q2hhbmdlcyA9IFtdOwpjb25zdCBpbnB1dCA9IGNyZWF0ZUd1aUlucHV0KGZha2VEb2N1bWVudCwgewogIHZhbHVlOiAic2VlZCIsCiAgb25WYWx1ZUNoYW5nZTogKHZhbHVlKSA9PiBpbnB1dENoYW5nZXMucHVzaCh2YWx1ZSksCn0pOwppbnB1dC5lbGVtZW50LmRpc3BhdGNoKCJjb21wb3NpdGlvbnN0YXJ0Iik7CmlucHV0LmVsZW1lbnQudmFsdWUgPSAi44GrIjsKaW5wdXQuZWxlbWVudC5kaXNwYXRjaCgiaW5wdXQiLCB7IGlzQ29tcG9zaW5nOiB0cnVlIH0pOwppbnB1dC51cGRhdGUoeyB2YWx1ZTogInNlZWQiIH0pOwphc3NlcnQuZXF1YWwoaW5wdXQuZWxlbWVudC52YWx1ZSwgIuOBqyIsICJzdGFsZSBjb250cm9sbGVkIGlucHV0IHJlbmRlciBtdXN0IG5vdCBvdmVyd3JpdGUgYWN0aXZlIElNRSBwcmVlZGl0Iik7CmlucHV0LmVsZW1lbnQudmFsdWUgPSAi5pel5pysIjsKaW5wdXQuZWxlbWVudC5kaXNwYXRjaCgiaW5wdXQiLCB7IGlzQ29tcG9zaW5nOiB0cnVlIH0pOwppbnB1dC51cGRhdGUoeyB2YWx1ZTogIuOBqyIgfSk7CmFzc2VydC5lcXVhbChpbnB1dC5lbGVtZW50LnZhbHVlLCAi5pel5pysIiwgImxhdGVyIHByZWVkaXQgbXVzdCBzdXJ2aXZlIGNvbnRyb2xsZWQgdXBkYXRlcyBkdXJpbmcgY29tcG9zaXRpb24iKTsKaW5wdXQuZWxlbWVudC5kaXNwYXRjaCgiY29tcG9zaXRpb25lbmQiKTsKYXdhaXQgUHJvbWlzZS5yZXNvbHZlKCk7CmFzc2VydC5kZWVwRXF1YWwoaW5wdXRDaGFuZ2VzLCBbIuOBqyIsICLml6XmnKwiXSwgImNvbXBvc2l0aW9uZW5kIGZhbGxiYWNrIG11c3Qgbm90IGR1cGxpY2F0ZSBhbiBhbHJlYWR5IG9ic2VydmVkIGZpbmFsIHByZWVkaXQgdmFsdWUiKTsKaW5wdXQudXBkYXRlKHsgdmFsdWU6ICLml6XmnKwiIH0pOwphc3NlcnQuZXF1YWwoaW5wdXQuZWxlbWVudC52YWx1ZSwgIuaXpeacrCIpOwppbnB1dC5lbGVtZW50LmRpc3BhdGNoKCJjb21wb3NpdGlvbnN0YXJ0Iik7CmlucHV0LmVsZW1lbnQudmFsdWUgPSAi5pel5pys6KqeIjsKaW5wdXQuZWxlbWVudC5kaXNwYXRjaCgiY29tcG9zaXRpb25lbmQiKTsKYXdhaXQgUHJvbWlzZS5yZXNvbHZlKCk7CmFzc2VydC5kZWVwRXF1YWwoaW5wdXRDaGFuZ2VzLCBbIuOBqyIsICLml6XmnKwiLCAi5pel5pys6KqeIl0sICJjb21wb3NpdGlvbmVuZCBtdXN0IGVtaXQgY29tbWl0dGVkIHRleHQgd2hlbiBhIGJyb3dzZXIgb21pdHMgdGhlIGZpbmFsIGlucHV0IGV2ZW50Iik7CmlucHV0LnVwZGF0ZSh7IHZhbHVlOiAic2VydmVyLXJlc2V0IiB9KTsKYXNzZXJ0LmVxdWFsKGlucHV0LmVsZW1lbnQudmFsdWUsICJzZXJ2ZXItcmVzZXQiLCAiY29udHJvbGxlZCByZWNvbmNpbGlhdGlvbiBtdXN0IHJlc3VtZSBhZnRlciBjb21wb3NpdGlvbiBlbmRzIik7CmlucHV0LmRlc3Ryb3koKTsKYXNzZXJ0LmVxdWFsKGlucHV0LmVsZW1lbnQubGlzdGVuZXJzLmhhcygiY29tcG9zaXRpb25zdGFydCIpLCBmYWxzZSk7CmFzc2VydC5lcXVhbChpbnB1dC5lbGVtZW50Lmxpc3RlbmVycy5oYXMoImNvbXBvc2l0aW9uZW5kIiksIGZhbHNlKTsKCmNvbnN0IHF1ZXJ5Q2hhbmdlcyA9IFtdOwpjb25zdCB2YWx1ZUNoYW5nZXMgPSBbXTsKY29uc3QgZXhwYW5kZWRDaGFuZ2VzID0gW107CmNvbnN0IHNlbGVjdCA9IGNyZWF0ZUd1aVNlbGVjdChmYWtlRG9jdW1lbnQsIHsKICB2YWx1ZTogIiIsCiAgcXVlcnk6ICJzZWVkIiwKICBlZGl0YWJsZTogdHJ1ZSwKICBleHBhbmRlZDogdHJ1ZSwKICBvblF1ZXJ5Q2hhbmdlOiAodmFsdWUpID0+IHF1ZXJ5Q2hhbmdlcy5wdXNoKHZhbHVlKSwKICBvblZhbHVlQ2hhbmdlOiAodmFsdWUpID0+IHZhbHVlQ2hhbmdlcy5wdXNoKHZhbHVlKSwKICBvbkV4cGFuZGVkQ2hhbmdlOiAodmFsdWUpID0+IGV4cGFuZGVkQ2hhbmdlcy5wdXNoKHZhbHVlKSwKfSk7CmNvbnN0IG9wdGlvbiA9IGNyZWF0ZUd1aVNlbGVjdE9wdGlvbihmYWtlRG9jdW1lbnQsIHsgdmFsdWU6ICJqcCIsIGxhYmVsOiAi5pel5pys6KqeIiB9KTsKc2VsZWN0LnBvcHVwRWxlbWVudC5hcHBlbmRDaGlsZChvcHRpb24uZWxlbWVudCk7CnNlbGVjdC5yZWZyZXNoT3B0aW9ucygpOwpzZWxlY3QuZWxlbWVudC5kaXNwYXRjaCgiY29tcG9zaXRpb25zdGFydCIpOwpzZWxlY3QuZWxlbWVudC52YWx1ZSA9ICLjgYsiOwpzZWxlY3QuZWxlbWVudC5kaXNwYXRjaCgiaW5wdXQiLCB7IGlzQ29tcG9zaW5nOiB0cnVlIH0pOwpzZWxlY3QudXBkYXRlKHsgcXVlcnk6ICJzZWVkIiB9KTsKYXNzZXJ0LmVxdWFsKHNlbGVjdC5lbGVtZW50LnZhbHVlLCAi44GLIiwgImVkaXRhYmxlIGNvbWJvYm94IHByZWVkaXQgbXVzdCBzdXJ2aXZlIHN0YWxlIGNvbnRyb2xsZWQgcXVlcnkgcmVuZGVycyIpOwpjb25zdCBlbnRlckR1cmluZ0NvbXBvc2l0aW9uID0gc2VsZWN0LmVsZW1lbnQuZGlzcGF0Y2goImtleWRvd24iLCB7IGtleTogIkVudGVyIiwgaXNDb21wb3Npbmc6IHRydWUsIGtleUNvZGU6IDIyOSB9KTsKYXNzZXJ0LmVxdWFsKGVudGVyRHVyaW5nQ29tcG9zaXRpb24ucHJldmVudGVkLCBmYWxzZSwgIklNRSBFbnRlciBtdXN0IG5vdCBiZSBjb25zdW1lZCBieSBjb21ib2JveCBuYXZpZ2F0aW9uIik7CmFzc2VydC5kZWVwRXF1YWwodmFsdWVDaGFuZ2VzLCBbXSwgIklNRSBFbnRlciBtdXN0IG5vdCBjb21taXQgYW4gb3B0aW9uIik7CmNvbnN0IGFycm93RHVyaW5nQ29tcG9zaXRpb24gPSBzZWxlY3QuZWxlbWVudC5kaXNwYXRjaCgia2V5ZG93biIsIHsga2V5OiAiQXJyb3dEb3duIiwgaXNDb21wb3Npbmc6IHRydWUsIGtleUNvZGU6IDIyOSB9KTsKYXNzZXJ0LmVxdWFsKGFycm93RHVyaW5nQ29tcG9zaXRpb24ucHJldmVudGVkLCBmYWxzZSwgIklNRSBhcnJvdyBrZXlzIG11c3QgcmVtYWluIGF2YWlsYWJsZSB0byB0aGUgY2FuZGlkYXRlIFVJIik7CnNlbGVjdC5lbGVtZW50LnZhbHVlID0gIuOBi+OBqiI7CnNlbGVjdC5lbGVtZW50LmRpc3BhdGNoKCJpbnB1dCIsIHsgaXNDb21wb3Npbmc6IHRydWUgfSk7CnNlbGVjdC51cGRhdGUoeyBxdWVyeTogIuOBiyIgfSk7CmFzc2VydC5lcXVhbChzZWxlY3QuZWxlbWVudC52YWx1ZSwgIuOBi+OBqiIpOwpzZWxlY3QuZWxlbWVudC5kaXNwYXRjaCgiY29tcG9zaXRpb25lbmQiKTsKYXdhaXQgUHJvbWlzZS5yZXNvbHZlKCk7CmFzc2VydC5kZWVwRXF1YWwocXVlcnlDaGFuZ2VzLCBbIuOBiyIsICDjgYvjgaoiXSk7CnNlbGVjdC51cGRhdGUoeyBxdWVyeTogIuOBi+OBqiIgfSk7CmNvbnN0IHByb2Nlc3NLZXkgPSBzZWxlY3QuZWxlbWVudC5kaXNwYXRjaCgia2V5ZG93biIsIHsga2V5OiAiRW50ZXIiLCBrZXlDb2RlOiAyMjkgfSk7CmFzc2VydC5lcXVhbChwcm9jZXNzS2V5LnByZXZlbnRlZCwgZmFsc2UsICJsZWdhY3kgSU1FIHByb2Nlc3Mga2V5IDIyOSBtdXN0IG5vdCBiZSBjb25zdW1lZCBldmVuIGlmIGlzQ29tcG9zaW5nIGlzIHVuYXZhaWxhYmxlIik7CmFzc2VydC5kZWVwRXF1YWwodmFsdWVDaGFuZ2VzLCBbXSk7CmNvbnN0IGVudGVyQWZ0ZXJDb21wb3NpdGlvbiA9IHNlbGVjdC5lbGVtZW50LmRpc3BhdGNoKCJrZXlkb3duIiwgeyBrZXk6ICJFbnRlciIgfSk7CmFzc2VydC5lcXVhbChlbnRlckFmdGVyQ29tcG9zaXRpb24ucHJldmVudGVkLCB0cnVlLCAibm9ybWFsIEVudGVyIGhhbmRsaW5nIG11c3QgcmVzdW1lIGFmdGVyIGNvbXBvc2l0aW9uIik7CmFzc2VydC5kZWVwRXF1YWwodmFsdWVDaGFuZ2VzLCBbImpwIl0pOwphc3NlcnQuZGVlcEVxdWFsKGV4cGFuZGVkQ2hhbmdlcywgW2ZhbHNlXSk7CnNlbGVjdC5kZXN0cm95KCk7CmFzc2VydC5lcXVhbChzZWxlY3QuZWxlbWVudC5saXN0ZW5lcnMuaGFzKCJjb21wb3NpdGlvbnN0YXJ0IiksIGZhbHNlKTsKYXNzZXJ0LmVxdWFsKHNlbGVjdC5lbGVtZW50Lmxpc3RlbmVycy5oYXMoImNvbXBvc2l0aW9uZW5kIiksIGZhbHNlKTsKCmNvbnNvbGUubG9nKCJXZWIgSU1FIGNvbXBvc2l0aW9uIHJvYnVzdG5lc3MgdGVzdHMgcGFzc2VkLiIpOwo='))
           PY
       - name: Validate source syntax
         run: |
@@ -206,5 +85,5 @@ console.log("Web IME composition robustness tests passed.");
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add packages/adapter-web/src/input.mjs packages/adapter-web/src/select.mjs scripts/test-web-ime-composition.mjs
-          git commit -m "fix(ime): preserve Web composition sessions" 
+          git commit -m "fix(ime): preserve Web composition sessions"
           git push
