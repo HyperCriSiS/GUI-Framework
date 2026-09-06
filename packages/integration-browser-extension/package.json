@@ -1,0 +1,6 @@
+{
+  "name": "@gui-framework/browser-extension-integration-internal",
+  "private": true,
+  "version": "0.0.0-development",
+  "type": "module"
+}
