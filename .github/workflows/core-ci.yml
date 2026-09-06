@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    # Pull requests already run the full Core gate. On main, avoid repeating
+    # the expensive baseline for Markdown-only merges; dedicated documentation
+    # and policy workflows continue to validate their own files.
+    paths-ignore:
+      - "**/*.md"
   pull_request:
   workflow_dispatch:
 
@@ -337,7 +342,7 @@ jobs:
         run: npm run test:kotlin-scaling
 
       - name: Test Compose Desktop integration kit
-        run: npm run test:desktop-integration
+        run: npm run test:kotlin-desktop-integration
 
       - name: Test Compose Desktop reference application
         run: npm run test:kotlin-desktop-reference
@@ -356,11 +361,12 @@ jobs:
 
   web-browser-regression:
     name: web-browser-regression
-    runs-on: ubuntu-latest
     needs: validate-and-typecheck
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.head.sha && github.event.pull_request.title || github.event.head_commit.message, '[browser-ci]') ||
       contains(github.event.head_commit.message, '[browser-ci]')
+    runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_VERSION: "1.62.1"
     steps:
@@ -373,42 +379,42 @@ jobs:
           node-version: "24"
           cache: npm
 
+      - name: Install Playwright browser
+        run: npx --yes playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium
+
+      - name: Validate spec before browser regression
+        run: npm run validate:spec
+
       - name: Compile neutral specification
         run: npm run compile:spec
 
       - name: Generate Web token output
         run: npm run build:web-tokens
 
+      - name: Generate Web assets
+        run: npm run build:web-assets
+
       - name: Generate Web component output
         run: npm run build:web-components
 
-      - name: Generate Web assets
-        run: npm run build:web-assets
+      - name: Build browser extension integration bundle
+        run: npm run build:browser-extension-integration
 
       - name: Build browser extension reference
         run: npm run build:browser-extension-reference
 
-      - name: Install Playwright test runner
-        run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Install Chromium ${{ env.PLAYWRIGHT_VERSION }}
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Chromium reference regression
-        run: npx playwright test
+      - name: Run Playwright reference regression
+        run: npm run test:web-browser
 
   compose-android-reference:
     name: compose-android-reference
-    runs-on: ubuntu-latest
     needs: validate-and-typecheck
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.head.sha && github.event.pull_request.title || github.event.head_commit.message, '[android-ci]') ||
       contains(github.event.head_commit.message, '[android-ci]')
+    runs-on: ubuntu-latest
     env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-      GRADLE_VERSION: "9.5.0"
-      AGP_VERSION: "9.3.0"
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
@@ -433,10 +439,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
+      - name: Install Android compile SDK
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+      - name: Validate spec before Android build
+        run: npm run validate:spec
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -454,49 +461,45 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference and instrumentation sources
+        working-directory: examples/compose-android
         run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          compileDebugKotlin
-          compileDebugAndroidTestKotlin
+          ./gradlew
+          --no-daemon
+          :app:compileDebugKotlin
+          :app:compileDebugAndroidTestKotlin
 
-      - name: Build Android reference and instrumentation APKs
-        run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          assembleDebug
-          assembleDebugAndroidTest
+      - name: Build Android reference APK and instrumentation APK
+        working-directory: examples/compose-android
+        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
 
   compose-android-runtime:
     name: compose-android-runtime (${{ matrix.api-level }}, ${{ matrix.target }}, ${{ matrix.arch }}, ${{ matrix.ram-size }}, ${{ matrix.heap-size }}, ${{ matrix.density }}, ${{ matrix.font-scale }})
-    runs-on: ubuntu-latest
-    needs: validate-and-typecheck
+    needs:
+      - validate-and-typecheck
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.head.sha && github.event.pull_request.title || github.event.head_commit.message, '[device-ci]') ||
       contains(github.event.head_commit.message, '[device-ci]')
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - api-level: 23
-            target: google_apis
+            target: default
             arch: x86_64
-            ram-size: 1536M
-            heap-size: 192M
-            density: 240
+            ram-size: "768M"
+            heap-size: "128M"
+            density: "240"
             font-scale: "1.30"
           - api-level: 35
             target: google_apis
             arch: x86_64
-            ram-size: 2048M
-            heap-size: 256M
-            density: 480
+            ram-size: "2048M"
+            heap-size: "256M"
+            density: "560"
             font-scale: "1.00"
     env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-      GRADLE_VERSION: "9.5.0"
-      AGP_VERSION: "9.3.0"
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
@@ -521,16 +524,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Enable KVM acceleration
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+      - name: Install Android compile SDK
+        run: sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
+      - name: Validate spec before Android runtime
+        run: npm run validate:spec
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -547,16 +545,30 @@ jobs:
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
 
-      - name: Run scaled Android reference instrumentation
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: Build Android reference and instrumentation APKs
+        working-directory: examples/compose-android
+        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
+
+      - name: Run representative Android runtime instrumentation
+        uses: ReactiveCircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          profile: pixel_2
+          profile: Nexus 5X
+          cores: 2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
           density: ${{ matrix.density }}
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: >-
+            -no-window
+            -gpu swiftshader_indirect
+            -noaudio
+            -no-boot-anim
+            -camera-back none
+            -camera-front none
           disable-animations: true
-          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }} ${{ matrix.density }}
+          script: >-
+            ./scripts/run-android-runtime-check.sh
+            "${{ matrix.api-level }}"
+            "${{ matrix.font-scale }}"
