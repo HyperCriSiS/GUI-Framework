@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "GUI Framework Browser Extension Reference",
+  "version": "0.0.0",
+  "description": "Runtime reference for the GUI Framework browser-extension integration kit.",
+  "action": {
+    "default_title": "GUI Framework Reference",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "service-worker.mjs",
+    "type": "module"
+  }
+}
