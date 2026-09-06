@@ -15,7 +15,7 @@ The framework currently includes:
 
 ## Current status
 
-The implementation and ecosystem-readiness roadmap through Phase 8 is complete. Phase 9 is validating the actual release artifact boundaries before any registry coordinates or publish-capable workflow are enabled.
+The implementation and ecosystem-readiness roadmap through Phase 8 is complete. Phase 9 validates actual release artifact boundaries before any registry coordinates or publish-capable workflow are enabled.
 
 Current Phase-9 coverage includes:
 
@@ -26,4 +26,10 @@ Current Phase-9 coverage includes:
 
 Publication remains **locked** and requires explicit human approval plus deliberate registry namespace/coordinate binding. Successful CI or a Git tag is not publication authorization.
 
-See `ROADMAP.md` for the active execution plan and `DISTRIBUTION.md` for the release/publication contract.
+## Project contracts and documentation
+
+- Documentation index: `docs/README.md`
+- Stable API contract: `PUBLIC_API.md`
+- Versioning and migration contract: `MIGRATION_POLICY.md`
+- Distribution/publication contract: `DISTRIBUTION.md`
+- Active execution plan: `ROADMAP.md`

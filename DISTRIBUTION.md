@@ -6,9 +6,9 @@ This repository uses a **unified release train** for the neutral specification, 
 
 Publication is currently **locked**.
 
-The stable public API and versioned migration-policy prerequisites are complete. The remaining lock is intentional: registry namespace ownership must be verified, concrete registry coordinates must be bound deliberately, and an explicit human release approval is required before any publish-capable automation can be enabled.
+The **Stable public API surface** and **Versioned migration policy** prerequisites are complete. The remaining lock is intentional: registry namespace ownership must be verified, concrete registry coordinates must be bound deliberately, and an explicit human release approval is required before any publish-capable automation can be enabled.
 
-No merge to `main` publishes packages. No CI workflow is allowed to infer publication approval from a tag, branch name or successful test run.
+No merge to `main` publishes packages. Before explicit approval, CI **must never publish a registry artifact**; registry coordinates remain unbound. No workflow may infer publication approval from a tag, branch name or successful test run.
 
 Authoritative artifact identities and lock state live in `distribution/artifacts.json`.
 
