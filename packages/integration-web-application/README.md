@@ -1,18 +1,7 @@
-# Web application integration kit
+# Web Application Integration
 
-This internal kit gives ordinary Web applications a small host boundary around the native Web adapter without imposing a framework, router, bundler, state library, or custom element system.
+This package provides the thin host boundary for regular Web applications. It owns only reversible GUI Framework host attributes and explicit capability context; application lifecycle, routing and DOM ownership remain with the host.
 
-`createWebApplicationGuiHost(root, options)` attaches the explicit GUI host context to an existing DOM root and returns a reversible controller. The application supplies its theme, palette, surface and optional capabilities explicitly. The host does not silently detect CSS/GPU/browser capabilities; applications that want automatic Web capability detection may opt into the lower-level Web adapter API themselves.
+The canonical consumer entry point is the package root (`@gui-framework/web-application-integration`). Source development reuses the Web adapter capability resolver from the monorepo. Phase 9 release staging vendors that resolver into the staged package so the packed artifact has no repository-relative dependency outside its own package boundary. This is a build-time self-containment step, not a second source of truth.
 
-```js
-const host = createWebApplicationGuiHost(document.querySelector("#app"), {
-  theme: "basic",
-  palette: "reference-dark",
-  surface: "application",
-  availableCapabilities: [],
-});
-```
-
-The returned `configureComponentCapabilities(element, ir)` helper applies the current host theme/palette/capability context to a native Web-adapter component using the compiled neutral IR. This keeps fallback behavior deterministic while retaining native HTML focus, input and accessibility behavior.
-
-The application remains responsible for loading the generated token/component CSS and assets using its normal build pipeline. The integration kit does not own routing, document lifecycle, network requests, hydration, persistence or application state.
+Registry publication remains locked. The local artifact gate packs the private development package and imports it from a clean npm consumer before any public registry coordinate is selected.

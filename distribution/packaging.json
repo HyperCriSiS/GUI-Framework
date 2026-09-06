@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "stagingRoot": "build/release-staging",
+  "developmentVersion": "0.0.0-development",
+  "artifacts": {
+    "spec-source": {
+      "strategy": "archive",
+      "packageRoot": "spec"
+    },
+    "core-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/core",
+      "stagingMode": "compiled"
+    },
+    "spec-compiler-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/compiler",
+      "stagingMode": "source"
+    },
+    "web-adapter-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/adapter-web",
+      "stagingMode": "source"
+    },
+    "browser-extension-integration-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/integration-browser-extension",
+      "stagingMode": "source"
+    },
+    "web-application-integration-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/integration-web-application",
+      "stagingMode": "self-contained-stage"
+    },
+    "host-context-js": {
+      "strategy": "npm",
+      "packageRoot": "packages/integration-host-context",
+      "stagingMode": "source"
+    },
+    "compose-adapter-jvm": {
+      "strategy": "maven",
+      "packageRoot": "packages/adapter-compose",
+      "stagingMode": "generated-pom"
+    },
+    "desktop-integration-jvm": {
+      "strategy": "maven",
+      "packageRoot": "packages/integration-desktop",
+      "stagingMode": "generated-pom"
+    },
+    "android-integration-jvm": {
+      "strategy": "maven",
+      "packageRoot": "packages/integration-android",
+      "stagingMode": "generated-pom"
+    },
+    "host-context-jvm": {
+      "strategy": "maven",
+      "packageRoot": "packages/integration-host-context/kotlin",
+      "stagingMode": "generated-pom"
+    },
+    "python-integration": {
+      "strategy": "pypi",
+      "packageRoot": "packages/integration-python",
+      "stagingMode": "source"
+    },
+    "host-context-python": {
+      "strategy": "pypi",
+      "packageRoot": "packages/integration-host-context/python",
+      "stagingMode": "generated-pyproject"
+    }
+  }
+}
