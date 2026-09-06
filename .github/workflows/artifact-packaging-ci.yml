@@ -17,6 +17,8 @@ on:
       - 'scripts/test-artifact-packaging-contract.mjs'
       - 'scripts/stage-npm-artifacts.mjs'
       - 'scripts/test-npm-artifacts.mjs'
+      - 'scripts/stage-maven-artifacts.mjs'
+      - 'scripts/test-maven-artifacts.mjs'
       - 'package.json'
       - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
@@ -37,6 +39,8 @@ on:
       - 'scripts/test-artifact-packaging-contract.mjs'
       - 'scripts/stage-npm-artifacts.mjs'
       - 'scripts/test-npm-artifacts.mjs'
+      - 'scripts/stage-maven-artifacts.mjs'
+      - 'scripts/test-maven-artifacts.mjs'
       - 'package.json'
       - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
@@ -46,6 +50,7 @@ permissions:
 
 jobs:
   npm-packaging:
+    name: artifact-packaging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +58,14 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
       - name: Validate artifact package roots and publication lock
         run: npm run test:artifact-packaging
       - name: Build and consume staged npm artifacts
         run: npm run check:npm-artifacts
+      - name: Build and consume staged Maven artifacts
+        run: npm run check:maven-artifacts

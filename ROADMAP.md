@@ -121,7 +121,7 @@ The framework is intended to remain renderer-neutral at the semantic and theme-s
 
 - [x] Machine-readable artifact packaging contract <!-- all 13 distribution artifacts map 1:1 to explicit package roots and ecosystem staging strategies while registry coordinates remain unbound and publication remains locked -->
 - [x] npm staged-package build / pack / install smoke <!-- Core emits consumable ESM + declarations, six private development tarballs include AGPL metadata/license, Web Application staging removes monorepo-deep imports, and a clean Node consumer imports all public package entry points -->
-- [ ] Maven local artifact build / consumer smoke
+- [x] Maven local artifact build / consumer smoke <!-- four isolated local-only JAR coordinates, generated Compose release inputs, AGPL license embedded in every JAR, isolated Maven repository installation, and a clean Kotlin consumer compile across Compose/Desktop/Android/host-context artifacts -->
 - [ ] Python sdist / wheel build / install smoke
 - [ ] Specification-source release archive smoke
 - [ ] Cross-ecosystem staging manifest and checksums
