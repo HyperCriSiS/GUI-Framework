@@ -1,0 +1,233 @@
+name: Maintenance IME Runtime References
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Integrate Web and Compose IME runtime references
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # Expose reference-only controllers so Playwright can deliberately inject stale host echoes.
+          p = Path('examples/web-reference/app.mjs')
+          s = p.read_text()
+          s = s.replace(
+            '''      .then((capabilityIr) => {\n        mountReferenceApp(document, root, {''',
+            '''      .then((capabilityIr) => {\n        globalThis.__guiReferenceController = mountReferenceApp(document, root, {'''
+          )
+          p.write_text(s)
+
+          p = Path('examples/web-reference/select-reference.mjs')
+          s = p.read_text()
+          s = s.replace(
+            '''    mountSelectReference(document, root, {\n      density: query.get("density") ?? "standard",''',
+            '''    globalThis.__guiSelectReferenceController = mountSelectReference(document, root, {\n      density: query.get("density") ?? "standard",'''
+          )
+          p.write_text(s)
+
+          # Add real Chromium CompositionEvent/InputEvent coverage to the existing reference specs.
+          p = Path('tests/browser/web-reference.spec.mjs')
+          s = p.read_text()
+          addition = r'''
+
+test("controlled Input preserves real browser IME preedit across stale host echoes", async ({ page }) => {
+  await page.goto("/examples/web-reference/index.html?theme=basic");
+  await page.waitForFunction(() => Boolean(globalThis.__guiReferenceController));
+  const input = page.locator("#gui-reference-name");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    element.value = "に";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "に",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiReferenceController.components.nameInput.update({ value: "Ada Lovelace" });
+  });
+  await expect(input).toHaveValue("に");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.value = "日本語 🧑🏽‍💻";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "日本語 🧑🏽‍💻",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiReferenceController.components.nameInput.update({ value: "に" });
+  });
+  await expect(input).toHaveValue("日本語 🧑🏽‍💻");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "日本語 🧑🏽‍💻" }));
+  });
+  await page.waitForFunction(() => globalThis.__guiReferenceController.getState().name === "日本語 🧑🏽‍💻");
+  await page.evaluate(() => {
+    const controller = globalThis.__guiReferenceController;
+    controller.components.nameInput.update({ value: controller.getState().name });
+  });
+  await expect(input).toHaveValue("日本語 🧑🏽‍💻");
+});
+'''
+          if 'controlled Input preserves real browser IME preedit' not in s:
+              s += addition
+          p.write_text(s)
+
+          p = Path('tests/browser/select-reference.spec.mjs')
+          s = p.read_text()
+          addition = r'''
+
+test("editable ComboBox preserves real browser composition and leaves candidate keys to the IME", async ({ page }) => {
+  await page.goto(`${referencePath}?editable=true`);
+  await page.waitForFunction(() => Boolean(globalThis.__guiSelectReferenceController));
+  const combo = page.getByRole("combobox", { name: "Find delivery channel" });
+
+  const composingKeys = await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    element.value = "か";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "か",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiSelectReferenceController.select.update({ query: "seed" });
+    const enter = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter", isComposing: true });
+    const down = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown", isComposing: true });
+    element.dispatchEvent(enter);
+    element.dispatchEvent(down);
+    return { enterPrevented: enter.defaultPrevented, downPrevented: down.defaultPrevented };
+  });
+  expect(composingKeys).toEqual({ enterPrevented: false, downPrevented: false });
+  await expect(combo).toHaveValue("か");
+  await expect(page.getByText("Selected push.")).toHaveCount(0);
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.value = "かな 🧑🏽‍💻";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "かな 🧑🏽‍💻",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiSelectReferenceController.select.update({ query: "か" });
+  });
+  await expect(combo).toHaveValue("かな 🧑🏽‍💻");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "かな 🧑🏽‍💻" }));
+    const controller = globalThis.__guiSelectReferenceController;
+    controller.select.update({ query: controller.getState().query });
+  });
+  await expect(combo).toHaveValue("かな 🧑🏽‍💻");
+  await combo.press("ArrowDown");
+  await combo.press("Enter");
+  await expect(page.getByText(/Selected (email|push|digest)\./)).toBeVisible();
+});
+'''
+          if 'editable ComboBox preserves real browser composition' not in s:
+              s += addition
+          p.write_text(s)
+
+          # Shared Compose IME reference controls.
+          for file_name in [
+              'examples/compose-desktop/src/main/kotlin/Main.kt',
+              'examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt',
+          ]:
+              p = Path(file_name)
+              s = p.read_text()
+              s = s.replace(
+                '    var selectExpanded by remember { mutableStateOf(false) }\n',
+                '''    var selectExpanded by remember { mutableStateOf(false) }\n    var imeInputValue by remember { mutableStateOf("") }\n    var imeQuery by remember { mutableStateOf("") }\n    var imeValue by remember { mutableStateOf("") }\n    var imeExpanded by remember { mutableStateOf(false) }\n'''
+              )
+              marker = '''                    GuiTabs(\n'''
+              controls = '''                    GuiInput(\n                        value = imeInputValue,\n                        onValueChange = { imeInputValue = it },\n                        placeholder = "日本語 or emoji",\n                        accessibilityLabel = "IME composition input",\n                        size = inputSize,\n                    )\n                    BasicText("IME input: $imeInputValue")\n                    GuiSelect(\n                        value = imeValue,\n                        options = listOf(\n                            GuiSelectOption(value = "jp", label = "日本語"),\n                            GuiSelectOption(value = "zh", label = "北京"),\n                            GuiSelectOption(value = "emoji", label = "🧑🏽‍💻"),\n                        ),\n                        onValueChange = { imeValue = it },\n                        query = imeQuery,\n                        onQueryChange = { imeQuery = it },\n                        editable = true,\n                        expanded = imeExpanded,\n                        onExpandedChange = { imeExpanded = it },\n                        placeholder = "かな / 北京 / 🧑🏽‍💻",\n                        accessibilityLabel = "IME editable ComboBox",\n                        size = selectSize,\n                    )\n                    BasicText("IME query: $imeQuery")\n'''
+              if 'accessibilityLabel = "IME composition input"' not in s:
+                  s = s.replace(marker, controls + marker, 1)
+              p.write_text(s)
+
+          # Android runtime: real Foundation text editing with CJK + emoji on both editable controls.
+          p = Path('examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt')
+          s = p.read_text()
+          anchor = '''            val deliverySelect = composeRule.onNodeWithContentDescription("Delivery channel")\n            deliverySelect.assertIsDisplayed().performClick()\n            composeRule.waitForIdle()\n            composeRule.onNodeWithContentDescription("Legacy channel").performScrollTo().assertIsDisplayed().assertIsNotEnabled()\n            composeRule.onNodeWithContentDescription("Push").performScrollTo().assertIsDisplayed().performClick()\n            composeRule.waitForIdle()\n            composeRule.onNodeWithText("Push").assertIsDisplayed()\n'''
+          runtime = anchor + '''\n            val imeInput = composeRule.onNodeWithContentDescription("IME composition input")\n            imeInput.performScrollTo().assertIsDisplayed().performTextReplacement("日本語 🧑🏽‍💻")\n            composeRule.waitForIdle()\n            composeRule.onNodeWithText("IME input: 日本語 🧑🏽‍💻").performScrollTo().assertIsDisplayed()\n\n            val imeCombo = composeRule.onNodeWithContentDescription("IME editable ComboBox")\n            imeCombo.performScrollTo().assertIsDisplayed().performTextReplacement("かな 北京 🧑🏽‍💻")\n            composeRule.waitForIdle()\n            composeRule.onNodeWithText("IME query: かな 北京 🧑🏽‍💻").performScrollTo().assertIsDisplayed()\n'''
+          if 'IME input: 日本語 🧑🏽‍💻' not in s:
+              s = s.replace(anchor, runtime)
+          p.write_text(s)
+
+          # Permanent Compose reference source/runtime gates.
+          p = Path('scripts/test-compose-android-reference.mjs')
+          s = p.read_text()
+          addition = '''\nassert.match(source, /var imeInputValue by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /var imeQuery by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /var imeValue by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /accessibilityLabel = "IME composition input"/);\nassert.match(source, /accessibilityLabel = "IME editable ComboBox"/);\nassert.match(source, /editable = true/);\nassert.match(source, /GuiSelectOption\\(value = "jp", label = "日本語"\\)/);\nassert.match(source, /GuiSelectOption\\(value = "zh", label = "北京"\\)/);\nassert.match(source, /GuiSelectOption\\(value = "emoji", label = "🧑🏽‍💻"\\)/);\nassert.match(source, /IME input: \\$imeInputValue/);\nassert.match(source, /IME query: \\$imeQuery/);\nassert.match(runtimeTest, /onNodeWithContentDescription\\("IME composition input"\\)/);\nassert.match(runtimeTest, /performTextReplacement\\("日本語 🧑🏽‍💻"\\)/);\nassert.match(runtimeTest, /onNodeWithText\\("IME input: 日本語 🧑🏽‍💻"\\)/);\nassert.match(runtimeTest, /onNodeWithContentDescription\\("IME editable ComboBox"\\)/);\nassert.match(runtimeTest, /performTextReplacement\\("かな 北京 🧑🏽‍💻"\\)/);\nassert.match(runtimeTest, /onNodeWithText\\("IME query: かな 北京 🧑🏽‍💻"\\)/);\n'''
+          if 'IME composition input' not in s:
+              s = s.replace('console.log("Compose Android reference application source/build/runtime contract tests passed', addition + 'console.log("Compose Android reference application source/build/runtime contract tests passed')
+          p.write_text(s)
+
+          p = Path('scripts/test-compose-desktop-reference.mjs')
+          s = p.read_text()
+          addition = '''\nassert.match(source, /var imeInputValue by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /var imeQuery by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /var imeValue by remember \\{ mutableStateOf\\(""\\) \\}/);\nassert.match(source, /accessibilityLabel = "IME composition input"/);\nassert.match(source, /accessibilityLabel = "IME editable ComboBox"/);\nassert.match(source, /editable = true/);\nassert.match(source, /GuiSelectOption\\(value = "jp", label = "日本語"\\)/);\nassert.match(source, /GuiSelectOption\\(value = "zh", label = "北京"\\)/);\nassert.match(source, /GuiSelectOption\\(value = "emoji", label = "🧑🏽‍💻"\\)/);\nassert.match(source, /IME input: \\$imeInputValue/);\nassert.match(source, /IME query: \\$imeQuery/);\n'''
+          if 'IME composition input' not in s:
+              s = s.replace('console.log("Compose Desktop reference application source contract tests passed', addition + 'console.log("Compose Desktop reference application source contract tests passed')
+          p.write_text(s)
+
+          p = Path('scripts/test-reference-parity.mjs')
+          s = p.read_text()
+          addition = '''\nfor (const [name, source] of [["Desktop", desktop], ["Android", android]]) {\n  assert.match(source, /var imeInputValue by remember \\{ mutableStateOf\\(""\\) \\}/, `${name} must expose the shared IME Input state`);\n  assert.match(source, /var imeQuery by remember \\{ mutableStateOf\\(""\\) \\}/, `${name} must expose the shared editable ComboBox query`);\n  assert.match(source, /accessibilityLabel = "IME composition input"/, `${name} must expose the shared IME Input semantics`);\n  assert.match(source, /accessibilityLabel = "IME editable ComboBox"/, `${name} must expose the shared IME ComboBox semantics`);\n  assert.match(source, /GuiSelectOption\\(value = "jp", label = "日本語"\\)/, `${name} must expose the shared Japanese IME option`);\n  assert.match(source, /GuiSelectOption\\(value = "zh", label = "北京"\\)/, `${name} must expose the shared CJK IME option`);\n  assert.match(source, /GuiSelectOption\\(value = "emoji", label = "🧑🏽‍💻"\\)/, `${name} must expose the shared emoji IME option`);\n}\n'''
+          if 'shared IME Input state' not in s:
+              s = s.replace('console.log("Cross-platform reference application parity tests passed', addition + 'console.log("Cross-platform reference application parity tests passed')
+          p.write_text(s)
+          PY
+      - name: Validate permanent source and browser test syntax
+        run: |
+          node --check examples/web-reference/app.mjs
+          node --check examples/web-reference/select-reference.mjs
+          node --check tests/browser/web-reference.spec.mjs
+          node --check tests/browser/select-reference.spec.mjs
+          node scripts/test-web-input.mjs
+          node scripts/test-web-select.mjs
+          node scripts/test-compose-input.mjs
+          node scripts/test-compose-select.mjs
+          node scripts/test-compose-desktop-reference.mjs
+          node scripts/test-compose-android-reference.mjs
+          node scripts/test-reference-parity.mjs
+          git diff --check
+      - name: Generate and compile real Foundation Compose adapter
+        run: |
+          npm run compile:spec
+          npm run build:kotlin-contracts
+          npm run build:kotlin-tokens
+          npm run build:kotlin-visuals
+          npm run build:kotlin-assets
+          npm run compile:kotlin-contracts
+      - name: Commit validated IME runtime references
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/web-reference/app.mjs examples/web-reference/select-reference.mjs tests/browser/web-reference.spec.mjs tests/browser/select-reference.spec.mjs examples/compose-desktop/src/main/kotlin/Main.kt examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt scripts/test-compose-android-reference.mjs scripts/test-compose-desktop-reference.mjs scripts/test-reference-parity.mjs
+          git commit -m "test(ime): integrate cross-platform runtime references"
+          git pull --rebase origin main
+          git push
