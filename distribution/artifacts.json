@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "releaseTrain": {
+    "mode": "unified",
+    "versionSource": "git-tag",
+    "tagPattern": "v<semver>",
+    "publicationTrigger": "explicit-approval-only"
+  },
+  "publicationLock": {
+    "state": "locked",
+    "registryCoordinates": "unbound",
+    "requiresRoadmapGates": [
+      "stable-public-api-surface",
+      "versioned-migration-policy"
+    ]
+  },
+  "artifacts": [
+    {
+      "id": "spec-source",
+      "ecosystem": "github-release",
+      "sourcePath": "spec",
+      "logicalName": "gui-framework-spec",
+      "registryName": null
+    },
+    {
+      "id": "core-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/core",
+      "logicalName": "@gui-framework/core",
+      "registryName": null
+    },
+    {
+      "id": "spec-compiler-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/compiler",
+      "logicalName": "@gui-framework/spec-compiler",
+      "registryName": null
+    },
+    {
+      "id": "web-adapter-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/adapter-web",
+      "logicalName": "@gui-framework/web-adapter",
+      "registryName": null
+    },
+    {
+      "id": "browser-extension-integration-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/integration-browser-extension",
+      "logicalName": "@gui-framework/browser-extension-integration",
+      "registryName": null
+    },
+    {
+      "id": "web-application-integration-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/integration-web-application",
+      "logicalName": "@gui-framework/web-application-integration",
+      "registryName": null
+    },
+    {
+      "id": "host-context-js",
+      "ecosystem": "npm",
+      "sourcePath": "packages/integration-host-context/src",
+      "logicalName": "@gui-framework/host-context",
+      "registryName": null
+    },
+    {
+      "id": "compose-adapter-jvm",
+      "ecosystem": "maven-central",
+      "sourcePath": "packages/adapter-compose",
+      "logicalName": "gui-framework-compose-adapter",
+      "registryName": null
+    },
+    {
+      "id": "desktop-integration-jvm",
+      "ecosystem": "maven-central",
+      "sourcePath": "packages/integration-desktop",
+      "logicalName": "gui-framework-desktop-integration",
+      "registryName": null
+    },
+    {
+      "id": "android-integration-jvm",
+      "ecosystem": "maven-central",
+      "sourcePath": "packages/integration-android",
+      "logicalName": "gui-framework-android-integration",
+      "registryName": null
+    },
+    {
+      "id": "host-context-jvm",
+      "ecosystem": "maven-central",
+      "sourcePath": "packages/integration-host-context/kotlin",
+      "logicalName": "gui-framework-host-context",
+      "registryName": null
+    },
+    {
+      "id": "python-integration",
+      "ecosystem": "pypi",
+      "sourcePath": "packages/integration-python",
+      "logicalName": "gui-framework-integration",
+      "registryName": null
+    },
+    {
+      "id": "host-context-python",
+      "ecosystem": "pypi",
+      "sourcePath": "packages/integration-host-context/python",
+      "logicalName": "gui-framework-host-context",
+      "registryName": null
+    }
+  ]
+}
