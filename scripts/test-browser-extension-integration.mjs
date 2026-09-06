@@ -110,11 +110,15 @@ const bundledCss = await readFile(bundle.stylesheetPath, "utf8");
 assert.match(bundledCss, /GUI Framework browser-extension integration bundle/);
 assert.ok(bundledCss.indexOf(":root { --gui-test: 1; }") < bundledCss.indexOf("[data-gui-theme]"), "tokens must precede component rules");
 assert.equal(await readFile(join(bundle.assetsPath, "reference-check.svg"), "utf8"), "<svg/>\n");
-assert.deepEqual(JSON.parse(await readFile(bundle.manifestPath, "utf8")), {
-  schemaVersion: 1,
-  host: "browser-extension",
-  stylesheet: "gui-framework.css",
-  assetsDirectory: "assets",
-});
+const generatedManifest = JSON.parse(await readFile(bundle.manifestPath, "utf8"));
+assert.equal(generatedManifest.schemaVersion, 1);
+assert.equal(generatedManifest.host, "browser-extension");
+assert.equal(generatedManifest.stylesheet, "gui-framework.css");
+assert.equal(generatedManifest.assetsDirectory, "assets");
+assert.equal(generatedManifest.integrationModule, "integration.mjs");
+assert.equal(generatedManifest.adapterDirectory, "adapter");
+assert.ok(generatedManifest.adapterModules.includes("button.mjs"));
+assert.match(await readFile(bundle.integrationModulePath, "utf8"), /createBrowserExtensionGuiHost/);
+assert.match(await readFile(join(bundle.adapterPath, "button.mjs"), "utf8"), /export function createGuiButton/);
 
 console.log("Browser extension integration kit tests passed.");

@@ -129,6 +129,12 @@ jobs:
       - name: Test browser extension integration kit
         run: npm run test:browser-extension-integration
 
+      - name: Build browser extension reference
+        run: npm run build:browser-extension-reference
+
+      - name: Test browser extension reference
+        run: npm run test:browser-extension-reference
+
       - name: Test Web capability fallback generation
         run: npm run test:web-capabilities
 
@@ -376,6 +382,12 @@ jobs:
       - name: Generate Web component output
         run: npm run build:web-components
 
+      - name: Generate Web assets
+        run: npm run build:web-assets
+
+      - name: Build browser extension reference
+        run: npm run build:browser-extension-reference
+
       - name: Install Playwright test runner
         run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
 
@@ -544,6 +556,7 @@ jobs:
           profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
+          density: ${{ matrix.density }}
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
           script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }} ${{ matrix.density }}
