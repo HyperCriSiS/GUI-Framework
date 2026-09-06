@@ -13,8 +13,9 @@ This directory documents the supported authoring and integration contracts of GU
 - `docs/guides/ACCESSIBILITY.md` — semantics, keyboard/focus, target size, contrast and reduced-motion obligations.
 - `docs/guides/PERFORMANCE.md` — budgets, capability fallbacks and representative runtime evidence.
 
-## Project process
+## Compatibility and project process
 
+- `COMPATIBILITY.md` — current support matrix, runtime floors and artifact-role compatibility.
 - `CONTRIBUTING.md` — contribution workflow and required gates.
 - `GOVERNANCE.md` — decision hierarchy, compatibility ownership and release authority.
 
