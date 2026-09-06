@@ -1,0 +1,33 @@
+name: Host Context Presets CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/integration-host-context/**"
+      - "scripts/test-host-context-presets.mjs"
+      - "packages/adapter-compose/pom.xml"
+      - ".github/workflows/host-context-presets-ci.yml"
+  pull_request:
+    paths:
+      - "packages/integration-host-context/**"
+      - "scripts/test-host-context-presets.mjs"
+      - "packages/adapter-compose/pom.xml"
+      - ".github/workflows/host-context-presets-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: node scripts/test-host-context-presets.mjs
