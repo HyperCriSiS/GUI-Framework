@@ -1,24 +1,25 @@
-# Python application integration path
+# Python Integration Path
 
-This package is the toolkit-neutral handoff from the compiled GUI Framework IR to Python applications. It is intentionally **not** a Python renderer and does not couple the framework to PySide/PyQt, Tkinter, wxPython, Dear PyGui, or another widget toolkit.
+This package is the toolkit-neutral Python bridge over the compiled GUI Framework specification IR. It intentionally does not choose Tkinter, PySide, wxPython or another GUI toolkit for the application.
 
-Python applications load the compiler output (`build/spec-ir.json` or a packaged equivalent), declare the same explicit host context used by the other integration kits, and ask `GuiPythonHost` for the resolved semantic contract and visual recipe of a component:
+## Runtime contract
 
-```python
-from gui_framework_integration import GuiPythonHost, GuiPythonSurface
+- consume compiled `spec-ir.json`, never DTCG source directly,
+- make host surface, theme, palette and capabilities explicit,
+- resolve required capability fallbacks deterministically,
+- do not infer operating system, GPU, window-manager or toolkit capabilities,
+- keep toolkit lifecycle and rendering ownership in the consuming application.
 
-host = GuiPythonHost.from_file(
-    "spec-ir.json",
-    theme_id="basic",
-    palette_id="reference-dark",
-    surface=GuiPythonSurface.APPLICATION,
-    available_capabilities=(),
-)
-button = host.resolve_component("button")
+The stable public API is exported from `gui_framework_integration`.
+
+## Pre-release packaging validation
+
+Phase 9 stages this source as the logical `gui-framework-integration` artifact with PEP-440 development version `0.0.0.dev0`. The staging gate builds both wheel and sdist forms, embeds the AGPL license, then installs and imports each form from a fresh Python 3.11 virtual environment.
+
+This does not reserve or publish a PyPI project name. `distribution/artifacts.json` keeps the registry coordinate unbound and publication locked.
+
+Run the local smoke after installing the pinned build tools documented in `DISTRIBUTION.md`:
+
+```sh
+npm run check:python-artifacts
 ```
-
-`ResolvedPythonComponent` exposes the semantic component contract, base visual recipe, capability-adjusted effective visual recipe, deterministic capability selection result, and explicit host context.
-
-The integration path never parses DTCG source files directly and never infers optional capabilities from the operating system, Python version, GPU, window manager, or GUI toolkit. A future toolkit adapter should translate the resolved component data to native toolkit primitives while preserving native text, focus, input and accessibility behavior.
-
-This boundary is deliberately small so an existing Python application can adopt the GUI Framework incrementally. A concrete toolkit adapter should only be added when an actual application target justifies the dependency and mapping work.
