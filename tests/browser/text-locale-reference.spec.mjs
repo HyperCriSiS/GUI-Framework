@@ -41,7 +41,7 @@ test("Basic components preserve Unicode, wrap hostile text and follow host RTL/L
   await expect(mixedInput).toHaveValue(/Café é · 東京 · 🧑🏽‍💻/u);
   await expect(navigation).toHaveCSS("direction", "rtl");
   await expect(table).toBeVisible();
-  await expect(page.getByText(/Project Atlas 42 — مشروع أطلس — פרויקט אטלס/)).toBeVisible();
+  await expect(page.getByRole("caption")).toContainText(/Project Atlas 42 — مشروع أطلس — פרויקט אטלס/);
   await expectNoHorizontalOverflow(page);
 
   const rtlEdges = await selectedIndicatorEdges(page);
