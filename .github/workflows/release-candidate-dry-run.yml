@@ -1,0 +1,39 @@
+name: Release Candidate Dry Run
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-dry-run
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_DATE_EPOCH: "315532800"
+      TZ: UTC
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Install deterministic Python build tools
+        run: python -m pip install --disable-pip-version-check build==1.2.2.post1 setuptools==80.9.0 wheel==0.45.1
+      - name: Enforce read-only dry-run workflow policy
+        run: npm run test:release-dry-run-policy
+      - name: Prove byte-reproducible cross-ecosystem staging
+        run: npm run test:reproducible-staging

@@ -135,7 +135,14 @@
     "check:maven-artifacts": "npm run test:artifact-packaging && npm run compile:spec && npm run build:kotlin-contracts && npm run build:kotlin-tokens && npm run build:kotlin-visuals && npm run build:kotlin-assets && npm run stage:maven-artifacts && npm run test:maven-artifacts",
     "stage:python-artifacts": "python3 scripts/stage-python-artifacts.py",
     "test:python-artifacts": "python3 scripts/test-python-artifacts.py",
-    "check:python-artifacts": "npm run test:artifact-packaging && npm run stage:python-artifacts && npm run test:python-artifacts"
+    "check:python-artifacts": "npm run test:artifact-packaging && npm run stage:python-artifacts && npm run test:python-artifacts",
+    "stage:spec-archive": "python3 scripts/stage-spec-archive.py",
+    "test:spec-archive": "node scripts/test-spec-archive.mjs",
+    "check:spec-archive": "npm run test:artifact-packaging && npm run stage:spec-archive && npm run test:spec-archive",
+    "stage:release-manifest": "python3 scripts/stage-release-manifest.py",
+    "test:release-manifest": "python3 scripts/test-release-manifest.py",
+    "test:release-dry-run-policy": "node scripts/test-release-dry-run-policy.mjs",
+    "test:reproducible-staging": "python3 scripts/test-reproducible-staging.py"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1"

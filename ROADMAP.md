@@ -109,8 +109,8 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] npm staged-package build / pack / install smoke <!-- Core emits consumable ESM + declarations, six private development tarballs include AGPL metadata/license, Web Application staging removes monorepo-deep imports, and a clean Node consumer imports all public package entry points -->
 - [x] Maven local artifact build / consumer smoke <!-- four isolated local-only JAR coordinates, generated Compose release inputs, AGPL license embedded in every JAR, isolated Maven repository installation, and a clean Kotlin consumer compile across Compose/Desktop/Android/host-context artifacts -->
 - [x] Python sdist / wheel build / install smoke <!-- two PEP-440 development artifacts build as wheel+sdist, embed AGPL license metadata, and install/import successfully from clean Python 3.11 virtual environments without binding PyPI registry coordinates -->
-- [ ] Specification-source release archive smoke
-- [ ] Cross-ecosystem staging manifest and checksums
+- [x] Specification-source release archive smoke <!-- deterministic AGPL-bearing spec tarball extracts outside the repository and recompiles to IR identical to the source tree -->
+- [x] Cross-ecosystem staging manifest and checksums <!-- all 13 logical artifacts / 15 physical staged files are enumerated with size and SHA-256 while registry coordinates remain unbound -->
 - [ ] Reproducible staging validation
 - [ ] Manual release-candidate dry-run workflow with no publication credentials or registry writes
 
