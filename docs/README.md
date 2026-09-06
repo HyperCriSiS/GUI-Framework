@@ -1,28 +1,25 @@
 # GUI Framework Documentation
 
-This directory documents the supported authoring and integration contracts of GUI Framework. The repository schemas, `PUBLIC_API.md`, `MIGRATION_POLICY.md`, `ARCHITECTURE.md`, and machine-readable policy files remain authoritative when prose and contracts disagree.
+This directory contains authoring and operational documentation for the framework. The repository contracts remain authoritative; these guides explain how to use and extend them without bypassing validation, accessibility, performance or release-policy boundaries.
 
 ## Authoring
 
-- `docs/authoring/THEMES.md` — create or extend a visual theme without coupling it to a palette or renderer.
-- `docs/authoring/COMPONENTS.md` — add a semantic component recipe and carry it through adapters and validation.
-- `docs/authoring/ADAPTERS.md` — implement a new target adapter from compiled neutral IR while preserving host-platform semantics.
+- `THEME_AUTHORING.md` — theme families, palettes, inheritance, capabilities and validation.
+- `COMPONENT_AUTHORING.md` — neutral component recipes, semantics, tokens, capabilities and renderer completion.
+- `ADAPTER_AUTHORING.md` — renderer/host boundaries, compiled IR consumption and adapter completion gates.
 
 ## Quality
 
-- `docs/guides/ACCESSIBILITY.md` — semantics, keyboard/focus, target size, contrast and reduced-motion obligations.
-- `docs/guides/PERFORMANCE.md` — budgets, capability fallbacks and representative runtime evidence.
+- `ACCESSIBILITY.md` — neutral accessibility rules, platform mappings and review checklist.
+- `PERFORMANCE.md` — performance budgets, fallbacks, virtualization guidance and representative runtime checks.
 
-## Distribution and pre-release hardening
+## Project and release contracts
 
-- `DISTRIBUTION.md` — unified release train, publication lock and local artifact staging rules.
-- `distribution/artifacts.json` — canonical artifact families and deliberately unbound registry coordinates.
-- `distribution/packaging.json` — Phase 9 package roots and local ecosystem staging strategies used before publication.
+- `../PUBLIC_API.md` — stable public API boundary.
+- `../MIGRATION_POLICY.md` — SemVer, compatibility and migration-record requirements.
+- `../DISTRIBUTION.md` — locked publication strategy and local pre-release artifact staging, including npm, Maven and Python consumer smokes.
+- `../COMPATIBILITY.md` — supported platform/runtime matrix.
+- `../CONTRIBUTING.md` — contribution workflow and required gates.
+- `../GOVERNANCE.md` — decision hierarchy, maintainership and release approval separation.
 
-## Compatibility and project process
-
-- `COMPATIBILITY.md` — current support matrix, runtime floors and artifact-role compatibility.
-- `CONTRIBUTING.md` — contribution workflow and required gates.
-- `GOVERNANCE.md` — decision hierarchy, compatibility ownership and release authority.
-
-Documentation is gated by `.github/workflows/documentation-contract-ci.yml`. The contract verifies required references, schema coverage and that documented `npm run ...` commands actually exist.
+The documentation contract CI checks that these documents stay connected to the repository's schemas, scripts and policy files rather than drifting into standalone prose.
