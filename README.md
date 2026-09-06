@@ -1,37 +1,29 @@
 # GUI Framework
 
-GUI Framework is a renderer-neutral GUI system focused on clear, high-performance, strongly differentiated visual themes without coupling product code to one rendering engine.
+A renderer-neutral GUI framework specification with generated Web and Foundation Compose adapters, six theme families, integration kits and cross-platform validation.
 
-The project defines semantic components, theme/palette contracts, capability fallbacks and generated adapter output for Web and Compose Multiplatform / Android. Browser extensions, desktop applications, Android applications, Python hosts and Web applications are first-class integration targets.
+The framework currently includes:
 
-## Design goals
+- a canonical neutral specification and compiler,
+- Basic, Modern, Glass, Frosted Glass, Spacey and Cyberpunk theme families,
+- native Web and Foundation Compose component adapters,
+- browser-extension, Web-application, Desktop, Android and Python integration paths,
+- shared cross-language host-context capability presets,
+- stable public API and migration contracts,
+- schema-backed authoring/accessibility/performance/governance documentation,
+- and pre-release artifact hardening that exercises staged npm, Maven and Python packages without publishing them.
 
-- clear, sharp, elegant interfaces with a recognizable visual identity;
-- six initial theme families: Basic, Modern, Glass, Frosted Glass, Spacey and Cyberpunk;
-- palettes independent from theme structure;
-- practical host-native behavior rather than recreating mature platform systems;
-- necessary micro-interactions only, with decorative motion disabled by default;
-- explicit capability fallback for expensive or unavailable effects;
-- performance budgets, accessibility and representative runtime validation as completion gates;
-- renderer-neutral semantic/theme contracts that remain reusable across projects.
+## Current status
 
-## Architecture
+The implementation and ecosystem-readiness roadmap through Phase 8 is complete. Phase 9 is validating the actual release artifact boundaries before any registry coordinates or publish-capable workflow are enabled.
 
-Primary roles:
+Current Phase-9 coverage includes:
 
-- **Neutral specification:** source of truth for semantic component contracts, themes, palettes, tokens, assets and capabilities.
-- **Web adapter:** generated CSS/assets/contracts plus native DOM interaction adapters.
-- **Compose adapter:** generated Kotlin contracts/tokens/visual recipes/assets plus Foundation Compose controls.
-- **Integration kits:** thin host-context boundaries for browser extensions, desktop, Android, Python and Web applications.
-- **Skia:** optional advanced rendering and shader effects where supported and worthwhile.
-- **Capability fallbacks:** themes must remain usable when advanced effects are unavailable or intentionally disabled.
+- machine-readable mapping for all 13 planned artifacts,
+- clean install/import testing for six staged npm tarballs,
+- isolated local Maven build/install/consumer testing for four JVM artifacts,
+- wheel + sdist build/install/import testing for both planned Python artifacts.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [PUBLIC_API.md](PUBLIC_API.md) for the stable consumer boundary, [MIGRATION_POLICY.md](MIGRATION_POLICY.md) for compatibility/versioning rules, [docs/README.md](docs/README.md) for authoring and quality guides, and [ROADMAP.md](ROADMAP.md) for implementation status.
+Publication remains **locked** and requires explicit human approval plus deliberate registry namespace/coordinate binding. Successful CI or a Git tag is not publication authorization.
 
-## Status
-
-The component/theme foundations, six initial theme families, extended component set, Web/Compose references, Phase 7 integration kits, and Phase 8 distribution/ecosystem contracts are implemented. Phase 9 now hardens the promised artifacts as real locally consumable npm/Maven/PyPI/archive outputs before any registry coordinate or release approval is introduced. Registry publication remains locked and requires explicit human release approval; see [DISTRIBUTION.md](DISTRIBUTION.md).
-
-## License
-
-AGPL-3.0-or-later. See [LICENSE](LICENSE) and [LICENSE_POLICY.md](LICENSE_POLICY.md).
+See `ROADMAP.md` for the active execution plan and `DISTRIBUTION.md` for the release/publication contract.
