@@ -245,4 +245,22 @@ assert.match(runtimeTest, /performSemanticsAction\(SemanticsActions\.ScrollBy\)/
 assert.match(runtimeTest, /scrollBy\(0f, 500f\)/);
 assert.match(runtimeTest, /onNodeWithText\("Scroll offset: 0"\)\.assertDoesNotExist\(\)/);
 assert.match(runtimeTest, /onNodeWithText\("Activity event 12"\)\.assertIsDisplayed\(\)/);
+
+assert.match(source, /var imeInputValue by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /var imeQuery by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /var imeValue by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /accessibilityLabel = "IME composition input"/);
+assert.match(source, /accessibilityLabel = "IME editable ComboBox"/);
+assert.match(source, /editable = true/);
+assert.match(source, /GuiSelectOption\(value = "jp", label = "日本語"\)/);
+assert.match(source, /GuiSelectOption\(value = "zh", label = "北京"\)/);
+assert.match(source, /GuiSelectOption\(value = "emoji", label = "🧑🏽‍💻"\)/);
+assert.match(source, /IME input: \$imeInputValue/);
+assert.match(source, /IME query: \$imeQuery/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("IME composition input"\)/);
+assert.match(runtimeTest, /performTextReplacement\("日本語 🧑🏽‍💻"\)/);
+assert.match(runtimeTest, /onNodeWithText\("IME input: 日本語 🧑🏽‍💻"\)/);
+assert.match(runtimeTest, /onNodeWithContentDescription\("IME editable ComboBox"\)/);
+assert.match(runtimeTest, /performTextReplacement\("かな 北京 🧑🏽‍💻"\)/);
+assert.match(runtimeTest, /onNodeWithText\("IME query: かな 北京 🧑🏽‍💻"\)/);
 console.log("Compose Android reference application source/build/runtime contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Scroll Container/Menu coverage and Phase 5 theme selection isolation.");

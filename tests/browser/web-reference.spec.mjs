@@ -519,3 +519,48 @@ test("Basic reference light mobile visual baseline", async ({ page }) => {
   await expect(root).toHaveAttribute("data-gui-palette", "reference-light");
   await expect(root).toHaveScreenshot("reference-light-mobile.png", { animations: "disabled" });
 });
+
+
+test("controlled Input preserves real browser IME preedit across stale host echoes", async ({ page }) => {
+  await page.goto("/examples/web-reference/index.html?theme=basic");
+  await page.waitForFunction(() => Boolean(globalThis.__guiReferenceController));
+  const input = page.locator("#gui-reference-name");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    element.value = "に";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "に",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiReferenceController.components.nameInput.update({ value: "Ada Lovelace" });
+  });
+  await expect(input).toHaveValue("に");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.value = "日本語 🧑🏽‍💻";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "日本語 🧑🏽‍💻",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiReferenceController.components.nameInput.update({ value: "に" });
+  });
+  await expect(input).toHaveValue("日本語 🧑🏽‍💻");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-reference-name");
+    element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "日本語 🧑🏽‍💻" }));
+  });
+  await page.waitForFunction(() => globalThis.__guiReferenceController.getState().name === "日本語 🧑🏽‍💻");
+  await page.evaluate(() => {
+    const controller = globalThis.__guiReferenceController;
+    controller.components.nameInput.update({ value: controller.getState().name });
+  });
+  await expect(input).toHaveValue("日本語 🧑🏽‍💻");
+});

@@ -114,6 +114,16 @@ class ReferenceRuntimeTest {
             composeRule.waitForIdle()
             composeRule.onNodeWithText("Push").assertIsDisplayed()
 
+            val imeInput = composeRule.onNodeWithContentDescription("IME composition input")
+            imeInput.performScrollTo().assertIsDisplayed().performTextReplacement("日本語 🧑🏽‍💻")
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("IME input: 日本語 🧑🏽‍💻").performScrollTo().assertIsDisplayed()
+
+            val imeCombo = composeRule.onNodeWithContentDescription("IME editable ComboBox")
+            imeCombo.performScrollTo().assertIsDisplayed().performTextReplacement("かな 北京 🧑🏽‍💻")
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText("IME query: かな 北京 🧑🏽‍💻").performScrollTo().assertIsDisplayed()
+
             val overviewTab = composeRule.onNodeWithText("Overview")
             val metricsTab = composeRule.onNodeWithText("Metrics")
             val logsTab = composeRule.onNodeWithText("Logs")

@@ -298,4 +298,14 @@ for (const [name, source] of [["Desktop", desktop], ["Android", android]]) {
   assert.match(source, /Activity event 12/, `${name} must expose the shared terminal activity item`);
   assert.match(source, /Scroll offset: \$\{activityScrollState\.value\}/, `${name} must surface host-owned offset`);
 }
+
+for (const [name, source] of [["Desktop", desktop], ["Android", android]]) {
+  assert.match(source, /var imeInputValue by remember \{ mutableStateOf\(""\) \}/, `${name} must expose the shared IME Input state`);
+  assert.match(source, /var imeQuery by remember \{ mutableStateOf\(""\) \}/, `${name} must expose the shared editable ComboBox query`);
+  assert.match(source, /accessibilityLabel = "IME composition input"/, `${name} must expose the shared IME Input semantics`);
+  assert.match(source, /accessibilityLabel = "IME editable ComboBox"/, `${name} must expose the shared IME ComboBox semantics`);
+  assert.match(source, /GuiSelectOption\(value = "jp", label = "日本語"\)/, `${name} must expose the shared Japanese IME option`);
+  assert.match(source, /GuiSelectOption\(value = "zh", label = "北京"\)/, `${name} must expose the shared CJK IME option`);
+  assert.match(source, /GuiSelectOption\(value = "emoji", label = "🧑🏽‍💻"\)/, `${name} must expose the shared emoji IME option`);
+}
 console.log("Cross-platform reference application parity tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Scroll Container/Table/Data Grid/Menu extensions and validated Modern/Glass/Frosted/Spacey/Cyberpunk selection paths.");

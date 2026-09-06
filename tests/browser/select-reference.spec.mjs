@@ -55,3 +55,55 @@ test("editable ComboBox reference exposes controlled query behavior", async ({ p
   await combo.press("Escape");
   await expect(combo).toHaveAttribute("aria-expanded", "false");
 });
+
+
+test("editable ComboBox preserves real browser composition and leaves candidate keys to the IME", async ({ page }) => {
+  await page.goto(`${referencePath}?editable=true`);
+  await page.waitForFunction(() => Boolean(globalThis.__guiSelectReferenceController));
+  const combo = page.getByRole("combobox", { name: "Find delivery channel" });
+
+  const composingKeys = await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    element.value = "か";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "か",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiSelectReferenceController.select.update({ query: "seed" });
+    const enter = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter", isComposing: true });
+    const down = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown", isComposing: true });
+    element.dispatchEvent(enter);
+    element.dispatchEvent(down);
+    return { enterPrevented: enter.defaultPrevented, downPrevented: down.defaultPrevented };
+  });
+  expect(composingKeys).toEqual({ enterPrevented: false, downPrevented: false });
+  await expect(combo).toHaveValue("か");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.value = "かな 🧑🏽‍💻";
+    element.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      data: "かな 🧑🏽‍💻",
+      inputType: "insertCompositionText",
+      isComposing: true,
+    }));
+    globalThis.__guiSelectReferenceController.select.update({ query: "か" });
+  });
+  await expect(combo).toHaveValue("かな 🧑🏽‍💻");
+
+  await page.evaluate(() => {
+    const element = document.querySelector("#gui-select-reference-control");
+    element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "かな 🧑🏽‍💻" }));
+    const controller = globalThis.__guiSelectReferenceController;
+    controller.select.update({ query: controller.getState().query });
+  });
+  await expect(combo).toHaveValue("かな 🧑🏽‍💻");
+
+  await combo.press("ArrowDown");
+  await combo.press("Enter");
+  await expect(page.getByText(/Selected (email|push|digest)\./)).toBeVisible();
+});

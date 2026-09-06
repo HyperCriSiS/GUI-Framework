@@ -129,7 +129,7 @@ if (typeof document !== "undefined") {
   const root = document.querySelector?.("#gui-select-reference-root");
   if (root) {
     const query = new URLSearchParams(globalThis.location?.search ?? "");
-    mountSelectReference(document, root, {
+    globalThis.__guiSelectReferenceController = mountSelectReference(document, root, {
       density: query.get("density") ?? "standard",
       editable: query.get("editable") === "true",
     });

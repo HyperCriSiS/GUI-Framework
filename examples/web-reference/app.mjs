@@ -418,7 +418,7 @@ if (typeof document !== "undefined") {
 
     loadReferenceIr()
       .then((capabilityIr) => {
-        mountReferenceApp(document, root, {
+        globalThis.__guiReferenceController = mountReferenceApp(document, root, {
           hostContext: query.get("context") ?? "page",
           density: query.get("density") ?? "standard",
           theme: query.get("theme") ?? "basic",

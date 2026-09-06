@@ -136,4 +136,16 @@ assert.match(source, /verticalScrollState = activityScrollState/);
 assert.match(source, /Activity event 12/);
 assert.match(source, /Scroll offset: \$\{activityScrollState\.value\}/);
 assert.match(source, /\.height\(if \(density == ReferenceDensity\.Compact\) 144\.dp else 176\.dp\)/);
+
+assert.match(source, /var imeInputValue by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /var imeQuery by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /var imeValue by remember \{ mutableStateOf\(""\) \}/);
+assert.match(source, /accessibilityLabel = "IME composition input"/);
+assert.match(source, /accessibilityLabel = "IME editable ComboBox"/);
+assert.match(source, /editable = true/);
+assert.match(source, /GuiSelectOption\(value = "jp", label = "日本語"\)/);
+assert.match(source, /GuiSelectOption\(value = "zh", label = "北京"\)/);
+assert.match(source, /GuiSelectOption\(value = "emoji", label = "🧑🏽‍💻"\)/);
+assert.match(source, /IME input: \$imeInputValue/);
+assert.match(source, /IME query: \$imeQuery/);
 console.log("Compose Desktop reference application source contract tests passed with Basic Checkbox/Radio/Select/Tabs/Tooltip/Toast/Progress/Slider/Navigation/Form Layout/Scroll Container/Menu coverage and Phase 5 theme selection isolation.");

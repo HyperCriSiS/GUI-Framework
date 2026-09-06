@@ -135,6 +135,10 @@ fun AndroidReferenceApp(
     var reviewMode by remember { mutableStateOf("summary") }
     var deliveryChannel by remember { mutableStateOf("email") }
     var selectExpanded by remember { mutableStateOf(false) }
+    var imeInputValue by remember { mutableStateOf("") }
+    var imeQuery by remember { mutableStateOf("") }
+    var imeValue by remember { mutableStateOf("") }
+    var imeExpanded by remember { mutableStateOf(false) }
     var activeSection by remember { mutableStateOf("overview") }
     var tooltipOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -257,6 +261,32 @@ fun AndroidReferenceApp(
                     accessibilityLabel = "Delivery channel",
                     size = selectSize,
                 )
+                    GuiInput(
+                        value = imeInputValue,
+                        onValueChange = { imeInputValue = it },
+                        placeholder = "日本語 or emoji",
+                        accessibilityLabel = "IME composition input",
+                        size = inputSize,
+                    )
+                    BasicText("IME input: $imeInputValue")
+                    GuiSelect(
+                        value = imeValue,
+                        options = listOf(
+                            GuiSelectOption(value = "jp", label = "日本語"),
+                            GuiSelectOption(value = "zh", label = "北京"),
+                            GuiSelectOption(value = "emoji", label = "🧑🏽‍💻"),
+                        ),
+                        onValueChange = { imeValue = it },
+                        query = imeQuery,
+                        onQueryChange = { imeQuery = it },
+                        editable = true,
+                        expanded = imeExpanded,
+                        onExpandedChange = { imeExpanded = it },
+                        placeholder = "かな / 北京 / 🧑🏽‍💻",
+                        accessibilityLabel = "IME editable ComboBox",
+                        size = selectSize,
+                    )
+                    BasicText("IME query: $imeQuery")
                 GuiTabs(
                     value = activeSection,
                     tabs = listOf(
