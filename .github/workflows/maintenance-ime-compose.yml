@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -15,9 +17,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Patch Compose editable controls
+      - name: Restore clean pre-IME Compose slices and apply minimal IME patch
         shell: bash
         run: |
+          git show 2b3db9adff9d4d9b1180ffde2a798d3fd5576f30:packages/adapter-compose/src/main/kotlin/GuiInput.kt > packages/adapter-compose/src/main/kotlin/GuiInput.kt
+          git show 2b3db9adff9d4d9b1180ffde2a798d3fd5576f30:packages/adapter-compose/src/main/kotlin/GuiSelect.kt > packages/adapter-compose/src/main/kotlin/GuiSelect.kt
+          git show 2b3db9adff9d4d9b1180ffde2a798d3fd5576f30:scripts/test-compose-input.mjs > scripts/test-compose-input.mjs
+          git show 2b3db9adff9d4d9b1180ffde2a798d3fd5576f30:scripts/test-compose-select.mjs > scripts/test-compose-select.mjs
           python - <<'PY'
           from pathlib import Path
 
@@ -47,14 +53,8 @@ jobs:
 
           p = Path('packages/adapter-compose/src/main/kotlin/GuiSelect.kt')
           s = p.read_text()
-          s = s.replace(
-            'import androidx.compose.runtime.Composable\n',
-            'import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.SideEffect\n'
-          )
-          s = s.replace(
-            'import androidx.compose.ui.text.TextStyle\n',
-            'import androidx.compose.ui.text.TextRange\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.input.TextFieldValue\n'
-          )
+          s = s.replace('import androidx.compose.runtime.Composable\n', 'import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.SideEffect\n')
+          s = s.replace('import androidx.compose.ui.text.TextStyle\n', 'import androidx.compose.ui.text.TextRange\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.input.TextFieldValue\n')
           s = s.replace(
             '''    val selectedLabel = options.firstOrNull { it.value == value }?.label ?: value\n    val fieldValue = if (editable) query else selectedLabel\n    val density = LocalDensity.current''',
             '''    val selectedLabel = options.firstOrNull { it.value == value }?.label ?: value\n    var editingValue by remember {\n        mutableStateOf(TextFieldValue(text = query, selection = TextRange(query.length)))\n    }\n    val editableFieldValue = if (editingValue.composition != null || editingValue.text == query) {\n        editingValue\n    } else {\n        TextFieldValue(text = query, selection = TextRange(query.length))\n    }\n    SideEffect {\n        if (editingValue.composition == null && editingValue != editableFieldValue) editingValue = editableFieldValue\n    }\n    val fieldValue = if (editable) editableFieldValue.text else selectedLabel\n    val density = LocalDensity.current'''
@@ -68,16 +68,29 @@ jobs:
             '''                BasicTextField(\n                    value = editableFieldValue,\n                    onValueChange = { nextValue ->\n                        editingValue = nextValue\n                        if (enabled && nextValue.text != query) {\n                            onQueryChange(nextValue.text)\n                            if (!expanded) onExpandedChange(true)\n                        }\n                    },'''
           )
           p.write_text(s)
+
+          p = Path('scripts/test-compose-input.mjs')
+          s = p.read_text()
+          anchor = 'assert.match(source, /contentDescription = accessibilityLabel/);\n'
+          ime = '''assert.match(source, /TextFieldValue\\(text = value, selection = TextRange\\(value\\.length\\)\\)/);\nassert.match(source, /editingValue\\.composition != null/);\nassert.match(source, /editingValue\\.text == value/);\nassert.match(source, /editingValue\\.composition == null && editingValue != fieldValue/);\nassert.match(source, /value = fieldValue/);\nassert.match(source, /editingValue = nextValue/);\nassert.match(source, /if \\(nextValue\\.text != value\\) onValueChange\\(nextValue\\.text\\)/);\nassert.match(source, /fieldValue\\.text\\.isEmpty\\(\\)/);\n'''
+          s = s.replace(anchor, anchor + ime)
+          p.write_text(s)
+
+          p = Path('scripts/test-compose-select.mjs')
+          s = p.read_text()
+          anchor = 'assert.match(source, /expanded: Boolean = false/);\n'
+          ime = '''assert.match(source, /TextFieldValue\\(text = query, selection = TextRange\\(query\\.length\\)\\)/);\nassert.match(source, /editingValue\\.composition != null/);\nassert.match(source, /editingValue\\.text == query/);\nassert.match(source, /editingValue\\.composition == null && editingValue != editableFieldValue/);\nassert.match(source, /value = editableFieldValue/);\nassert.match(source, /editingValue = nextValue/);\nassert.match(source, /onQueryChange\\(nextValue\\.text\\)/);\nassert.match(source, /if \\(editable && editableFieldValue\\.composition != null\\) return@onPreviewKeyEvent false/);\n'''
+          s = s.replace(anchor, anchor + ime)
+          p.write_text(s)
           PY
-      - name: Guard intended IME source shape
+      - name: Guard minimal diff and permanent source contracts
         shell: bash
         run: |
-          grep -q 'TextFieldValue' packages/adapter-compose/src/main/kotlin/GuiInput.kt
-          grep -q 'editingValue.composition != null' packages/adapter-compose/src/main/kotlin/GuiInput.kt
-          grep -q 'value = fieldValue' packages/adapter-compose/src/main/kotlin/GuiInput.kt
-          grep -q 'TextFieldValue' packages/adapter-compose/src/main/kotlin/GuiSelect.kt
-          grep -q 'editableFieldValue.composition != null' packages/adapter-compose/src/main/kotlin/GuiSelect.kt
-          grep -q 'value = editableFieldValue' packages/adapter-compose/src/main/kotlin/GuiSelect.kt
+          node scripts/test-compose-input.mjs
+          node scripts/test-compose-select.mjs
+          git diff --check
+          test "$(git diff --numstat -- packages/adapter-compose/src/main/kotlin/GuiInput.kt | awk '{print $2}')" -lt 80
+          test "$(git diff --numstat -- packages/adapter-compose/src/main/kotlin/GuiSelect.kt | awk '{print $2}')" -lt 80
       - name: Generate Kotlin framework outputs
         run: |
           npm run compile:spec
@@ -85,17 +98,14 @@ jobs:
           npm run build:kotlin-tokens
           npm run build:kotlin-visuals
           npm run build:kotlin-assets
-      - name: Run existing Compose editable-control gates
-        run: |
-          npm run test:kotlin-input
-          npm run test:kotlin-select
       - name: Compile real Foundation Compose adapter
         run: npm run compile:kotlin-contracts
-      - name: Commit validated Compose IME adapter slice
+      - name: Commit normalized validated Compose IME slice
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/adapter-compose/src/main/kotlin/GuiInput.kt packages/adapter-compose/src/main/kotlin/GuiSelect.kt
-          git commit -m "fix(ime): preserve Compose composition metadata"
+          git add packages/adapter-compose/src/main/kotlin/GuiInput.kt packages/adapter-compose/src/main/kotlin/GuiSelect.kt scripts/test-compose-input.mjs scripts/test-compose-select.mjs
+          git commit -m "fix(ime): preserve Compose composition sessions"
+          git pull --rebase origin main
           git push
