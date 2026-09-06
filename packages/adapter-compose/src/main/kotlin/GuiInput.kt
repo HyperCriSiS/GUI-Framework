@@ -15,8 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,8 +33,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -121,6 +126,20 @@ fun GuiInput(
     val hovered by source.collectIsHoveredAsState()
     val focused by source.collectIsFocusedAsState()
     val enabled = !disabled
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(text = value)) }
+
+    // Keep the IME-owned composition/selection state while the host echoes normal edits
+    // through the controlled String API. Only a genuinely external text replacement resets
+    // the composition, because carrying an old composing range into different text is invalid.
+    SideEffect {
+        if (textFieldValue.text != value) {
+            textFieldValue = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length),
+                composition = null,
+            )
+        }
+    }
 
     val baseRecipe = GuiVisualRegistry.component(
         paletteId = selection.paletteId,
@@ -182,8 +201,11 @@ fun GuiInput(
         propagateMinConstraints = true,
     ) {
         BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = textFieldValue,
+            onValueChange = { nextValue ->
+                textFieldValue = nextValue
+                if (nextValue.text != value) onValueChange(nextValue.text)
+            },
             modifier = fieldModifier,
             enabled = enabled,
             readOnly = readOnly,

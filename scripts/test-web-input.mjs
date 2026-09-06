@@ -33,9 +33,16 @@ class FakeElement {
   removeEventListener(type, listener) {
     if (this.listeners.get(type) === listener) this.listeners.delete(type);
   }
-  input(value) {
+  input(value, { isComposing = false } = {}) {
     this.value = value;
-    this.listeners.get("input")?.({ type: "input", currentTarget: this });
+    this.listeners.get("input")?.({ type: "input", currentTarget: this, isComposing });
+  }
+  compositionStart() {
+    this.listeners.get("compositionstart")?.({ type: "compositionstart", currentTarget: this });
+  }
+  compositionEnd(value = this.value) {
+    this.value = value;
+    this.listeners.get("compositionend")?.({ type: "compositionend", currentTarget: this });
   }
 }
 
@@ -101,16 +108,34 @@ try {
   input.update({ accessibilityLabel: "" });
   assert.equal(input.element.getAttribute("aria-label"), null, "Empty labels must defer to host-associated labels");
 
+  input.element.compositionStart();
+  input.element.input("be", { isComposing: true });
+  assert.deepEqual(changes, ["beta", "be"], "IME intermediate text must flow through the controlled value callback");
+  input.update({ value: "be" });
+  assert.equal(input.element.value, "be", "Controlled rerenders must not clobber the browser-owned composing value");
+  input.element.input("べ", { isComposing: true });
+  input.update({ value: "べ" });
+  assert.equal(input.element.value, "べ", "Composition must survive host echoes of intermediate IME text");
+  input.element.compositionEnd("べ");
+  await Promise.resolve();
+  assert.deepEqual(changes, ["beta", "be", "べ"], "compositionend must not duplicate a value already emitted by input");
+
+  input.element.compositionStart();
+  input.element.value = "北京";
+  input.element.compositionEnd("北京");
+  await Promise.resolve();
+  assert.deepEqual(changes, ["beta", "be", "べ", "北京"], "compositionend must commit when a browser omits the final input event");
+
   input.update({ readOnly: true });
   assert.equal(input.element.readOnly, true);
   input.element.input("blocked");
-  assert.deepEqual(changes, ["beta"], "Read-only inputs must not emit framework value changes");
+  assert.deepEqual(changes, ["beta", "be", "べ", "北京"], "Read-only inputs must not emit framework value changes");
 
   input.update({ readOnly: false, disabled: true, error: false });
   assert.equal(input.element.disabled, true);
   assert.equal(input.element.getAttribute("aria-invalid"), null);
   input.element.input("disabled");
-  assert.deepEqual(changes, ["beta"], "Disabled inputs must not emit framework value changes");
+  assert.deepEqual(changes, ["beta", "be", "べ", "北京"], "Disabled inputs must not emit framework value changes");
 
   assert.throws(
     () => input.update({ value: undefined }),
