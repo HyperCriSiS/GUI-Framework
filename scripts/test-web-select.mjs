@@ -39,10 +39,12 @@ class FakeElement {
   addEventListener(type, listener) { this.listeners.set(type, listener); }
   removeEventListener(type, listener) { if (this.listeners.get(type) === listener) this.listeners.delete(type); }
   click() { this.listeners.get("click")?.({ type: "click", currentTarget: this, target: this }); }
-  input(value) { this.value = value; this.listeners.get("input")?.({ type: "input", currentTarget: this, target: this }); }
-  keydown(key) {
+  input(value, { isComposing = false } = {}) { this.value = value; this.listeners.get("input")?.({ type: "input", currentTarget: this, target: this, isComposing }); }
+  compositionStart() { this.listeners.get("compositionstart")?.({ type: "compositionstart", currentTarget: this, target: this }); }
+  compositionEnd(value = this.value) { this.value = value; this.listeners.get("compositionend")?.({ type: "compositionend", currentTarget: this, target: this }); }
+  keydown(key, { isComposing = false, keyCode = 0 } = {}) {
     let prevented = false;
-    this.listeners.get("keydown")?.({ type: "keydown", key, currentTarget: this, target: this, preventDefault() { prevented = true; } });
+    this.listeners.get("keydown")?.({ type: "keydown", key, keyCode, isComposing, currentTarget: this, target: this, preventDefault() { prevented = true; } });
     return prevented;
   }
   clickChild(child) { this.listeners.get("click")?.({ type: "click", currentTarget: this, target: child }); }
@@ -126,6 +128,50 @@ try {
   assert.deepEqual(expandedChanges, [true, false, false], "Only the enabled option commit closed the editable popup");
   assert.throws(() => select.update({ editable: "yes" }), /editable must be a boolean/);
   assert.throws(() => createGuiSelectOption(fakeDocument, { value: "x", label: "" }), /label must be a non-empty string/);
+
+  const imeQueries = [];
+  const imeValues = [];
+  const imeExpanded = [];
+  const imeSelect = createGuiSelect(fakeDocument, {
+    value: "",
+    query: "seed",
+    editable: true,
+    expanded: true,
+    onQueryChange(value) { imeQueries.push(value); },
+    onValueChange(value) { imeValues.push(value); },
+    onExpandedChange(value) { imeExpanded.push(value); },
+  });
+  const imeOption = createGuiSelectOption(fakeDocument, { value: "jp", label: "日本語" });
+  imeSelect.popupElement.append(imeOption.element);
+  imeSelect.refreshOptions();
+  imeSelect.element.compositionStart();
+  imeSelect.element.input("か", { isComposing: true });
+  imeSelect.update({ query: "seed" });
+  assert.equal(imeSelect.element.value, "か", "Controlled query echoes must not overwrite active IME preedit");
+  assert.equal(imeSelect.element.keydown("Enter", { isComposing: true, keyCode: 229 }), false, "IME Enter must not be consumed by ComboBox navigation");
+  assert.equal(imeSelect.element.keydown("ArrowDown", { isComposing: true, keyCode: 229 }), false, "IME candidate arrows must remain available to the platform");
+  assert.deepEqual(imeValues, [], "IME candidate interaction must not commit an option");
+  imeSelect.element.input("かな", { isComposing: true });
+  imeSelect.update({ query: "か" });
+  assert.equal(imeSelect.element.value, "かな");
+  imeSelect.element.compositionEnd("かな");
+  await Promise.resolve();
+  assert.deepEqual(imeQueries, ["か", "かな"], "compositionend must not duplicate a final query already emitted by input");
+  imeSelect.update({ query: "かな" });
+  assert.equal(imeSelect.element.keydown("Enter", { keyCode: 229 }), false, "Legacy IME process key 229 must not be treated as option commit");
+  assert.deepEqual(imeValues, []);
+  assert.equal(imeSelect.element.keydown("Enter"), true, "Normal Enter handling must resume after composition");
+  assert.deepEqual(imeValues, ["jp"]);
+  assert.deepEqual(imeExpanded, [false]);
+  imeSelect.element.compositionStart();
+  imeSelect.element.value = "北京";
+  imeSelect.element.compositionEnd("北京");
+  await Promise.resolve();
+  assert.deepEqual(imeQueries, ["か", "かな", "北京"], "compositionend must recover the committed query when a browser omits the final input event");
+  imeOption.destroy();
+  imeSelect.destroy();
+  assert.equal(imeSelect.element.listeners.has("compositionstart"), false);
+  assert.equal(imeSelect.element.listeners.has("compositionend"), false);
 
   disabled.destroy(); modern.destroy(); basic.destroy(); select.destroy();
   console.log("Web Basic Select / ComboBox vertical-slice tests passed.");
