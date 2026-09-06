@@ -10,7 +10,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DIST_ROOT = ROOT / "build" / "staging" / "python" / "dist"
+PACKAGING = json.loads((ROOT / "distribution" / "packaging.json").read_text(encoding="utf-8"))
+DIST_ROOT = ROOT / PACKAGING["stagingRoot"] / "python" / "dist"
 EXPECTATIONS = {
     "python-integration": {
         "name": "gui-framework-integration",

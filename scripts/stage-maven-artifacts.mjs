@@ -96,6 +96,7 @@ function pom({ artifactId, name, dependencies = "", sourceDirs, compose = false 
         <kotlin.version>${kotlinVersion}</kotlin.version>
         <compose.version>${composeVersion}</compose.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.outputTimestamp>1980-01-01T00:00:00Z</project.build.outputTimestamp>
     </properties>${repositoriesXml}
     <dependencies>
         <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-stdlib</artifactId><version>\${kotlin.version}</version></dependency>${dependencies}

@@ -21,8 +21,14 @@ on:
       - 'scripts/test-maven-artifacts.mjs'
       - 'scripts/stage-python-artifacts.py'
       - 'scripts/test-python-artifacts.py'
+      - 'scripts/stage-spec-archive.py'
+      - 'scripts/test-spec-archive.mjs'
+      - 'scripts/stage-release-manifest.py'
+      - 'scripts/test-release-manifest.py'
+      - 'scripts/test-release-dry-run-policy.mjs'
+      - 'scripts/test-reproducible-staging.py'
+      - '.github/workflows/release-candidate-dry-run.yml'
       - 'package.json'
-      - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
   push:
     branches: [main]
@@ -45,8 +51,14 @@ on:
       - 'scripts/test-maven-artifacts.mjs'
       - 'scripts/stage-python-artifacts.py'
       - 'scripts/test-python-artifacts.py'
+      - 'scripts/stage-spec-archive.py'
+      - 'scripts/test-spec-archive.mjs'
+      - 'scripts/stage-release-manifest.py'
+      - 'scripts/test-release-manifest.py'
+      - 'scripts/test-release-dry-run-policy.mjs'
+      - 'scripts/test-reproducible-staging.py'
+      - '.github/workflows/release-candidate-dry-run.yml'
       - 'package.json'
-      - 'ROADMAP.md'
       - '.github/workflows/artifact-packaging-ci.yml'
 
 permissions:
@@ -80,3 +92,9 @@ jobs:
         run: python -m pip install --disable-pip-version-check build==1.2.2.post1 setuptools==80.9.0 wheel==0.45.1
       - name: Build and consume staged Python artifacts
         run: npm run check:python-artifacts
+      - name: Build and validate staged specification archive
+        run: npm run check:spec-archive
+      - name: Emit and validate cross-ecosystem staging manifest
+        run: npm run stage:release-manifest && npm run test:release-manifest
+      - name: Validate release-candidate dry-run policy
+        run: npm run test:release-dry-run-policy

@@ -45,6 +45,9 @@ Current local staging gates:
 - embed the AGPL license in each staged JAR, install them into an isolated Maven repository, and compile a clean Kotlin consumer against that repository,
 - build both planned Python artifacts as PEP-440 `0.0.0.dev0` wheel **and** sdist packages,
 - embed AGPL license metadata/files in both Python package forms and install/import each form from fresh Python 3.11 virtual environments,
+- build a deterministic specification-source archive containing `spec/` plus the repository license and prove the extracted tree compiles to the same neutral IR,
+- emit `release-manifest.json` plus `SHA256SUMS` across all 13 logical artifacts / 15 physical staged files,
+- prove byte-identical staging in two clean passes during the manually dispatched release-candidate dry run,
 - never bind or contact npm, Maven Central, PyPI or a GitHub Release endpoint during these staging checks.
 
 These checks prove artifact shape and consumer usability only. They do **not** authorize publication and do not weaken the explicit release-approval requirement.
@@ -56,7 +59,11 @@ npm run test:artifact-packaging
 npm run check:npm-artifacts
 npm run check:maven-artifacts
 npm run check:python-artifacts
+npm run check:spec-archive
+npm run stage:release-manifest && npm run test:release-manifest
 ```
+
+The full reproducibility proof is intentionally excluded from ordinary pull-request CI because it rebuilds the complete cross-ecosystem staging set twice. It is executed by `.github/workflows/release-candidate-dry-run.yml`, which is manual-only and has `contents: read` permission with no publication credentials or registry-write commands.
 
 ## Publication gate
 
