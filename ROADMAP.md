@@ -1,70 +1,70 @@
 # GUI Framework Roadmap
 
-This roadmap tracks only the work that belongs to the GUI Framework itself.
+This roadmap tracks the technical progression from specification work to a production-grade renderer-neutral GUI framework.
 
-## Operating principles
+The framework is intended to remain renderer-neutral at the semantic and theme-specification layers while supporting practical adapters for modern Web, Compose Multiplatform / Android, and later additional host environments.
 
-- Keep the neutral specification renderer-agnostic.
-- Derive platform outputs from the neutral contract instead of hand-maintaining equivalent definitions.
-- Preserve clear ownership boundaries between spec, compiler, theme, adapter, reference app and integration layers.
-- Prefer capabilities and fallback rules over platform branches inside the neutral spec.
-- Ship a component only when applicable schema, compiler, adapter, accessibility, performance and reference-application gates are green.
-- Keep motion limited to necessary interaction feedback; no decorative animation belongs in the default framework behavior.
-- Treat Basic as the canonical quality baseline; additional themes inherit semantics and only override presentation where necessary.
+## Guiding principles
 
-## Phase 1 — Repository and specification foundation
+- [x] Renderer-neutral semantic component specification
+- [x] Basic theme as the canonical semantic baseline
+- [x] Theme inheritance for non-semantic visual differentiation
+- [x] Restrictive copyleft licensing via AGPL-3.0-or-later
+- [x] Necessary usability micro-interactions only; no decorative motion by default
+- [x] Native or semantically native host behavior where practical
+- [x] Foundation Compose rather than Material coupling
+- [x] Performance budgets and capability fallback as first-class contracts
+- [x] Reference applications used as integration/runtime gates rather than showcase-only demos
 
-- [x] Restrictive project license and contribution boundary
-- [x] Repository structure and ownership model
-- [x] Renderer-neutral theme/component specification
-- [x] Token taxonomy and aliases
-- [x] Component recipe schema
-- [x] Theme inheritance model
-- [x] Capability/fallback model
-- [x] Palette-family model
-- [x] Spec validation and compiler tests
+## Phase 1 — Specification foundation
 
-## Phase 2 — Compiler and generated contracts
-
+- [x] Theme manifest and palette-family model
+- [x] Neutral component recipe schema
+- [x] Theme visual schema
+- [x] Asset manifest model
+- [x] Capability vocabulary and fallback rules
+- [x] Accessibility requirements in component contracts
 - [x] Neutral specification compiler
-- [x] Generated Web TypeScript contracts
-- [x] Generated Kotlin contracts
-- [x] Generated Web token output
-- [x] Generated Kotlin token output
-- [x] Generated visual-recipe output
-- [x] Generated asset output
 - [x] Renderer-neutral boundary guards
-- [x] Generated-output typechecking/compilation gates
+- [x] Typed visual recipe resolution
+- [x] Theme inheritance and override resolution
 
-## Phase 3 — Basic theme and primitive adapters
+## Phase 2 — Generated adapter foundations
 
-- [x] Basic theme foundation
-- [x] Basic palette-family model
-- [x] Basic quality contract
-- [x] Basic performance budget
-- [x] Native Web adapter foundation
-- [x] Foundation Compose adapter foundation
-- [x] Shared semantics and interaction contracts
-- [x] Capability-aware visual fallback resolution
+- [x] Web token generation
+- [x] Web asset generation
+- [x] Web component CSS generation
+- [x] Web TypeScript contract generation
+- [x] Kotlin contract generation
+- [x] Kotlin token generation
+- [x] Kotlin visual recipe generation
+- [x] Kotlin asset generation
+- [x] Generated Web TypeScript typechecking
+- [x] Generated Kotlin/Compose compilation
 
-## Phase 4 — Core components
+## Phase 3 — Core component baseline
 
 - [x] Button
 - [x] Input
 - [x] Switch
 - [x] Panel
 - [x] Dialog
-- [x] Shared control sizing and compact-mode behavior
-- [x] Accessibility target-size/contrast checks
+- [x] Native Web adapters for core controls
+- [x] Foundation Compose adapters for core controls
+- [x] Basic theme recipes for core controls
+- [x] WCAG contrast/target validation for applicable core controls
 - [x] Web reference application
 - [x] Compose Desktop reference application
 - [x] Compose Android reference application
-- [x] Cross-platform reference parity gate
+- [x] Cross-platform reference parity checks
 - [x] Chromium reference regression
-- [x] Android instrumentation/runtime path
+- [x] Android reference APK build
+- [x] Representative API 23 / API 35 runtime validation
 
-## Phase 5 — Theme family expansion
+## Phase 4 — Theme family foundations
 
+- [x] Basic theme foundation
+- [x] Basic performance budget
 - [x] Modern theme foundation
 - [x] Modern performance budget
 - [x] Glass theme foundation
@@ -93,7 +93,7 @@ This roadmap tracks only the work that belongs to the GUI Framework itself.
 - [x] Tree / Hierarchy primitives <!-- neutral contract/tokens/Basic visuals, controlled native Web/Foundation Compose adapters, selection/expansion/activation and disabled semantics, keyboard hierarchy navigation, standalone Web plus Desktop/Android references, cross-platform parity, compact 320px Chromium regression, Android APK build and representative API 23 large-font/API 35 high-density runtime validation are complete -->
 - [x] Form layout primitives <!-- neutral contract/Basic visuals, compound native Web/Foundation Compose adapters with host-owned control state, label/help/error association and responsive inline/stacked layout, standalone Web plus Desktop/Android references, cross-platform parity, compact 320px Chromium regression, Android APK build and representative API 23 large-font/API 35 high-density runtime validation are complete -->
 - [x] Scroll container primitives <!-- neutral contract/Basic visuals, native Web/Foundation Compose adapters with browser-owned or caller-owned scroll state, vertical/horizontal/both axes, standalone Web plus Desktop/Android references, cross-platform parity, compact Chromium scroll-offset preservation regression, Android APK build and representative API 23 large-font/API 35 high-density runtime validation are complete -->
-- [ ] Cross-component text/locale robustness (long and unbroken text, Unicode/emoji, RTL/bidi and locale-sensitive layout)
+- [x] Cross-component text/locale robustness <!-- long natural-language and hostile unbroken text, Unicode/emoji/combining characters, mixed bidi content, logical CSS, RTL/LTR host-direction switching, Web/Compose source gates, compact Chromium regression, Android build and representative API 23 large-font/API 35 high-density runtime validation are complete -->
 - [ ] IME/composition robustness for editable controls across Web and Compose
 
 ## Phase 7 — Integration kits
@@ -130,5 +130,3 @@ A phase or component is only complete when every applicable gate is green:
 - representative runtime validation,
 - generated-output typechecking/compilation,
 - and cross-platform parity where applicable.
-
-A checkbox is not a documentation claim. It is a summary of those gates.
