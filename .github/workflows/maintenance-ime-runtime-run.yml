@@ -1,0 +1,51 @@
+name: Maintenance IME Runtime Run
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Apply prepared IME runtime patch
+        run: python scripts/maintenance-ime-runtime.py
+      - name: Validate permanent source and browser test syntax
+        run: |
+          node --check examples/web-reference/app.mjs
+          node --check examples/web-reference/select-reference.mjs
+          node --check tests/browser/web-reference.spec.mjs
+          node --check tests/browser/select-reference.spec.mjs
+          node scripts/test-web-input.mjs
+          node scripts/test-web-select.mjs
+          node scripts/test-compose-input.mjs
+          node scripts/test-compose-select.mjs
+          node scripts/test-compose-desktop-reference.mjs
+          node scripts/test-compose-android-reference.mjs
+          node scripts/test-reference-parity.mjs
+          git diff --check
+      - name: Generate and compile real Foundation Compose adapter
+        run: |
+          npm run compile:spec
+          npm run build:kotlin-contracts
+          npm run build:kotlin-tokens
+          npm run build:kotlin-visuals
+          npm run build:kotlin-assets
+          npm run compile:kotlin-contracts
+      - name: Commit validated IME runtime references
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/web-reference/app.mjs examples/web-reference/select-reference.mjs tests/browser/web-reference.spec.mjs tests/browser/select-reference.spec.mjs examples/compose-desktop/src/main/kotlin/Main.kt examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/MainActivity.kt examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt scripts/test-compose-android-reference.mjs scripts/test-compose-desktop-reference.mjs scripts/test-reference-parity.mjs
+          git commit -m "test(ime): integrate cross-platform runtime references [browser-ci] [android-ci] [device-ci]"
+          git pull --rebase origin main
+          git push
