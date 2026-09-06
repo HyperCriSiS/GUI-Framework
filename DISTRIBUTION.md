@@ -6,16 +6,16 @@ This document defines how GUI Framework will become consumable outside the repos
 
 The framework uses a **unified release train**. The neutral specification, compiler, generated adapter outputs, integration kits, and cross-language host-context bindings share one framework version. A release tag therefore represents one tested compatibility set rather than a collection of independently drifting package versions.
 
-Until the public API and migration policy are explicitly stabilized, publication stays locked. Existing development package manifests remain private/internal and registry coordinates remain unbound.
+The stable public API and versioned migration policy are now defined. Publication nevertheless stays locked: existing development package manifests remain private/internal, registry coordinates remain unbound, registry namespace ownership must be verified, and an explicit human release approval is still required.
 
 ## Publication unlock gates
 
-Registry publication must not be enabled until both roadmap gates are complete:
+The two roadmap prerequisites are complete:
 
 1. Stable public API surface.
 2. Versioned migration policy.
 
-Completing only one of these is insufficient. The first registry-enabled release also requires registry namespace ownership to be verified before coordinates are committed.
+They are necessary but not sufficient to publish. The lock remains in force until registry namespace ownership is verified, coordinates are deliberately committed, and an explicit human release approval authorizes a concrete release. CI success by itself cannot satisfy that approval.
 
 ## Artifact families
 
@@ -51,7 +51,7 @@ A merge to `main`, a pull request, or a normal CI run must never publish a regis
 
 ## Versioning
 
-Before the public API/migration policy is complete, repository versions stay development-only. The first externally consumable release follows Semantic Versioning and the migration policy defined by the later Phase 8 gate.
+Repository versions remain development-only while publication is locked. The stable consumer boundary is defined by `PUBLIC_API.md`, and every externally consumable release must follow the Semantic Versioning and migration rules in `MIGRATION_POLICY.md`.
 
 All public artifacts from one release carry the same framework version. If an ecosystem needs packaging-only metadata, it may append ecosystem-compatible build metadata but must not imply a different framework compatibility version.
 
@@ -72,4 +72,4 @@ The following are not guessed in advance:
 - the final PyPI project names,
 - exact signing/trusted-publishing setup.
 
-Those decisions require verified namespace ownership and are made when the public API and migration gates are complete. This keeps the current architecture portable and prevents namespace availability from leaking into framework APIs.
+The API/migration prerequisites are complete, but these decisions are still deferred until explicit release preparation verifies namespace ownership. This keeps the current architecture portable, prevents namespace availability from leaking into framework APIs, and avoids treating roadmap completion as release authorization.

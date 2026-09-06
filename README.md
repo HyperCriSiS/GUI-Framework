@@ -23,7 +23,7 @@ Primary roles:
 - **Skia:** optional advanced rendering and shader effects where supported and worthwhile.
 - **Capability fallbacks:** themes must remain usable when advanced effects are unavailable or intentionally disabled.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [PUBLIC_API.md](PUBLIC_API.md) for the stable consumer boundary, [MIGRATION_POLICY.md](MIGRATION_POLICY.md) for compatibility/versioning rules, [docs/README.md](docs/README.md) for authoring and quality guides, and [ROADMAP.md](ROADMAP.md) for implementation status.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the technical model, [PUBLIC_API.md](PUBLIC_API.md) for the stable consumer boundary, [MIGRATION_POLICY.md](MIGRATION_POLICY.md) for compatibility/versioning rules, [COMPATIBILITY.md](COMPATIBILITY.md) for runtime/support status, [docs/README.md](docs/README.md) for authoring and quality guides, and [ROADMAP.md](ROADMAP.md) for implementation status.
 
 ## Status
 

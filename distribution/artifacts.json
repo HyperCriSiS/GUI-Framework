@@ -12,7 +12,9 @@
     "requiresRoadmapGates": [
       "stable-public-api-surface",
       "versioned-migration-policy"
-    ]
+    ],
+    "requiresNamespaceOwnershipVerification": true,
+    "requiresExplicitReleaseApproval": true
   },
   "artifacts": [
     {
