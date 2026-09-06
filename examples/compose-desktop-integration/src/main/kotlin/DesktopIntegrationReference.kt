@@ -22,8 +22,7 @@ fun DesktopIntegrationReference(
         check(LocalGuiDesktopHostContext.current.surface == GuiDesktopSurface.APPLICATION)
         GuiButton(
             label = "Integration action",
-            onClick = onAction,
-            accessibilityLabel = "Desktop integration action",
+            onActivate = onAction,
         )
     }
 }
