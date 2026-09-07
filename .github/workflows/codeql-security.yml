@@ -1,0 +1,68 @@
+name: CodeQL Security
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 1 * *"
+  pull_request:
+    paths:
+      - ".github/workflows/codeql-security.yml"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    name: analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
+          - language: java-kotlin
+            build-mode: manual
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js for Kotlin build
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Set up Java for Kotlin build
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build Kotlin release surfaces
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: npm run check:maven-artifacts
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
