@@ -13,6 +13,8 @@
       "stable-public-api-surface",
       "versioned-migration-policy"
     ],
+    "requiresSecurityReadinessReview": true,
+    "securityPolicy": "SECURITY.md",
     "requiresNamespaceOwnershipVerification": true,
     "requiresExplicitReleaseApproval": true
   },
