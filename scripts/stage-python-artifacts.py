@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import gzip
+import importlib.metadata
 import io
 import json
 import os
@@ -13,6 +14,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_REQUIREMENTS = ROOT / "scripts" / "release-requirements.txt"
+REQUIRED_RELEASE_TOOLS = ("build", "setuptools", "wheel")
 PACKAGING = json.loads((ROOT / "distribution" / "packaging.json").read_text(encoding="utf-8"))
 BUILD_ROOT = ROOT / PACKAGING["stagingRoot"] / "python"
 DIST_ROOT = BUILD_ROOT / "dist"
@@ -42,8 +45,48 @@ def load_distribution() -> dict:
     return data
 
 
-def pyproject(name: str, setuptools_config: str) -> str:
-    return f'''[build-system]\nrequires = ["setuptools>=80,<81", "wheel>=0.48,<0.49"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\nname = "{name}"\nversion = "0.0.0.dev0"\ndescription = "GUI Framework pre-release local staging artifact"\nrequires-python = ">=3.11"\nlicense = "AGPL-3.0-or-later"\nlicense-files = ["LICENSE"]\n\n{setuptools_config}'''
+def load_release_tool_versions() -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for line_number, raw_line in enumerate(RELEASE_REQUIREMENTS.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.count("==") != 1:
+            raise RuntimeError(
+                f"{RELEASE_REQUIREMENTS.relative_to(ROOT)}:{line_number} must use one exact name==version pin"
+            )
+        name, version = (part.strip() for part in line.split("==", 1))
+        if not name or not version:
+            raise RuntimeError(f"Invalid release-tool pin on line {line_number}: {raw_line!r}")
+        if name in versions:
+            raise RuntimeError(f"Duplicate release-tool pin for {name}")
+        versions[name] = version
+
+    missing = [name for name in REQUIRED_RELEASE_TOOLS if name not in versions]
+    if missing:
+        raise RuntimeError(f"Missing required release-tool pins: {', '.join(missing)}")
+    return versions
+
+
+def verify_release_toolchain(tool_versions: dict[str, str]) -> None:
+    for name, expected in tool_versions.items():
+        try:
+            actual = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError as exc:
+            raise RuntimeError(
+                f"Release build tool {name} is not installed; install -r {RELEASE_REQUIREMENTS.relative_to(ROOT)}"
+            ) from exc
+        if actual != expected:
+            raise RuntimeError(
+                f"Release build tool drift for {name}: expected {expected}, found {actual}; "
+                f"install -r {RELEASE_REQUIREMENTS.relative_to(ROOT)}"
+            )
+
+
+def pyproject(name: str, setuptools_config: str, tool_versions: dict[str, str]) -> str:
+    setuptools_version = tool_versions["setuptools"]
+    wheel_version = tool_versions["wheel"]
+    return f'''[build-system]\nrequires = ["setuptools=={setuptools_version}", "wheel=={wheel_version}"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\nname = "{name}"\nversion = "0.0.0.dev0"\ndescription = "GUI Framework pre-release local staging artifact"\nrequires-python = ">=3.11"\nlicense = "AGPL-3.0-or-later"\nlicense-files = ["LICENSE"]\n\n{setuptools_config}'''
 
 
 def normalize_tree_mtime(root: Path) -> None:
@@ -94,6 +137,8 @@ def normalize_sdist(path: Path) -> None:
 
 
 def main() -> None:
+    tool_versions = load_release_tool_versions()
+    verify_release_toolchain(tool_versions)
     distribution = load_distribution()
     declared = {item["id"]: item for item in distribution["artifacts"] if item["ecosystem"] == "pypi"}
     if set(declared) != set(ARTIFACTS):
@@ -126,7 +171,7 @@ def main() -> None:
             else:
                 shutil.copy2(source, target)
         (stage_dir / "pyproject.toml").write_text(
-            pyproject(config["logical_name"], config["setuptools"]), encoding="utf-8"
+            pyproject(config["logical_name"], config["setuptools"], tool_versions), encoding="utf-8"
         )
         normalize_tree_mtime(stage_dir)
         out_dir = DIST_ROOT / artifact_id
