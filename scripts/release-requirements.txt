@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Deterministic Python build tooling used by artifact staging and release dry runs.
+build==1.2.2.post1
+setuptools==80.9.0
+wheel==0.45.1
