@@ -87,6 +87,6 @@ assert.match(strategy, /exact source commit SHA/i);
 assert.match(strategy, /release-manifest\.json/);
 assert.match(strategy, /SHA256SUMS/);
 assert.match(strategy, /must never be overwritten or republished/i);
-assert.match(strategy, /release tag must resolve to the approved source commit/i);
+assert.match(strategy, /release tag `v<semver>` must resolve to the approved source commit/i);
 
 console.log("Distribution/publication strategy contract tests passed.");
