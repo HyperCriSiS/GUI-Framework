@@ -3,3 +3,5 @@
 build==1.6.0
 setuptools==80.10.2
 wheel==0.48.0
+packaging==26.3
+pyproject_hooks==1.2.0
