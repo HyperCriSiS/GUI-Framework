@@ -43,7 +43,7 @@ def load_distribution() -> dict:
 
 
 def pyproject(name: str, setuptools_config: str) -> str:
-    return f'''[build-system]\nrequires = ["setuptools>=80,<81", "wheel>=0.45,<0.46"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\nname = "{name}"\nversion = "0.0.0.dev0"\ndescription = "GUI Framework pre-release local staging artifact"\nrequires-python = ">=3.11"\nlicense = "AGPL-3.0-or-later"\nlicense-files = ["LICENSE"]\n\n{setuptools_config}'''
+    return f'''[build-system]\nrequires = ["setuptools>=80,<81", "wheel>=0.48,<0.49"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\nname = "{name}"\nversion = "0.0.0.dev0"\ndescription = "GUI Framework pre-release local staging artifact"\nrequires-python = ">=3.11"\nlicense = "AGPL-3.0-or-later"\nlicense-files = ["LICENSE"]\n\n{setuptools_config}'''
 
 
 def normalize_tree_mtime(root: Path) -> None:
