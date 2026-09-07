@@ -40,3 +40,5 @@ for (const fileName of workflowFiles) {
 
 assert.ok(remoteUses > 0, "no remote GitHub Actions references were validated");
 console.log(`GitHub Actions pinning contract passed for ${remoteUses} remote uses.`);
+
+await import("./test-workflow-trigger-contract.mjs");
