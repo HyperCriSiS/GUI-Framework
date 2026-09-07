@@ -17,7 +17,17 @@ Use one short-lived branch per logical change / pull request:
 
 Do not create permanent `dev`, `staging`, module, subsystem, theme, or feature branches. Branch from the current `main`, merge back into `main`, then delete the branch.
 
-Stacked pull requests are acceptable only for genuine temporary dependencies. The authoritative roadmap and architecture planning must live on `main`. Mark releases with Git tags rather than permanent release branches.
+Stacked pull requests are acceptable only for genuine temporary dependencies. Mark releases with Git tags rather than permanent release branches.
+
+## Documentation authority
+
+The authoritative project-wide roadmap, architecture/API state, compatibility/distribution policy, project status and other management documentation live on `main`.
+
+Development branches document their own delta rather than maintaining an independent global project state. A canonical document edited on a side branch is only a proposed change until merged and must be reconciled with the latest `main` before integration. Do not use a stale branch copy of `ROADMAP.md`, `ARCHITECTURE.md`, `PUBLIC_API.md`, or equivalent global documentation as the current source of truth.
+
+Branch-local feature designs, API deltas, migrations, ADRs and change-specific test specifications may travel with the code that requires them. After merge, permanent global state must be reflected by the canonical documentation on `main`.
+
+Details: `docs/engineering/PROJECT-PLAYBOOK.md`.
 
 ## Repository enforcement for `main`
 
