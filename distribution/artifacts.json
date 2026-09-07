@@ -19,6 +19,20 @@
     "requiresNamespaceOwnershipVerification": true,
     "requiresExplicitReleaseApproval": true
   },
+  "releaseApprovalPolicy": {
+    "recordRequired": true,
+    "candidateIdentity": [
+      "version",
+      "sourceCommit",
+      "releaseManifestSha256",
+      "sha256SumsSha256"
+    ],
+    "approvalScope": "single-candidate",
+    "candidateMutationRequiresReapproval": true,
+    "releaseTagMustResolveToApprovedCommit": true,
+    "publishedVersionReuse": "forbidden",
+    "rollbackMode": "withdraw-or-new-version"
+  },
   "artifacts": [
     {
       "id": "spec-source",
