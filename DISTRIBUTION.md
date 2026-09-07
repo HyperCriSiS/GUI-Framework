@@ -6,7 +6,7 @@ This repository uses a **unified release train** for the neutral specification, 
 
 Publication is currently **locked**.
 
-The **Stable public API surface** and **Versioned migration policy** prerequisites are complete. The remaining lock is intentional: registry namespace ownership must be verified, concrete registry coordinates must be bound deliberately, and an explicit human release approval is required before any publish-capable automation can be enabled.
+The **Stable public API surface** and **Versioned migration policy** prerequisites are complete. The remaining lock is intentional: the pre-release **security readiness review** defined in `SECURITY.md` must pass, registry namespace ownership must be verified, concrete registry coordinates must be bound deliberately, and an explicit human release approval is required before any publish-capable automation can be enabled.
 
 No merge to `main` publishes packages. Before explicit approval, CI **must never publish a registry artifact**; registry coordinates remain unbound. No workflow may infer publication approval from a tag, branch name or successful test run.
 
@@ -71,8 +71,9 @@ Before any real package publication is enabled, all of the following remain mand
 
 1. Verify ownership/control of the intended npm scope, Maven group and PyPI project names.
 2. Bind final registry coordinates in the machine-readable artifact plan through an explicit reviewed change.
-3. Run the complete release-candidate dry-run and reproducibility gates.
-4. Obtain explicit human release approval.
-5. Only then may a separate publish-capable workflow be introduced or enabled.
+3. Complete the security readiness review defined in `SECURITY.md`, including repository security controls or an explicitly approved waiver where permitted.
+4. Run the complete release-candidate dry-run and reproducibility gates.
+5. Obtain explicit human release approval.
+6. Only then may a separate publish-capable workflow be introduced or enabled.
 
 Until those conditions are met, CI must remain read-only with respect to external registries.

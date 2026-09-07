@@ -10,6 +10,8 @@ assert.equal(plan.releaseTrain.versionSource, "git-tag");
 assert.equal(plan.releaseTrain.publicationTrigger, "explicit-approval-only");
 assert.equal(plan.publicationLock.state, "locked");
 assert.equal(plan.publicationLock.registryCoordinates, "unbound");
+assert.equal(plan.publicationLock.requiresSecurityReadinessReview, true);
+assert.equal(plan.publicationLock.securityPolicy, "SECURITY.md");
 assert.equal(plan.publicationLock.requiresNamespaceOwnershipVerification, true);
 assert.equal(plan.publicationLock.requiresExplicitReleaseApproval, true);
 assert.deepEqual(plan.publicationLock.requiresRoadmapGates, [
@@ -54,10 +56,17 @@ const license = await readFile("LICENSE", "utf8");
 assert.match(license, /GNU AFFERO GENERAL PUBLIC LICENSE/);
 assert.match(license, /Version 3/);
 
+const securityPolicy = await readFile(plan.publicationLock.securityPolicy, "utf8");
+assert.match(securityPolicy, /Private Vulnerability Reporting/);
+assert.match(securityPolicy, /Dependabot Security Alerts/);
+assert.match(securityPolicy, /Code Scanning/);
+
 const strategy = await readFile("DISTRIBUTION.md", "utf8");
 assert.match(strategy, /Stable public API surface/);
 assert.match(strategy, /Versioned migration policy/);
 assert.match(strategy, /must never publish a registry artifact/);
 assert.match(strategy, /registry coordinates remain unbound/);
+assert.match(strategy, /security readiness review/i);
+assert.match(strategy, /SECURITY\.md/);
 
 console.log("Distribution/publication strategy contract tests passed.");
