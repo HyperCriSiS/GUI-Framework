@@ -16,6 +16,12 @@ Include enough information in the private report to reproduce and assess the pro
 
 Security reports are in scope when they affect the framework source, generated artifacts, compiler, adapters, integration kits, release-staging tooling, or repository automation. A vulnerability in an application merely using the framework is out of scope unless the framework itself causes or materially enables the issue.
 
+## Repository analysis
+
+The maintained **Code Scanning** path is `.github/workflows/codeql-security.yml`. It uses CodeQL for JavaScript/TypeScript, Python and Java/Kotlin. Java/Kotlin analysis traces the same local Maven artifact build used by the release-staging contract so executable JVM surfaces are actually compiled for analysis. The workflow is scheduled monthly, can be dispatched manually, and only runs on pull requests that modify the CodeQL workflow itself; ordinary framework pull requests do not pay the CodeQL cost.
+
+The CodeQL workflow has `contents: read` and `security-events: write` permissions only. It has no package, release, registry or identity-token permission and does not authorize publication.
+
 ## Disclosure
 
 Coordinate disclosure with the maintainer. Public disclosure should follow a fix or an explicit decision that a fix is not required. Security fixes that must break compatibility still follow `MIGRATION_POLICY.md` unless an emergency compatibility waiver is justified and recorded.
