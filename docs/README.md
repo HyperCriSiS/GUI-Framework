@@ -1,12 +1,12 @@
 # GUI Framework Documentation
 
-This directory contains authoring and operational documentation for the framework. The repository contracts remain authoritative; these guides explain how to use and extend them without bypassing validation, accessibility, performance or release-policy boundaries.
+This index points to the maintained authoring and operational guidance for the framework. The JSON schemas, manifests, policy files and generated contract tests remain normative where prose and machine-readable contracts differ.
 
 ## Authoring
 
-- `THEME_AUTHORING.md` — theme families, palettes, inheritance, capabilities and validation.
-- `COMPONENT_AUTHORING.md` — neutral component recipes, semantics, tokens, capabilities and renderer completion.
-- `ADAPTER_AUTHORING.md` — renderer/host boundaries, compiled IR consumption and adapter completion gates.
+- `authoring/THEMES.md` — theme-family authoring, inheritance, palettes, capabilities and quality gates.
+- `authoring/COMPONENTS.md` — component recipes, semantics, states, token bindings, capabilities and cross-adapter requirements.
+- `authoring/ADAPTERS.md` — adapter boundaries, public entrypoints, capability handling and guidance for adding another renderer.
 
 ## Quality
 
@@ -23,3 +23,7 @@ This directory contains authoring and operational documentation for the framewor
 - `../GOVERNANCE.md` — decision hierarchy, maintainership and release approval separation.
 
 The documentation contract CI checks that these documents stay connected to the repository's schemas, scripts and policy files rather than drifting into standalone prose.
+
+## Security
+
+- [`SECURITY.md`](../SECURITY.md) — vulnerability reporting and pre-release security prerequisites.
