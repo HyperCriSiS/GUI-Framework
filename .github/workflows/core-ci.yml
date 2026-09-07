@@ -4,6 +4,20 @@ on:
   push:
     branches:
       - main
+    # PRs always run the full Core gate. Avoid paying for the same heavy gate
+    # a second time after merges that only change documentation or Dependabot policy.
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'GOVERNANCE.md'
+      - 'ARCHITECTURE.md'
+      - 'COMPATIBILITY.md'
+      - 'PUBLIC_API.md'
+      - 'MIGRATION_POLICY.md'
+      - 'DISTRIBUTION.md'
+      - 'ROADMAP.md'
+      - '.github/dependabot.yml'
   pull_request:
   workflow_dispatch:
 
@@ -91,10 +105,10 @@ jobs:
         run: npm run test:glass-performance
 
       - name: Test Frosted Glass capability contract
-        run: npm run test:frosted-theme
+        run: npm run test:frosted-glass-theme
 
       - name: Test Frosted Glass performance budget
-        run: npm run test:frosted-performance
+        run: npm run test:frosted-glass-performance
 
       - name: Test Spacey theme foundation contract
         run: npm run test:spacey-theme
@@ -139,61 +153,61 @@ jobs:
         run: npm run test:web-capabilities
 
       - name: Test native Web Basic Button
-        run: npm run test:web-button
+        run: npm run test:web-basic-button
 
       - name: Test native Web Basic Input
-        run: npm run test:web-input
+        run: npm run test:web-basic-input
 
       - name: Test native Web Basic Switch
-        run: npm run test:web-switch
+        run: npm run test:web-basic-switch
 
       - name: Test native Web Basic Checkbox
-        run: npm run test:web-checkbox
+        run: npm run test:web-basic-checkbox
 
       - name: Test native Web Basic Radio
-        run: npm run test:web-radio
+        run: npm run test:web-basic-radio
 
       - name: Test native Web Basic Select / ComboBox
-        run: npm run test:web-select
+        run: npm run test:web-basic-select
 
       - name: Test native Web Basic Tabs
-        run: npm run test:web-tabs
+        run: npm run test:web-basic-tabs
 
       - name: Test native Web Basic Navigation
-        run: npm run test:web-navigation
+        run: npm run test:web-basic-navigation
 
       - name: Test native Web Basic Tree / Hierarchy
-        run: npm run test:web-tree
+        run: npm run test:web-basic-tree
 
       - name: Test native Web Basic Form Layout
-        run: npm run test:web-form-layout
+        run: npm run test:web-basic-form-layout
 
       - name: Test native Web Basic Scroll Container
-        run: npm run test:web-scroll-container
+        run: npm run test:web-basic-scroll-container
 
       - name: Test cross-component Web text / locale robustness
-        run: npm run test:text-locale-robustness
+        run: npm run test:web-text-locale-robustness
 
       - name: Test native Web Basic Table / Data Grid
-        run: npm run test:web-table
+        run: npm run test:web-basic-table
 
       - name: Test native Web Basic Tooltip
-        run: npm run test:web-tooltip
+        run: npm run test:web-basic-tooltip
 
       - name: Test native Web Basic Toast / Notification
-        run: npm run test:web-toast
+        run: npm run test:web-basic-toast
 
       - name: Test native Web Basic Progress / Spinner
-        run: npm run test:web-progress
+        run: npm run test:web-basic-progress
 
       - name: Test native Web Basic Slider
-        run: npm run test:web-slider
+        run: npm run test:web-basic-slider
 
       - name: Test native Web Basic Panel
-        run: npm run test:web-panel
+        run: npm run test:web-basic-panel
 
       - name: Test native Web Basic Dialog
-        run: npm run test:web-dialog
+        run: npm run test:web-basic-dialog
 
       - name: Test functional Web reference application
         run: npm run test:web-reference
@@ -244,7 +258,7 @@ jobs:
         run: npm run test:web-contracts
 
       - name: Typecheck generated Web TypeScript contracts
-        run: npm run typecheck:web-contracts
+        run: npm run check:web-contracts
 
       - name: Generate Kotlin contracts
         run: npm run build:kotlin-contracts
@@ -271,64 +285,64 @@ jobs:
         run: npm run test:kotlin-assets
 
       - name: Test native Compose Basic Button
-        run: npm run test:kotlin-button
+        run: npm run test:kotlin-basic-button
 
       - name: Test native Compose Basic Input
-        run: npm run test:kotlin-input
+        run: npm run test:kotlin-basic-input
 
       - name: Test native Compose Basic Switch
-        run: npm run test:kotlin-switch
+        run: npm run test:kotlin-basic-switch
 
       - name: Test native Compose Basic Checkbox
-        run: npm run test:kotlin-checkbox
+        run: npm run test:kotlin-basic-checkbox
 
       - name: Test native Compose Basic Radio
-        run: npm run test:kotlin-radio
+        run: npm run test:kotlin-basic-radio
 
       - name: Test native Compose Basic Select / ComboBox
-        run: npm run test:kotlin-select
+        run: npm run test:kotlin-basic-select
 
       - name: Test native Compose Basic Tabs
-        run: npm run test:kotlin-tabs
+        run: npm run test:kotlin-basic-tabs
 
       - name: Test native Compose Basic Navigation
-        run: npm run test:kotlin-navigation
+        run: npm run test:kotlin-basic-navigation
 
       - name: Test native Compose Basic Tree / Hierarchy
-        run: npm run test:kotlin-tree
+        run: npm run test:kotlin-basic-tree
 
       - name: Test native Compose Basic Form Layout
-        run: npm run test:kotlin-form-layout
+        run: npm run test:kotlin-basic-form-layout
 
       - name: Test native Compose Basic Scroll Container
-        run: npm run test:kotlin-scroll-container
+        run: npm run test:kotlin-basic-scroll-container
 
       - name: Test Compose text / locale robustness
-        run: npm run test:kotlin-text-locale
+        run: npm run test:kotlin-text-locale-robustness
 
       - name: Test native Compose Basic Table / Data Grid
-        run: npm run test:kotlin-table
+        run: npm run test:kotlin-basic-table
 
       - name: Test native Compose Basic Tooltip
-        run: npm run test:kotlin-tooltip
+        run: npm run test:kotlin-basic-tooltip
 
       - name: Test native Compose Basic Toast / Notification
-        run: npm run test:kotlin-toast
+        run: npm run test:kotlin-basic-toast
 
       - name: Test native Compose Basic Progress / Spinner
-        run: npm run test:kotlin-progress
+        run: npm run test:kotlin-basic-progress
 
       - name: Test native Compose Basic Slider
-        run: npm run test:kotlin-slider
+        run: npm run test:kotlin-basic-slider
 
       - name: Test native Compose Basic Menu / Context Menu
-        run: npm run test:kotlin-menu
+        run: npm run test:kotlin-basic-menu
 
       - name: Test native Compose Basic Panel
-        run: npm run test:kotlin-panel
+        run: npm run test:kotlin-basic-panel
 
       - name: Test native Compose Basic Dialog
-        run: npm run test:kotlin-dialog
+        run: npm run test:kotlin-basic-dialog
 
       - name: Test Compose semantics and interactions
         run: npm run test:kotlin-semantics
@@ -340,27 +354,23 @@ jobs:
         run: npm run test:desktop-integration
 
       - name: Test Compose Desktop reference application
-        run: npm run test:kotlin-desktop-reference
+        run: npm run test:desktop-reference
 
       - name: Test Compose Android reference source and build contract
-        run: npm run test:kotlin-android-reference
+        run: npm run test:android-reference
 
       - name: Test cross-platform reference application parity
         run: npm run test:reference-parity
 
       - name: Compile generated Kotlin and Compose adapter output
-        run: npm run compile:kotlin-contracts
+        run: npm run check:kotlin-adapter
 
       - name: Typecheck prototype contracts
-        run: npm run typecheck
+        run: npm run check:contracts
 
   web-browser-regression:
-    name: web-browser-regression
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[browser-ci]') || contains(github.event.head_commit.message, '[browser-ci]') }}
     runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[browser-ci]')
     env:
       PLAYWRIGHT_VERSION: "1.62.1"
     steps:
@@ -373,40 +383,118 @@ jobs:
           node-version: "24"
           cache: npm
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Install Chromium
+        run: npx --yes playwright@${{ env.PLAYWRIGHT_VERSION }} install chromium --with-deps
 
-      - name: Generate Web token output
-        run: npm run build:web-tokens
+      - name: Test native Web Basic Button in Chromium
+        run: npm run test:web-basic-button:browser
 
-      - name: Generate Web component output
-        run: npm run build:web-components
+      - name: Test native Web Basic Input in Chromium
+        run: npm run test:web-basic-input:browser
 
-      - name: Generate Web assets
-        run: npm run build:web-assets
+      - name: Test native Web Basic Switch in Chromium
+        run: npm run test:web-basic-switch:browser
 
-      - name: Build browser extension reference
-        run: npm run build:browser-extension-reference
+      - name: Test native Web Basic Checkbox in Chromium
+        run: npm run test:web-basic-checkbox:browser
 
-      - name: Install Playwright test runner
-        run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
+      - name: Test native Web Basic Radio in Chromium
+        run: npm run test:web-basic-radio:browser
 
-      - name: Install Chromium ${{ env.PLAYWRIGHT_VERSION }}
-        run: npx playwright install --with-deps chromium
+      - name: Test native Web Basic Select / ComboBox in Chromium
+        run: npm run test:web-basic-select:browser
 
-      - name: Run Chromium reference regression
-        run: npx playwright test
+      - name: Test native Web Basic Tabs in Chromium
+        run: npm run test:web-basic-tabs:browser
+
+      - name: Test native Web Basic Navigation in Chromium
+        run: npm run test:web-basic-navigation:browser
+
+      - name: Test native Web Basic Tree / Hierarchy in Chromium
+        run: npm run test:web-basic-tree:browser
+
+      - name: Test native Web Basic Form Layout in Chromium
+        run: npm run test:web-basic-form-layout:browser
+
+      - name: Test native Web Basic Scroll Container in Chromium
+        run: npm run test:web-basic-scroll-container:browser
+
+      - name: Test cross-component Web text / locale robustness in Chromium
+        run: npm run test:web-text-locale-robustness:browser
+
+      - name: Test native Web Basic Table / Data Grid in Chromium
+        run: npm run test:web-basic-table:browser
+
+      - name: Test native Web Basic Tooltip in Chromium
+        run: npm run test:web-basic-tooltip:browser
+
+      - name: Test native Web Basic Toast / Notification in Chromium
+        run: npm run test:web-basic-toast:browser
+
+      - name: Test native Web Basic Progress / Spinner in Chromium
+        run: npm run test:web-basic-progress:browser
+
+      - name: Test native Web Basic Slider in Chromium
+        run: npm run test:web-basic-slider:browser
+
+      - name: Test native Web Basic Panel in Chromium
+        run: npm run test:web-basic-panel:browser
+
+      - name: Test native Web Basic Dialog in Chromium
+        run: npm run test:web-basic-dialog:browser
+
+      - name: Test standalone Web reference application in Chromium
+        run: npm run test:web-reference:browser
+
+      - name: Test standalone Web Select / ComboBox reference in Chromium
+        run: npm run test:web-select-reference:browser
+
+      - name: Test standalone Web Tabs reference in Chromium
+        run: npm run test:web-tabs-reference:browser
+
+      - name: Test standalone Web Tooltip reference in Chromium
+        run: npm run test:web-tooltip-reference:browser
+
+      - name: Test standalone Web Toast / Notification reference in Chromium
+        run: npm run test:web-toast-reference:browser
+
+      - name: Test standalone Web Progress / Spinner reference in Chromium
+        run: npm run test:web-progress-reference:browser
+
+      - name: Test standalone Web Slider reference in Chromium
+        run: npm run test:web-slider-reference:browser
+
+      - name: Test standalone Web Navigation reference in Chromium
+        run: npm run test:web-navigation-reference:browser
+
+      - name: Test standalone Web Tree / Hierarchy reference in Chromium
+        run: npm run test:web-tree-reference:browser
+
+      - name: Test standalone Web Form Layout reference in Chromium
+        run: npm run test:web-form-layout-reference:browser
+
+      - name: Test standalone Web Scroll Container reference in Chromium
+        run: npm run test:web-scroll-container-reference:browser
+
+      - name: Test standalone Web text / locale reference in Chromium
+        run: npm run test:web-text-locale-reference:browser
+
+      - name: Test standalone Web Table / Data Grid reference in Chromium
+        run: npm run test:web-table-reference:browser
+
+      - name: Test standalone Web Menu / Context Menu reference in Chromium
+        run: npm run test:web-menu-reference:browser
+
+      - name: Test browser-extension reference in Chromium
+        run: npm run test:browser-extension-reference:browser
+
+      - name: Test Web app integration reference in Chromium
+        run: npm run test:web-application-integration:browser
 
   compose-android-reference:
-    name: compose-android-reference
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[android-ci]') || contains(github.event.head_commit.message, '[android-ci]') }}
     runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[android-ci]')
     env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
       GRADLE_VERSION: "9.5.0"
       AGP_VERSION: "9.3.0"
       ANDROID_COMPILE_SDK: "37"
@@ -438,69 +526,49 @@ jobs:
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+          yes | sdkmanager --licenses >/dev/null || true
 
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
+      - name: Test Compose Android reference source and build contract
+        run: npm run test:android-reference
 
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
+      - name: Generate Compose artifacts
+        run: npm run build:compose-artifacts
 
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Compile Android reference and instrumentation sources
-        run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          compileDebugKotlin
-          compileDebugAndroidTestKotlin
-
-      - name: Build Android reference and instrumentation APKs
-        run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          assembleDebug
-          assembleDebugAndroidTest
+      - name: Compile Compose Android reference APK
+        working-directory: examples/compose-android
+        run: gradle --no-daemon --stacktrace assembleDebug
 
   compose-android-runtime:
-    name: compose-android-runtime (${{ matrix.api-level }}, ${{ matrix.target }}, ${{ matrix.arch }}, ${{ matrix.ram-size }}, ${{ matrix.heap-size }}, ${{ matrix.density }}, ${{ matrix.font-scale }})
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[device-ci]') || contains(github.event.head_commit.message, '[device-ci]') }}
     runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[device-ci]')
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - api-level: 23
-            target: google_apis
-            arch: x86_64
-            ram-size: 1536M
-            heap-size: 192M
-            density: 240
-            font-scale: "1.30"
-          - api-level: 35
-            target: google_apis
-            arch: x86_64
-            ram-size: 2048M
-            heap-size: 256M
-            density: 480
-            font-scale: "1.00"
     env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
       GRADLE_VERSION: "9.5.0"
       AGP_VERSION: "9.3.0"
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
       ANDROID_PLATFORM_PACKAGE: "android-37"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 23
+            target: default
+            arch: x86_64
+            ram-size: 2048M
+            heap-size: 384M
+            density: 320
+            font-scale: 1.0
+          - api-level: 35
+            target: google_apis
+            arch: x86_64
+            ram-size: 3072M
+            heap-size: 512M
+            density: 440
+            font-scale: 1.3
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -532,22 +600,18 @@ jobs:
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - name: Compile neutral specification
-        run: npm run compile:spec
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+          yes | sdkmanager --licenses >/dev/null || true
 
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
+      - name: Test Compose Android reference source and build contract
+        run: npm run test:android-reference
 
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
+      - name: Generate Compose artifacts
+        run: npm run build:compose-artifacts
 
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Run scaled Android reference instrumentation
+      - name: Run Android instrumentation smoke on API ${{ matrix.api-level }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -556,7 +620,12 @@ jobs:
           profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          density: ${{ matrix.density }}
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          sdcard-path-or-size: 128M
+          disk-size: 4096M
+          cores: 2
+          emulator-options: >-
+            -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
-          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }} ${{ matrix.density }}
+          script: |
+            cd examples/compose-android
+            gradle --no-daemon --stacktrace connectedDebugAndroidTest
