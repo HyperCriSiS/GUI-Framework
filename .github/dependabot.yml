@@ -39,35 +39,21 @@ updates:
     directory: "/packages/adapter-compose"
     schedule:
       interval: "monthly"
-    groups:
-      maven-toolchain:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
     ignore:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 2
 
   - package-ecosystem: "gradle"
     directory: "/examples/compose-android"
     schedule:
       interval: "monthly"
-    groups:
-      gradle-toolchain:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
     ignore:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 2
 
   - package-ecosystem: "pip"
     directory: "/scripts"
