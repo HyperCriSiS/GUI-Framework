@@ -20,6 +20,21 @@ Authoritative artifact identities and lock state live in `distribution/artifacts
 - no automatic publication merely because a tag exists,
 - registry publication requires an explicit release-approval action after all release gates pass.
 
+## Release approval identity
+
+An explicit human approval must identify one immutable release candidate rather than merely approving a version name or the repository in general. The approved candidate identity consists of:
+
+- the intended SemVer version,
+- the exact source commit SHA,
+- the SHA-256 of the generated `release-manifest.json`, and
+- the SHA-256 of the generated `SHA256SUMS` file.
+
+Approval is **single-candidate**. Any source change, artifact rebuild that changes either recorded hash, version change, or other candidate mutation invalidates the approval and requires the complete release-candidate/security gates plus a fresh human approval. At publication time the release tag `v<semver>` must resolve to the approved source commit; moving or reusing a release tag must never substitute for approval.
+
+Published version identities are immutable. A registry artifact must never be overwritten or republished under an already released version number. If a release must be withdrawn, use the registry's supported withdrawal/yank/deprecation mechanism where appropriate and publish a new SemVer version for corrected bits. Security incidents additionally follow `SECURITY.md`.
+
+The machine-readable form of this rule lives in `distribution/artifacts.json` under `releaseApprovalPolicy`. Defining this policy does not create an approval record, bind a registry coordinate, create a tag, or authorize publication.
+
 ## Artifact families
 
 The planned distribution surface is intentionally multi-ecosystem:
@@ -73,7 +88,7 @@ Before any real package publication is enabled, all of the following remain mand
 2. Bind final registry coordinates in the machine-readable artifact plan through an explicit reviewed change.
 3. Complete the security readiness review defined in `SECURITY.md`, including protection of the default branch, repository security controls, or an explicitly approved waiver where permitted.
 4. Run the complete release-candidate dry-run and reproducibility gates.
-5. Obtain explicit human release approval.
+5. Obtain explicit human release approval bound to the exact candidate identity defined above; verify the release tag resolves to that approved source commit.
 6. Only then may a separate publish-capable workflow be introduced or enabled.
 
 Until those conditions are met, CI must remain read-only with respect to external registries.

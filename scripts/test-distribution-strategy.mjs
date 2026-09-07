@@ -19,6 +19,18 @@ assert.deepEqual(plan.publicationLock.requiresRoadmapGates, [
   "stable-public-api-surface",
   "versioned-migration-policy",
 ]);
+assert.equal(plan.releaseApprovalPolicy.recordRequired, true);
+assert.deepEqual(plan.releaseApprovalPolicy.candidateIdentity, [
+  "version",
+  "sourceCommit",
+  "releaseManifestSha256",
+  "sha256SumsSha256",
+]);
+assert.equal(plan.releaseApprovalPolicy.approvalScope, "single-candidate");
+assert.equal(plan.releaseApprovalPolicy.candidateMutationRequiresReapproval, true);
+assert.equal(plan.releaseApprovalPolicy.releaseTagMustResolveToApprovedCommit, true);
+assert.equal(plan.releaseApprovalPolicy.publishedVersionReuse, "forbidden");
+assert.equal(plan.releaseApprovalPolicy.rollbackMode, "withdraw-or-new-version");
 
 assert.ok(Array.isArray(plan.artifacts) && plan.artifacts.length >= 10);
 const ids = plan.artifacts.map((artifact) => artifact.id);
@@ -70,5 +82,11 @@ assert.match(strategy, /must never publish a registry artifact/);
 assert.match(strategy, /registry coordinates remain unbound/);
 assert.match(strategy, /security readiness review/i);
 assert.match(strategy, /SECURITY\.md/);
+assert.match(strategy, /single-candidate/i);
+assert.match(strategy, /exact source commit SHA/i);
+assert.match(strategy, /release-manifest\.json/);
+assert.match(strategy, /SHA256SUMS/);
+assert.match(strategy, /must never be overwritten or republished/i);
+assert.match(strategy, /release tag `v<semver>` must resolve to the approved source commit/i);
 
 console.log("Distribution/publication strategy contract tests passed.");
