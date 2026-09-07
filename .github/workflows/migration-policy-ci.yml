@@ -11,6 +11,7 @@ on:
       - "migrations/**"
       - "distribution/artifacts.json"
       - "scripts/test-migration-policy.mjs"
+      - ".github/workflows/migration-policy-ci.yml"
   pull_request:
     paths:
       - "api/migration-policy.json"
@@ -19,6 +20,7 @@ on:
       - "migrations/**"
       - "distribution/artifacts.json"
       - "scripts/test-migration-policy.mjs"
+      - ".github/workflows/migration-policy-ci.yml"
 
 permissions:
   contents: read
