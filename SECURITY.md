@@ -30,7 +30,7 @@ Coordinate disclosure with the maintainer. Public disclosure should follow a fix
 
 `DISTRIBUTION.md` remains authoritative: publication is locked and a green CI run never authorizes publishing by itself. Before the first public registry release, the repository security posture must be reviewed explicitly. At minimum:
 
-- The default branch must be protected by a GitHub branch protection rule or repository ruleset that requires pull requests and the repository's required CI checks; bypass must be limited to an explicit administrator emergency path.
+- The default branch must be protected by a GitHub branch protection rule or repository ruleset using the concrete `main` enforcement profile in `BRANCHING.md`; bypass must be limited to an explicit administrator emergency path.
 - **Private Vulnerability Reporting** must be enabled so reporters have a real confidential channel.
 - **Dependabot Security Alerts** must be enabled, or an equivalent continuously maintained advisory mechanism must be documented and approved.
 - **Code Scanning** / SAST must have a maintained analysis path for the languages that carry executable framework logic, or an explicit risk-based waiver must be documented and approved.

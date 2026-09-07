@@ -27,6 +27,6 @@
     "GOVERNANCE.md": ["MIGRATION_POLICY.md", "DISTRIBUTION.md"],
     "README.md": ["docs/README.md", "PUBLIC_API.md", "MIGRATION_POLICY.md", "DISTRIBUTION.md", "SECURITY.md"],
     "COMPATIBILITY.md": ["PUBLIC_API.md", "MIGRATION_POLICY.md", "DISTRIBUTION.md", "distribution/artifacts.json", "api/public-api.json"],
-    "SECURITY.md": ["DISTRIBUTION.md", "Release Candidate Dry Run", "Dependabot Security Alerts", "Private Vulnerability Reporting", "Code Scanning", ".github/workflows/codeql-security.yml"]
+    "SECURITY.md": ["DISTRIBUTION.md", "Release Candidate Dry Run", "Dependabot Security Alerts", "Private Vulnerability Reporting", "Code Scanning", ".github/workflows/codeql-security.yml", "BRANCHING.md"]
   }
 }
