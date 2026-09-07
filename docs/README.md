@@ -4,14 +4,14 @@ This directory contains authoring and operational documentation for the framewor
 
 ## Authoring
 
-- `THEME_AUTHORING.md` — theme families, palettes, inheritance, capabilities and validation.
-- `COMPONENT_AUTHORING.md` — neutral component recipes, semantics, tokens, capabilities and renderer completion.
-- `ADAPTER_AUTHORING.md` — renderer/host boundaries, compiled IR consumption and adapter completion gates.
+- `authoring/THEMES.md` — theme families, palettes, inheritance, capabilities and validation.
+- `authoring/COMPONENTS.md` — neutral component recipes, semantics, tokens, capabilities and renderer completion.
+- `authoring/ADAPTERS.md` — renderer/host boundaries, compiled IR consumption and adapter completion gates.
 
 ## Quality
 
-- `ACCESSIBILITY.md` — neutral accessibility rules, platform mappings and review checklist.
-- `PERFORMANCE.md` — performance budgets, fallbacks, virtualization guidance and representative runtime checks.
+- `guides/ACCESSIBILITY.md` — neutral accessibility rules, platform mappings and review checklist.
+- `guides/PERFORMANCE.md` — performance budgets, fallbacks, virtualization guidance and representative runtime checks.
 
 ## Project and release contracts
 
