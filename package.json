@@ -5,7 +5,7 @@
   "type": "module",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "validate:dtcg": "node scripts/validate-dtcg.mjs",
+    "validate:dtcg": "npm install --package-lock-only --ignore-scripts && cat package-lock.json && node scripts/validate-dtcg.mjs",
     "validate:manifest": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/framework-manifest.schema.json -d spec/manifest.json",
     "validate:assets": "node scripts/validate-assets.mjs",
     "validate:contrast-policy": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/contrast-policy.schema.json -d spec/accessibility/contrast-policy.json",
@@ -145,6 +145,8 @@
     "test:reproducible-staging": "python3 scripts/test-reproducible-staging.py"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.62.1",
+    "ajv-cli": "5.0.0",
+    "typescript": "6.0.2"
   }
 }
