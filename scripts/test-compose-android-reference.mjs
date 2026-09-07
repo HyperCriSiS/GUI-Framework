@@ -12,7 +12,7 @@ const [rootBuild, appBuild, settings, manifest, source, runtimeTest] = await Pro
   readFile("examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ReferenceRuntimeTest.kt", "utf8"),
 ]);
 
-assert.match(rootBuild, /id\("com\.android\.application"\) version "9\.3\.0"/);
+assert.match(rootBuild, /id\("com\.android\.application"\) version "9\.4\.0"/);
 assert.match(rootBuild, /kotlin-gradle-plugin:2\.4\.10/);
 assert.match(rootBuild, /id\("org\.jetbrains\.kotlin\.plugin\.compose"\) version "2\.4\.10"/);
 assert.doesNotMatch(rootBuild, /org\.jetbrains\.kotlin\.android|kotlin-android/, "AGP 9 reference must use built-in Kotlin");
