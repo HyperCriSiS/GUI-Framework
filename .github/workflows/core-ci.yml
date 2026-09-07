@@ -367,8 +367,6 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.head_commit.message, '[browser-ci]')
-    env:
-      PLAYWRIGHT_VERSION: "1.62.1"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -394,10 +392,10 @@ jobs:
       - name: Build browser extension reference
         run: npm run build:browser-extension-reference
 
-      - name: Install Playwright test runner
-        run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
+      - name: Install locked Node dependencies
+        run: npm ci
 
-      - name: Install Chromium ${{ env.PLAYWRIGHT_VERSION }}
+      - name: Install Chromium browser
         run: npx playwright install --with-deps chromium
 
       - name: Run Chromium reference regression
