@@ -33,3 +33,7 @@ Minimum configuration:
 - do not configure a mandatory external approval count that a single-maintainer repository cannot satisfy. If additional maintainers are added, review requirements can be raised deliberately.
 
 Requiring the branch to be fully up to date with `main` before every merge is optional rather than a baseline requirement because it can force duplicate CI runs. The stable mandatory gate is `validate-and-typecheck`; change-scoped packaging, documentation, API, migration, browser, Android and other specialist gates remain additive evidence when applicable.
+
+## Documentation-only CI behavior
+
+Pull requests that only change Markdown, `docs/**`, or `.github/dependabot.yml` still run the full `validate-and-typecheck` Core CI gate before merge. After such a pull request is merged, Core CI intentionally skips the resulting documentation-only push to `main` to avoid paying for the same full gate twice. Documentation Contract CI remains responsible for covered documentation and policy paths. If a push contains any non-ignored file, Core CI runs normally.
