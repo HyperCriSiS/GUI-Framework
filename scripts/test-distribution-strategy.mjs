@@ -12,6 +12,7 @@ assert.equal(plan.publicationLock.state, "locked");
 assert.equal(plan.publicationLock.registryCoordinates, "unbound");
 assert.equal(plan.publicationLock.requiresSecurityReadinessReview, true);
 assert.equal(plan.publicationLock.securityPolicy, "SECURITY.md");
+assert.equal(plan.publicationLock.requiresProtectedDefaultBranch, true);
 assert.equal(plan.publicationLock.requiresNamespaceOwnershipVerification, true);
 assert.equal(plan.publicationLock.requiresExplicitReleaseApproval, true);
 assert.deepEqual(plan.publicationLock.requiresRoadmapGates, [
@@ -57,6 +58,7 @@ assert.match(license, /GNU AFFERO GENERAL PUBLIC LICENSE/);
 assert.match(license, /Version 3/);
 
 const securityPolicy = await readFile(plan.publicationLock.securityPolicy, "utf8");
+assert.match(securityPolicy, /default branch must be protected/i);
 assert.match(securityPolicy, /Private Vulnerability Reporting/);
 assert.match(securityPolicy, /Dependabot Security Alerts/);
 assert.match(securityPolicy, /Code Scanning/);
