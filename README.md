@@ -15,16 +15,19 @@ The framework currently includes:
 
 ## Current status
 
-The implementation and ecosystem-readiness roadmap through Phase 8 is complete. Phase 9 validates actual release artifact boundaries before any registry coordinates or publish-capable workflow are enabled.
+The implementation and ecosystem-readiness roadmap through Phase 9 is complete. Phase 9 proved the planned release artifact boundaries without binding registry coordinates or enabling publish-capable automation.
 
-Current Phase-9 coverage includes:
+Completed Phase-9 coverage includes:
 
-- machine-readable mapping for all 13 planned artifacts,
+- machine-readable packaging roots for all 13 planned logical artifacts,
 - clean install/import testing for six staged npm tarballs,
 - isolated local Maven build/install/consumer testing for four JVM artifacts,
-- wheel + sdist build/install/import testing for both planned Python artifacts.
+- wheel + sdist build/install/import testing for both planned Python artifacts,
+- deterministic specification-source archive validation,
+- a cross-ecosystem staging manifest and SHA-256 checksums for 15 physical files,
+- and a manual read-only Release Candidate Dry Run that reproduced all 15 staged files byte-identically across two clean passes.
 
-Publication remains **locked** and requires explicit human approval plus deliberate registry namespace/coordinate binding. Successful CI or a Git tag is not publication authorization.
+Publication remains **locked** and requires explicit human approval plus deliberate registry namespace/coordinate binding. Successful CI, a dry run or a Git tag is not publication authorization.
 
 ## Project contracts and documentation
 
@@ -32,4 +35,5 @@ Publication remains **locked** and requires explicit human approval plus deliber
 - Stable API contract: `PUBLIC_API.md`
 - Versioning and migration contract: `MIGRATION_POLICY.md`
 - Distribution/publication contract: `DISTRIBUTION.md`
+- Security policy and release prerequisites: `SECURITY.md`
 - Active execution plan: `ROADMAP.md`
