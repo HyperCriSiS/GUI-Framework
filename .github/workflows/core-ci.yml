@@ -11,25 +11,19 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
-concurrency:
-  group: core-ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate-and-typecheck:
-    name: validate-and-typecheck
     runs-on: ubuntu-latest
     env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-      PLAYWRIGHT_VERSION: "1.62.1"
-      GRADLE_VERSION: "9.5.0"
-      AGP_VERSION: "9.3.0"
+      ANDROID_API_LEVEL: "37"
       ANDROID_COMPILE_SDK: "37"
-      ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
       ANDROID_PLATFORM_PACKAGE: "android-37"
     steps:
@@ -45,12 +39,14 @@ jobs:
       - name: Guard immutable GitHub Actions references
         run: node scripts/test-actions-pinning.mjs
 
+      - name: Guard workflow trigger coverage
+        run: node scripts/test-workflow-trigger-contract.mjs
+
       - name: Set up Java
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: maven
 
       - name: Validate neutral specification
         run: npm run validate:spec
@@ -195,6 +191,9 @@ jobs:
 
       - name: Test native Web Basic Slider
         run: npm run test:web-slider
+
+      - name: Test native Web Menu / Context Menu
+        run: npm run test:web-menu
 
       - name: Test native Web Basic Panel
         run: npm run test:web-panel
@@ -362,205 +361,98 @@ jobs:
         run: npm run typecheck
 
   web-browser-regression:
-    name: web-browser-regression
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[browser-ci]') || contains(github.event.pull_request.title, '[browser-ci]') }}
     runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[browser-ci]')
-    env:
-      PLAYWRIGHT_VERSION: "1.62.1"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: npm
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Web token output
-        run: npm run build:web-tokens
-
-      - name: Generate Web component output
-        run: npm run build:web-components
-
-      - name: Generate Web assets
-        run: npm run build:web-assets
-
-      - name: Build browser extension reference
-        run: npm run build:browser-extension-reference
-
-      - name: Install Playwright test runner
-        run: npm install --no-save --no-package-lock @playwright/test@${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Install Chromium ${{ env.PLAYWRIGHT_VERSION }}
+      - name: Install Chromium
         run: npx playwright install --with-deps chromium
-
-      - name: Run Chromium reference regression
-        run: npx playwright test
+      - name: Run browser-backed regression
+        run: npm run test:web-browser
 
   compose-android-reference:
-    name: compose-android-reference
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[android-ci]') || contains(github.event.pull_request.title, '[android-ci]') }}
     runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[android-ci]')
-    env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-      GRADLE_VERSION: "9.5.0"
-      AGP_VERSION: "9.3.0"
-      ANDROID_COMPILE_SDK: "37"
-      ANDROID_TARGET_SDK: "37"
-      ANDROID_BUILD_TOOLS: "37.0.0"
-      ANDROID_PLATFORM_PACKAGE: "android-37"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: npm
-
       - name: Set up Java
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-
-      - name: Set up Gradle
+      - name: Cache Gradle dependencies
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
-
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
-
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Compile Android reference and instrumentation sources
-        run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          compileDebugKotlin
-          compileDebugAndroidTestKotlin
-
-      - name: Build Android reference and instrumentation APKs
-        run: >-
-          gradle --no-daemon --stacktrace --console=plain
-          -p examples/compose-android
-          assembleDebug
-          assembleDebugAndroidTest
+      - name: Install Android SDK platform and build tools
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Build Android reference application
+        run: npm run build:kotlin-android-reference
 
   compose-android-runtime:
-    name: compose-android-runtime (${{ matrix.api-level }}, ${{ matrix.target }}, ${{ matrix.arch }}, ${{ matrix.ram-size }}, ${{ matrix.heap-size }}, ${{ matrix.density }}, ${{ matrix.font-scale }})
-    runs-on: ubuntu-latest
-    needs: validate-and-typecheck
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[device-ci]')
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[device-ci]') || contains(github.event.pull_request.title, '[device-ci]') }}
+    needs: compose-android-reference
     strategy:
       fail-fast: false
       matrix:
         include:
           - api-level: 23
-            target: google_apis
+            target: default
             arch: x86_64
-            ram-size: 1536M
-            heap-size: 192M
+            ram-size: 1024M
+            heap-size: 256M
             density: 240
-            font-scale: "1.30"
+            font-scale: "1.0"
           - api-level: 35
             target: google_apis
             arch: x86_64
             ram-size: 2048M
-            heap-size: 256M
-            density: 480
-            font-scale: "1.00"
-    env:
-      KOTLIN_VERSION: "2.4.10"
-      COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
-      GRADLE_VERSION: "9.5.0"
-      AGP_VERSION: "9.3.0"
-      ANDROID_COMPILE_SDK: "37"
-      ANDROID_TARGET_SDK: "37"
-      ANDROID_BUILD_TOOLS: "37.0.0"
-      ANDROID_PLATFORM_PACKAGE: "android-37"
+            heap-size: 512M
+            density: 420
+            font-scale: "1.3"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: npm
-
       - name: Set up Java
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-
-      - name: Enable KVM acceleration
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Set up Gradle
+      - name: Cache Gradle dependencies
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Compile neutral specification
-        run: npm run compile:spec
-
-      - name: Generate Kotlin contracts
-        run: npm run build:kotlin-contracts
-
-      - name: Generate Kotlin tokens
-        run: npm run build:kotlin-tokens
-
-      - name: Generate Kotlin visual recipes
-        run: npm run build:kotlin-visuals
-
-      - name: Generate Kotlin assets
-        run: npm run build:kotlin-assets
-
-      - name: Run scaled Android reference instrumentation
-        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+      - name: Install Android SDK platform and build tools
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;${ANDROID_PLATFORM_PACKAGE}" "build-tools;${ANDROID_BUILD_TOOLS}"
+      - name: Run Android instrumentation tests
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          profile: pixel_2
+          profile: pixel
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
           density: ${{ matrix.density }}
