@@ -1,8 +1,6 @@
 {
-  "version": 1,
-  "documents": [
-    "README.md",
-    "COMPATIBILITY.md",
+  "schemaVersion": 1,
+  "requiredDocuments": [
     "docs/README.md",
     "docs/authoring/THEMES.md",
     "docs/authoring/COMPONENTS.md",
@@ -13,20 +11,107 @@
     "GOVERNANCE.md",
     "SECURITY.md"
   ],
-  "themeRequiredFields": ["specVersion", "theme", "components"],
-  "componentRequiredFields": ["specVersion", "component", "anatomy", "content", "properties", "events", "variants", "sizes", "states", "semantics", "tokenBindings", "capabilities"],
-  "manifestRequiredFields": ["specVersion", "tokenSources", "palettes", "themes", "assets", "components"],
+  "themeRequiredFields": [
+    "specVersion",
+    "theme",
+    "components"
+  ],
+  "componentRequiredFields": [
+    "specVersion",
+    "component",
+    "anatomy",
+    "content",
+    "properties",
+    "events",
+    "variants",
+    "sizes",
+    "states",
+    "semantics",
+    "tokenBindings",
+    "capabilities"
+  ],
+  "manifestRequiredFields": [
+    "specVersion",
+    "tokenSources",
+    "palettes",
+    "themes",
+    "assets",
+    "components"
+  ],
   "requiredReferences": {
-    "docs/authoring/THEMES.md": ["spec/schemas/theme.schema.json", "spec/manifest.json", "npm run validate:themes", "npm run test:theme-resolution", "npm run test:capability-resolution"],
-    "docs/authoring/COMPONENTS.md": ["spec/schemas/component-recipe.schema.json", "spec/manifest.json", "PUBLIC_API.md", "MIGRATION_POLICY.md", "npm run validate:components", "npm run test:accessibility"],
-    "docs/authoring/ADAPTERS.md": ["ARCHITECTURE.md", "PUBLIC_API.md", "MIGRATION_POLICY.md", "build/spec-ir.json", "npm run test:neutral-boundaries", "npm run test:reference-parity"],
-    "docs/guides/ACCESSIBILITY.md": ["spec/accessibility/contrast-policy.json", "spec/schemas/contrast-policy.schema.json", "npm run test:accessibility", "npm run validate:contrast-policy"],
-    "docs/guides/PERFORMANCE.md": ["spec/quality/performance-budgets.json", "npm run test:basic-performance", "npm run test:cyberpunk-performance"],
-    "docs/README.md": ["authoring/THEMES.md", "authoring/COMPONENTS.md", "authoring/ADAPTERS.md", "guides/ACCESSIBILITY.md", "guides/PERFORMANCE.md", "SECURITY.md"],
-    "CONTRIBUTING.md": ["PUBLIC_API.md", "MIGRATION_POLICY.md", "npm run check"],
-    "GOVERNANCE.md": ["MIGRATION_POLICY.md", "DISTRIBUTION.md"],
-    "README.md": ["docs/README.md", "PUBLIC_API.md", "MIGRATION_POLICY.md", "DISTRIBUTION.md", "SECURITY.md"],
-    "COMPATIBILITY.md": ["PUBLIC_API.md", "MIGRATION_POLICY.md", "DISTRIBUTION.md", "distribution/artifacts.json", "api/public-api.json"],
-    "SECURITY.md": ["DISTRIBUTION.md", "Release Candidate Dry Run", "Dependabot Security Alerts", "Private Vulnerability Reporting", "Code Scanning", ".github/workflows/codeql-security.yml"]
+    "docs/authoring/THEMES.md": [
+      "spec/schemas/theme.schema.json",
+      "spec/manifest.json",
+      "npm run validate:themes",
+      "npm run test:theme-resolution",
+      "npm run test:capability-resolution"
+    ],
+    "docs/authoring/COMPONENTS.md": [
+      "spec/schemas/component-recipe.schema.json",
+      "spec/manifest.json",
+      "PUBLIC_API.md",
+      "MIGRATION_POLICY.md",
+      "npm run validate:components",
+      "npm run test:accessibility"
+    ],
+    "docs/authoring/ADAPTERS.md": [
+      "ARCHITECTURE.md",
+      "PUBLIC_API.md",
+      "MIGRATION_POLICY.md",
+      "build/spec-ir.json",
+      "npm run test:neutral-boundaries",
+      "npm run test:reference-parity"
+    ],
+    "docs/guides/ACCESSIBILITY.md": [
+      "spec/accessibility/contrast-policy.json",
+      "spec/schemas/contrast-policy.schema.json",
+      "npm run test:accessibility",
+      "npm run validate:contrast-policy"
+    ],
+    "docs/guides/PERFORMANCE.md": [
+      "spec/quality/performance-budgets.json",
+      "npm run test:basic-performance",
+      "npm run test:cyberpunk-performance"
+    ],
+    "docs/README.md": [
+      "authoring/THEMES.md",
+      "authoring/COMPONENTS.md",
+      "authoring/ADAPTERS.md",
+      "guides/ACCESSIBILITY.md",
+      "guides/PERFORMANCE.md",
+      "SECURITY.md"
+    ],
+    "CONTRIBUTING.md": [
+      "PUBLIC_API.md",
+      "MIGRATION_POLICY.md",
+      "npm run check"
+    ],
+    "GOVERNANCE.md": [
+      "MIGRATION_POLICY.md",
+      "DISTRIBUTION.md"
+    ],
+    "README.md": [
+      "docs/README.md",
+      "PUBLIC_API.md",
+      "MIGRATION_POLICY.md",
+      "DISTRIBUTION.md",
+      "SECURITY.md"
+    ],
+    "COMPATIBILITY.md": [
+      "PUBLIC_API.md",
+      "MIGRATION_POLICY.md",
+      "DISTRIBUTION.md",
+      "distribution/artifacts.json",
+      "api/public-api.json"
+    ],
+    "SECURITY.md": [
+      "DISTRIBUTION.md",
+      "Release Candidate Dry Run",
+      "Dependabot Security Alerts",
+      "Private Vulnerability Reporting",
+      "Code Scanning",
+      ".github/workflows/codeql-security.yml",
+      "BRANCHING.md"
+    ]
   }
 }
