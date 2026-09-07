@@ -23,6 +23,7 @@ on:
       - "examples/compose-desktop/**"
       - "examples/compose-desktop-integration/**"
       - "scripts/test-public-api.mjs"
+      - ".github/workflows/public-api-ci.yml"
   pull_request:
     paths:
       - "api/**"
@@ -43,6 +44,7 @@ on:
       - "examples/compose-desktop/**"
       - "examples/compose-desktop-integration/**"
       - "scripts/test-public-api.mjs"
+      - ".github/workflows/public-api-ci.yml"
 
 permissions:
   contents: read
