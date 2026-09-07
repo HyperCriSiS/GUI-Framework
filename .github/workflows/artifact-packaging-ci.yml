@@ -28,6 +28,7 @@ on:
       - 'scripts/test-release-dry-run-policy.mjs'
       - 'scripts/test-reproducible-staging.py'
       - 'scripts/release-requirements.txt'
+      - 'scripts/test-release-toolchain-closure.py'
       - '.github/workflows/release-candidate-dry-run.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -60,6 +61,7 @@ on:
       - 'scripts/test-release-dry-run-policy.mjs'
       - 'scripts/test-reproducible-staging.py'
       - 'scripts/release-requirements.txt'
+      - 'scripts/test-release-toolchain-closure.py'
       - '.github/workflows/release-candidate-dry-run.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -95,7 +97,9 @@ jobs:
       - name: Build and consume staged Maven artifacts
         run: npm run check:maven-artifacts
       - name: Install Python staging build tools
-        run: python -m pip install --disable-pip-version-check -r scripts/release-requirements.txt
+        run: python -m pip install --disable-pip-version-check --no-deps -r scripts/release-requirements.txt
+      - name: Validate pinned Python toolchain closure
+        run: python3 scripts/test-release-toolchain-closure.py
       - name: Build and consume staged Python artifacts
         run: npm run check:python-artifacts
       - name: Build and validate staged specification archive

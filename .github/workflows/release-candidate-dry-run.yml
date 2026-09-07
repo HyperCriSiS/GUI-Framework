@@ -34,7 +34,9 @@ jobs:
       - name: Install locked Node dependencies
         run: npm ci --ignore-scripts --audit=false
       - name: Install deterministic Python build tools
-        run: python -m pip install --disable-pip-version-check -r scripts/release-requirements.txt
+        run: python -m pip install --disable-pip-version-check --no-deps -r scripts/release-requirements.txt
+      - name: Validate pinned Python toolchain closure
+        run: python3 scripts/test-release-toolchain-closure.py
       - name: Enforce read-only dry-run workflow policy
         run: npm run test:release-dry-run-policy
       - name: Prove byte-reproducible cross-ecosystem staging
