@@ -15,6 +15,7 @@
     ],
     "requiresSecurityReadinessReview": true,
     "securityPolicy": "SECURITY.md",
+    "requiresProtectedDefaultBranch": true,
     "requiresNamespaceOwnershipVerification": true,
     "requiresExplicitReleaseApproval": true
   },
