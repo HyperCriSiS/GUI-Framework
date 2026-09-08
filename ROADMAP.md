@@ -121,7 +121,7 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Glass production visual language with crisp no-blur translucency across structural, overlay, data, and passive-track surfaces while keeping primary interaction controls opaque and backdrop-independent within the unchanged 700-leaf / 2-shadow budget
 - [x] Frosted Glass production visual language with capability-aware blur limited to Panel/Card and Dialog on Web, exact crisp-Glass fallback when backdrop blur is unavailable, and an explicit crisp fallback on Compose where the adapter does not advertise backdrop blur
 - [x] Spacey production visual language across the complete visible component set
-- [ ] Cyberpunk production visual language across the complete visible component set
+- [x] Cyberpunk production visual language across the complete visible component set
 - [ ] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
 - [ ] Theme-specific browser visual-regression baselines for representative complex screens
 - [ ] Compose Desktop / Android visual-parity validation for all six themes
