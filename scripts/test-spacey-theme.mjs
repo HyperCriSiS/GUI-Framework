@@ -29,75 +29,155 @@ const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(
   Object.keys(spacey.components).sort(),
   visualComponentIds,
-  "Spacey must retain every Basic visual component through inheritance without claiming newly registered contracts before their visuals exist",
+  "Spacey must retain every Basic visual component through inheritance",
 );
 
-const expectedFoundation = {
-  button: {
-    root: { radius: "{radius.pill}" },
-  },
-  input: {
-    root: {
-      fill: "{semantic.color.surface}",
-      radius: "{radius.pill}",
-      border: {
-        color: "{semantic.color.borderStrong}",
-        width: "{border.width.standard}",
-      },
-    },
-  },
-  switch: {
-    root: {
-      radius: "{radius.pill}",
-      border: {
-        color: "{semantic.color.borderStrong}",
-        width: "{border.width.standard}",
-      },
-    },
-    thumb: { radius: "{radius.pill}" },
-  },
-  panel: {
-    root: {
-      fill: "{semantic.color.surface}",
-      radius: "{radius.sm}",
-      border: {
-        color: "{semantic.color.borderStrong}",
-        width: "{border.width.standard}",
-      },
-    },
-  },
-  dialog: {
-    root: {
-      radius: "{radius.sm}",
-      border: {
-        color: "{semantic.color.borderStrong}",
-        width: "{border.width.standard}",
-      },
-    },
-  },
-};
+const directComponentIds = [
+  "button",
+  "checkbox",
+  "data-grid",
+  "dialog",
+  "input",
+  "menu",
+  "navigation",
+  "panel",
+  "progress",
+  "radio",
+  "select",
+  "slider",
+  "switch",
+  "table",
+  "tabs",
+  "toast",
+  "tooltip",
+  "tree",
+].sort();
+assert.deepEqual(
+  Object.keys(spaceyEntry.definition.components).sort(),
+  directComponentIds,
+  "Spacey production styling must cover every visual surface/control family that benefits from instrumentation geometry",
+);
 
-for (const [componentId, parts] of Object.entries(expectedFoundation)) {
-  const directBase = spaceyEntry.definition.components[componentId]?.base;
-  assert.ok(directBase, `Spacey ${componentId} must define its direct instrumentation override`);
-  assert.deepEqual(directBase, parts, `Spacey ${componentId} foundation must remain deterministic`);
-
-  for (const [partId, expectedStyle] of Object.entries(parts)) {
-    const resolvedPart = spacey.components[componentId].base[partId];
-    if (expectedStyle.radius) assert.equal(resolvedPart.radius, expectedStyle.radius);
-    if (expectedStyle.fill) assert.equal(resolvedPart.fill, expectedStyle.fill);
-    if (expectedStyle.border) assert.deepEqual(resolvedPart.border, expectedStyle.border);
-  }
+for (const componentId of ["form-layout", "scroll-container"]) {
+  assert.deepEqual(
+    spacey.components[componentId],
+    basic.components[componentId],
+    `${componentId} must remain an intentional neutral inheritance instead of gaining decorative framing`,
+  );
 }
 
+function leafPaths(value, path = []) {
+  if (Array.isArray(value)) {
+    return value.flatMap((child, index) => leafPaths(child, [...path, String(index)]));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).flatMap(([key, child]) => leafPaths(child, [...path, key]));
+  }
+  return [path.join(".")];
+}
+
+const basicLeafPaths = new Set(leafPaths(basic.components));
+const directLeafPaths = leafPaths(spaceyEntry.definition.components);
 assert.deepEqual(
-  spaceyEntry.definition.components.switch.states?.checked?.root?.border,
-  {
-    color: "{semantic.color.borderStrong}",
-    width: "{border.width.standard}",
-  },
-  "Spacey checked Switch must keep the instrument frame while inheriting the active Accent fill",
+  directLeafPaths.filter((path) => !basicLeafPaths.has(path)),
+  [],
+  "Spacey maturity overrides must replace existing Basic visual leaves instead of growing the resolved recipe graph",
 );
+
+for (const componentId of directComponentIds) {
+  const direct = spaceyEntry.definition.components[componentId];
+  const before = basic.components[componentId];
+  const after = spacey.components[componentId];
+  assert.notDeepEqual(after, before, `Spacey ${componentId} must produce at least one real visual delta`);
+  assert.ok(Object.keys(direct).length > 0, `Spacey ${componentId} direct override must not be empty`);
+}
+
+function at(value, path) {
+  return path.split(".").reduce((current, key) => current?.[key], value);
+}
+
+const expectedPillPaths = [
+  "button.base.root.radius",
+  "input.base.root.radius",
+  "select.base.root.radius",
+  "switch.base.root.radius",
+  "switch.base.thumb.radius",
+];
+for (const path of expectedPillPaths) {
+  assert.equal(at(spacey, `components.${path}`), "{radius.pill}", `${path} must use Spacey's pill control geometry`);
+}
+
+const expectedTechnicalRadiusPaths = [
+  "data-grid.base.root.radius",
+  "dialog.base.root.radius",
+  "navigation.base.list.radius",
+  "navigation.base.item.radius",
+  "panel.base.root.radius",
+  "table.base.root.radius",
+  "tree.base.root.radius",
+  "tree.base.item.radius",
+];
+for (const path of expectedTechnicalRadiusPaths) {
+  assert.equal(at(spacey, `components.${path}`), "{radius.sm}", `${path} must use the compact technical surface radius`);
+}
+
+const expectedStrongBorderPaths = [
+  "checkbox.base.root.border.color",
+  "data-grid.base.root.border.color",
+  "dialog.base.root.border.color",
+  "input.base.root.border.color",
+  "menu.base.popup.border.color",
+  "navigation.base.list.border.color",
+  "panel.base.root.border.color",
+  "progress.variants.circular.base.track.border.color",
+  "radio.base.root.border.color",
+  "select.base.root.border.color",
+  "slider.base.track.border.color",
+  "slider.base.thumb.border.color",
+  "switch.base.root.border.color",
+  "switch.states.checked.root.border.color",
+  "table.base.root.border.color",
+  "tabs.base.tabList.border.color",
+  "tooltip.base.popup.border.color",
+  "tree.base.root.border.color",
+];
+for (const path of expectedStrongBorderPaths) {
+  assert.equal(
+    at(spacey, `components.${path}`),
+    "{semantic.color.borderStrong}",
+    `${path} must use the Spacey instrumentation outline`,
+  );
+}
+assert.equal(spacey.components.menu.base.separator.fill, "{semantic.color.borderStrong}");
+
+for (const path of [
+  "checkbox.base.root.fill",
+  "input.base.root.fill",
+  "panel.base.root.fill",
+  "radio.base.root.fill",
+  "select.base.root.fill",
+  "slider.base.track.fill",
+  "slider.base.thumb.fill",
+  "table.base.root.fill",
+]) {
+  assert.equal(at(spacey, `components.${path}`), "{semantic.color.surface}", `${path} must use the flat instrument surface`);
+}
+assert.equal(spacey.components.table.base.header.fill, "{semantic.color.surfaceElevated}");
+assert.equal(spacey.components.toast.base.root.fill, "{semantic.color.background}");
+assert.equal(spacey.components.tooltip.base.popup.fill, "{semantic.color.background}");
+
+for (const path of [
+  "data-grid.base.root.fill",
+  "menu.base.popup.fill",
+  "navigation.base.list.fill",
+  "tree.base.root.fill",
+]) {
+  assert.equal(
+    at(spacey, `components.${path}`),
+    at(basic, `components.${path}`),
+    `${path} must preserve Basic's elevated host surface so inherited hover/selection fills remain visible`,
+  );
+}
 
 function collectKeys(value, predicate, path = "spacey") {
   if (!value || typeof value !== "object") return [];
@@ -123,22 +203,6 @@ const hardCodedColors = collectKeys(
 );
 assert.deepEqual(hardCodedColors, [], "Spacey must use semantic palette roles instead of hard-coded colors");
 
-const borderStrongPaths = collectKeys(
-  spaceyEntry.definition.components,
-  (key, value) => key === "color" && value === "{semantic.color.borderStrong}",
-);
-assert.deepEqual(
-  borderStrongPaths.sort(),
-  [
-    "spacey.dialog.base.root.border.color",
-    "spacey.input.base.root.border.color",
-    "spacey.panel.base.root.border.color",
-    "spacey.switch.base.root.border.color",
-    "spacey.switch.states.checked.root.border.color",
-  ],
-  "Spacey strong instrumentation outlines must stay limited to the intended surfaces and preserve the checked switch frame",
-);
-
 for (const componentId of visualComponentIds) {
   const entry = manifest.components.find((candidate) => candidate.id === componentId);
   assert.ok(entry, `Spacey visual component ${componentId} must remain backed by a registered component contract`);
@@ -146,7 +210,7 @@ for (const componentId of visualComponentIds) {
   const visual = spacey.components[componentId];
 
   for (const size of contract.sizes ?? []) {
-    assert.ok(visual.sizes?.[size], `Spacey ${componentId} must inherit declared ${size} sizing`);
+    assert.ok(visual.sizes?.[size], `Spacey ${componentId} must retain declared ${size} sizing`);
   }
 
   for (const state of (contract.states ?? []).filter((state) => state !== "default")) {
@@ -177,7 +241,10 @@ try {
     assert.ok(components?.panel, `${paletteId} must compile the Spacey theme`);
     assert.equal(components.button.base.root.radius.reference, "{radius.pill}");
     assert.equal(components.panel.base.root.radius.reference, "{radius.sm}");
+    assert.equal(components.navigation.base.list.radius.reference, "{radius.sm}");
+    assert.equal(components.select.base.root.radius.reference, "{radius.pill}");
     assert.equal(components.panel.base.root.border.color.reference, "{semantic.color.borderStrong}");
+    assert.equal(components.tooltip.base.popup.fill.reference, "{semantic.color.background}");
     assert.equal(components.panel.base.root.shadow, undefined, "Spacey Panel must remain flat");
     compiled[paletteId] = components;
   }
@@ -192,10 +259,15 @@ try {
     compiled["reference-light"].panel.base.root.border.color.value,
     "Spacey semantic instrumentation outlines must follow the active palette",
   );
+  assert.notDeepEqual(
+    compiled["reference-dark"].tooltip.base.popup.fill.value,
+    compiled["reference-light"].tooltip.base.popup.fill.value,
+    "Spacey HUD-like overlay surfaces must follow the active palette",
+  );
 } finally {
   await rm(irPath, { force: true });
 }
 
 console.log(
-  "Spacey inherits the complete Basic contract and establishes a flat, palette-neutral aerospace instrumentation geometry using only native low-cost visual properties.",
+  "Spacey production visual language covers 18 component families through zero-growth Basic overrides while preserving neutral layout primitives, state contrast, semantic palettes and a zero-expensive-effect contract.",
 );
