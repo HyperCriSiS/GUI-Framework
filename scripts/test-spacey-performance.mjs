@@ -16,7 +16,10 @@ const definitions = await Promise.all(
     definition: JSON.parse(await readFile(join("spec", entry.source), "utf8")),
   })),
 );
-const spacey = resolveThemeDefinitions(definitions).find((theme) => theme.id === "spacey");
+const resolvedThemes = resolveThemeDefinitions(definitions);
+const basic = resolvedThemes.find((theme) => theme.id === "basic");
+const spacey = resolvedThemes.find((theme) => theme.id === "spacey");
+assert.ok(basic, "Basic theme must resolve before Spacey zero-growth performance can be evaluated");
 assert.ok(spacey, "Spacey theme must resolve before its performance budget can be evaluated");
 
 function countLeaves(value) {
@@ -40,6 +43,12 @@ function findKeys(value, forbidden, path = "spacey") {
 
 const components = spacey.components ?? {};
 const totalLeaves = countLeaves(components);
+const basicLeaves = countLeaves(basic.components ?? {});
+assert.equal(
+  totalLeaves,
+  basicLeaves,
+  "Spacey production maturity must remain zero-growth relative to the complete Basic visual graph",
+);
 assert.ok(
   totalLeaves <= budget.maxResolvedVisualLeaves,
   `Spacey resolved visual recipe cost ${totalLeaves} exceeds budget ${budget.maxResolvedVisualLeaves}`,
@@ -81,5 +90,5 @@ for (const [componentId, component] of Object.entries(components)) {
 }
 
 console.log(
-  `Spacey performance budget passed: ${totalLeaves}/${budget.maxResolvedVisualLeaves} resolved visual leaves across ${Object.keys(components).length} components with zero expensive effect keys.`,
+  `Spacey performance budget passed: ${totalLeaves}/${budget.maxResolvedVisualLeaves} resolved visual leaves (zero growth vs Basic) across ${Object.keys(components).length} components with zero expensive effect keys.`,
 );
