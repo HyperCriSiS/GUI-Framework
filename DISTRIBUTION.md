@@ -80,6 +80,8 @@ npm run stage:release-manifest && npm run test:release-manifest
 
 The full reproducibility proof is intentionally excluded from ordinary pull-request CI because it rebuilds the complete cross-ecosystem staging set twice. It is executed by `.github/workflows/release-candidate-dry-run.yml`, which is manual-only and has `contents: read` permission with no publication credentials or registry-write commands.
 
+A second manual pre-release check is available through **Distribution Strategy CI**. Its `repository-readiness` job is read-only and validates the live GitHub repository state against `distribution/artifacts.json`: the active default-branch rule profile, Private Vulnerability Reporting, the maintained Advanced CodeQL workflow and its result for the candidate commit, plus open Code Scanning and Dependabot alerts. A passing readiness audit is evidence only; it does not bind registry coordinates, create a tag or release, grant credentials, or satisfy the separate explicit human release approval.
+
 ## Publication gate
 
 Before any real package publication is enabled, all of the following remain mandatory:

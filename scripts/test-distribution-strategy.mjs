@@ -15,6 +15,17 @@ assert.equal(plan.publicationLock.securityPolicy, "SECURITY.md");
 assert.equal(plan.publicationLock.requiresProtectedDefaultBranch, true);
 assert.equal(plan.publicationLock.requiresNamespaceOwnershipVerification, true);
 assert.equal(plan.publicationLock.requiresExplicitReleaseApproval, true);
+assert.deepEqual(plan.repositorySecurityReadiness, {
+  defaultBranch: "main",
+  requiredEffectiveRules: ["deletion", "pull_request", "required_status_checks", "non_fast_forward"],
+  requiredStatusChecks: ["validate-and-typecheck"],
+  strictRequiredStatusChecksPolicy: false,
+  requiredApprovingReviewCount: 0,
+  privateVulnerabilityReporting: true,
+  requiredCodeScanningWorkflow: ".github/workflows/codeql-security.yml",
+  requireNoOpenCodeScanningAlerts: true,
+  requireNoOpenDependabotAlerts: true,
+});
 assert.deepEqual(plan.publicationLock.requiresRoadmapGates, [
   "stable-public-api-surface",
   "versioned-migration-policy",
@@ -74,6 +85,38 @@ assert.match(securityPolicy, /default branch must be protected/i);
 assert.match(securityPolicy, /Private Vulnerability Reporting/);
 assert.match(securityPolicy, /Dependabot Security Alerts/);
 assert.match(securityPolicy, /Code Scanning/);
+
+const branchingPolicy = await readFile("BRANCHING.md", "utf8");
+assert.match(branchingPolicy, /require changes to reach `main` through a pull request/i);
+assert.match(branchingPolicy, /validate-and-typecheck/);
+assert.match(branchingPolicy, /block force pushes and branch deletion/i);
+assert.match(branchingPolicy, /fully up to date with `main` before every merge is optional/i);
+
+const distributionWorkflow = await readFile(".github/workflows/distribution-strategy-ci.yml", "utf8");
+const distributionContractInputs = [
+  "BRANCHING.md",
+  "DISTRIBUTION.md",
+  "SECURITY.md",
+  "LICENSE",
+  "distribution/**",
+  "packages/core/package.json",
+  "packages/compiler/package.json",
+  "packages/adapter-web/package.json",
+  "packages/integration-browser-extension/package.json",
+  "packages/integration-python/pyproject.toml",
+  "scripts/check-repository-release-readiness.mjs",
+  "scripts/test-repository-release-readiness.mjs",
+  "scripts/test-distribution-strategy.mjs",
+  ".github/workflows/distribution-strategy-ci.yml",
+];
+for (const path of distributionContractInputs) {
+  const marker = `- "${path}"`;
+  assert.equal(
+    distributionWorkflow.split(marker).length - 1,
+    2,
+    `${path} must trigger Distribution Strategy CI on both push and pull_request`,
+  );
+}
 
 const strategy = await readFile("DISTRIBUTION.md", "utf8");
 assert.match(strategy, /Stable public API surface/);

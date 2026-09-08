@@ -19,6 +19,24 @@
     "requiresNamespaceOwnershipVerification": true,
     "requiresExplicitReleaseApproval": true
   },
+  "repositorySecurityReadiness": {
+    "defaultBranch": "main",
+    "requiredEffectiveRules": [
+      "deletion",
+      "pull_request",
+      "required_status_checks",
+      "non_fast_forward"
+    ],
+    "requiredStatusChecks": [
+      "validate-and-typecheck"
+    ],
+    "strictRequiredStatusChecksPolicy": false,
+    "requiredApprovingReviewCount": 0,
+    "privateVulnerabilityReporting": true,
+    "requiredCodeScanningWorkflow": ".github/workflows/codeql-security.yml",
+    "requireNoOpenCodeScanningAlerts": true,
+    "requireNoOpenDependabotAlerts": true
+  },
   "releaseApprovalPolicy": {
     "recordRequired": true,
     "candidateIdentity": [

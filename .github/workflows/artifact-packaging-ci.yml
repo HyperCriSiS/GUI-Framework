@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'distribution/**'
+      - 'LICENSE'
+      - 'spec/**'
       - 'packages/core/**'
       - 'packages/compiler/**'
       - 'packages/adapter-web/**'
@@ -37,6 +39,8 @@ on:
     branches: [main]
     paths:
       - 'distribution/**'
+      - 'LICENSE'
+      - 'spec/**'
       - 'packages/core/**'
       - 'packages/compiler/**'
       - 'packages/adapter-web/**'
