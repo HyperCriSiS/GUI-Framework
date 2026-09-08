@@ -70,19 +70,20 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/artifact-packaging-ci.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  artifact-packaging:
+  npm-packaging:
+    name: artifact-packaging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
+          cache: npm
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
@@ -90,6 +91,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: maven
       - name: Install locked Node dependencies
         run: npm ci --ignore-scripts --audit=false
       - name: Validate artifact package roots and publication lock
