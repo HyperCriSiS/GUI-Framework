@@ -35,7 +35,13 @@
     "privateVulnerabilityReporting": true,
     "requiredCodeScanningWorkflow": ".github/workflows/codeql-security.yml",
     "requireNoOpenCodeScanningAlerts": true,
-    "requireNoOpenDependabotAlerts": true
+    "requireNoOpenDependabotAlerts": true,
+    "requiredCodeScanningLanguages": [
+      "actions",
+      "javascript-typescript",
+      "python",
+      "java-kotlin"
+    ]
   },
   "releaseApprovalPolicy": {
     "recordRequired": true,

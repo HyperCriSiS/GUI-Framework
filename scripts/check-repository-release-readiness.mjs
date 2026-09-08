@@ -59,10 +59,28 @@ export function validatePrivateVulnerabilityReporting(status, policy) {
 export function validateSecurityWorkflow(workflow, successfulRuns, candidateSha, policy) {
   assert.equal(workflow?.path, policy.requiredCodeScanningWorkflow, "unexpected CodeQL workflow path");
   assert.equal(workflow?.state, "active", `${policy.requiredCodeScanningWorkflow} must be enabled`);
-  assert.ok(
-    successfulRuns.some((run) => run.head_sha === candidateSha && run.conclusion === "success"),
-    `CodeQL Security must have a successful run for candidate commit ${candidateSha}`,
+  const candidateRun = successfulRuns.find(
+    (run) => run.head_sha === candidateSha && run.conclusion === "success",
   );
+  assert.ok(candidateRun, `CodeQL Security must have a successful run for candidate commit ${candidateSha}`);
+  assert.ok(candidateRun.id, "successful CodeQL candidate run must expose a run id");
+  return candidateRun;
+}
+
+export function validateSecurityWorkflowJobs(jobs, policy) {
+  assert.ok(Array.isArray(jobs), "CodeQL workflow jobs response must be an array");
+  assert.ok(
+    Array.isArray(policy.requiredCodeScanningLanguages) && policy.requiredCodeScanningLanguages.length > 0,
+    "requiredCodeScanningLanguages policy is required",
+  );
+
+  const byName = new Map(jobs.map((job) => [job.name, job]));
+  for (const language of policy.requiredCodeScanningLanguages) {
+    const expectedName = `analyze (${language})`;
+    const job = byName.get(expectedName);
+    assert.ok(job, `CodeQL candidate run is missing required job: ${expectedName}`);
+    assert.equal(job.conclusion, "success", `CodeQL candidate job must succeed: ${expectedName}`);
+  }
 }
 
 export function validateNoOpenAlerts(alerts, label) {
@@ -171,8 +189,13 @@ export async function runLiveReadiness(environment = process.env) {
       client,
       `/actions/workflows/${workflow.id}/runs?branch=${encodeURIComponent(branchName)}&status=success&per_page=100`,
     );
-    validateSecurityWorkflow(workflow, runs.workflow_runs ?? [], candidateSha, policy);
-    return `active and green for ${candidateSha.slice(0, 12)}`;
+    const candidateRun = validateSecurityWorkflow(workflow, runs.workflow_runs ?? [], candidateSha, policy);
+    const jobs = await githubRequest(
+      client,
+      `/actions/runs/${candidateRun.id}/jobs?filter=latest&per_page=100`,
+    );
+    validateSecurityWorkflowJobs(jobs.jobs ?? [], policy);
+    return `active and ${policy.requiredCodeScanningLanguages.length}/${policy.requiredCodeScanningLanguages.length} required language jobs green for ${candidateSha.slice(0, 12)}`;
   });
 
   if (policy.requireNoOpenCodeScanningAlerts) {
