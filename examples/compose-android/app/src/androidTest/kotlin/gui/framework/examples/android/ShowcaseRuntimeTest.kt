@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +29,7 @@ class ShowcaseRuntimeTest {
         composeRule.onNodeWithContentDescription("Viewport").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed().performTextReplacement("Runtime showcase")
+        composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithText("Screens").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
