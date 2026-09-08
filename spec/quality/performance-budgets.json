@@ -30,7 +30,7 @@
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
       "maxShadowProperties": 2,
-      "maxTranslucentFillProperties": 2,
+      "maxTranslucentFillProperties": 18,
       "forbiddenEffectKeys": [
         "blur",
         "backdropBlur",
@@ -43,7 +43,7 @@
       "maxVariantsPerComponent": 6,
       "maxStatesPerComponent": 8,
       "maxShadowProperties": 2,
-      "maxTranslucentFillProperties": 2,
+      "maxTranslucentFillProperties": 18,
       "maxBackdropBlurProperties": 2,
       "maxCapabilityFallbacksPerComponent": 1,
       "forbiddenEffectKeys": [
