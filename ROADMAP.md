@@ -119,7 +119,7 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Shared Showcase Explorer baseline for Desktop/Windows and Android
 - [x] Modern zero-growth production geometry across surface-bearing component families with explicit inheritance for primitives already matching the Modern shape language
 - [x] Glass production visual language with crisp no-blur translucency across structural, overlay, data, and passive-track surfaces while keeping primary interaction controls opaque and backdrop-independent within the unchanged 700-leaf / 2-shadow budget
-- [ ] Frosted Glass production visual language with capability-aware blur coverage across appropriate surfaces
+- [x] Frosted Glass production visual language with capability-aware blur limited to Panel/Card and Dialog on Web, exact crisp-Glass fallback when backdrop blur is unavailable, and an explicit crisp fallback on Compose where the adapter does not advertise backdrop blur
 - [ ] Spacey production visual language across the complete visible component set
 - [ ] Cyberpunk production visual language across the complete visible component set
 - [ ] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
