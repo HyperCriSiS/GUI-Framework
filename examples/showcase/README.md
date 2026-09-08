@@ -24,3 +24,7 @@ The source directory is already part of the Compose Maven compile gate, so the e
 ## Android
 
 `ShowcaseActivity` is compiled inside the existing Android reference application. The Android manifest exposes it as a second launcher activity labeled `GUI Framework Showcase`, leaving the established reference activity unchanged for runtime tests.
+
+## Validation
+
+The existing Compose compile gate covers the desktop source set. Android APK compilation is verified through the repository's opt-in Android CI lane.
