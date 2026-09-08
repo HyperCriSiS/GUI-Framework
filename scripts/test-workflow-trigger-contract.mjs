@@ -47,6 +47,32 @@ for (const [fileName, minimumSelfReferences] of selfTriggered) {
   assert.match(content, /^\s*pull_request:\s*$/m, `${fileName}: expected pull_request trigger`);
 }
 
+const requiredCrossWorkflowInputs = new Map([
+  [
+    "public-api-ci.yml",
+    [
+      "distribution/artifacts.json",
+      "spec/**",
+      "packages/adapter-compose/src/generate-contracts.mjs",
+      "packages/adapter-compose/src/generate-tokens.mjs",
+      "packages/adapter-compose/src/generate-visuals.mjs",
+    ],
+  ],
+  ["python-integration-ci.yml", ["package.json", "spec/**", "packages/compiler/**"]],
+  ["web-application-integration-ci.yml", ["packages/adapter-web/src/capabilities.mjs"]],
+]);
+for (const [fileName, requiredInputs] of requiredCrossWorkflowInputs) {
+  const content = contents.get(fileName);
+  for (const input of requiredInputs) {
+    const occurrences = content.split(input).length - 1;
+    assert.equal(
+      occurrences,
+      2,
+      `${fileName}: ${input} must trigger both push and pull_request (found ${occurrences} references)`,
+    );
+  }
+}
+
 const core = contents.get("core-ci.yml");
 assert.match(core, /^\s*pull_request:\s*$/m, "core-ci.yml: pull_request must remain unfiltered");
 assert.doesNotMatch(
