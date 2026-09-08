@@ -2,6 +2,7 @@
 
 package gui.framework.examples.showcase
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import gui.framework.compose.GuiButton
 import gui.framework.compose.GuiInput
 import gui.framework.compose.GuiPanel
@@ -28,17 +33,32 @@ import gui.framework.compose.GuiSwitch
 import gui.framework.compose.GuiTabItem
 import gui.framework.compose.GuiTabs
 import gui.framework.compose.GuiTheme
+import gui.framework.compose.internal.toComposeColor
+import gui.framework.compose.internal.toComposeSp
 import gui.framework.generated.internal.GuiButtonSize
+import gui.framework.generated.internal.GuiColorValue
+import gui.framework.generated.internal.GuiDimensionValue
 import gui.framework.generated.internal.GuiInputSize
+import gui.framework.generated.internal.GuiNumberValue
+import gui.framework.generated.internal.GuiPaletteTokens
 import gui.framework.generated.internal.GuiPanelSize
+import gui.framework.generated.internal.GuiPrimitiveTokens
 import gui.framework.generated.internal.GuiSelectSize
 import gui.framework.generated.internal.GuiSwitchSize
 import gui.framework.generated.internal.GuiTabsSize
 import gui.framework.generated.internal.GuiThemeId
+import kotlin.math.roundToInt
 
 private enum class ShowcaseDensity {
     Standard,
     Compact,
+}
+
+private enum class ShowcaseTextRole {
+    Title,
+    Heading,
+    Body,
+    Muted,
 }
 
 private fun GuiThemeId.showcaseValue(): String = when (this) {
@@ -57,6 +77,57 @@ private fun showcaseTheme(value: String): GuiThemeId = when (value) {
     "spacey" -> GuiThemeId.SPACEY
     "cyberpunk" -> GuiThemeId.CYBERPUNK
     else -> GuiThemeId.BASIC
+}
+
+private fun showcaseColor(paletteId: String, tokenPath: String): Color {
+    val token = GuiPaletteTokens.semantic(paletteId)[tokenPath] as? GuiColorValue
+        ?: error("Showcase palette $paletteId is missing color token $tokenPath")
+    return token.toComposeColor()
+}
+
+private fun showcaseDimension(tokenPath: String): GuiDimensionValue =
+    GuiPrimitiveTokens.all[tokenPath] as? GuiDimensionValue
+        ?: error("Showcase is missing dimension token $tokenPath")
+
+private fun showcaseNumber(tokenPath: String): GuiNumberValue =
+    GuiPrimitiveTokens.all[tokenPath] as? GuiNumberValue
+        ?: error("Showcase is missing number token $tokenPath")
+
+@Composable
+private fun ShowcaseText(
+    text: String,
+    paletteId: String,
+    role: ShowcaseTextRole = ShowcaseTextRole.Body,
+) {
+    val sizeTokenPath = when (role) {
+        ShowcaseTextRole.Title,
+        ShowcaseTextRole.Heading,
+        -> "typography.size.large"
+        ShowcaseTextRole.Body -> "typography.size.medium"
+        ShowcaseTextRole.Muted -> "typography.size.small"
+    }
+    val sizeToken = showcaseDimension(sizeTokenPath)
+    val lineHeightMultiplier = showcaseNumber("typography.lineHeight.control").value
+    val fontWeight = if (role == ShowcaseTextRole.Title || role == ShowcaseTextRole.Heading) {
+        FontWeight(showcaseNumber("typography.weight.medium").value.roundToInt())
+    } else {
+        null
+    }
+    val colorPath = if (role == ShowcaseTextRole.Muted) {
+        "semantic.color.textSecondary"
+    } else {
+        "semantic.color.textPrimary"
+    }
+
+    BasicText(
+        text = text,
+        style = TextStyle(
+            color = showcaseColor(paletteId, colorPath),
+            fontSize = sizeToken.toComposeSp(),
+            fontWeight = fontWeight,
+            lineHeight = (sizeToken.value * lineHeightMultiplier).toFloat().sp,
+        ),
+    )
 }
 
 @Composable
@@ -84,12 +155,21 @@ fun ShowcaseExplorer(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(showcaseColor(paletteId, "semantic.color.background"))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            BasicText("GUI Framework — Showcase Explorer")
-            BasicText(platformLabel)
+            ShowcaseText(
+                text = "GUI Framework — Showcase Explorer",
+                paletteId = paletteId,
+                role = ShowcaseTextRole.Title,
+            )
+            ShowcaseText(
+                text = platformLabel,
+                paletteId = paletteId,
+                role = ShowcaseTextRole.Muted,
+            )
 
             GuiPanel(
                 accessibilityLabel = "Showcase configuration",
@@ -152,22 +232,29 @@ fun ShowcaseExplorer(
                 accessibilityLabel = "Showcase section",
                 size = tabsSize,
             ) { selected ->
-                BasicText("Section: ${selected.label}")
+                ShowcaseText(
+                    text = "Section: ${selected.label}",
+                    paletteId = paletteId,
+                    role = ShowcaseTextRole.Muted,
+                )
             }
 
             when (section) {
                 "screens" -> RealWorldPreview(
+                    paletteId = paletteId,
                     buttonSize = buttonSize,
                     inputSize = inputSize,
                     panelSize = panelSize,
                     switchSize = switchSize,
                 )
                 "stress" -> StressPreview(
+                    paletteId = paletteId,
                     buttonSize = buttonSize,
                     panelSize = panelSize,
                     controlCount = stressControlCount,
                 )
                 else -> ComponentPreview(
+                    paletteId = paletteId,
                     buttonSize = buttonSize,
                     inputSize = inputSize,
                     panelSize = panelSize,
@@ -180,6 +267,7 @@ fun ShowcaseExplorer(
 
 @Composable
 private fun ComponentPreview(
+    paletteId: String,
     buttonSize: GuiButtonSize,
     inputSize: GuiInputSize,
     panelSize: GuiPanelSize,
@@ -194,7 +282,11 @@ private fun ComponentPreview(
         size = panelSize,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BasicText("Component Gallery")
+            ShowcaseText(
+                text = "Component Gallery",
+                paletteId = paletteId,
+                role = ShowcaseTextRole.Heading,
+            )
             GuiInput(
                 value = text,
                 onValueChange = { text = it },
@@ -212,7 +304,10 @@ private fun ComponentPreview(
                     accessibilityLabel = "Enable workspace",
                     size = switchSize,
                 )
-                BasicText(if (enabled) "Enabled" else "Disabled")
+                ShowcaseText(
+                    text = if (enabled) "Enabled" else "Disabled",
+                    paletteId = paletteId,
+                )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 GuiButton(label = "Primary action", onActivate = {}, size = buttonSize)
@@ -224,6 +319,7 @@ private fun ComponentPreview(
 
 @Composable
 private fun RealWorldPreview(
+    paletteId: String,
     buttonSize: GuiButtonSize,
     inputSize: GuiInputSize,
     panelSize: GuiPanelSize,
@@ -238,7 +334,11 @@ private fun RealWorldPreview(
         size = panelSize,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BasicText("Real-world Screen — Settings")
+            ShowcaseText(
+                text = "Real-world Screen — Settings",
+                paletteId = paletteId,
+                role = ShowcaseTextRole.Heading,
+            )
             GuiInput(
                 value = endpoint,
                 onValueChange = { endpoint = it },
@@ -256,7 +356,7 @@ private fun RealWorldPreview(
                     accessibilityLabel = "Diagnostics",
                     size = switchSize,
                 )
-                BasicText("Diagnostics")
+                ShowcaseText(text = "Diagnostics", paletteId = paletteId)
             }
             GuiButton(label = "Save settings", onActivate = {}, size = buttonSize)
         }
@@ -265,6 +365,7 @@ private fun RealWorldPreview(
 
 @Composable
 private fun StressPreview(
+    paletteId: String,
     buttonSize: GuiButtonSize,
     panelSize: GuiPanelSize,
     controlCount: Int,
@@ -275,7 +376,11 @@ private fun StressPreview(
         size = panelSize,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            BasicText("Stress Lab — repeated interactive controls")
+            ShowcaseText(
+                text = "Stress Lab — repeated interactive controls",
+                paletteId = paletteId,
+                role = ShowcaseTextRole.Heading,
+            )
             repeat(controlCount) { index ->
                 GuiButton(
                     label = "Stress control ${index + 1}",
