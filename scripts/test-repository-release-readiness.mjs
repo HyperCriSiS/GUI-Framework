@@ -7,6 +7,7 @@ import {
   validatePrivateVulnerabilityReporting,
   validatePublicationLock,
   validateSecurityWorkflow,
+  validateSecurityWorkflowJobs,
 } from "./check-repository-release-readiness.mjs";
 
 const plan = {
@@ -26,6 +27,7 @@ const plan = {
     requiredApprovingReviewCount: 0,
     privateVulnerabilityReporting: true,
     requiredCodeScanningWorkflow: ".github/workflows/codeql-security.yml",
+    requiredCodeScanningLanguages: ["actions", "javascript-typescript", "python", "java-kotlin"],
     requireNoOpenCodeScanningAlerts: true,
     requireNoOpenDependabotAlerts: true,
   },
@@ -76,11 +78,46 @@ validatePrivateVulnerabilityReporting({ enabled: true }, policy);
 assert.throws(() => validatePrivateVulnerabilityReporting({ enabled: false }, policy), /must be enabled/);
 
 const candidateSha = "a".repeat(40);
-validateSecurityWorkflow(
+const candidateRun = validateSecurityWorkflow(
   { path: ".github/workflows/codeql-security.yml", state: "active" },
-  [{ head_sha: candidateSha, conclusion: "success" }],
+  [{ id: 42, head_sha: candidateSha, conclusion: "success" }],
   candidateSha,
   policy,
+);
+assert.equal(candidateRun.id, 42);
+validateSecurityWorkflowJobs(
+  [
+    { name: "analyze (actions)", conclusion: "success" },
+    { name: "analyze (javascript-typescript)", conclusion: "success" },
+    { name: "analyze (python)", conclusion: "success" },
+    { name: "analyze (java-kotlin)", conclusion: "success" },
+  ],
+  policy,
+);
+assert.throws(
+  () =>
+    validateSecurityWorkflowJobs(
+      [
+        { name: "analyze (javascript-typescript)", conclusion: "success" },
+        { name: "analyze (python)", conclusion: "success" },
+        { name: "analyze (java-kotlin)", conclusion: "success" },
+      ],
+      policy,
+    ),
+  /missing required job: analyze \(actions\)/,
+);
+assert.throws(
+  () =>
+    validateSecurityWorkflowJobs(
+      [
+        { name: "analyze (actions)", conclusion: "success" },
+        { name: "analyze (javascript-typescript)", conclusion: "success" },
+        { name: "analyze (python)", conclusion: "failure" },
+        { name: "analyze (java-kotlin)", conclusion: "success" },
+      ],
+      policy,
+    ),
+  /must succeed: analyze \(python\)/,
 );
 assert.throws(
   () =>
