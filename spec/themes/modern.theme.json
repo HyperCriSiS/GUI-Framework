@@ -3,15 +3,114 @@
   "theme": "modern",
   "extends": "basic",
   "components": {
-    "button": { "base": { "root": { "radius": "{radius.lg}" } } },
-    "input": { "base": { "root": { "radius": "{radius.lg}" } } },
-    "switch": {
+    "button": {
       "base": {
-        "root": { "radius": "{radius.pill}" },
-        "thumb": { "radius": "{radius.pill}" }
+        "root": {
+          "radius": "{radius.lg}"
+        }
       }
     },
-    "panel": { "base": { "root": { "radius": "{radius.xl}", "shadow": "{elevation.shadow.low}" } } },
-    "dialog": { "base": { "root": { "radius": "{radius.xl}", "shadow": "{elevation.shadow.medium}" } } }
+    "checkbox": {
+      "base": {
+        "root": {
+          "radius": "{radius.md}"
+        }
+      }
+    },
+    "data-grid": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}"
+        }
+      }
+    },
+    "dialog": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}",
+          "shadow": "{elevation.shadow.medium}"
+        }
+      }
+    },
+    "input": {
+      "base": {
+        "root": {
+          "radius": "{radius.lg}"
+        }
+      }
+    },
+    "menu": {
+      "base": {
+        "popup": {
+          "radius": "{radius.xl}"
+        }
+      }
+    },
+    "navigation": {
+      "base": {
+        "list": {
+          "radius": "{radius.xl}"
+        },
+        "item": {
+          "radius": "{radius.lg}"
+        }
+      }
+    },
+    "panel": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}",
+          "shadow": "{elevation.shadow.low}"
+        }
+      }
+    },
+    "select": {
+      "base": {
+        "root": {
+          "radius": "{radius.lg}"
+        }
+      }
+    },
+    "switch": {
+      "base": {
+        "root": {
+          "radius": "{radius.pill}"
+        },
+        "thumb": {
+          "radius": "{radius.pill}"
+        }
+      }
+    },
+    "table": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}"
+        }
+      }
+    },
+    "toast": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}"
+        }
+      }
+    },
+    "tooltip": {
+      "base": {
+        "popup": {
+          "radius": "{radius.lg}"
+        }
+      }
+    },
+    "tree": {
+      "base": {
+        "root": {
+          "radius": "{radius.xl}"
+        },
+        "item": {
+          "radius": "{radius.lg}"
+        }
+      }
+    }
   }
 }
