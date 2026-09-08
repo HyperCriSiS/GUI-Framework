@@ -31,6 +31,28 @@ assert(
   `Packaging artifact IDs must exactly match distribution/artifacts.json\nDistribution: ${distributionIds.join(", ")}\nPackaging: ${packagingIds.join(", ")}`,
 );
 
+const packagingWorkflow = fs.readFileSync(path.join(root, ".github/workflows/artifact-packaging-ci.yml"), "utf8");
+const packageRootTrigger = (packageRoot) => {
+  const normalized = packageRoot.replace(/\\/g, "/");
+  if (normalized.startsWith("packages/integration-host-context/")) return "packages/integration-host-context/**";
+  return `${normalized}/**`;
+};
+const requiredPackagingTriggerPaths = new Set([
+  "distribution/**",
+  "LICENSE",
+  ...Object.values(packaging.artifacts).map((contract) => packageRootTrigger(contract.packageRoot)),
+]);
+for (const triggerPath of requiredPackagingTriggerPaths) {
+  const singleQuoted = `- '${triggerPath}'`;
+  const doubleQuoted = `- "${triggerPath}"`;
+  const occurrences =
+    packagingWorkflow.split(singleQuoted).length - 1 + packagingWorkflow.split(doubleQuoted).length - 1;
+  assert(
+    occurrences === 2,
+    `${triggerPath} must trigger Artifact Packaging CI on both push and pull_request (found ${occurrences})`,
+  );
+}
+
 for (const artifact of distribution.artifacts) {
   assert(artifact.registryName === null, `${artifact.id} must not bind a public registry name during pre-release hardening`);
   const contract = packaging.artifacts[artifact.id];
