@@ -56,6 +56,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: contract
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       actions: read
       contents: read

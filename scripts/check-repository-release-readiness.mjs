@@ -78,6 +78,7 @@ function repositoryParts(repository) {
 
 async function githubRequest({ apiUrl, token, owner, repo }, path) {
   const response = await fetch(`${apiUrl}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}${path}`, {
+    signal: AbortSignal.timeout(15_000),
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${token}`,
