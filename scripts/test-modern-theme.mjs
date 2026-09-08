@@ -32,41 +32,75 @@ assert.deepEqual(
   "Modern must retain every Basic visual component through inheritance without claiming newly registered contracts before their visuals exist",
 );
 
-const expectedFoundation = {
+const expectedDirectGeometry = {
   button: { root: { radius: "{radius.lg}" } },
+  checkbox: { root: { radius: "{radius.md}" } },
+  "data-grid": { root: { radius: "{radius.xl}" } },
+  dialog: { root: { radius: "{radius.xl}", shadow: "{elevation.shadow.medium}" } },
   input: { root: { radius: "{radius.lg}" } },
+  menu: {
+    popup: { radius: "{radius.xl}" },
+    item: { radius: "{radius.lg}" },
+  },
+  navigation: {
+    list: { radius: "{radius.xl}" },
+    item: { radius: "{radius.lg}" },
+    indicator: { radius: "{radius.pill}" },
+  },
+  panel: { root: { radius: "{radius.xl}", shadow: "{elevation.shadow.low}" } },
+  select: { root: { radius: "{radius.lg}" } },
   switch: {
     root: { radius: "{radius.pill}" },
     thumb: { radius: "{radius.pill}" },
   },
-  panel: {
-    root: { radius: "{radius.xl}", shadow: "{elevation.shadow.low}" },
+  table: { root: { radius: "{radius.xl}" } },
+  tabs: {
+    tabList: { radius: "{radius.xl}" },
+    tab: { radius: "{radius.lg}" },
+    indicator: { radius: "{radius.pill}" },
   },
-  dialog: {
-    root: { radius: "{radius.xl}", shadow: "{elevation.shadow.medium}" },
+  toast: { root: { radius: "{radius.xl}" } },
+  tooltip: { popup: { radius: "{radius.lg}" } },
+  tree: {
+    root: { radius: "{radius.xl}" },
+    item: { radius: "{radius.lg}" },
   },
 };
 
-for (const [componentId, parts] of Object.entries(expectedFoundation)) {
+const intentionallyInheritedGeometry = [
+  "form-layout",
+  "progress",
+  "radio",
+  "scroll-container",
+  "slider",
+];
+
+assert.deepEqual(
+  Object.keys(modernEntry.definition.components).sort(),
+  Object.keys(expectedDirectGeometry).sort(),
+  "Modern must directly style every surface-bearing component family in its production geometry layer",
+);
+assert.deepEqual(
+  [...Object.keys(expectedDirectGeometry), ...intentionallyInheritedGeometry].sort(),
+  visualComponentIds,
+  "Every Modern component family must be either intentionally restyled or explicitly inherited when Basic already matches the Modern geometry contract",
+);
+
+for (const [componentId, parts] of Object.entries(expectedDirectGeometry)) {
   const directBase = modernEntry.definition.components[componentId]?.base;
-  assert.ok(directBase, `Modern ${componentId} must define its direct foundation override`);
+  assert.ok(directBase, `Modern ${componentId} must define its direct production geometry override`);
 
   for (const [partId, expectedStyle] of Object.entries(parts)) {
     assert.deepEqual(
       directBase[partId],
       expectedStyle,
-      `Modern ${componentId}.${partId} foundation must remain deterministic`,
+      `Modern ${componentId}.${partId} geometry must remain deterministic`,
     );
-    assert.equal(
-      modern.components[componentId].base[partId].radius,
-      expectedStyle.radius,
-      `Modern ${componentId}.${partId} radius must survive theme resolution`,
-    );
-    if (expectedStyle.shadow) {
+    for (const [property, expectedToken] of Object.entries(expectedStyle)) {
       assert.equal(
-        modern.components[componentId].base[partId].shadow,
-        expectedStyle.shadow,
-        `Modern ${componentId}.${partId} shadow must survive theme resolution`,
+        modern.components[componentId].base[partId][property],
+        expectedToken,
+        `Modern ${componentId}.${partId}.${property} must survive theme resolution`,
       );
     }
   }
@@ -144,5 +178,5 @@ try {
 }
 
 console.log(
-  "Modern theme inherits the complete Basic contract and establishes palette-neutral rounded geometry with deterministic drop-shadow elevation while reusing the same compiled reference palettes.",
+  "Modern theme inherits the complete Basic contract and intentionally restyles every surface-bearing component family with palette-neutral rounded geometry while preserving deterministic low-cost elevation and explicit inheritance for primitives that already match the Modern shape language.",
 );
