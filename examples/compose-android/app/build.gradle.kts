@@ -39,6 +39,7 @@ android {
         kotlin.directories += "../../../packages/adapter-compose/src/main/kotlin"
         kotlin.directories += "../../../packages/integration-android/src/main/kotlin"
         kotlin.directories += "../../../build/compose"
+        kotlin.directories += "../../showcase-shared/src/main/kotlin"
     }
 }
 
