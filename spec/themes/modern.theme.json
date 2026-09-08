@@ -43,9 +43,6 @@
       "base": {
         "popup": {
           "radius": "{radius.xl}"
-        },
-        "item": {
-          "radius": "{radius.lg}"
         }
       }
     },
@@ -56,9 +53,6 @@
         },
         "item": {
           "radius": "{radius.lg}"
-        },
-        "indicator": {
-          "radius": "{radius.pill}"
         }
       }
     },
@@ -91,19 +85,6 @@
       "base": {
         "root": {
           "radius": "{radius.xl}"
-        }
-      }
-    },
-    "tabs": {
-      "base": {
-        "tabList": {
-          "radius": "{radius.xl}"
-        },
-        "tab": {
-          "radius": "{radius.lg}"
-        },
-        "indicator": {
-          "radius": "{radius.pill}"
         }
       }
     },

@@ -38,14 +38,10 @@ const expectedDirectGeometry = {
   "data-grid": { root: { radius: "{radius.xl}" } },
   dialog: { root: { radius: "{radius.xl}", shadow: "{elevation.shadow.medium}" } },
   input: { root: { radius: "{radius.lg}" } },
-  menu: {
-    popup: { radius: "{radius.xl}" },
-    item: { radius: "{radius.lg}" },
-  },
+  menu: { popup: { radius: "{radius.xl}" } },
   navigation: {
     list: { radius: "{radius.xl}" },
     item: { radius: "{radius.lg}" },
-    indicator: { radius: "{radius.pill}" },
   },
   panel: { root: { radius: "{radius.xl}", shadow: "{elevation.shadow.low}" } },
   select: { root: { radius: "{radius.lg}" } },
@@ -54,11 +50,6 @@ const expectedDirectGeometry = {
     thumb: { radius: "{radius.pill}" },
   },
   table: { root: { radius: "{radius.xl}" } },
-  tabs: {
-    tabList: { radius: "{radius.xl}" },
-    tab: { radius: "{radius.lg}" },
-    indicator: { radius: "{radius.pill}" },
-  },
   toast: { root: { radius: "{radius.xl}" } },
   tooltip: { popup: { radius: "{radius.lg}" } },
   tree: {
@@ -73,12 +64,13 @@ const intentionallyInheritedGeometry = [
   "radio",
   "scroll-container",
   "slider",
+  "tabs",
 ];
 
 assert.deepEqual(
   Object.keys(modernEntry.definition.components).sort(),
   Object.keys(expectedDirectGeometry).sort(),
-  "Modern must directly style every surface-bearing component family in its production geometry layer",
+  "Modern must directly style every surface-bearing component family whose geometry can be refined by replacing existing visual properties in its production geometry layer",
 );
 assert.deepEqual(
   [...Object.keys(expectedDirectGeometry), ...intentionallyInheritedGeometry].sort(),
@@ -178,5 +170,5 @@ try {
 }
 
 console.log(
-  "Modern theme inherits the complete Basic contract and intentionally restyles every surface-bearing component family with palette-neutral rounded geometry while preserving deterministic low-cost elevation and explicit inheritance for primitives that already match the Modern shape language.",
+  "Modern theme inherits the complete Basic contract and intentionally restyles surface-bearing component families with zero-growth, palette-neutral geometry overrides while preserving deterministic low-cost elevation and explicit inheritance for primitives that already match the Modern shape language.",
 );
