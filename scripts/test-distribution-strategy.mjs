@@ -23,6 +23,7 @@ assert.deepEqual(plan.repositorySecurityReadiness, {
   requiredApprovingReviewCount: 0,
   privateVulnerabilityReporting: true,
   requiredCodeScanningWorkflow: ".github/workflows/codeql-security.yml",
+  requiredCodeScanningLanguages: ["actions", "javascript-typescript", "python", "java-kotlin"],
   requireNoOpenCodeScanningAlerts: true,
   requireNoOpenDependabotAlerts: true,
 });
@@ -85,6 +86,22 @@ assert.match(securityPolicy, /default branch must be protected/i);
 assert.match(securityPolicy, /Private Vulnerability Reporting/);
 assert.match(securityPolicy, /Dependabot Security Alerts/);
 assert.match(securityPolicy, /Code Scanning/);
+assert.match(securityPolicy, /GitHub Actions/);
+assert.match(securityPolicy, /JavaScript\/TypeScript/);
+assert.match(securityPolicy, /Python/);
+assert.match(securityPolicy, /Java\/Kotlin/);
+
+const codeqlWorkflow = await readFile(plan.repositorySecurityReadiness.requiredCodeScanningWorkflow, "utf8");
+for (const language of plan.repositorySecurityReadiness.requiredCodeScanningLanguages) {
+  const marker = `- language: ${language}`;
+  assert.equal(
+    codeqlWorkflow.split(marker).length - 1,
+    1,
+    `${language} must remain in the maintained Advanced CodeQL matrix`,
+  );
+}
+assert.match(codeqlWorkflow, /- language: actions\s+build-mode: none/);
+assert.match(codeqlWorkflow, /- language: java-kotlin\s+build-mode: manual/);
 
 const branchingPolicy = await readFile("BRANCHING.md", "utf8");
 assert.match(branchingPolicy, /require changes to reach `main` through a pull request/i);
@@ -107,6 +124,7 @@ const distributionContractInputs = [
   "scripts/check-repository-release-readiness.mjs",
   "scripts/test-repository-release-readiness.mjs",
   "scripts/test-distribution-strategy.mjs",
+  ".github/workflows/codeql-security.yml",
   ".github/workflows/distribution-strategy-ci.yml",
 ];
 for (const path of distributionContractInputs) {

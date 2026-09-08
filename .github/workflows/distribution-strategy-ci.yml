@@ -17,6 +17,7 @@ on:
       - "scripts/check-repository-release-readiness.mjs"
       - "scripts/test-repository-release-readiness.mjs"
       - "scripts/test-distribution-strategy.mjs"
+      - ".github/workflows/codeql-security.yml"
       - ".github/workflows/distribution-strategy-ci.yml"
   pull_request:
     paths:
@@ -33,6 +34,7 @@ on:
       - "scripts/check-repository-release-readiness.mjs"
       - "scripts/test-repository-release-readiness.mjs"
       - "scripts/test-distribution-strategy.mjs"
+      - ".github/workflows/codeql-security.yml"
       - ".github/workflows/distribution-strategy-ci.yml"
   workflow_dispatch:
 
