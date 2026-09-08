@@ -3,24 +3,6 @@
   "theme": "glass",
   "extends": "modern",
   "components": {
-    "button": {
-      "variants": {
-        "secondary": {
-          "base": {
-            "root": {
-              "fill": "{semantic.color.surfaceElevatedTranslucent}"
-            }
-          }
-        }
-      }
-    },
-    "checkbox": {
-      "base": {
-        "root": {
-          "fill": "{semantic.color.surfaceElevatedTranslucent}"
-        }
-      }
-    },
     "data-grid": {
       "base": {
         "root": {
@@ -29,13 +11,6 @@
       }
     },
     "dialog": {
-      "base": {
-        "root": {
-          "fill": "{semantic.color.surfaceElevatedTranslucent}"
-        }
-      }
-    },
-    "input": {
       "base": {
         "root": {
           "fill": "{semantic.color.surfaceElevatedTranslucent}"
@@ -74,33 +49,9 @@
         }
       }
     },
-    "radio": {
-      "base": {
-        "root": {
-          "fill": "{semantic.color.surfaceElevatedTranslucent}"
-        }
-      }
-    },
-    "select": {
-      "base": {
-        "root": {
-          "fill": "{semantic.color.surfaceElevatedTranslucent}"
-        }
-      }
-    },
     "slider": {
       "base": {
         "track": {
-          "fill": "{semantic.color.surfaceTranslucent}"
-        },
-        "thumb": {
-          "fill": "{semantic.color.surfaceElevatedTranslucent}"
-        }
-      }
-    },
-    "switch": {
-      "base": {
-        "root": {
           "fill": "{semantic.color.surfaceTranslucent}"
         }
       }

@@ -32,19 +32,13 @@ assert.equal(frostedEntry.definition.extends, "glass", "Frosted Glass must build
 assert.deepEqual(frosted.inheritance, ["basic", "modern", "glass", "frosted-glass"]);
 
 const expectedDirectComponents = [
-  "button",
-  "checkbox",
   "data-grid",
   "dialog",
-  "input",
   "menu",
   "navigation",
   "panel",
   "progress",
-  "radio",
-  "select",
   "slider",
-  "switch",
   "table",
   "toast",
   "tooltip",
@@ -53,24 +47,17 @@ const expectedDirectComponents = [
 assert.deepEqual(
   Object.keys(glassEntry.definition.components).sort(),
   expectedDirectComponents,
-  "Glass must intentionally restyle every component family with an existing neutral surface fill rather than remaining a two-surface foundation",
+  "Glass must intentionally restyle structural surfaces, overlays, data surfaces and passive tracks while keeping primary interaction surfaces opaque and backdrop-independent",
 );
 
 const expectedTranslucentFills = new Map([
-  ["button.variants.secondary.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
-  ["checkbox.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
   ["data-grid.base.root.fill", "{semantic.color.surfaceTranslucent}"],
   ["dialog.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
-  ["input.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
   ["menu.base.popup.fill", "{semantic.color.surfaceElevatedTranslucent}"],
   ["navigation.base.list.fill", "{semantic.color.surfaceTranslucent}"],
   ["panel.base.root.fill", "{semantic.color.surfaceTranslucent}"],
   ["progress.variants.linear.base.track.fill", "{semantic.color.surfaceTranslucent}"],
-  ["radio.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
-  ["select.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
-  ["slider.base.thumb.fill", "{semantic.color.surfaceElevatedTranslucent}"],
   ["slider.base.track.fill", "{semantic.color.surfaceTranslucent}"],
-  ["switch.base.root.fill", "{semantic.color.surfaceTranslucent}"],
   ["table.base.root.fill", "{semantic.color.surfaceTranslucent}"],
   ["toast.base.root.fill", "{semantic.color.surfaceElevatedTranslucent}"],
   ["tooltip.base.popup.fill", "{semantic.color.surfaceElevatedTranslucent}"],
@@ -208,5 +195,5 @@ for (const entry of manifest.palettes) {
 }
 
 console.log(
-  "Glass now applies crisp, blur-free translucency across every existing neutral surface-bearing component family while preserving Modern geometry and deterministic low-cost effects.",
+  "Glass now applies crisp, blur-free translucency across structural surfaces, overlays, data surfaces and passive tracks while preserving opaque backdrop-independent interaction controls and Modern geometry.",
 );
