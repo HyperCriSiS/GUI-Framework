@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/**'
       - 'README.md'
+      - 'examples/showcase/README.md'
       - 'CONTRIBUTING.md'
       - 'GOVERNANCE.md'
       - 'BRANCHING.md'
@@ -25,6 +26,7 @@ on:
     paths:
       - 'docs/**'
       - 'README.md'
+      - 'examples/showcase/README.md'
       - 'CONTRIBUTING.md'
       - 'GOVERNANCE.md'
       - 'BRANCHING.md'
