@@ -4,14 +4,34 @@ on:
   push:
     branches: [main]
     paths:
+      - "BRANCHING.md"
       - "DISTRIBUTION.md"
+      - "SECURITY.md"
+      - "LICENSE"
       - "distribution/**"
+      - "packages/core/package.json"
+      - "packages/compiler/package.json"
+      - "packages/adapter-web/package.json"
+      - "packages/integration-browser-extension/package.json"
+      - "packages/integration-python/pyproject.toml"
+      - "scripts/check-repository-release-readiness.mjs"
+      - "scripts/test-repository-release-readiness.mjs"
       - "scripts/test-distribution-strategy.mjs"
       - ".github/workflows/distribution-strategy-ci.yml"
   pull_request:
     paths:
+      - "BRANCHING.md"
       - "DISTRIBUTION.md"
+      - "SECURITY.md"
+      - "LICENSE"
       - "distribution/**"
+      - "packages/core/package.json"
+      - "packages/compiler/package.json"
+      - "packages/adapter-web/package.json"
+      - "packages/integration-browser-extension/package.json"
+      - "packages/integration-python/pyproject.toml"
+      - "scripts/check-repository-release-readiness.mjs"
+      - "scripts/test-repository-release-readiness.mjs"
       - "scripts/test-distribution-strategy.mjs"
       - ".github/workflows/distribution-strategy-ci.yml"
   workflow_dispatch:
@@ -27,4 +47,26 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
-      - run: node scripts/test-distribution-strategy.mjs
+      - name: Validate distribution strategy contract
+        run: node scripts/test-distribution-strategy.mjs
+      - name: Validate repository readiness audit contract
+        run: node scripts/test-repository-release-readiness.mjs
+
+  repository-readiness:
+    if: github.event_name == 'workflow_dispatch'
+    needs: contract
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: read
+      vulnerability-alerts: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - name: Audit live repository release readiness
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-repository-release-readiness.mjs
