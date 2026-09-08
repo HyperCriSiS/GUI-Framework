@@ -8,10 +8,17 @@ The framework currently includes:
 - Basic, Modern, Glass, Frosted Glass, Spacey and Cyberpunk theme families,
 - native Web and Foundation Compose component adapters,
 - browser-extension, Web-application, Desktop, Android and Python integration paths,
+- a runnable cross-platform Showcase Explorer for Desktop/Windows and Android,
 - shared cross-language host-context capability presets,
 - stable public API and migration contracts,
 - schema-backed authoring/accessibility/performance/governance documentation,
 - and pre-release artifact hardening that exercises staged npm, Maven and Python packages without publishing them.
+
+## Showcase Explorer
+
+A runnable visual explorer is available under [`examples/showcase/`](examples/showcase/README.md). It uses the real Compose adapter and one shared explorer surface on Desktop/Windows and Android, with live switching across all six themes, dark/light reference palettes, standard/compact density, component previews, a representative settings screen and a repeated-controls stress surface.
+
+On Android, the existing reference application exposes a second launcher entry named **GUI Framework Showcase**. For Desktop/Windows, the Showcase README contains the repository-root launch command using the same pinned Maven Exec path as the established Desktop reference application.
 
 ## Current status
 
