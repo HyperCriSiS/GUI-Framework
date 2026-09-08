@@ -62,6 +62,11 @@ INSTRUMENTATION_OUTPUT="$(adb shell am instrument -w -r \
 INSTRUMENTATION_STATUS=$?
 set -e
 
+# adb shell can return CRLF even on Linux hosts. Normalize carriage returns before
+# matching AndroidJUnitRunner's summary so a successful "OK (N tests)" line is not
+# misclassified as a CI failure.
+INSTRUMENTATION_OUTPUT="${INSTRUMENTATION_OUTPUT//$'\r'/}"
+
 printf '%s\n' "${INSTRUMENTATION_OUTPUT}"
 
 if (( INSTRUMENTATION_STATUS != 0 )); then
