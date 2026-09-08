@@ -16,7 +16,10 @@ const definitions = await Promise.all(
     definition: JSON.parse(await readFile(join("spec", entry.source), "utf8")),
   })),
 );
-const cyberpunk = resolveThemeDefinitions(definitions).find((theme) => theme.id === "cyberpunk");
+const resolvedThemes = resolveThemeDefinitions(definitions);
+const basic = resolvedThemes.find((theme) => theme.id === "basic");
+const cyberpunk = resolvedThemes.find((theme) => theme.id === "cyberpunk");
+assert.ok(basic, "Basic theme must resolve before Cyberpunk graph growth can be evaluated");
 assert.ok(cyberpunk, "Cyberpunk theme must resolve before its performance budget can be evaluated");
 
 function countLeaves(value) {
@@ -25,6 +28,16 @@ function countLeaves(value) {
     return Object.values(value).reduce((total, child) => total + countLeaves(child), 0);
   }
   return 1;
+}
+
+function leafPaths(value, path = []) {
+  if (Array.isArray(value)) {
+    return value.flatMap((child, index) => leafPaths(child, [...path, String(index)]));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).flatMap(([key, child]) => leafPaths(child, [...path, key]));
+  }
+  return [path.join(".")];
 }
 
 function findKeys(value, predicate, path = "cyberpunk") {
@@ -39,10 +52,24 @@ function findKeys(value, predicate, path = "cyberpunk") {
 }
 
 const components = cyberpunk.components ?? {};
+const basicComponents = basic.components ?? {};
 const totalLeaves = countLeaves(components);
+const basicLeaves = countLeaves(basicComponents);
+assert.equal(
+  totalLeaves,
+  basicLeaves + 2,
+  "Cyberpunk production maturity may grow the Basic visual graph only by Panel and Dialog elevation",
+);
 assert.ok(
   totalLeaves <= budget.maxResolvedVisualLeaves,
   `Cyberpunk resolved visual recipe cost ${totalLeaves} exceeds budget ${budget.maxResolvedVisualLeaves}`,
+);
+
+const basicLeafPaths = new Set(leafPaths(basicComponents));
+assert.deepEqual(
+  leafPaths(components).filter((path) => !basicLeafPaths.has(path)).sort(),
+  ["dialog.base.root.shadow", "panel.base.root.shadow"],
+  "Cyberpunk resolved graph growth must be exactly the two budgeted shadow leaves",
 );
 
 for (const [componentId, component] of Object.entries(components)) {
@@ -67,7 +94,7 @@ for (const [componentId, component] of Object.entries(components)) {
   assert.equal(
     Object.keys(component.fallbacks ?? {}).length,
     0,
-    `Cyberpunk ${componentId} must not need capability fallbacks for its native signal-frame foundation`,
+    `Cyberpunk ${componentId} must not need capability fallbacks for its native signal-frame language`,
   );
 }
 
@@ -79,9 +106,10 @@ assert.deepEqual(
 );
 
 const shadowPaths = findKeys(components, (key) => key === "shadow");
-assert.ok(
-  shadowPaths.length <= budget.maxShadowProperties,
-  `Cyberpunk uses ${shadowPaths.length} shadow properties; budget is ${budget.maxShadowProperties}`,
+assert.equal(
+  shadowPaths.length,
+  budget.maxShadowProperties,
+  `Cyberpunk must use exactly its intentional ${budget.maxShadowProperties}-shadow elevation budget`,
 );
 assert.deepEqual(
   shadowPaths.sort(),
@@ -90,5 +118,5 @@ assert.deepEqual(
 );
 
 console.log(
-  `Cyberpunk performance budget passed: ${totalLeaves}/${budget.maxResolvedVisualLeaves} resolved visual leaves, ${shadowPaths.length}/${budget.maxShadowProperties} shadow properties across ${Object.keys(components).length} components.`,
+  `Cyberpunk performance budget passed: ${totalLeaves}/${budget.maxResolvedVisualLeaves} resolved visual leaves (${totalLeaves - basicLeaves} intentional growth vs Basic), ${shadowPaths.length}/${budget.maxShadowProperties} shadow properties across ${Object.keys(components).length} components.`,
 );

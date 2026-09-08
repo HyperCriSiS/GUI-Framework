@@ -29,101 +29,154 @@ const visualComponentIds = Object.keys(basic.components).sort();
 assert.deepEqual(
   Object.keys(cyberpunk.components).sort(),
   visualComponentIds,
-  "Cyberpunk must retain every Basic visual component through inheritance without claiming newly registered contracts before their visuals exist",
+  "Cyberpunk must retain every Basic visual component through inheritance",
 );
 
-const expectedFoundation = {
-  button: {
-    base: {
-      root: { radius: "{radius.sm}" },
-    },
-  },
-  input: {
-    base: {
-      root: {
-        fill: "{semantic.color.surface}",
-        radius: "{radius.sm}",
-        border: {
-          color: "{semantic.color.accent}",
-          width: "{border.width.standard}",
-        },
-      },
-    },
-    states: {
-      hover: {
-        root: {
-          border: {
-            color: "{semantic.color.focus}",
-            width: "{border.width.standard}",
-          },
-        },
-      },
-    },
-  },
-  switch: {
-    base: {
-      root: {
-        fill: "{semantic.color.surface}",
-        radius: "{radius.sm}",
-        border: {
-          color: "{semantic.color.accent}",
-          width: "{border.width.standard}",
-        },
-      },
-      thumb: { radius: "{radius.sm}" },
-    },
-    states: {
-      hover: {
-        root: {
-          border: {
-            color: "{semantic.color.focus}",
-            width: "{border.width.standard}",
-          },
-        },
-      },
-      pressed: {
-        root: {
-          border: {
-            color: "{semantic.color.focus}",
-            width: "{border.width.standard}",
-          },
-        },
-      },
-    },
-  },
-  panel: {
-    base: {
-      root: {
-        fill: "{semantic.color.surface}",
-        radius: "{radius.sm}",
-        border: {
-          color: "{semantic.color.accent}",
-          width: "{border.width.standard}",
-        },
-        shadow: "{elevation.shadow.low}",
-      },
-    },
-  },
-  dialog: {
-    base: {
-      root: {
-        fill: "{semantic.color.surfaceElevated}",
-        radius: "{radius.sm}",
-        border: {
-          color: "{semantic.color.focus}",
-          width: "{border.width.standard}",
-        },
-        shadow: "{elevation.shadow.medium}",
-      },
-    },
-  },
-};
-
+const directComponentIds = [
+  "button",
+  "checkbox",
+  "data-grid",
+  "dialog",
+  "input",
+  "menu",
+  "navigation",
+  "panel",
+  "progress",
+  "radio",
+  "select",
+  "slider",
+  "switch",
+  "table",
+  "tabs",
+  "toast",
+  "tooltip",
+  "tree",
+].sort();
 assert.deepEqual(
-  cyberpunkEntry.definition.components,
-  expectedFoundation,
-  "Cyberpunk direct overrides must remain a deterministic native signal-frame foundation",
+  Object.keys(cyberpunkEntry.definition.components).sort(),
+  directComponentIds,
+  "Cyberpunk production styling must cover every visible control/surface family that benefits from signal-frame geometry",
 );
+
+for (const componentId of ["form-layout", "scroll-container"]) {
+  assert.deepEqual(
+    cyberpunk.components[componentId],
+    basic.components[componentId],
+    `${componentId} must remain an intentional neutral inheritance instead of gaining decorative framing`,
+  );
+}
+
+function leafPaths(value, path = []) {
+  if (Array.isArray(value)) {
+    return value.flatMap((child, index) => leafPaths(child, [...path, String(index)]));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).flatMap(([key, child]) => leafPaths(child, [...path, key]));
+  }
+  return [path.join(".")];
+}
+
+const basicLeafPaths = new Set(leafPaths(basic.components));
+const directLeafPaths = leafPaths(cyberpunkEntry.definition.components);
+assert.deepEqual(
+  directLeafPaths.filter((path) => !basicLeafPaths.has(path)).sort(),
+  ["dialog.base.root.shadow", "panel.base.root.shadow"],
+  "Cyberpunk maturity may grow the Basic graph only by the two deliberately budgeted elevation shadows",
+);
+
+for (const componentId of directComponentIds) {
+  const direct = cyberpunkEntry.definition.components[componentId];
+  const before = basic.components[componentId];
+  const after = cyberpunk.components[componentId];
+  assert.notDeepEqual(after, before, `Cyberpunk ${componentId} must produce at least one real visual delta`);
+  assert.ok(Object.keys(direct).length > 0, `Cyberpunk ${componentId} direct override must not be empty`);
+}
+
+function at(value, path) {
+  return path.split(".").reduce((current, key) => current?.[key], value);
+}
+
+for (const path of [
+  "button.base.root.radius",
+  "data-grid.base.root.radius",
+  "dialog.base.root.radius",
+  "input.base.root.radius",
+  "navigation.base.list.radius",
+  "navigation.base.item.radius",
+  "panel.base.root.radius",
+  "select.base.root.radius",
+  "switch.base.root.radius",
+  "switch.base.thumb.radius",
+  "table.base.root.radius",
+  "tree.base.root.radius",
+  "tree.base.item.radius",
+]) {
+  assert.equal(at(cyberpunk, `components.${path}`), "{radius.sm}", `${path} must use Cyberpunk's sharp technical radius`);
+}
+
+for (const path of [
+  "checkbox.base.root.border.color",
+  "data-grid.base.root.border.color",
+  "input.base.root.border.color",
+  "menu.base.popup.border.color",
+  "navigation.base.list.border.color",
+  "panel.base.root.border.color",
+  "radio.base.root.border.color",
+  "select.base.root.border.color",
+  "slider.base.track.border.color",
+  "switch.base.root.border.color",
+  "table.base.root.border.color",
+  "tree.base.root.border.color",
+]) {
+  assert.equal(at(cyberpunk, `components.${path}`), "{semantic.color.accent}", `${path} must use the primary Cyberpunk signal frame`);
+}
+
+for (const path of [
+  "dialog.base.root.border.color",
+  "input.states.hover.root.border.color",
+  "progress.variants.circular.base.track.border.color",
+  "select.states.hover.root.border.color",
+  "slider.base.thumb.border.color",
+  "switch.states.hover.root.border.color",
+  "switch.states.pressed.root.border.color",
+  "switch.states.checked.root.border.color",
+  "tabs.base.tabList.border.color",
+  "tooltip.base.popup.border.color",
+]) {
+  assert.equal(at(cyberpunk, `components.${path}`), "{semantic.color.focus}", `${path} must use the hot Cyberpunk signal frame`);
+}
+assert.equal(cyberpunk.components.menu.base.separator.fill, "{semantic.color.focus}");
+
+for (const path of [
+  "checkbox.base.root.fill",
+  "input.base.root.fill",
+  "panel.base.root.fill",
+  "radio.base.root.fill",
+  "select.base.root.fill",
+  "slider.base.track.fill",
+  "slider.base.thumb.fill",
+  "switch.base.root.fill",
+  "table.base.root.fill",
+]) {
+  assert.equal(at(cyberpunk, `components.${path}`), "{semantic.color.surface}", `${path} must use the flat Cyberpunk instrument surface`);
+}
+assert.equal(cyberpunk.components.dialog.base.root.fill, "{semantic.color.surfaceElevated}");
+assert.equal(cyberpunk.components.table.base.header.fill, "{semantic.color.surfaceElevated}");
+assert.equal(cyberpunk.components.toast.base.root.fill, "{semantic.color.background}");
+assert.equal(cyberpunk.components.tooltip.base.popup.fill, "{semantic.color.background}");
+
+for (const path of [
+  "data-grid.base.root.fill",
+  "menu.base.popup.fill",
+  "navigation.base.list.fill",
+  "tree.base.root.fill",
+]) {
+  assert.equal(
+    at(cyberpunk, `components.${path}`),
+    at(basic, `components.${path}`),
+    `${path} must preserve Basic's elevated host surface so inherited hover/selection states remain legible`,
+  );
+}
 
 function collectKeys(value, predicate, path = "cyberpunk") {
   if (!value || typeof value !== "object") return [];
@@ -149,41 +202,14 @@ assert.deepEqual(
   "Cyberpunk must not introduce blur, backdrop blur or glow effects",
 );
 
-const shadowPaths = collectKeys(cyberpunkEntry.definition.components, (key) => key === "shadow");
+const shadowPaths = collectKeys(cyberpunk.components, (key) => key === "shadow");
 assert.deepEqual(
   shadowPaths.sort(),
   ["cyberpunk.dialog.base.root.shadow", "cyberpunk.panel.base.root.shadow"],
   "Cyberpunk elevation must stay limited to Panel/Card and Dialog",
 );
-
-const accentFramePaths = collectKeys(
-  cyberpunkEntry.definition.components,
-  (key, value) => key === "color" && value === "{semantic.color.accent}",
-);
-assert.deepEqual(
-  accentFramePaths.sort(),
-  [
-    "cyberpunk.input.base.root.border.color",
-    "cyberpunk.panel.base.root.border.color",
-    "cyberpunk.switch.base.root.border.color",
-  ],
-  "Cyberpunk Accent signal frames must remain limited to the intended base surfaces",
-);
-
-const focusFramePaths = collectKeys(
-  cyberpunkEntry.definition.components,
-  (key, value) => key === "color" && value === "{semantic.color.focus}",
-);
-assert.deepEqual(
-  focusFramePaths.sort(),
-  [
-    "cyberpunk.dialog.base.root.border.color",
-    "cyberpunk.input.states.hover.root.border.color",
-    "cyberpunk.switch.states.hover.root.border.color",
-    "cyberpunk.switch.states.pressed.root.border.color",
-  ],
-  "Cyberpunk Focus signal frames must remain limited to interaction emphasis and Dialog",
-);
+assert.equal(cyberpunk.components.panel.base.root.shadow, "{elevation.shadow.low}");
+assert.equal(cyberpunk.components.dialog.base.root.shadow, "{elevation.shadow.medium}");
 
 for (const componentId of visualComponentIds) {
   const entry = manifest.components.find((candidate) => candidate.id === componentId);
@@ -192,7 +218,7 @@ for (const componentId of visualComponentIds) {
   const visual = cyberpunk.components[componentId];
 
   for (const size of contract.sizes ?? []) {
-    assert.ok(visual.sizes?.[size], `Cyberpunk ${componentId} must inherit declared ${size} sizing`);
+    assert.ok(visual.sizes?.[size], `Cyberpunk ${componentId} must retain declared ${size} sizing`);
   }
 
   for (const state of (contract.states ?? []).filter((state) => state !== "default")) {
@@ -204,13 +230,11 @@ for (const componentId of visualComponentIds) {
       `Cyberpunk ${componentId} must retain styling for declared state ${state}`,
     );
   }
-}
 
-for (const [componentId, component] of Object.entries(cyberpunk.components)) {
   assert.equal(
-    Object.keys(component.fallbacks ?? {}).length,
+    Object.keys(visual.fallbacks ?? {}).length,
     0,
-    `Cyberpunk ${componentId} must not need capability fallbacks for its native foundation`,
+    `Cyberpunk ${componentId} must not need capability fallbacks for its native signal-frame language`,
   );
 }
 
@@ -231,8 +255,11 @@ try {
     assert.ok(components?.panel, `${paletteId} must compile the Cyberpunk theme`);
     assert.equal(components.button.base.root.radius.reference, "{radius.sm}");
     assert.equal(components.input.base.root.border.color.reference, "{semantic.color.accent}");
+    assert.equal(components.input.states.hover.root.border.color.reference, "{semantic.color.focus}");
+    assert.equal(components.select.states.hover.root.border.color.reference, "{semantic.color.focus}");
     assert.equal(components.panel.base.root.shadow.reference, "{elevation.shadow.low}");
     assert.equal(components.dialog.base.root.shadow.reference, "{elevation.shadow.medium}");
+    assert.equal(components.tooltip.base.popup.fill.reference, "{semantic.color.background}");
     assert.equal(components.panel.base.root.backdropBlur, undefined);
     compiled[paletteId] = components;
   }
@@ -245,12 +272,17 @@ try {
   assert.notDeepEqual(
     compiled["reference-dark"].input.base.root.border.color.value,
     compiled["reference-light"].input.base.root.border.color.value,
-    "Cyberpunk semantic signal frames must follow the active palette",
+    "Cyberpunk Accent signal frames must follow the active palette",
+  );
+  assert.notDeepEqual(
+    compiled["reference-dark"].tooltip.base.popup.border.color.value,
+    compiled["reference-light"].tooltip.base.popup.border.color.value,
+    "Cyberpunk Focus signal frames must follow the active palette",
   );
 } finally {
   await rm(irPath, { force: true });
 }
 
 console.log(
-  "Cyberpunk inherits the complete Basic contract and establishes sharp, palette-driven native signal frames with bounded Panel/Dialog elevation and no blur/glow effects.",
+  "Cyberpunk production visual language covers 18 component families with sharp palette-driven signal frames, two bounded elevation shadows, neutral layout primitives and no blur/glow effects.",
 );

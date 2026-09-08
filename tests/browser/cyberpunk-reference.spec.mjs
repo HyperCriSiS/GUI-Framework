@@ -73,7 +73,8 @@ test("Cyberpunk renders sharp palette-driven signal frames with bounded native e
   expect(inputStyle.backdropFilter).toBe("none");
   expect(switchStyle.borderRadius).toBe("6px");
   expect(switchStyle.thumbBorderRadius).toBe("6px");
-  expect(switchStyle.borderColor).toBe(inputStyle.borderColor);
+  expect(switchStyle.borderColor).toBe("rgb(43, 109, 235)");
+  expect(switchStyle.borderColor).not.toBe(inputStyle.borderColor);
   expect(switchStyle.boxShadow).toBe("none");
   expect(switchStyle.backdropFilter).toBe("none");
   expect(panelStyle.borderRadius).toBe("6px");
