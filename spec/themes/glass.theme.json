@@ -3,7 +3,7 @@
   "theme": "glass",
   "extends": "modern",
   "components": {
-    "panel": {
+    "data-grid": {
       "base": {
         "root": {
           "fill": "{semantic.color.surfaceTranslucent}"
@@ -14,6 +14,73 @@
       "base": {
         "root": {
           "fill": "{semantic.color.surfaceElevatedTranslucent}"
+        }
+      }
+    },
+    "menu": {
+      "base": {
+        "popup": {
+          "fill": "{semantic.color.surfaceElevatedTranslucent}"
+        }
+      }
+    },
+    "navigation": {
+      "base": {
+        "list": {
+          "fill": "{semantic.color.surfaceTranslucent}"
+        }
+      }
+    },
+    "panel": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceTranslucent}"
+        }
+      }
+    },
+    "progress": {
+      "variants": {
+        "linear": {
+          "base": {
+            "track": {
+              "fill": "{semantic.color.surfaceTranslucent}"
+            }
+          }
+        }
+      }
+    },
+    "slider": {
+      "base": {
+        "track": {
+          "fill": "{semantic.color.surfaceTranslucent}"
+        }
+      }
+    },
+    "table": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceTranslucent}"
+        }
+      }
+    },
+    "toast": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceElevatedTranslucent}"
+        }
+      }
+    },
+    "tooltip": {
+      "base": {
+        "popup": {
+          "fill": "{semantic.color.surfaceElevatedTranslucent}"
+        }
+      }
+    },
+    "tree": {
+      "base": {
+        "root": {
+          "fill": "{semantic.color.surfaceTranslucent}"
         }
       }
     }

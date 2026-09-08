@@ -89,11 +89,13 @@ for (const componentId of ["panel", "dialog"]) {
   assert.equal(blurred.visual.root.shadow, glass.components[componentId].base.root.shadow);
 }
 
-for (const componentId of ["button", "input", "switch"]) {
+for (const componentId of Object.keys(glass.components).filter(
+  (componentId) => !["panel", "dialog"].includes(componentId),
+)) {
   assert.deepEqual(
     frosted.components[componentId],
     glass.components[componentId],
-    `${componentId} must remain identical to Glass`,
+    `${componentId} must remain identical to the complete Glass base`,
   );
 }
 

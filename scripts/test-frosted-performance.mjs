@@ -98,10 +98,23 @@ assert.ok(
   translucentFillPaths.length <= budget.maxTranslucentFillProperties,
   `Frosted Glass uses ${translucentFillPaths.length} translucent fill properties; budget is ${budget.maxTranslucentFillProperties}`,
 );
+const expectedGlassTranslucentFillPaths = [
+  "data-grid.base.root.fill",
+  "dialog.base.root.fill",
+  "menu.base.popup.fill",
+  "navigation.base.list.fill",
+  "panel.base.root.fill",
+  "progress.variants.linear.base.track.fill",
+  "slider.base.track.fill",
+  "table.base.root.fill",
+  "toast.base.root.fill",
+  "tooltip.base.popup.fill",
+  "tree.base.root.fill",
+].map((path) => `frosted-glass.${path}`).sort();
 assert.deepEqual(
   translucentFillPaths.sort(),
-  ["frosted-glass.dialog.base.root.fill", "frosted-glass.panel.base.root.fill"],
-  "Frosted Glass translucency must remain limited to Panel/Card and Dialog surfaces",
+  expectedGlassTranslucentFillPaths,
+  "Frosted Glass must inherit the complete crisp Glass translucency map before optional blur is applied",
 );
 
 const backdropBlurPaths = findKeys(components, (key) => key === "backdropBlur");

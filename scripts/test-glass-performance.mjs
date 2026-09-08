@@ -98,10 +98,23 @@ assert.ok(
   translucentFillPaths.length <= budget.maxTranslucentFillProperties,
   `Glass uses ${translucentFillPaths.length} translucent fill properties; budget is ${budget.maxTranslucentFillProperties}`,
 );
+const expectedTranslucentFillPaths = [
+  "glass.data-grid.base.root.fill",
+  "glass.dialog.base.root.fill",
+  "glass.menu.base.popup.fill",
+  "glass.navigation.base.list.fill",
+  "glass.panel.base.root.fill",
+  "glass.progress.variants.linear.base.track.fill",
+  "glass.slider.base.track.fill",
+  "glass.table.base.root.fill",
+  "glass.toast.base.root.fill",
+  "glass.tooltip.base.popup.fill",
+  "glass.tree.base.root.fill",
+].sort();
 assert.deepEqual(
   translucentFillPaths.sort(),
-  ["glass.dialog.base.root.fill", "glass.panel.base.root.fill"],
-  "Glass translucency must remain limited to Panel/Card and Dialog surfaces",
+  expectedTranslucentFillPaths,
+  "Glass translucency must remain limited to the intentional structural, overlay, data-surface and passive-track map",
 );
 
 console.log(
