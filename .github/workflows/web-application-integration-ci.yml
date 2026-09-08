@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - "packages/adapter-web/src/capabilities.mjs"
       - "packages/integration-web-application/**"
       - "examples/web-reference/integration.html"
       - "examples/web-reference/integration-reference.mjs"
@@ -13,6 +14,7 @@ on:
       - ".github/workflows/web-application-integration-ci.yml"
   pull_request:
     paths:
+      - "packages/adapter-web/src/capabilities.mjs"
       - "packages/integration-web-application/**"
       - "examples/web-reference/integration.html"
       - "examples/web-reference/integration-reference.mjs"
