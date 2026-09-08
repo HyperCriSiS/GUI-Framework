@@ -22,6 +22,8 @@ The maintained **Code Scanning** path is `.github/workflows/codeql-security.yml`
 
 The CodeQL workflow has `contents: read` and `security-events: write` permissions only. It has no package, release, registry or identity-token permission and does not authorize publication.
 
+Before a release decision, manually dispatch **Distribution Strategy CI** to run its read-only `repository-readiness` job on the current `main` commit. The audit checks the effective active `main` rules, Private Vulnerability Reporting, the maintained Advanced CodeQL workflow/current candidate result, and open Code Scanning and Dependabot alerts. The audit intentionally cannot modify repository settings or authorize publication; administrative controls still have to be enabled independently.
+
 ## Disclosure
 
 Coordinate disclosure with the maintainer. Public disclosure should follow a fix or an explicit decision that a fix is not required. Security fixes that must break compatibility still follow `MIGRATION_POLICY.md` unless an emergency compatibility waiver is justified and recorded.
