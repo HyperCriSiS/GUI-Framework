@@ -21,13 +21,13 @@ class ShowcaseRuntimeTest {
 
     @Test
     fun explorerStartsAndPrimarySectionsRemainInteractive() {
-        composeRule.onNodeWithText("GUI Framework — Showcase Explorer").assertIsDisplayed()
-        composeRule.onNodeWithText("Android target").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Theme").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Palette").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Density").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Font scale").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Viewport").assertIsDisplayed()
+        composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Android target").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Theme").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Palette").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Density").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Font scale").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Viewport").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed().performTextReplacement("Runtime showcase")
