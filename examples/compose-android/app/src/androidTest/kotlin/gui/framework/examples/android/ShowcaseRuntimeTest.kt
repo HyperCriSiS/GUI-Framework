@@ -73,7 +73,7 @@ class ShowcaseRuntimeTest {
         composeRule.onNodeWithContentDescription("Phone · 420").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText("GUI Framework — Showcase Explorer").assertIsDisplayed()
+        composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
     }
 
@@ -81,14 +81,14 @@ class ShowcaseRuntimeTest {
     fun galleryCoversComplexDataLayoutAndFeedbackSurfaces() {
         composeRule.onNodeWithText("Data").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Table").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Data Grid").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Tree").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Component status table").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Worker data grid").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Framework hierarchy").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithText("Layout").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Form Layout").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Scroll Container").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Showcase form").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Scrollable component sample").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithText("Feedback").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
