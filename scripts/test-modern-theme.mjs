@@ -94,6 +94,11 @@ for (const [componentId, parts] of Object.entries(expectedDirectGeometry)) {
         expectedToken,
         `Modern ${componentId}.${partId}.${property} must survive theme resolution`,
       );
+      assert.notEqual(
+        basic.components[componentId].base[partId]?.[property],
+        expectedToken,
+        `Modern ${componentId}.${partId}.${property} must remain a real visual delta from Basic instead of a no-op override`,
+      );
     }
   }
 }

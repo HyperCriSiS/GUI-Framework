@@ -114,6 +114,19 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Reproducible staging validation <!-- Release Candidate Dry Run #2 on commit 99d30650 rebuilt the complete 15-file cross-ecosystem staging set twice from clean staging roots and produced identical SHA-256 identities for every physical artifact -->
 - [x] Manual release-candidate dry-run workflow with no publication credentials or registry writes <!-- manual-only workflow completed successfully with contents: read, no registry write scopes/credentials, and the full byte-reproducibility proof -->
 
+## Phase 10 — Theme visual maturity and showcase-driven validation
+
+- [x] Shared Showcase Explorer baseline for Desktop/Windows and Android
+- [x] Modern zero-growth production geometry across surface-bearing component families with explicit inheritance for primitives already matching the Modern shape language
+- [ ] Glass production visual language across relevant controls, containers, overlays, and data surfaces
+- [ ] Frosted Glass production visual language with capability-aware blur coverage across appropriate surfaces
+- [ ] Spacey production visual language across the complete visible component set
+- [ ] Cyberpunk production visual language across the complete visible component set
+- [ ] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
+- [ ] Theme-specific browser visual-regression baselines for representative complex screens
+- [ ] Compose Desktop / Android visual-parity validation for all six themes
+- [ ] Final complex-screen contrast, interaction-state, and performance sign-off per theme
+
 ## Completion gates
 
 A phase or component is only complete when every applicable gate is green:
