@@ -15,16 +15,12 @@ The explorer intentionally uses framework components instead of mock styling so 
 
 ## Desktop / Windows
 
-`examples/compose-desktop/src/main/kotlin/ShowcaseExplorer.kt` provides the dedicated desktop entry point:
+`examples/compose-desktop/src/main/kotlin/ShowcaseExplorer.kt` provides the thin desktop entry point:
 
 `gui.framework.examples.showcase.desktop.ShowcaseExplorerKt`
 
-The source directory is already part of the Compose Maven compile gate, so the explorer is compiled with the existing desktop reference sources.
+The shared Compose surface lives under `examples/showcase-shared/` and is included in the existing Compose Maven compile gate. Windows and Android therefore exercise the same explorer implementation.
 
 ## Android
 
-`ShowcaseActivity` is compiled inside the existing Android reference application. The Android manifest exposes it as a second launcher activity labeled `GUI Framework Showcase`, leaving the established reference activity unchanged for runtime tests.
-
-## Validation
-
-The existing Compose compile gate covers the desktop source set. Android APK compilation is verified through the repository's opt-in Android CI lane.
+`ShowcaseActivity` is compiled inside the existing Android reference application and delegates to the same shared Compose explorer. The Android manifest exposes it as a second launcher activity labeled `GUI Framework Showcase`, leaving the established reference activity unchanged for runtime tests.
