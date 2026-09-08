@@ -18,11 +18,11 @@ Security reports are in scope when they affect the framework source, generated a
 
 ## Repository analysis
 
-The maintained **Code Scanning** path is `.github/workflows/codeql-security.yml`. It uses CodeQL for JavaScript/TypeScript, Python and Java/Kotlin. Java/Kotlin analysis traces the same local Maven artifact build used by the release-staging contract so executable JVM surfaces are actually compiled for analysis. The workflow is scheduled monthly, can be dispatched manually, and only runs on pull requests that modify the CodeQL workflow itself; ordinary framework pull requests do not pay the CodeQL cost.
+The maintained **Code Scanning** path is `.github/workflows/codeql-security.yml`. It uses CodeQL for GitHub Actions, JavaScript/TypeScript, Python and Java/Kotlin. Java/Kotlin analysis traces the same local Maven artifact build used by the release-staging contract so executable JVM surfaces are actually compiled for analysis; GitHub Actions, JavaScript/TypeScript and Python use no-build analysis. The workflow is scheduled monthly, can be dispatched manually, and only runs on pull requests that modify the CodeQL workflow itself; ordinary framework pull requests do not pay the CodeQL cost.
 
 The CodeQL workflow has `contents: read` and `security-events: write` permissions only. It has no package, release, registry or identity-token permission and does not authorize publication.
 
-Before a release decision, manually dispatch **Distribution Strategy CI** to run its read-only `repository-readiness` job on the current `main` commit. The audit checks the effective active `main` rules, Private Vulnerability Reporting, the maintained Advanced CodeQL workflow/current candidate result, and open Code Scanning and Dependabot alerts. The audit intentionally cannot modify repository settings or authorize publication; administrative controls still have to be enabled independently.
+Before a release decision, manually dispatch **Distribution Strategy CI** to run its read-only `repository-readiness` job on the current `main` commit. The audit checks the effective active `main` rules, Private Vulnerability Reporting, the maintained Advanced CodeQL workflow/current candidate result, successful candidate jobs for every required CodeQL language, and open Code Scanning and Dependabot alerts. The audit intentionally cannot modify repository settings or authorize publication; administrative controls still have to be enabled independently.
 
 ## Disclosure
 
