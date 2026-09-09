@@ -102,7 +102,7 @@ assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
 assert.match(source, /var formEmail by remember \{ mutableStateOf\("demo@example\.invalid"\) \}/);
-assert.doesNotMatch(source, /demo@example\.invalid/i, "Android reference fixtures must not contain personalized user data");
+assert.doesNotMatch(source, /@example\.com/i, "Android reference fixtures must use reserved neutral identity domains");
 assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/);
 assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/);
 assert.match(source, /var formSaveCount by remember \{ mutableStateOf\(0\) \}/);
