@@ -22,7 +22,7 @@ const selfTriggered = new Map([
 ]);
 
 const universalPullRequest = new Set(["core-ci.yml", "showcase-contract.yml"]);
-const manualOnly = new Set(["release-candidate-dry-run.yml"]);
+const manualOnly = new Set(["release-candidate-dry-run.yml", "visual-baseline-update.yml"]);
 
 const classified = [...selfTriggered.keys(), ...universalPullRequest, ...manualOnly].sort();
 assert.deepEqual(
@@ -81,17 +81,19 @@ assert.doesNotMatch(
   "core-ci.yml: pull_request must not become path-filtered",
 );
 
-const releaseCandidate = contents.get("release-candidate-dry-run.yml");
-assert.match(
-  releaseCandidate,
-  /^on:\s*\n\s+workflow_dispatch:\s*$/m,
-  "release-candidate-dry-run.yml must remain manually dispatchable",
-);
-assert.doesNotMatch(
-  releaseCandidate,
-  /^\s+(?:push|pull_request|schedule):/m,
-  "release-candidate-dry-run.yml must remain manual-only",
-);
+for (const fileName of manualOnly) {
+  const content = contents.get(fileName);
+  assert.match(
+    content,
+    /^on:\s*\n\s+workflow_dispatch:\s*$/m,
+    `${fileName} must remain manually dispatchable`,
+  );
+  assert.doesNotMatch(
+    content,
+    /^\s+(?:push|pull_request|schedule):/m,
+    `${fileName} must remain manual-only`,
+  );
+}
 
 const artifactPackaging = contents.get("artifact-packaging-ci.yml");
 const releaseCandidatePath = ".github/workflows/release-candidate-dry-run.yml";

@@ -1,0 +1,130 @@
+name: Visual Baseline Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: "Feature branch that contains the visual-baseline test changes"
+        required: true
+        type: string
+
+concurrency:
+  group: visual-baseline-update-${{ inputs.target_branch }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  render:
+    name: render-visual-baselines
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Validate target branch
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          case "$TARGET_BRANCH" in
+            feat/*|test/*) ;;
+            *) echo "target_branch must be a feat/* or test/* branch" >&2; exit 1 ;;
+          esac
+
+      - name: Checkout target branch without write credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.target_branch }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install locked Node dependencies
+        run: npm ci --ignore-scripts --audit=false
+
+      - name: Build deterministic Web reference inputs
+        run: |
+          npm run compile:spec
+          npm run build:web-tokens
+          npm run build:web-components
+          npm run build:web-assets
+          npm run build:browser-extension-reference
+
+      - name: Install Chromium browser
+        run: npm run install:web-browser
+
+      - name: Render theme visual baselines
+        run: npx playwright test tests/browser/theme-visual-baselines.spec.mjs --update-snapshots
+
+      - name: Upload rendered PNG baselines
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: theme-visual-baselines
+          path: tests/browser/__snapshots__/theme-visual-baselines.spec.mjs
+          if-no-files-found: error
+          retention-days: 1
+
+  commit:
+    name: commit-visual-baselines
+    needs: render
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Validate target branch
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          case "$TARGET_BRANCH" in
+            feat/*|test/*) ;;
+            *) echo "target_branch must be a feat/* or test/* branch" >&2; exit 1 ;;
+          esac
+
+      - name: Checkout target branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.target_branch }}
+          fetch-depth: 0
+
+      - name: Download rendered baselines
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: theme-visual-baselines
+          path: /tmp/theme-visual-baselines
+
+      - name: Validate rendered artifact
+        run: |
+          test -n "$(find /tmp/theme-visual-baselines -type f -name '*.png' -print -quit)"
+          if find /tmp/theme-visual-baselines -type f ! -name '*.png' -print -quit | grep -q .; then
+            echo "visual baseline artifact contains a non-PNG file" >&2
+            exit 1
+          fi
+          if find /tmp/theme-visual-baselines -type l -print -quit | grep -q .; then
+            echo "visual baseline artifact contains a symbolic link" >&2
+            exit 1
+          fi
+          test "$(find /tmp/theme-visual-baselines -type f -name '*.png' | wc -l)" -eq 6
+
+      - name: Replace only the visual baseline snapshot directory
+        run: |
+          destination='tests/browser/__snapshots__/theme-visual-baselines.spec.mjs'
+          rm -rf "$destination"
+          mkdir -p "$destination"
+          cp -a /tmp/theme-visual-baselines/. "$destination/"
+          git add -- "$destination"
+
+      - name: Commit baselines when changed
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          if git diff --cached --quiet; then
+            echo "Visual baselines are already current."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(web): update theme visual baselines'
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
