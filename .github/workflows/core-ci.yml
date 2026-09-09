@@ -4,20 +4,23 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/dependabot.yml"
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: core-ci-${{ github.ref }}
+  group: core-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate-and-typecheck:
+    name: validate-and-typecheck
     runs-on: ubuntu-latest
     env:
       KOTLIN_VERSION: "2.4.10"
@@ -177,7 +180,7 @@ jobs:
         run: npm run test:web-scroll-container
 
       - name: Test cross-component Web text / locale robustness
-        run: npm run test:web-text-locale
+        run: npm run test:text-locale-robustness
 
       - name: Test native Web Basic Table / Data Grid
         run: npm run test:web-table
@@ -194,7 +197,7 @@ jobs:
       - name: Test native Web Basic Slider
         run: npm run test:web-slider
 
-      - name: Test native Web Panel
+      - name: Test native Web Basic Panel
         run: npm run test:web-panel
 
       - name: Test native Web Basic Dialog
