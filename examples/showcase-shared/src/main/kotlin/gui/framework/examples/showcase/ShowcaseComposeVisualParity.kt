@@ -58,12 +58,11 @@ fun verifyShowcaseComposeVisualParity(): Map<String, String> {
             fingerprints["$paletteId/$themeId"] = actual
         }
 
-        check(paletteFingerprints.getValue("glass") == paletteFingerprints.getValue("frosted-glass")) {
+        check(composeThemeVisualPayload(paletteId, "glass") == composeThemeVisualPayload(paletteId, "frosted-glass")) {
             "Frosted Glass must resolve to the crisp Glass visual recipe on Compose for $paletteId"
         }
-        check(paletteFingerprints.values.toSet().size == 5) {
-            "Compose expects five distinct effective visual fingerprints per palette: " +
-                "Basic, Modern, Glass/Frosted Glass, Spacey, and Cyberpunk"
+        check(paletteFingerprints.values.toSet().size == composeParityThemeIds.size) {
+            "Compose parity fingerprints must remain theme-scoped even when two themes resolve to the same visual payload"
         }
     }
 
@@ -74,11 +73,18 @@ fun verifyShowcaseComposeVisualParity(): Map<String, String> {
 private fun composeThemeFingerprint(
     paletteId: String,
     themeId: String,
+): String = sha256(
+    "Q(${canonicalString(paletteId)};${canonicalString(themeId)};[${composeThemeVisualPayload(paletteId, themeId)}])",
+)
+
+private fun composeThemeVisualPayload(
+    paletteId: String,
+    themeId: String,
 ): String {
     val recipes = GuiVisualRegistry.theme(paletteId, themeId)
         ?: error("Missing generated Compose visual recipes for $paletteId/$themeId")
 
-    val componentEntries = recipes.entries
+    return recipes.entries
         .sortedBy { it.key }
         .joinToString(",") { (componentId, recipe) ->
             val capabilities = GuiComposeVisualParityMetadata.capabilities(componentId)
@@ -99,9 +105,6 @@ private fun composeThemeFingerprint(
             "E(${canonicalString(componentId)};${canonicalOptionalString(selection.fallbackId)};" +
                 "${canonicalRecipe(resolved)})"
         }
-
-    val payload = "Q(${canonicalString(paletteId)};${canonicalString(themeId)};[$componentEntries])"
-    return sha256(payload)
 }
 
 private fun sha256(value: String): String =

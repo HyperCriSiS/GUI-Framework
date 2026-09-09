@@ -82,8 +82,8 @@ assert.equal(
 );
 assert.equal(
   new Set(hashes).size,
-  ir.palettes.length * 5,
-  "Each palette must retain five effective Compose visual identities because Frosted Glass crisply falls back to Glass",
+  ir.palettes.length * expectedThemes.length,
+  "Compose parity fingerprints must remain theme-scoped even when effective visual payloads converge",
 );
 
 assert.match(sharedProbe, /GuiThemeId\.entries\.map \{ it\.wireValue \}/);
@@ -93,8 +93,8 @@ assert.match(sharedProbe, /availableCapabilities = emptySet\(\)/);
 assert.match(sharedProbe, /GuiComposeVisualParityBaseline\.fingerprint\(paletteId, themeId\)/);
 assert.match(sharedProbe, /MessageDigest\.getInstance\("SHA-256"\)/);
 assert.match(sharedProbe, /value\.toRawBits\(\)\.toULong\(\)\.toString\(16\)/);
-assert.match(sharedProbe, /paletteFingerprints\.getValue\("glass"\) == paletteFingerprints\.getValue\("frosted-glass"\)/);
-assert.match(sharedProbe, /paletteFingerprints\.values\.toSet\(\)\.size == 5/);
+assert.match(sharedProbe, /composeThemeVisualPayload\(paletteId, "glass"\) == composeThemeVisualPayload\(paletteId, "frosted-glass"\)/);
+assert.match(sharedProbe, /paletteFingerprints\.values\.toSet\(\)\.size == composeParityThemeIds\.size/);
 assert.match(sharedProbe, /fingerprints\.size == composeParityPalettes\.size \* composeParityThemeIds\.size/);
 
 assert.match(desktopProbe, /verifyShowcaseComposeVisualParity\(\)/);
