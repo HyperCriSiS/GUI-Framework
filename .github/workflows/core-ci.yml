@@ -368,6 +368,7 @@ jobs:
     needs: validate-and-typecheck
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
       contains(github.event.head_commit.message, '[browser-ci]')
     steps:
       - name: Checkout
