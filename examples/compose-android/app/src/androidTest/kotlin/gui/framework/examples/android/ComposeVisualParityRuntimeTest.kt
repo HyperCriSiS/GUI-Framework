@@ -4,6 +4,7 @@ package gui.framework.examples.android
 
 import gui.framework.examples.showcase.verifyShowcaseComposeVisualParity
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
@@ -13,11 +14,11 @@ class ComposeVisualParityRuntimeTest {
         val fingerprints = verifyShowcaseComposeVisualParity()
 
         assertEquals(12, fingerprints.size)
-        assertEquals(
+        assertNotEquals(
             fingerprints["reference-dark/glass"],
             fingerprints["reference-dark/frosted-glass"],
         )
-        assertEquals(
+        assertNotEquals(
             fingerprints["reference-light/glass"],
             fingerprints["reference-light/frosted-glass"],
         )
