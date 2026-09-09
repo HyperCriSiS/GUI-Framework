@@ -132,7 +132,7 @@
       {
         "id": "email",
         "label": "Email",
-        "initialValue": "jan@example.com",
+        "initialValue": "demo@example.invalid",
         "disabled": false,
         "error": false
       },

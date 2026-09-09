@@ -30,7 +30,7 @@ export function mountFormLayoutReference(document, root, options = {}) {
   if (!densities.has(density)) throw new Error(`Unknown Form Layout reference density: ${density}`);
   const componentSize = density === "compact" ? "small" : "medium";
   let variant = "inline";
-  let emailValue = "jan@example.com";
+  let emailValue = "demo@example.invalid";
   let recoveryValue = "12";
   let saveCount = 0;
 
