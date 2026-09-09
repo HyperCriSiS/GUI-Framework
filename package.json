@@ -87,6 +87,7 @@
     "test:kotlin-tokens": "node scripts/test-compose-tokens.mjs",
     "build:kotlin-visuals": "node packages/adapter-compose/src/generate-visuals.mjs",
     "test:kotlin-visuals": "node scripts/test-compose-visuals.mjs",
+    "test:kotlin-visual-parity": "node scripts/test-compose-visual-parity.mjs",
     "build:kotlin-assets": "node packages/adapter-compose/src/generate-assets.mjs",
     "test:kotlin-assets": "node scripts/test-compose-assets.mjs",
     "compile:kotlin-contracts": "mvn -q -f packages/adapter-compose/pom.xml compile",

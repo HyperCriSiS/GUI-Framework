@@ -272,6 +272,9 @@ jobs:
       - name: Test Kotlin visual generation
         run: npm run test:kotlin-visuals
 
+      - name: Test Compose six-theme visual parity contract
+        run: npm run test:kotlin-visual-parity
+
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
 
@@ -358,6 +361,12 @@ jobs:
 
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
+
+      - name: Run Compose Desktop visual parity probe
+        run: >-
+          mvn -q -f packages/adapter-compose/pom.xml
+          org.codehaus.mojo:exec-maven-plugin:3.5.0:java
+          -Dexec.mainClass=gui.framework.examples.desktop.ComposeVisualParityProbeKt
 
       - name: Typecheck prototype contracts
         run: npm run typecheck
