@@ -1,0 +1,42 @@
+name: One-shot neutralize showcase fixture
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  neutralize:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/showcase-theme-gallery' &&
+      github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: fix/showcase-theme-gallery
+          fetch-depth: 0
+      - name: Neutralize personalized fixture and remove this one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(git grep -Il 'jan@example.com' || true)"
+          if [[ -n "$matches" ]]; then
+            while IFS= read -r file; do
+              sed -i 's/jan@example\.com/demo@example.invalid/g' "$file"
+            done <<< "$matches"
+          fi
+          git rm .github/workflows/neutralize-showcase-fixture.yml
+          if git grep -n 'jan@example.com'; then
+            echo 'Personalized fixture still present after neutralization.' >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'chore(fixtures): neutralize example identity'
+          git push origin HEAD:fix/showcase-theme-gallery
