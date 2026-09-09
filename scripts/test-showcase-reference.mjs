@@ -81,4 +81,5 @@ for (const [enumName, label] of themes) {
 assert.ok(!/[\u0600-\u06ff\u3040-\u30ff\u3400-\u9fff]/u.test(androidDesign), "Android design gallery must not mix unrelated Arabic/CJK stress fixtures into the visible design experience");
 assert.ok(!/\bJan\b/.test(shared + androidDesign), "Showcase fixtures must not contain personalized user names");
 assert.ok(referenceScenarios.includes('"initialValue": "demo@example.invalid"'), "Shared reference scenarios must use neutral example identity data");
+assert.match(referenceScenarios, /"initialValue": "[^"]+@example\.invalid"/, "Shared reference identity fixtures must use the reserved .invalid domain");
 console.log("Six-theme Showcase coverage passed: Android starts in a design-first gallery, QA Lab retains the shared explorer, safe areas are respected, and Desktop keeps the shared explorer contract.");
