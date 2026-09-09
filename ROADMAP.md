@@ -122,7 +122,8 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Frosted Glass production visual language with capability-aware blur limited to Panel/Card and Dialog on Web, exact crisp-Glass fallback when backdrop blur is unavailable, and an explicit crisp fallback on Compose where the adapter does not advertise backdrop blur
 - [x] Spacey production visual language across the complete visible component set
 - [x] Cyberpunk production visual language across the complete visible component set
-- [ ] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
+- [x] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
+  <!-- Shared source contract plus real Android instrumentation traverses all six themes through Components, Screens, Compare, and Stress Lab; Core CI #767 passed Chromium, APK build, API 23 at 130% scale, and API 35 on the validated runtime head. -->
 - [ ] Theme-specific browser visual-regression baselines for representative complex screens
 - [ ] Compose Desktop / Android visual-parity validation for all six themes
 - [ ] Final complex-screen contrast, interaction-state, and performance sign-off per theme

@@ -21,7 +21,7 @@ const selfTriggered = new Map([
   ["web-application-integration-ci.yml", 2],
 ]);
 
-const universalPullRequest = new Set(["core-ci.yml"]);
+const universalPullRequest = new Set(["core-ci.yml", "showcase-contract.yml"]);
 const manualOnly = new Set(["release-candidate-dry-run.yml"]);
 
 const classified = [...selfTriggered.keys(), ...universalPullRequest, ...manualOnly].sort();
