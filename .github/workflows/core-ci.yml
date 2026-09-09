@@ -116,6 +116,9 @@ jobs:
       - name: Test Cyberpunk theme performance budget
         run: npm run test:cyberpunk-performance
 
+      - name: Final six-theme production sign-off
+        run: npm run test:theme-production-signoff
+
       - name: Generate Web token output
         run: npm run build:web-tokens
 
