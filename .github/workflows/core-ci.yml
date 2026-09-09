@@ -29,7 +29,7 @@ jobs:
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
-      ANDROID_PLATFORM_PACKAGE: android-37
+      ANDROID_PLATFORM_PACKAGE: "android-37"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -47,22 +47,23 @@ jobs:
         run: node scripts/test-actions-pinning.mjs
 
       - name: Set up Java
-        uses: actions/setup-java@ae2b61dbc685e60e4427b2e8ed4f0135d84f3b9c # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
+          cache: maven
 
       - name: Validate neutral specification
-        run: npm run validate
+        run: npm run validate:spec
 
       - name: Compile neutral specification
         run: npm run compile:spec
 
       - name: Test specification compiler
-        run: npm run test:compiler
+        run: npm run test:spec
 
       - name: Guard renderer-neutral specification boundaries
-        run: npm run test:neutral-spec-boundaries
+        run: npm run test:neutral-boundaries
 
       - name: Test palette-family model
         run: npm run test:palette-model
@@ -278,73 +279,73 @@ jobs:
         run: npm run test:kotlin-assets
 
       - name: Test native Compose Basic Button
-        run: npm run test:compose-button
+        run: npm run test:kotlin-button
 
       - name: Test native Compose Basic Input
-        run: npm run test:compose-input
+        run: npm run test:kotlin-input
 
       - name: Test native Compose Basic Switch
-        run: npm run test:compose-switch
+        run: npm run test:kotlin-switch
 
       - name: Test native Compose Basic Checkbox
-        run: npm run test:compose-checkbox
+        run: npm run test:kotlin-checkbox
 
       - name: Test native Compose Basic Radio
-        run: npm run test:compose-radio
+        run: npm run test:kotlin-radio
 
       - name: Test native Compose Basic Select / ComboBox
-        run: npm run test:compose-select
+        run: npm run test:kotlin-select
 
       - name: Test native Compose Basic Tabs
-        run: npm run test:compose-tabs
+        run: npm run test:kotlin-tabs
 
       - name: Test native Compose Basic Navigation
-        run: npm run test:compose-navigation
+        run: npm run test:kotlin-navigation
 
       - name: Test native Compose Basic Tree / Hierarchy
-        run: npm run test:compose-tree
+        run: npm run test:kotlin-tree
 
       - name: Test native Compose Basic Form Layout
-        run: npm run test:compose-form-layout
+        run: npm run test:kotlin-form-layout
 
       - name: Test native Compose Basic Scroll Container
-        run: npm run test:compose-scroll-container
+        run: npm run test:kotlin-scroll-container
 
       - name: Test Compose text / locale robustness
-        run: npm run test:compose-text-locale
+        run: npm run test:kotlin-text-locale
 
       - name: Test native Compose Basic Table / Data Grid
-        run: npm run test:compose-table
+        run: npm run test:kotlin-table
 
       - name: Test native Compose Basic Tooltip
-        run: npm run test:compose-tooltip
+        run: npm run test:kotlin-tooltip
 
       - name: Test native Compose Basic Toast / Notification
-        run: npm run test:compose-toast
+        run: npm run test:kotlin-toast
 
       - name: Test native Compose Basic Progress / Spinner
-        run: npm run test:compose-progress
+        run: npm run test:kotlin-progress
 
       - name: Test native Compose Basic Slider
-        run: npm run test:compose-slider
+        run: npm run test:kotlin-slider
 
       - name: Test native Compose Basic Menu / Context Menu
-        run: npm run test:compose-menu
+        run: npm run test:kotlin-menu
 
       - name: Test native Compose Basic Panel
-        run: npm run test:compose-panel
+        run: npm run test:kotlin-panel
 
       - name: Test native Compose Basic Dialog
-        run: npm run test:compose-dialog
+        run: npm run test:kotlin-dialog
 
       - name: Test Compose semantics and interactions
-        run: npm run test:compose-semantics
+        run: npm run test:kotlin-semantics
 
       - name: Test Compose scaling and minimum-capability behavior
-        run: npm run test:compose-scaling
+        run: npm run test:kotlin-scaling
 
       - name: Test Compose Desktop integration kit
-        run: npm run test:kotlin-desktop-integration
+        run: npm run test:desktop-integration
 
       - name: Test Compose Desktop reference application
         run: npm run test:kotlin-desktop-reference
@@ -417,7 +418,7 @@ jobs:
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
-      ANDROID_PLATFORM_PACKAGE: android-37
+      ANDROID_PLATFORM_PACKAGE: "android-37"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -429,18 +430,19 @@ jobs:
           cache: npm
 
       - name: Set up Java
-        uses: actions/setup-java@ae2b61dbc685e60e4427b2e8ed4f0135d84f3b9c # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
+          cache: gradle
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@07976a51c1892c3f31ad79e8343a8a7e3d4bd927 # v3
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@9a69e8a78d6c0a16a0c42dfb0dbf6681aa0eb9c6 # v5
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
         with:
-          gradle-version: "9.6.0"
+          gradle-version: ${{ env.GRADLE_VERSION }}
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -458,14 +460,18 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Compile Android reference and instrumentation sources
-        run: |
-          cd examples/compose-android
-          gradle :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin
+        run: >-
+          gradle --no-daemon --stacktrace --console=plain
+          -p examples/compose-android
+          compileDebugKotlin
+          compileDebugAndroidTestKotlin
 
       - name: Build Android reference and instrumentation APKs
-        run: |
-          cd examples/compose-android
-          gradle :app:assembleDebug :app:assembleDebugAndroidTest
+        run: >-
+          gradle --no-daemon --stacktrace --console=plain
+          -p examples/compose-android
+          assembleDebug
+          assembleDebugAndroidTest
 
   compose-android-runtime:
     name: compose-android-runtime (${{ matrix.api-level }}, ${{ matrix.target }}, ${{ matrix.arch }}, ${{ matrix.ram-size }}, ${{ matrix.heap-size }}, ${{ matrix.density }}, ${{ matrix.font-scale }})
@@ -473,8 +479,7 @@ jobs:
     needs: validate-and-typecheck
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[android-ci]')
-    timeout-minutes: 25
+      contains(github.event.head_commit.message, '[device-ci]')
     strategy:
       fail-fast: false
       matrix:
@@ -485,14 +490,14 @@ jobs:
             ram-size: 1536M
             heap-size: 192M
             density: 240
-            font-scale: 1.30
+            font-scale: "1.30"
           - api-level: 35
             target: google_apis
             arch: x86_64
             ram-size: 2048M
             heap-size: 256M
             density: 480
-            font-scale: 1.00
+            font-scale: "1.00"
     env:
       KOTLIN_VERSION: "2.4.10"
       COMPOSE_MULTIPLATFORM_VERSION: "1.10.3"
@@ -500,7 +505,7 @@ jobs:
       ANDROID_COMPILE_SDK: "37"
       ANDROID_TARGET_SDK: "37"
       ANDROID_BUILD_TOOLS: "37.0.0"
-      ANDROID_PLATFORM_PACKAGE: android-37
+      ANDROID_PLATFORM_PACKAGE: "android-37"
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -512,13 +517,14 @@ jobs:
           cache: npm
 
       - name: Set up Java
-        uses: actions/setup-java@ae2b61dbc685e60e4427b2e8ed4f0135d84f3b9c # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
+          cache: gradle
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@07976a51c1892c3f31ad79e8343a8a7e3d4bd927 # v3
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
 
       - name: Enable KVM acceleration
         run: |
@@ -527,9 +533,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@9a69e8a78d6c0a16a0c42dfb0dbf6681aa0eb9c6 # v5
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
         with:
-          gradle-version: "9.6.0"
+          gradle-version: ${{ env.GRADLE_VERSION }}
 
       - name: Compile neutral specification
         run: npm run compile:spec
@@ -547,13 +553,15 @@ jobs:
         run: npm run build:kotlin-assets
 
       - name: Run scaled Android reference instrumentation
-        uses: reactivecircus/android-emulator-runner@665b39cc1bff6f0716c1f5f3bb2e1e29793a4dbb # v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
+          profile: pixel_2
           ram-size: ${{ matrix.ram-size }}
           heap-size: ${{ matrix.heap-size }}
-          emulator-options: -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -no-window
+          density: ${{ matrix.density }}
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
-          script: ../../../scripts/run-android-runtime-check.sh "${{ matrix.density }}" "${{ matrix.font-scale }}"
+          script: bash scripts/run-android-runtime-check.sh ${{ matrix.font-scale }} ${{ matrix.density }}
