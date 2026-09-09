@@ -70,18 +70,20 @@ for (const qaOption of [
   "Standard",
   "Compact",
   "150%",
-  "Phone 420",
-  "Tablet 760",
-  "Desktop 1180",
+  "Phone · 420",
+  "Tablet · 760",
+  "Desktop · 1180",
 ]) {
   assert.ok(shared.includes(qaOption), `Showcase QA controls must expose ${qaOption}`);
 }
 
 assert.match(shared, /GuiTheme\s*\(/, "Shared Showcase content must render through the real GuiTheme provider");
 assert.ok(
-  (shared.match(/GuiTheme\s*\(/g) ?? []).length >= 3,
-  "Showcase comparison must render multiple independent real GuiTheme contexts",
+  (shared.match(/GuiTheme\s*\(/g) ?? []).length >= 2,
+  "Showcase must render the root theme plus nested comparison theme contexts",
 );
+assert.ok(shared.includes('ComparisonCard("A ·'), "Showcase comparison must render Theme A");
+assert.ok(shared.includes('ComparisonCard("B ·'), "Showcase comparison must render Theme B");
 
 for (const [source, platform] of [
   [desktop, "Desktop / Windows target"],
