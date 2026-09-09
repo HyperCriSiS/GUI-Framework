@@ -6,11 +6,13 @@ import { readFile } from "node:fs/promises";
 const sharedPath = "examples/showcase-shared/src/main/kotlin/gui/framework/examples/showcase/ShowcaseExplorerContent.kt";
 const desktopPath = "examples/compose-desktop/src/main/kotlin/ShowcaseExplorer.kt";
 const androidPath = "examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/ShowcaseActivity.kt";
+const androidDesignPath = "examples/compose-android/app/src/main/kotlin/gui/framework/examples/android/ShowcaseDesignApp.kt";
 
-const [shared, desktop, android] = await Promise.all([
+const [shared, desktop, android, androidDesign] = await Promise.all([
   readFile(sharedPath, "utf8"),
   readFile(desktopPath, "utf8"),
   readFile(androidPath, "utf8"),
+  readFile(androidDesignPath, "utf8"),
 ]);
 
 const themes = [
@@ -100,18 +102,33 @@ assert.ok(
   "Android Showcase must respect safe drawing insets so content is not clipped by system bars",
 );
 
-for (const [source, platform] of [
-  [desktop, "Desktop / Windows target"],
-  [android, "Android target"],
-]) {
-  assert.ok(
-    source.includes("gui.framework.examples.showcase.ShowcaseExplorer"),
-    `${platform} wrapper must import the shared ShowcaseExplorer`,
-  );
-  assert.ok(source.includes("ShowcaseExplorer("), `${platform} wrapper must delegate to the shared explorer`);
-  assert.ok(source.includes(platform), `${platform} wrapper must preserve its platform label`);
+assert.ok(
+  desktop.includes("gui.framework.examples.showcase.ShowcaseExplorer"),
+  "Desktop / Windows target wrapper must import the shared ShowcaseExplorer",
+);
+assert.ok(desktop.includes("ShowcaseExplorer("), "Desktop / Windows target wrapper must delegate to the shared explorer");
+assert.ok(desktop.includes("Desktop / Windows target"), "Desktop / Windows target wrapper must preserve its platform label");
+
+assert.ok(android.includes("ShowcaseDesignApp("), "Android target must launch the design-first Showcase app");
+assert.ok(
+  androidDesign.includes("gui.framework.examples.showcase.ShowcaseExplorer"),
+  "Android design app must retain access to the shared ShowcaseExplorer as the QA Lab",
+);
+assert.ok(androidDesign.includes('GuiTabItem("designs", "Designs")'), "Android Showcase must expose Designs as its primary mode");
+assert.ok(androidDesign.includes('GuiTabItem("qa", "QA Lab")'), "Android Showcase must expose the technical explorer as QA Lab");
+assert.ok(androidDesign.includes('mutableStateOf("designs")'), "Android Showcase must start in the Designs experience");
+assert.ok(androidDesign.includes("ShowcaseExplorer("), "Android QA Lab must delegate to the shared explorer");
+assert.ok(androidDesign.includes("Android target · QA Lab"), "Android QA Lab must preserve its platform label");
+for (const [enumName, label] of themes) {
+  assert.ok(androidDesign.includes(enumName), `Android design gallery must expose ${enumName}`);
+  assert.ok(androidDesign.includes(`"${label}"`), `Android design gallery must expose the ${label} theme label`);
 }
+assert.ok(
+  !/[\u0600-\u06ff\u3040-\u30ff\u3400-\u9fff]/u.test(androidDesign),
+  "Android design gallery must not mix unrelated Arabic/CJK stress fixtures into the visible design experience",
+);
+assert.ok(!/\bJan\b/.test(shared + androidDesign), "Showcase fixtures must not contain personalized user names");
 
 console.log(
-  "Six-theme Showcase coverage passed: shared Desktop/Android explorer exposes all themes, component gallery, real-world screens, A/B comparison, QA controls and stress scenarios.",
+  "Six-theme Showcase coverage passed: Android starts in a design-first gallery, QA Lab retains the shared explorer, safe areas are respected, and Desktop keeps the shared explorer contract.",
 );
