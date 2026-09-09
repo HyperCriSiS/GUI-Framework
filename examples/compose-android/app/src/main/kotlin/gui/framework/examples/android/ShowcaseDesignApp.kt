@@ -4,11 +4,13 @@ package gui.framework.examples.android
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -48,18 +50,10 @@ fun ShowcaseDesignApp() {
     var section by remember { mutableStateOf("designs") }
     var selectedTheme by remember { mutableStateOf<ThemeChoice?>(null) }
 
-    if (section == "qa") {
-        ShowcaseExplorer(platformLabel = "Android target · QA Lab", stressControlCount = 30)
-        return
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101114))
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .background(Color(0xFF101114)),
     ) {
         GuiTheme(theme = GuiThemeId.MODERN, paletteId = "reference-dark") {
             GuiTabs(
@@ -68,14 +62,33 @@ fun ShowcaseDesignApp() {
                     GuiTabItem("designs", "Designs"),
                     GuiTabItem("qa", "QA Lab"),
                 ),
-                onValueChange = { section = it },
+                onValueChange = {
+                    section = it
+                    if (it == "designs") selectedTheme = null
+                },
                 accessibilityLabel = "Showcase mode",
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
             ) { }
         }
 
-        selectedTheme?.let { theme ->
-            ThemeDetail(theme = theme, onBack = { selectedTheme = null })
-        } ?: ThemeGallery(onOpen = { selectedTheme = it })
+        if (section == "qa") {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                ShowcaseExplorer(platformLabel = "Android target · QA Lab", stressControlCount = 30)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                selectedTheme?.let { theme ->
+                    ThemeDetail(theme = theme, onBack = { selectedTheme = null })
+                } ?: ThemeGallery(onOpen = { selectedTheme = it })
+            }
+        }
     }
 }
 
