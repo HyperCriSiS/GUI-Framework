@@ -4,23 +4,20 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - ".github/dependabot.yml"
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: core-ci-${{ github.event.pull_request.number || github.ref }}
+  group: core-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate-and-typecheck:
-    name: validate-and-typecheck
     runs-on: ubuntu-latest
     env:
       KOTLIN_VERSION: "2.4.10"
@@ -180,7 +177,7 @@ jobs:
         run: npm run test:web-scroll-container
 
       - name: Test cross-component Web text / locale robustness
-        run: npm run test:text-locale-robustness
+        run: npm run test:web-text-locale
 
       - name: Test native Web Basic Table / Data Grid
         run: npm run test:web-table
@@ -197,7 +194,7 @@ jobs:
       - name: Test native Web Basic Slider
         run: npm run test:web-slider
 
-      - name: Test native Web Basic Panel
+      - name: Test native Web Panel
         run: npm run test:web-panel
 
       - name: Test native Web Basic Dialog
@@ -271,6 +268,9 @@ jobs:
 
       - name: Test Kotlin visual generation
         run: npm run test:kotlin-visuals
+
+      - name: Test Compose six-theme visual parity contract
+        run: npm run test:kotlin-visual-parity
 
       - name: Generate Kotlin assets
         run: npm run build:kotlin-assets
@@ -358,6 +358,12 @@ jobs:
 
       - name: Compile generated Kotlin and Compose adapter output
         run: npm run compile:kotlin-contracts
+
+      - name: Run Compose Desktop visual parity probe
+        run: >-
+          mvn -q -f packages/adapter-compose/pom.xml
+          org.codehaus.mojo:exec-maven-plugin:3.5.0:java
+          -Dexec.mainClass=gui.framework.examples.desktop.ComposeVisualParityProbeKt
 
       - name: Typecheck prototype contracts
         run: npm run typecheck
