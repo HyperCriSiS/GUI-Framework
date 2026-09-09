@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          matches="$(git grep -Il 'jan@example.com' || true)"
+          matches="$(git grep -Il 'jan@example.com' -- ':!.github/workflows/neutralize-showcase-fixture.yml' || true)"
           if [[ -n "$matches" ]]; then
             while IFS= read -r file; do
               sed -i 's/jan@example\.com/demo@example.invalid/g' "$file"
