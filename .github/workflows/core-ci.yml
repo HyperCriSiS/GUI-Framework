@@ -485,6 +485,21 @@ jobs:
           assembleDebug
           assembleDebugAndroidTest
 
+      - name: Stage Showcase debug APK
+        run: |
+          mkdir -p build/showcase-apk
+          cp examples/compose-android/app/build/outputs/apk/debug/app-debug.apk \
+            build/showcase-apk/GUI-Framework-Showcase-debug.apk
+
+      - name: Upload Showcase debug APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v7.0.1
+        with:
+          name: GUI-Framework-Showcase-debug-${{ github.sha }}
+          path: build/showcase-apk/GUI-Framework-Showcase-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
   compose-android-runtime:
     name: compose-android-runtime (${{ matrix.api-level }}, ${{ matrix.target }}, ${{ matrix.arch }}, ${{ matrix.ram-size }}, ${{ matrix.heap-size }}, ${{ matrix.density }}, ${{ matrix.font-scale }})
     runs-on: ubuntu-latest
