@@ -137,8 +137,8 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Observable behavior for every visibly enabled Showcase action instead of silent no-op handlers
 - [x] Locale-stress copy separated from the design-review experience; visible Showcase text stays intentional and coherent
 - [x] Repository contract tests preventing regression of safe-area handling, active no-op actions, and unrelated locale fixture leakage
-- [ ] Design-first Showcase information architecture: theme landing/gallery optimized for quickly judging the six visual languages before component-level QA
-- [ ] Curated per-theme hero screens that make the visual differences immediately obvious without navigating the component catalog
+- [x] Design-first Showcase information architecture: theme landing/gallery optimized for quickly judging the six visual languages before component-level QA
+- [x] Curated per-theme hero screens that make the visual differences immediately obvious without navigating the component catalog
 - [ ] Desktop and Android usability pass on representative small/large viewports after the design-first restructuring
 
 ## Completion gates

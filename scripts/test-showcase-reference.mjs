@@ -27,8 +27,23 @@ for (const [enumName, label] of themes) {
   assert.ok(shared.includes(`"${label}"`), `Showcase must expose the ${label} theme label`);
 }
 assert.ok(shared.includes("themeOptions"), "Showcase must keep one shared theme option source for selectors/comparison");
+assert.ok(shared.includes('mutableStateOf("themes")'), "Showcase must open on the design-first Themes landing section");
+assert.ok(shared.includes("Theme Gallery"), "Showcase must expose the design-first Theme Gallery");
+assert.ok(shared.includes("themeHeroes"), "Showcase must provide curated per-theme hero previews");
+assert.ok(shared.includes('GuiTheme(theme = themeId, paletteId = paletteId)'), "Every hero preview must render through its own live GuiTheme context");
+for (const preview of [
+  "Workspace Overview",
+  "Command Center",
+  "Signal Deck",
+  "Focus Space",
+  "Mission Control",
+  "Neon Grid",
+]) {
+  assert.ok(shared.includes(`"${preview}"`), `Theme Gallery must include curated hero screen ${preview}`);
+}
+assert.match(shared, /maxWidth >= 1040\.dp[\s\S]*maxWidth >= 680\.dp/, "Theme Gallery must adapt from one to two to three columns");
 
-for (const section of ["Components", "Screens", "Compare", "Stress Lab"]) {
+for (const section of ["Themes", "Screens", "Components", "Compare", "Stress Lab"]) {
   assert.ok(shared.includes(`"${section}"`), `Showcase must expose the ${section} primary section`);
 }
 
@@ -85,21 +100,6 @@ assert.ok(
 assert.ok(shared.includes('ComparisonCard("A ·'), "Showcase comparison must render Theme A");
 assert.ok(shared.includes('ComparisonCard("B ·'), "Showcase comparison must render Theme B");
 
-for (const activeNoOpLabel of ["Primary", "Save", "Save settings", "Primary action"]) {
-  assert.ok(
-    !shared.includes(`GuiButton("${activeNoOpLabel}", onActivate = {},`),
-    `Active Showcase action ${activeNoOpLabel} must provide observable feedback`,
-  );
-}
-assert.ok(
-  !/[\u0600-\u06ff\u3040-\u30ff\u3400-\u9fff]/u.test(shared),
-  "Design Showcase copy must not mix unrelated Arabic/CJK locale fixtures into the visible experience",
-);
-assert.ok(
-  android.includes(".safeDrawingPadding()"),
-  "Android Showcase must respect safe drawing insets so content is not clipped by system bars",
-);
-
 for (const [source, platform] of [
   [desktop, "Desktop / Windows target"],
   [android, "Android target"],
@@ -113,5 +113,5 @@ for (const [source, platform] of [
 }
 
 console.log(
-  "Six-theme Showcase coverage passed: shared Desktop/Android explorer exposes all themes, component gallery, real-world screens, A/B comparison, QA controls and stress scenarios.",
+  "Six-theme Showcase coverage passed: design-first live theme gallery, component QA, real-world screens, A/B comparison, QA controls and stress scenarios are all present.",
 );

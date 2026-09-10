@@ -22,12 +22,22 @@ class ShowcaseRuntimeTest {
     fun explorerStartsAndPrimarySectionsRemainInteractive() {
         composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Android target").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Theme Gallery").performScrollTo().assertIsDisplayed()
+        for (theme in listOf("Basic", "Modern", "Glass", "Frosted Glass", "Spacey", "Cyberpunk")) {
+            composeRule.onNodeWithContentDescription("$theme theme preview").performScrollTo().assertIsDisplayed()
+        }
+        composeRule.onNodeWithText("Enter grid").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Selected").performScrollTo().assertIsDisplayed()
+
         composeRule.onNodeWithContentDescription("Theme").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Palette").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Density").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Font scale").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Viewport").performScrollTo().assertIsDisplayed()
 
+        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed()
 
@@ -47,17 +57,17 @@ class ShowcaseRuntimeTest {
 
     @Test
     fun qaSelectorsRemainUsable() {
-        composeRule.onNodeWithContentDescription("Theme").assertIsDisplayed().performClick()
+        composeRule.onNodeWithContentDescription("Theme").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Cyberpunk").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithContentDescription("Palette").assertIsDisplayed().performClick()
+        composeRule.onNodeWithContentDescription("Palette").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Light").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithContentDescription("Density").assertIsDisplayed().performClick()
+        composeRule.onNodeWithContentDescription("Density").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Compact").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
@@ -73,11 +83,15 @@ class ShowcaseRuntimeTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun galleryCoversComplexDataLayoutAndFeedbackSurfaces() {
+        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Data").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Component status table").performScrollTo().assertIsDisplayed()
