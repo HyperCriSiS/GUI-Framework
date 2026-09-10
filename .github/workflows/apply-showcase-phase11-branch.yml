@@ -1,0 +1,33 @@
+name: Apply Showcase Phase 11 Branch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+      - name: Apply verified patch to feature branch
+        shell: bash
+        run: |
+          PATCH_B64="$(sed -n 's/^          PATCH_B64: //p' .github/workflows/apply-showcase-phase11.yml)"
+          test -n "$PATCH_B64"
+          printf '%s' "$PATCH_B64" | base64 -d | gzip -d > /tmp/phase11.patch
+          git apply --check /tmp/phase11.patch
+          git apply /tmp/phase11.patch
+          node --check scripts/test-showcase-reference.mjs
+          node scripts/test-showcase-reference.mjs
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b phase11-design-gallery
+          git add ROADMAP.md scripts/test-showcase-reference.mjs examples/showcase-shared/src/main/kotlin/gui/framework/examples/showcase/ShowcaseExplorerContent.kt examples/compose-android/app/src/androidTest/kotlin/gui/framework/examples/android/ShowcaseRuntimeTest.kt
+          git commit -m "feat(showcase): add design-first theme gallery"
+          git push origin HEAD:phase11-design-gallery
