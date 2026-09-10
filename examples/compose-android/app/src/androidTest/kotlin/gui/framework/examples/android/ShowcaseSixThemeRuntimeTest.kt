@@ -16,6 +16,9 @@ class ShowcaseSixThemeRuntimeTest {
 
     @Test
     fun allSixThemesExerciseGalleryScreensComparisonAndStress() {
+        composeRule.onNodeWithText("QA Lab").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+
         val themes = listOf(
             "Basic",
             "Modern",
