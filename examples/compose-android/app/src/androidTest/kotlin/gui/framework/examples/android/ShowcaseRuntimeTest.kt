@@ -23,9 +23,12 @@ class ShowcaseRuntimeTest {
         composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Android target").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Theme Gallery").performScrollTo().assertIsDisplayed()
-        for (theme in listOf("Basic", "Modern", "Glass", "Frosted Glass", "Spacey", "Cyberpunk")) {
-            composeRule.onNodeWithContentDescription("$theme theme preview").performScrollTo().assertIsDisplayed()
-        }
+        composeRule.onNodeWithContentDescription("Basic theme preview").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Modern theme preview").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Glass theme preview").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Frosted Glass theme preview").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Spacey theme preview").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Cyberpunk theme preview").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Enter grid").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Selected").performScrollTo().assertIsDisplayed()
