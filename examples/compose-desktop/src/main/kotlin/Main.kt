@@ -160,7 +160,7 @@ private fun DesktopReferenceContent(
     var treeValue by remember { mutableStateOf("workspace") }
     var workspaceExpanded by remember { mutableStateOf(true) }
     var lastTreeActivation by remember { mutableStateOf("none") }
-    var formEmail by remember { mutableStateOf("jan@example.com") }
+    var formEmail by remember { mutableStateOf("demo@example.invalid") }
     var formRecovery by remember { mutableStateOf("12") }
     var formVariant by remember { mutableStateOf(GuiFormLayoutVariant.INLINE) }
     var formSaveCount by remember { mutableStateOf(0) }

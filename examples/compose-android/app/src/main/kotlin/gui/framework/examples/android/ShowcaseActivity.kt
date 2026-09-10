@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
-import gui.framework.examples.showcase.ShowcaseExplorer
 
 class ShowcaseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,10 +19,7 @@ class ShowcaseActivity : ComponentActivity() {
                     .fillMaxSize()
                     .safeDrawingPadding(),
             ) {
-                ShowcaseExplorer(
-                    platformLabel = "Android target",
-                    stressControlCount = 30,
-                )
+                ShowcaseDesignApp()
             }
         }
     }

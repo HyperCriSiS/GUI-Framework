@@ -19,9 +19,30 @@ class ShowcaseRuntimeTest {
     val composeRule = createAndroidComposeRule<ShowcaseActivity>()
 
     @Test
-    fun explorerStartsAndPrimarySectionsRemainInteractive() {
+    fun designGalleryIsPrimaryAndQaLabRemainsReachable() {
+        composeRule.onNodeWithText("Designs").assertIsDisplayed()
+        composeRule.onNodeWithText("QA Lab").assertIsDisplayed()
+
+        for (theme in listOf("Basic", "Modern", "Glass", "Frosted Glass", "Spacey", "Cyberpunk")) {
+            composeRule
+                .onNodeWithContentDescription("$theme design preview")
+                .performScrollTo()
+                .assertIsDisplayed()
+        }
+
+        openQaLab()
         composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Android target").performScrollTo().assertIsDisplayed()
+
+        composeRule.onNodeWithText("Designs").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription("Basic design preview").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun qaExplorerPrimarySectionsRemainInteractive() {
+        openQaLab()
+        composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Android target · QA Lab").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Theme").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Palette").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Density").performScrollTo().assertIsDisplayed()
@@ -47,6 +68,7 @@ class ShowcaseRuntimeTest {
 
     @Test
     fun qaSelectorsRemainUsable() {
+        openQaLab()
         composeRule.onNodeWithContentDescription("Theme").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Cyberpunk").performScrollTo().assertIsDisplayed().performClick()
@@ -78,6 +100,7 @@ class ShowcaseRuntimeTest {
 
     @Test
     fun galleryCoversComplexDataLayoutAndFeedbackSurfaces() {
+        openQaLab()
         composeRule.onNodeWithText("Data").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Component status table").performScrollTo().assertIsDisplayed()
@@ -96,5 +119,10 @@ class ShowcaseRuntimeTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Confirm operation").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").assertIsDisplayed().performClick()
+    }
+
+    private fun openQaLab() {
+        composeRule.onNodeWithText("QA Lab").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
     }
 }

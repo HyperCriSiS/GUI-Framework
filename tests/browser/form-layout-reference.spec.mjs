@@ -30,7 +30,7 @@ test("Basic Form Layout preserves host-owned controls, field semantics and compa
   const columnCount = await form.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean).length);
   expect(columnCount).toBe(1);
 
-  await expect(email).toHaveValue("jan@example.com");
+  await expect(email).toHaveValue("demo@example.invalid");
   await email.fill("owner@example.com");
   await expect(email).toHaveValue("owner@example.com");
 
