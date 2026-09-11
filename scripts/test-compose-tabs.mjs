@@ -14,6 +14,8 @@ assert.match(source, /componentId = "tabs"/);
 assert.match(source, /resolveGuiVisualRecipe\(/);
 assert.match(source, /GuiTabsState\.entries\.map \{ it\.wireValue \}/);
 assert.match(source, /selectableGroup\(\)/);
+assert.match(source, /rememberScrollState\(\)/);
+assert.match(source, /\.horizontalScroll\(tabListScrollState\)/);
 assert.match(source, /role = Role\.Tab/);
 assert.match(source, /\.selectable\(/);
 assert.match(source, /collectIsHoveredAsState\(\)/);
