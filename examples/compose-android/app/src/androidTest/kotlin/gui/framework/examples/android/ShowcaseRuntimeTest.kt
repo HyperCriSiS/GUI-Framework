@@ -8,6 +8,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -52,20 +54,21 @@ class ShowcaseRuntimeTest {
         composeRule.onNodeWithContentDescription("Font scale").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Viewport").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
-        composeRule.waitForIdle()
-        composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed()
-
         composeRule.onNodeWithText("Screens").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Real-world Screen — Settings").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithText("Compare").performScrollTo().assertIsDisplayed().performClick()
+        swipeTabsLeft("Showcase section")
+        composeRule.onNodeWithText("Components").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Workspace name").performScrollTo().assertIsDisplayed()
+
+        composeRule.onNodeWithText("Compare").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Theme A/B Comparison").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithText("Stress Lab").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Stress Lab").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Stress Lab — repeated interactive controls").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Stress control 30").performScrollTo().assertIsDisplayed().performClick()
@@ -100,7 +103,8 @@ class ShowcaseRuntimeTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("GUI Framework — Showcase Explorer").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
+        swipeTabsLeft("Showcase section")
+        composeRule.onNodeWithText("Components").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Component Gallery").performScrollTo().assertIsDisplayed()
     }
@@ -108,26 +112,33 @@ class ShowcaseRuntimeTest {
     @Test
     fun galleryCoversComplexDataLayoutAndFeedbackSurfaces() {
         openQaLab()
-        composeRule.onNodeWithText("Components").performScrollTo().assertIsDisplayed().performClick()
+        swipeTabsLeft("Showcase section")
+        composeRule.onNodeWithText("Components").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Data").performScrollTo().assertIsDisplayed().performClick()
+        swipeTabsLeft("Component gallery category")
+        composeRule.onNodeWithText("Data").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Component status table").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Worker data grid").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Framework hierarchy").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithText("Layout").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Layout").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Showcase form").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Scrollable component sample").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithText("Feedback").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Feedback").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Dialog & Toast").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Open dialog").performScrollTo().assertIsDisplayed().performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Confirm operation").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").assertIsDisplayed().performClick()
+    }
+
+    private fun swipeTabsLeft(accessibilityLabel: String) {
+        composeRule.onNodeWithContentDescription(accessibilityLabel).performScrollTo().assertIsDisplayed().performTouchInput { swipeLeft() }
+        composeRule.waitForIdle()
     }
 
     private fun openQaLab() {
