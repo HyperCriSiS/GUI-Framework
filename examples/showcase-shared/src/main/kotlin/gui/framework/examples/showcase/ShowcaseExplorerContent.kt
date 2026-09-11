@@ -203,6 +203,24 @@ private fun showcaseSizes(compact: Boolean) = ShowcaseSizes(
     tree = if (compact) GuiTreeSize.SMALL else GuiTreeSize.MEDIUM,
 )
 
+private data class ShowcaseThemeHero(
+    val value: String,
+    val identity: String,
+    val screenTitle: String,
+    val status: String,
+    val progress: Double,
+    val action: String,
+)
+
+private val themeHeroes = listOf(
+    ShowcaseThemeHero("basic", "Clear utility", "Workspace Overview", "12 modules ready", 68.0, "Open workspace"),
+    ShowcaseThemeHero("modern", "Polished product", "Command Center", "Everything synchronized", 82.0, "Review activity"),
+    ShowcaseThemeHero("glass", "Layered clarity", "Signal Deck", "Live telemetry connected", 74.0, "Inspect signals"),
+    ShowcaseThemeHero("frosted-glass", "Soft depth", "Focus Space", "3 priorities in focus", 61.0, "Continue focus"),
+    ShowcaseThemeHero("spacey", "Orbital systems", "Mission Control", "Orbit stable", 88.0, "Open mission"),
+    ShowcaseThemeHero("cyberpunk", "High-energy operations", "Neon Grid", "27 nodes online", 93.0, "Enter grid"),
+)
+
 @Composable
 fun ShowcaseExplorer(platformLabel: String, stressControlCount: Int = 40) {
     var theme by remember { mutableStateOf(GuiThemeId.BASIC) }
@@ -211,7 +229,7 @@ fun ShowcaseExplorer(platformLabel: String, stressControlCount: Int = 40) {
     var density by remember { mutableStateOf(ShowcaseDensity.Standard) }
     var fontScale by remember { mutableStateOf(1f) }
     var viewport by remember { mutableStateOf(ShowcaseViewport.Auto) }
-    var section by remember { mutableStateOf("components") }
+    var section by remember { mutableStateOf("themes") }
     var themeExpanded by remember { mutableStateOf(false) }
     var paletteExpanded by remember { mutableStateOf(false) }
     var densityExpanded by remember { mutableStateOf(false) }
@@ -234,18 +252,13 @@ fun ShowcaseExplorer(platformLabel: String, stressControlCount: Int = 40) {
                 ) {
                     ShowcaseText("GUI Framework — Showcase Explorer", paletteId, ShowcaseTextRole.Title)
                     ShowcaseText(platformLabel, paletteId, ShowcaseTextRole.Muted)
-                    ConfigurationPanel(
-                        theme, { theme = it }, paletteId, { paletteId = it }, density, { density = it },
-                        fontScale, { fontScale = it }, viewport, { viewport = it }, themeExpanded,
-                        { themeExpanded = it }, paletteExpanded, { paletteExpanded = it }, densityExpanded,
-                        { densityExpanded = it }, fontScaleExpanded, { fontScaleExpanded = it }, viewportExpanded,
-                        { viewportExpanded = it }, sizes,
-                    )
+                    ShowcaseText("Start with the visual language, then inspect screens and components.", paletteId, ShowcaseTextRole.Muted)
                     GuiTabs(
                         value = section,
                         tabs = listOf(
-                            GuiTabItem(value = "components", label = "Components"),
+                            GuiTabItem(value = "themes", label = "Themes"),
                             GuiTabItem(value = "screens", label = "Screens"),
+                            GuiTabItem(value = "components", label = "Components"),
                             GuiTabItem(value = "compare", label = "Compare"),
                             GuiTabItem(value = "stress", label = "Stress Lab"),
                         ),
@@ -253,13 +266,115 @@ fun ShowcaseExplorer(platformLabel: String, stressControlCount: Int = 40) {
                         accessibilityLabel = "Showcase section",
                         size = sizes.tabs,
                     ) { selected -> ShowcaseText("Section: ${selected.label}", paletteId, ShowcaseTextRole.Muted) }
+
+                    if (section == "themes") {
+                        ThemeGallery(
+                            selectedTheme = theme,
+                            onThemeChange = { theme = it },
+                            paletteId = paletteId,
+                            sizes = sizes,
+                        )
+                    }
+
+                    ConfigurationPanel(
+                        theme, { theme = it }, paletteId, { paletteId = it }, density, { density = it },
+                        fontScale, { fontScale = it }, viewport, { viewport = it }, themeExpanded,
+                        { themeExpanded = it }, paletteExpanded, { paletteExpanded = it }, densityExpanded,
+                        { densityExpanded = it }, fontScaleExpanded, { fontScaleExpanded = it }, viewportExpanded,
+                        { viewportExpanded = it }, sizes,
+                    )
+
                     when (section) {
                         "screens" -> RealWorldScreens(paletteId, sizes)
+                        "components" -> ComponentGallery(paletteId, sizes)
                         "compare" -> ThemeComparison(theme, compareTheme, { compareTheme = it }, paletteId, sizes)
                         "stress" -> StressLab(paletteId, sizes, stressControlCount)
-                        else -> ComponentGallery(paletteId, sizes)
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeGallery(
+    selectedTheme: GuiThemeId,
+    onThemeChange: (GuiThemeId) -> Unit,
+    paletteId: String,
+    sizes: ShowcaseSizes,
+) {
+    ShowcaseText("Theme Gallery", paletteId, ShowcaseTextRole.Heading)
+    ShowcaseText(
+        "Six live previews use the real framework components. Select a visual language here; use Screens and Compare for deeper review.",
+        paletteId,
+        ShowcaseTextRole.Muted,
+    )
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val columnCount = when {
+            maxWidth >= 1040.dp -> 3
+            maxWidth >= 680.dp -> 2
+            else -> 1
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            themeHeroes.chunked(columnCount).forEach { rowHeroes ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    rowHeroes.forEach { hero ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            ThemeHeroCard(
+                                hero = hero,
+                                selected = selectedTheme == showcaseTheme(hero.value),
+                                onSelect = { onThemeChange(showcaseTheme(hero.value)) },
+                                paletteId = paletteId,
+                                sizes = sizes,
+                            )
+                        }
+                    }
+                    repeat(columnCount - rowHeroes.size) {
+                        Box(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeHeroCard(
+    hero: ShowcaseThemeHero,
+    selected: Boolean,
+    onSelect: () -> Unit,
+    paletteId: String,
+    sizes: ShowcaseSizes,
+) {
+    val themeId = showcaseTheme(hero.value)
+    val themeLabel = themeOptions.first { it.value == hero.value }.label
+    GuiTheme(theme = themeId, paletteId = paletteId) {
+        GuiPanel(accessibilityLabel = "$themeLabel theme preview", size = sizes.panel) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                ShowcaseText(themeLabel, paletteId, ShowcaseTextRole.Heading)
+                ShowcaseText(hero.identity, paletteId, ShowcaseTextRole.Muted)
+                GuiPanel(accessibilityLabel = "$themeLabel hero screen", size = sizes.panel) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ShowcaseText(hero.screenTitle, paletteId, ShowcaseTextRole.Heading)
+                        ShowcaseText(hero.status, paletteId)
+                        GuiProgress(
+                            value = hero.progress,
+                            accessibilityLabel = "$themeLabel hero progress",
+                            label = "System readiness",
+                            size = sizes.progress,
+                        )
+                        ShowcaseText("Readiness ${hero.progress.roundToInt()}%", paletteId, ShowcaseTextRole.Muted)
+                    }
+                }
+                GuiButton(
+                    label = if (selected) "Selected" else hero.action,
+                    onActivate = onSelect,
+                    disabled = selected,
+                    size = sizes.button,
+                )
             }
         }
     }
