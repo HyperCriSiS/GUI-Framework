@@ -59,7 +59,7 @@ assert.deepEqual(scenario.phase6FormLayout, {
   initialVariant: "inline",
   compactColumns: 1,
   fields: [
-    { id: "email", label: "Email", initialValue: "jan@example.com", disabled: false, error: false },
+    { id: "email", label: "Email", initialValue: "demo@example.invalid", disabled: false, error: false },
     { id: "recovery", label: "Recovery code", initialValue: "12", disabled: false, error: true },
     { id: "token", label: "API token", initialValue: "sk-local-reference", disabled: true, error: false },
   ],
@@ -151,7 +151,7 @@ assert.match(webFormLayout, /createGuiFormLayout\(/, "Web Form Layout reference 
 assert.match(webFormLayout, /accessibilityLabel: "Account settings form layout"/);
 assert.match(webFormLayout, /columns: 2/);
 assert.match(webFormLayout, /let variant = "inline"/);
-assert.match(webFormLayout, /let emailValue = "jan@example\.com"/);
+assert.match(webFormLayout, /let emailValue = "demo@example\.invalid"/);
 assert.match(webFormLayout, /let recoveryValue = "12"/);
 assert.match(webFormLayout, /label: "Recovery code"/);
 assert.match(webFormLayout, /error: "Recovery code must contain 6 characters\."/);
@@ -250,7 +250,7 @@ for (const [name, source] of [["Compose Desktop", desktop], ["Compose Android", 
   assert.match(source, /onValueChange = \{ treeValue = it \}/, `${name} must expose controlled Tree selection`);
   assert.match(source, /onExpandedChange = \{ if \(it == "workspace"\) workspaceExpanded = !workspaceExpanded \}/, `${name} must expose controlled Tree expansion`);
   assert.match(source, /onNodeActivate = \{ lastTreeActivation = it \}/, `${name} must expose Tree activation`);
-  assert.match(source, /var formEmail by remember \{ mutableStateOf\("jan@example\.com"\) \}/, `${name} must expose the shared Form Layout email value`);
+  assert.match(source, /var formEmail by remember \{ mutableStateOf\("demo@example\.invalid"\) \}/, `${name} must expose the shared Form Layout email value`);
   assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/, `${name} must expose the shared Form Layout recovery value`);
   assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/, `${name} must expose the shared Form Layout variant`);
   assert.match(source, /accessibilityLabel = "Account settings form layout"/, `${name} must expose Form Layout semantics`);

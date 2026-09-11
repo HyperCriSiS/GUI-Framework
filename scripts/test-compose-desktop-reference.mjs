@@ -84,7 +84,7 @@ assert.match(source, /GuiNavigationItem\(value = "archive", label = "Archive", i
 assert.match(source, /onValueChange = \{ navigationValue = it \}/);
 assert.match(source, /variant = GuiNavigationVariant\.VERTICAL/);
 assert.match(source, /Active destination: \$navigationValue/);
-assert.match(source, /var formEmail by remember \{ mutableStateOf\("jan@example\.com"\) \}/);
+assert.match(source, /var formEmail by remember \{ mutableStateOf\("demo@example\.invalid"\) \}/);
 assert.match(source, /var formRecovery by remember \{ mutableStateOf\("12"\) \}/);
 assert.match(source, /var formVariant by remember \{ mutableStateOf\(GuiFormLayoutVariant\.INLINE\) \}/);
 assert.match(source, /var formSaveCount by remember \{ mutableStateOf\(0\) \}/);
