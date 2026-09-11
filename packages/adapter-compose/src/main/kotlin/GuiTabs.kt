@@ -5,6 +5,8 @@ package gui.framework.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -167,6 +169,7 @@ private fun edgeEnabledIndex(
  * Keyboard behavior intentionally uses manual activation: Left/Right/Home/End move focus
  * without changing [value]. Enter/Space activation is provided by the native selectable tab.
  * This avoids loading expensive panels merely because keyboard focus moved.
+ * Tab-list overflow remains horizontally scrollable so every tab stays reachable on narrow viewports.
  */
 @Composable
 fun GuiTabs(
@@ -209,6 +212,7 @@ fun GuiTabs(
     val tabList = containerResolved["tabList"] ?: error("Resolved GUI tabs visual is missing required tabList part")
     val panel = containerResolved["panel"] ?: error("Resolved GUI tabs visual is missing required panel part")
     val focusRequesters = remember(tabs.map { it.value }) { List(tabs.size) { FocusRequester() } }
+    val tabListScrollState = rememberScrollState()
 
     val rootModifier = modifier.alpha(root.tabsOpacity())
     val tabListModifierBase = Modifier
@@ -222,10 +226,12 @@ fun GuiTabs(
     tabList.border?.let {
         tabListModifier = tabListModifier.border(it.width.toComposeDp(), it.color.toComposeColor())
     }
-    tabListModifier = tabListModifier.padding(
-        horizontal = tabList.paddingHorizontal?.toComposeDp() ?: 0.dp,
-        vertical = tabList.paddingVertical?.toComposeDp() ?: 0.dp,
-    )
+    tabListModifier = tabListModifier
+        .padding(
+            horizontal = tabList.paddingHorizontal?.toComposeDp() ?: 0.dp,
+            vertical = tabList.paddingVertical?.toComposeDp() ?: 0.dp,
+        )
+        .horizontalScroll(tabListScrollState)
 
     Column(modifier = rootModifier) {
         Row(modifier = tabListModifier) {
