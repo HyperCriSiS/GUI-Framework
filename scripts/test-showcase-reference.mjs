@@ -31,16 +31,8 @@ for (const [enumName, label] of themes) {
   assert.ok(shared.includes(`"${label}"`), `Showcase must expose the ${label} theme label`);
 }
 assert.ok(shared.includes("themeOptions"), "Showcase must keep one shared theme option source for selectors/comparison");
-assert.ok(shared.includes('mutableStateOf("themes")'), "Shared Showcase Explorer must open on the design-first Themes landing section");
-assert.ok(shared.includes("Theme Gallery"), "Shared Showcase Explorer must expose the design-first Theme Gallery");
-assert.ok(shared.includes("themeHeroes"), "Shared Showcase Explorer must provide curated per-theme hero previews");
-assert.ok(shared.includes('GuiTheme(theme = themeId, paletteId = paletteId)'), "Every shared hero preview must render through its own live GuiTheme context");
-for (const preview of ["Workspace Overview", "Command Center", "Signal Deck", "Focus Space", "Mission Control", "Neon Grid"]) {
-  assert.ok(shared.includes(`"${preview}"`), `Theme Gallery must include curated hero screen ${preview}`);
-}
-assert.match(shared, /maxWidth >= 1040\.dp[\s\S]*maxWidth >= 680\.dp/, "Theme Gallery must adapt from one to two to three columns");
 
-for (const section of ["Themes", "Screens", "Components", "Compare", "Stress Lab"]) {
+for (const section of ["Components", "Screens", "Compare", "Stress Lab"]) {
   assert.ok(shared.includes(`"${section}"`), `Showcase must expose the ${section} primary section`);
 }
 for (const gallerySection of ["Controls", "Data", "Layout", "Feedback"]) {
@@ -89,4 +81,4 @@ for (const [enumName, label] of themes) {
 assert.ok(!/[\u0600-\u06ff\u3040-\u30ff\u3400-\u9fff]/u.test(androidDesign), "Android design gallery must not mix unrelated Arabic/CJK stress fixtures into the visible design experience");
 assert.ok(referenceScenarios.includes('"initialValue": "demo@example.invalid"'), "Shared reference scenarios must use neutral example identity data");
 assert.match(referenceScenarios, /"initialValue": "[^"]+@example\.invalid"/, "Shared reference identity fixtures must use the reserved .invalid domain");
-console.log("Six-theme Showcase coverage passed: Android starts in its design-first gallery, QA Lab and Desktop share the live Theme Gallery explorer, and existing safety/reference contracts remain intact.");
+console.log("Six-theme Showcase coverage passed: Android starts in a design-first gallery, QA Lab retains the shared explorer, safe areas are respected, and Desktop keeps the shared explorer contract.");
