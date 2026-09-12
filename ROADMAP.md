@@ -1,160 +1,137 @@
 # GUI Framework Roadmap
 
-## Objective
+This roadmap is the active execution plan. Earlier exploratory phases have been consolidated into the completed foundation blocks below; established phase identifiers from Phase 6 onward are intentionally preserved for historical commit and discussion references.
 
-Build a reusable GUI framework that provides:
+## Phase 0 — Foundation
 
-- one renderer-neutral semantic component contract,
-- one structured theme system,
-- a canonical six-theme baseline,
-- one capability / fallback policy,
-- one acceptance framework for accessibility, performance, and cross-platform parity,
-- and native adapters for target UI stacks.
+- [x] Repository architecture and licensing
+- [x] Neutral specification format
+- [x] Design-token structure
+- [x] Component recipe format
+- [x] Capability model and deterministic fallback rules
+- [x] Asset manifests
+- [x] Accessibility baseline
+- [x] Performance budgets
+- [x] Web renderer baseline
+- [x] Foundation Compose renderer baseline
+- [x] Reference application baseline
 
-The framework is not intended to become a second rendering engine. Native renderers remain native. The shared layer defines intent, visual recipes, capability requirements, fallback behavior, and quality gates.
+## Phase 1 — Architecture hardening
 
-## Current baseline
-
-The repository already contains:
-
-- a neutral JSON specification,
-- schema validation,
-- specification compilation,
-- palette-family modeling,
-- theme inheritance,
-- capability resolution,
-- typed visual recipe resolution,
-- accessibility requirements,
-- performance-budget contracts,
-- generated Web output,
-- generated Kotlin output,
-- generated Web assets,
-- generated Kotlin assets,
-- a browser-extension integration kit and reference,
-- a Compose Desktop integration kit and reference,
-- a Compose Android reference application,
-- cross-platform reference parity checks,
-- browser regressions,
-- Android runtime instrumentation,
-- Compose Desktop visual parity checks,
-- and six-theme production sign-off.
-
-## Canonical theme baseline
-
-The six canonical themes are:
-
-1. Basic
-2. Modern
-3. Glass
-4. Frosted Glass
-5. Spacey
-6. Cyberpunk
-
-Theme identities remain stable while palette families may vary independently.
-
-## Delivery phases
-
-### Phase 1 — Neutral foundation
-
-- [x] Renderer-neutral component specification
-- [x] Schema validation and compilation
-- [x] Stable state / variant / accessibility vocabulary
-- [x] Renderer-neutral boundary guardrails
-
-### Phase 2 — Theme model
-
+- [x] Canonical component contracts
 - [x] Palette-family model
-- [x] Theme inheritance and override resolution
-- [x] Capability-aware theme fallback
-- [x] Typed visual recipe resolution
+- [x] Theme inheritance model
+- [x] Runtime capability-selection rules
+- [x] Generated Web contracts
+- [x] Generated Compose contracts
+- [x] Schema and compiler validation coverage
 
-### Phase 3 — Accessibility and performance
+## Phase 2 — Basic theme foundation
 
-- [x] Accessibility requirement model
-- [x] Basic quality contract
-- [x] Theme-specific performance budgets
-- [x] Minimum-capability behavior
+- [x] Basic token set
+- [x] Basic palette set
+- [x] Basic component visual rules
+- [x] Basic accessibility contract
+- [x] Basic performance contract
+- [x] Basic Web reference coverage
+- [x] Basic Compose reference coverage
 
-### Phase 4 — Six-theme visual language
+## Phase 3 — Renderer completeness
 
-- [x] Basic
+- [x] Web adapter native component coverage
+- [x] Foundation Compose native component coverage
+- [x] Generated asset integration
+- [x] Generated visual-recipe integration
+- [x] Cross-renderer reference parity
+- [x] Representative browser runtime validation
+- [x] Representative Android runtime validation
+
+## Phase 4 — Theme family foundations
+
 - [x] Modern
 - [x] Glass
 - [x] Frosted Glass
 - [x] Spacey
 - [x] Cyberpunk
-- [x] Final six-theme production sign-off
+- [x] Palette independence across theme families
+- [x] Capability-aware theme fallback behavior
+- [x] Theme-specific performance budgets
+- [x] Theme-specific accessibility validation
 
-### Phase 5 — Web adapter
+## Phase 6 — Component and robustness expansion
 
-- [x] Token and asset generation
-- [x] Native Basic controls
-- [x] Capability fallback generation
-- [x] Functional Web reference application
-- [x] Standalone component references
-- [x] TypeScript contracts
-- [x] Chromium regression coverage
-
-### Phase 6 — Compose adapter
-
-- [x] Kotlin contracts, tokens, recipes, and assets
-- [x] Native Basic controls
-- [x] Semantics and interaction checks
-- [x] Scaling and minimum-capability checks
-- [x] Compose Desktop integration kit
-- [x] Compose Desktop reference application
-- [x] Compose Android reference application
-- [x] Generated Kotlin / Compose compilation
-- [x] Compose Desktop visual parity probe
-- [x] Android runtime instrumentation
-
-### Phase 7 — Integration kits
-
-- [x] Browser-extension integration bundle
-- [x] Browser-extension reference
-- [x] Compose Desktop integration bundle
-- [x] Android reference packaging
-- [x] Cross-platform reference application parity
-
-### Phase 8 — Component expansion
-
+- [x] Button
+- [x] Input
+- [x] Switch
+- [x] Checkbox
+- [x] Radio
 - [x] Select / ComboBox
 - [x] Tabs
-- [x] Navigation
-- [x] Tree / hierarchy
-- [x] Form layout
-- [x] Scroll container
-- [x] Table / Data Grid
-- [x] Tooltip
-- [x] Toast / notification
-- [x] Progress / spinner
-- [x] Slider
-- [x] Menu / context menu
 - [x] Panel
 - [x] Dialog
+- [x] Tooltip
+- [x] Menu / Context Menu
+- [x] Toast / Notification
+- [x] Progress / Spinner
+- [x] Slider
+- [x] Navigation primitives
+- [x] Table / Data Grid primitives
+- [x] Tree / Hierarchy primitives
+- [x] Form layout primitives
+- [x] Scroll container primitives
+- [x] Cross-component text/locale robustness
+- [x] IME/composition robustness for editable controls across Web and Compose
 
-### Phase 9 — Showcase and developer experience
+## Phase 7 — Integration kits
 
-- [x] Shared Compose Showcase content consumed by Desktop and Android
-- [x] Six-theme runtime exercise
-- [x] Component gallery covering the expanded component surface
-- [x] Real-world screen examples
-- [x] Theme comparison view
-- [x] Stress Lab
-- [x] Theme / palette / density / font-scale / viewport controls
-- [x] Repository contract for Showcase structure and integration
+- [x] Browser extension integration kit
+- [x] Desktop application integration kit
+- [x] Android application integration kit
+- [x] Python application integration path
+- [x] Web application integration kit
+- [x] Shared host-context presets
 
-### Phase 10 — Repository hardening
+## Phase 8 — Distribution and ecosystem readiness
 
-- [x] Immutable GitHub Actions references
-- [x] Locked Node dependencies
-- [x] Secret-scanning guardrails
-- [x] Artifact packaging checks
-- [x] Main-branch protection with required Core CI validation
+- [x] Package publication strategy
+- [x] Stable public API surface
+- [x] Versioned migration policy
+- [x] Theme authoring documentation
+- [x] Adapter authoring documentation
+- [x] Component authoring documentation
+- [x] Accessibility documentation
+- [x] Performance documentation
+- [x] Contribution and governance documentation
 
-Phase 10 is considered complete for the current repository architecture. Additional hardening remains continuous maintenance rather than a blocking phase.
+## Phase 9 — Pre-release artifact hardening
 
-### Phase 11 — Showcase product-quality hardening
+- [x] Machine-readable artifact packaging contract <!-- all 13 distribution artifacts map 1:1 to explicit package roots and ecosystem staging strategies while registry coordinates remain unbound and publication remains locked -->
+- [x] npm staged-package build / pack / install smoke <!-- Core emits consumable ESM + declarations, six private development tarballs include AGPL metadata/license, Web Application staging removes monorepo-deep imports, and a clean Node consumer imports all public package entry points -->
+- [x] Maven local artifact build / consumer smoke <!-- four isolated local-only JAR coordinates, generated Compose release inputs, AGPL license embedded in every JAR, isolated Maven repository installation, and a clean Kotlin consumer compile across Compose/Desktop/Android/host-context artifacts -->
+- [x] Python sdist / wheel build / install smoke <!-- two PEP-440 development artifacts build as wheel+sdist, embed AGPL license metadata, and install/import successfully from clean Python 3.11 virtual environments without binding PyPI registry coordinates -->
+- [x] Specification-source release archive smoke <!-- deterministic AGPL-bearing spec tarball extracts outside the repository and recompiles to IR identical to the source tree -->
+- [x] Cross-ecosystem staging manifest and checksums <!-- all 13 logical artifacts / 15 physical staged files are enumerated with size and SHA-256 while registry coordinates remain unbound -->
+- [x] Reproducible staging validation <!-- Release Candidate Dry Run #2 on commit 99d30650 rebuilt the complete 15-file cross-ecosystem staging set twice from clean staging roots and produced identical SHA-256 identities for every physical artifact -->
+- [x] Manual release-candidate dry-run workflow with no publication credentials or registry writes <!-- manual-only workflow completed successfully with contents: read, no registry write scopes/credentials, and the full byte-reproducibility proof -->
+
+## Phase 10 — Theme visual maturity and showcase-driven validation
+
+- [x] Shared Showcase Explorer baseline for Desktop/Windows and Android
+- [x] Modern zero-growth production geometry across surface-bearing component families with explicit inheritance for primitives already matching the Modern shape language
+- [x] Glass production visual language with crisp no-blur translucency across structural, overlay, data, and passive-track surfaces while keeping primary interaction controls opaque and backdrop-independent within the unchanged 700-leaf / 2-shadow budget
+- [x] Frosted Glass production visual language with capability-aware blur limited to Panel/Card and Dialog on Web, exact crisp-Glass fallback when backdrop blur is unavailable, and an explicit crisp fallback on Compose where the adapter does not advertise backdrop blur
+- [x] Spacey production visual language across the complete visible component set
+- [x] Cyberpunk production visual language across the complete visible component set
+- [x] Six-theme Showcase comparison coverage for component gallery, real-world screens, and QA/stress scenarios
+  <!-- Shared source contract plus real Android instrumentation traverses all six themes through Components, Screens, Compare, and Stress Lab; Core CI #767 passed Chromium, APK build, API 23 at 130% scale, and API 35 on the validated runtime head. -->
+- [x] Theme-specific browser visual-regression baselines for representative complex screens
+  <!-- Six identical 1280×900 integrated settings/dialog baselines cover Basic, Modern, Glass, Frosted Glass, Spacey, and Cyberpunk; generated by the isolated Visual Baseline Update workflow and reproduced successfully by the normal PR Chromium regression gate. -->
+- [x] Compose Desktop / Android visual-parity validation for all six themes
+  <!-- Deterministic effective Compose recipe fingerprints cover both reference palettes and all six themes; Desktop JVM plus Android API 23/130% and API 35 runtime probes passed in Core CI #785. Frosted Glass is separately verified to resolve to the crisp Glass payload when backdropBlur is unavailable. -->
+- [x] Final complex-screen contrast, interaction-state, and performance sign-off per theme
+  <!-- Final production gate verifies declared visual interaction states across both reference palettes and all six themes, existing semantic/WCAG accessibility contracts, all six theme performance budgets, six 1280×900 complex browser baselines, and Showcase Dashboard/Data Explorer/Settings/Stress Lab evidence. Full Core CI #791 passed Desktop parity, Chromium, Android reference APKs, API 23 at 130% font scale, and API 35 instrumentation. -->
+
+## Phase 11 — Showcase product-quality hardening
 
 - [x] Android safe-area handling so Showcase content is not clipped by status/navigation bars
 - [x] Observable behavior for every visibly enabled Showcase action instead of silent no-op handlers
@@ -177,29 +154,3 @@ A phase or component is only complete when every applicable gate is green:
 - representative runtime validation,
 - generated-output typechecking/compilation,
 - and cross-platform parity where applicable.
-
-## Architectural guardrails
-
-The following remain hard constraints:
-
-- shared semantic intent must remain renderer-neutral,
-- native renderers own native widget behavior,
-- themes must resolve through structured recipes rather than arbitrary runtime branching,
-- fallback behavior must remain explicit and capability-driven,
-- generated output must be reproducible,
-- integration kits must stay small enough to adopt in real projects,
-- and visual sophistication must not bypass accessibility or performance budgets.
-
-## Adoption targets
-
-The framework should remain applicable to:
-
-- Android / Compose applications,
-- Compose Desktop applications,
-- Python desktop tooling through a dedicated adapter path,
-- browser extensions through generated Web assets and contracts,
-- and future native stacks without changing the neutral specification.
-
-## Next-step policy
-
-After the current roadmap phases are complete, expansion should be driven by real consuming projects rather than speculative framework surface. New primitives should be admitted only when at least one concrete project needs them and the behavior cannot be represented cleanly by existing components.
