@@ -139,7 +139,7 @@ This roadmap is the active execution plan. Earlier exploratory phases have been 
 - [x] Repository contract tests preventing regression of safe-area handling, active no-op actions, and unrelated locale fixture leakage
 - [x] Design-first Showcase information architecture: theme landing/gallery optimized for quickly judging the six visual languages before component-level QA
 - [x] Curated per-theme hero screens that make the visual differences immediately obvious without navigating the component catalog
-- [ ] Desktop and Android usability pass on representative small/large viewports after the design-first restructuring
+- [x] Desktop and Android usability pass on representative small/large viewports after the design-first restructuring; validated by full Core CI #847 across Compose Desktop visual parity, Chromium, Android API 23 at 130% font scale, API 35, and Android reference/APK builds
 
 ## Completion gates
 
