@@ -7,11 +7,11 @@ buildscript {
     }
     dependencies {
         // AGP 9 uses built-in Kotlin. Pin the higher KGP used by the Compose adapter toolchain.
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
     }
 }
 
 plugins {
     id("com.android.application") version "9.4.0" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.10" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.20" apply false
 }
