@@ -148,8 +148,8 @@
     "test:reproducible-staging": "python3 scripts/test-reproducible-staging.py"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "ajv": "8.20.0",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   }
 }
