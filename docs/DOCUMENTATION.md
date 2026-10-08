@@ -6,3 +6,5 @@ This is the standard navigation entry point for repository documentation. Existi
 - [Project roadmap](ROADMAP.md)
 - [Instructions for coding agents](../AGENTS.md)
 - [Architecture](../ARCHITECTURE.md)
+
+- [Current work and handoff](engineering/CURRENT-WORK.md)
